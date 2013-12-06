@@ -1,7 +1,9 @@
 # build directory
 build/
-
 bridge.touch
+
+# tests directory
+tests/
 
 # Compiled Object files
 *.slo
