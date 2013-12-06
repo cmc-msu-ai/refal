@@ -44,5 +44,5 @@ $(DEPS_DIR)/deps.mk: $(DEPS)
 	cat $^ > $(DEPS_DIR)/deps.mk
 
 clean:
-	rm bridge.touch
-	rm -R build
+	rm -f bridge.touch
+	rm -R -f build
