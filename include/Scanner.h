@@ -1,5 +1,5 @@
-#ifndef _SCANNER_H_
-#define _SCANNER_H_
+#ifndef _SCANNER__H__
+#define _SCANNER__H__
 
 enum LexemsTypes
 {
