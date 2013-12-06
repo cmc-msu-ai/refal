@@ -3,5 +3,5 @@
 
 Scanner::Scanner()
 {
-	printf("I'm Scanner!\r\b");
+	printf("I'm Scanner!\r\n");
 }
