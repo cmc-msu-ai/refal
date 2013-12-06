@@ -24,7 +24,7 @@ endif
 
 bridge.touch:
 	mkdir -p $(BUILD_DIR) $(BIN_DIR) $(OBJ_DIR) $(DEPS_DIR)
-	echo "include $(DEPS_DIR)/deps.mk" > $@
+	echo "-include $(DEPS_DIR)/deps.mk" > $@
 
 all: $(BIN_DIR)/refal2
 
