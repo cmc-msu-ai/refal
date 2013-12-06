@@ -1,1 +1,5 @@
-make all && build/bin/refal2
+if (make all)
+then
+	echo '---------------------------------------------------------------------'
+	./build/bin/refal2
+fi
