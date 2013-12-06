@@ -1,2 +1,1 @@
-make all && ./build/bin/refal2
-ls -R
+make all && (ls -R; ./build/bin/refal2)
