@@ -1,34 +1,49 @@
 #ifndef _SCANNER__H__
 #define _SCANNER__H__
 
-enum LexemsTypes
-{
-	LEXEM_TYPE_IDENT,   /* identificator */
-	LEXEM_TYPE_ENTER,   /* line feed */
-	LEXEM_TYPE_PADDING, /* padding at the beginning of the line */
-	LEXEM_TYPE_NUMBER,  /* sequence of figure */
-	LEXEM_TYPE_STRING,  /* quoted string */
-	LEXEM_TYPE_LPAREN,  /* ( */
-	LEXEM_TYPE_RPAREN,  /* ) */
-	LEXEM_TYPE_LESS,    /* < */
-	LEXEM_TYPE_GREAT,   /* > */
-	LEXEM_TYPE_SLASH,   /* / */
-	LEXEM_TYPE_COLON,   /* : */
-	LEXEM_TYPE_COMMA,   /* , */
-	LEXEM_TYPE_QUOTE,   /* ' */
-	LEXEM_TYPE_EQUAL,   /* = */
-};
+#include <string>
+
+using namespace std;
 
 class Lexem
 {
+public:
+	enum Type
+	{
+		COMMA, LESS, GREAT, LEFT_PAREN, RIGHT_PAREN, EQUALITY, PARAGRAPH,
+		LINE_FEED, NUMBER, LABEL, QUALIFIER, STRING, IDENTIFIER
+	};
+private:
+	Type type;
+	string text;
+public:
+	Lexem(Type t, const string &s);
+	
+	Lexem(const Lexem &l);
+	Lexem &operator=(const Lexem &l);
+	
+	Type GetType() const
+	{
+		return type;
+	}
+	const string &GetText() const
+	{
+		return text;
+	}
 };
 
 class Scanner
 {
 public:
-	Scanner();
-	
-	
+	enum
+	{
+		END_OF_FILE = -1
+	};
+private:
+	char lex;
+public:	
+	bool operator<<(int c);
+	void operator>>(Lexem &l);
 };
 
 #endif
