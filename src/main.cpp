@@ -1,39 +1,38 @@
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include "Scanner.h"
+#include "Refal2.h"
 
-using namespace std;
+using std::string;
+using std::ifstream;
+using std::cin;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int main(int argc, const char *argv[])
 {
 	try
 	{
-		if(argc != 2)
-			throw string("using: refal2 program.ref");
-	
-		ifstream program(argv[1]);
-		if(!program.is_open())
-			throw string("can't open file: ").append(argv[1]);
+		Refal2 refal;
+		if(argc == 2)
+		{
+			ifstream input(argv[1]);
+		
+			if(!input.is_open())
+				throw string("can't open file: ").append(argv[1]);
 			
-		Scanner scanner;
-		while(!program.eof())
-		{
-			if(scanner << program.get())
-			{
-				Lexem lexem(Lexem::STRING, string());
-				scanner >> lexem;
-				cout << lexem.GetText();
-			}
+			refal.Load(input, cerr);
 		}
-		if(scanner << Scanner::END_OF_FILE)
+		else
 		{
-			Lexem lexem(Lexem::STRING, string());
-			scanner >> lexem;
-			cout << lexem.GetText() << endl;
+			refal.Load(cin, cerr);
 		}
 		
-		program.close();
+		if(!refal.Status())
+		{
+			return 1;
+		}
+		refal.Run(cin, cout);
 	}
 	catch(const string &e)
 	{
@@ -41,7 +40,7 @@ int main(int argc, const char *argv[])
 	}
 	catch(...)
 	{
-		cout << "Unknown error..." << endl;
+		cout << "Unknown error!" << endl;
 	}
 	
 	return 0;

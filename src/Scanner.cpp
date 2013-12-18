@@ -1,6 +1,6 @@
+#include "Scanner.h"
 #include <iostream>
 #include <string>
-#include "Scanner.h"
 
 Lexem::Lexem(Type t, const string &s)
 	: type(t), text(s)
