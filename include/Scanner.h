@@ -12,17 +12,17 @@ class Lexem
 {
 	friend class Scanner;
 public:
-	enum LexemType
-	{
-		INDEFINITELY, COMMA, LESS, GREAT, NUMBER, STRING, QUALIFIER, LABEL,
-		PARAGRAPH, LINE_FEED, LEFT_PAREN, IDENTIFIER, EQUALITY, RIGHT_PAREN
-	};
-public:
 	Lexem();
 	~Lexem();
 	
 	Lexem(const Lexem &l);
 	Lexem &operator=(const Lexem &l);
+public:
+	enum LexemType
+	{
+		INDEFINITELY, COMMA, LESS, GREAT, NUMBER, STRING, QUALIFIER, LABEL,
+		PARAGRAPH, LINE_FEED, LEFT_PAREN, IDENTIFIER, EQUALITY, RIGHT_PAREN
+	};
 private:
 	LexemType type;
 	/*union
@@ -31,6 +31,7 @@ private:
 		const char *string;
 	};*/
 	string text;
+	static const char *types[14];
 public:
 	LexemType Type() const
 	{
@@ -39,6 +40,10 @@ public:
 	const string &String() const
 	{
 		return text;
+	}
+	const char *StringType() const
+	{
+		return types[type];
 	}
 };
 
@@ -55,6 +60,7 @@ public:
 private:
 	istream &input;
 	ostream &errors;
+	enum {H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q} state;
 };
 
 #endif

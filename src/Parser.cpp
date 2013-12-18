@@ -13,7 +13,7 @@ Parser::Parser(istream &input, ostream &errors)
 	Lexem lexem;
 	while(scanner >> lexem)
 	{
-		cout << lexem.String() << endl;
+		cout << lexem.StringType() << "|" << lexem.String() << "|" << endl;
 	}
 }
 

@@ -3,6 +3,14 @@
 #include <string>
 
 /* Lemem */
+const char *Lexem::types[14] =
+{
+	"INDEFINITELY", "COMMA", "LESS", "GREAT",
+	"NUMBER", "STRING", "QUALIFIER", "LABEL",
+	"PARAGRAPH", "LINE_FEED", "LEFT_PAREN",
+	"IDENTIFIER", "EQUALITY", "RIGHT_PAREN"
+};
+
 Lexem::Lexem()
 	: type(INDEFINITELY)
 {
@@ -24,7 +32,7 @@ Lexem &Lexem::operator=(const Lexem &l)
 
 /* Scanner */
 Scanner::Scanner(istream &i, ostream &e)
-	: input(i), errors(e)
+	: input(i), errors(e), state(H)
 {
 }
 
