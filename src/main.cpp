@@ -17,11 +17,12 @@ int main(int argc, const char *argv[])
 		if(argc == 2)
 		{
 			ifstream input(argv[1]);
-		
+			
 			if(!input.is_open())
 				throw string("can't open file: ").append(argv[1]);
 			
 			refal.Load(input, cerr);
+			input.close();
 		}
 		else
 		{

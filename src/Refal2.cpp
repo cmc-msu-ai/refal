@@ -17,9 +17,9 @@ Refal2::~Refal2()
 
 bool Refal2::Load(istream &input, ostream &errors)
 {
-	while(!input.eof())
+	for(char c = input.get(); input.good(); c = input.get())
 	{
-		text += input.get();
+		text += c;
 	}
 	status = true;
 	return status;
