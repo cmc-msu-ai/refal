@@ -36,11 +36,13 @@ int main(int argc, const char *argv[])
 	}
 	catch(const string &e)
 	{
-		cout << e << endl;
+		cerr << e << endl;
+		return 1;
 	}
 	catch(...)
 	{
-		cout << "Unknown error!" << endl;
+		cerr << "Unknown error!" << endl;
+		return 1;
 	}
 	
 	return 0;
