@@ -1,32 +1,42 @@
 #ifndef _SCANNER__H__
 #define _SCANNER__H__
 
+#include <iostream>
 #include <string>
 
-using namespace std;
+using std::istream;
+using std::ostream;
+using std::string;
 
 class Lexem
 {
+	friend class Scanner;
 public:
-	enum Type
+	enum LexemType
 	{
-		COMMA, LESS, GREAT, LEFT_PAREN, RIGHT_PAREN, EQUALITY, PARAGRAPH,
-		LINE_FEED, NUMBER, LABEL, QUALIFIER, STRING, IDENTIFIER
+		INDEFINITELY, COMMA, LESS, GREAT, NUMBER, STRING, QUALIFIER, LABEL,
+		PARAGRAPH, LINE_FEED, LEFT_PAREN, IDENTIFIER, EQUALITY, RIGHT_PAREN
 	};
-private:
-	Type type;
-	string text;
 public:
-	Lexem(Type t, const string &s);
+	Lexem();
+	~Lexem();
 	
 	Lexem(const Lexem &l);
 	Lexem &operator=(const Lexem &l);
-	
-	Type GetType() const
+private:
+	LexemType type;
+	/*union
+	{
+		unsigned int number;
+		const char *string;
+	};*/
+	string text;
+public:
+	LexemType Type() const
 	{
 		return type;
 	}
-	const string &GetText() const
+	const string &String() const
 	{
 		return text;
 	}
@@ -34,16 +44,17 @@ public:
 
 class Scanner
 {
-public:
-	enum
-	{
-		END_OF_FILE = -1
-	};
 private:
-	char lex;
+	Scanner(const Scanner&);
+	Scanner &operator=(const Scanner&);
 public:	
-	bool operator<<(int c);
-	void operator>>(Lexem &l);
+	Scanner(istream&, ostream&);
+	~Scanner();
+	
+	bool operator>>(Lexem&);
+private:
+	istream &input;
+	ostream &errors;
 };
 
 #endif

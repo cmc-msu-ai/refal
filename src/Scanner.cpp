@@ -2,8 +2,13 @@
 #include <iostream>
 #include <string>
 
-Lexem::Lexem(Type t, const string &s)
-	: type(t), text(s)
+/* Lemem */
+Lexem::Lexem()
+	: type(INDEFINITELY)
+{
+}
+
+Lexem::~Lexem()
 {
 }
 
@@ -11,22 +16,28 @@ Lexem::Lexem(const Lexem &l)
 {
 	operator=(l);
 }
+
 Lexem &Lexem::operator=(const Lexem &l)
 {
-	type = l.type;
-	text = l.text;
 	return *this;
 }
 
-bool Scanner::operator<<(int c)
+/* Scanner */
+Scanner::Scanner(istream &i, ostream &e)
+	: input(i), errors(e)
 {
-	if(c == END_OF_FILE)
-		return false;
-	lex = c;
-	return true;
 }
 
-void Scanner::operator>>(Lexem &l)
+Scanner::~Scanner()
 {
-	l = Lexem(Lexem::STRING, string()+lex);
+}
+
+bool Scanner::operator>>(Lexem &lexem)
+{
+	bool status = input.good();
+	for(char c = input.get(); input.good(); c = input.get())
+	{
+		lexem.text += c;
+	}
+	return status;
 }
