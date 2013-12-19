@@ -14,6 +14,7 @@ Parser::Parser(istream &input, ostream &errors)
 	while(scanner >> lexem)
 	{
 		cout << lexem.StringType() << "|" << lexem.String() << "|" << endl;
+		//std::cin.get();
 	}
 }
 
