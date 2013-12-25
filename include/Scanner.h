@@ -1,12 +1,24 @@
-#ifndef _SCANNER__H__
-#define _SCANNER__H__
+#ifndef _SCANNER__H_
+#define _SCANNER__H_
 
 #include <iostream>
+#include <vector>
 #include <string>
+#include <functional>
+#include "CharSet.h"
 
 using std::istream;
 using std::ostream;
 using std::string;
+using std::vector;
+using std::function;
+
+class BasicLexem
+{
+public:
+	BasicLexem();
+	virtual ~BasicLexem() = 0;
+};
 
 class Lexem
 {
@@ -20,8 +32,10 @@ public:
 public:
 	enum LexemType
 	{
-		INDEFINITELY, COMMA, LESS, GREAT, NUMBER, STRING, QUALIFIER, LABEL,
-		PARAGRAPH, LINE_FEED, LEFT_PAREN, IDENTIFIER, EQUALITY, RIGHT_PAREN
+		INDEFINITELY, COMMA, LESS, GREAT, RIGHT_PAREN,
+		LINE_FEED, LEFT_PAREN, PARAGRAPH, EQUALITY,
+		NUMBER,
+		STRING, QUALIFIER, LABEL, IDENTIFIER
 	};
 private:
 	LexemType type;
@@ -60,54 +74,25 @@ public:
 private:
 	istream &input;
 	ostream &errors;
-	char curr;
-	string lex;
+		
+	void inc_line();
 	
 	enum State
 	{
-		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, STATES_COUNT
-	};
+		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, Z, Y, STATES_COUNT
+	};	
+	typedef function<bool(Lexem&, char c)> TSwitchFunc;
+	typedef function<void(Lexem&, char c)> TActionFunc;
+	
 	State state;
+	int line_count, sym_count;
+	unsigned int switch_table[STATES_COUNT][256];
+	vector<TSwitchFunc> switch_functions;
 	
-	typedef bool (Scanner::*TSwitchFunction)();
-	TSwitchFunction switch_table[STATES_COUNT][256];
-	
-	void def_rule(State s, const char *event, TSwitchFunction func);
-	void def_rule(State s, TSwitchFunction func);
-	void clear_switch_table();
-	
-	bool Hspace(); bool Hnewline(); bool Hrest();
-	
-	bool Aspace(); bool Anewline(); bool Arest();
-	
-	bool Bspace(); bool Bnewline(); bool Bidstart(); bool Bdelim();
-	bool Bslash(); bool Bplus(); bool Bcolon(); bool Bquote(); bool Brest();
-	
-	bool Cidsym(); bool Crest();
-	
-	bool Dbackslash(); bool Dquote(); bool Dctrls(); bool Drest();
-	
-	bool E07(); bool Ex(); bool Eabfnrtv(); bool Erest();
-	
-	bool Fidstart(); bool Frest();
-	
-	bool Gidsym(); bool Gcolon(); bool Grest();
-	
-	bool I09(); bool Iidstart(); bool Irest();
-	
-	bool J09(); bool Jslash(); bool Jrest();
-	
-	bool Kidsym(); bool Kslash(); bool Krest();
-	
-	bool Lspace(); bool Lnewline(); bool Lrest();
-	
-	bool Mspace_newline(); bool Mrest();
-	
-	bool N07(); bool Nrest();
-	
-	bool Phex(); bool Prest();
-	
-	bool Qhex(); bool Qrest();
+	Scanner &operator[](State);
+	Scanner &operator()(const CharSet&, State, bool, const TActionFunc&);
+	Scanner &operator()(const CharSet&, State, bool = false);
+	Scanner &operator()(State, bool, const TActionFunc&);
 };
 
 #endif

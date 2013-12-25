@@ -1,5 +1,5 @@
-#ifndef _REFAL2_H_
-#define _REFAL2_H_
+#ifndef _REFAL2__H_
+#define _REFAL2__H_
 
 #include <iostream>
 
