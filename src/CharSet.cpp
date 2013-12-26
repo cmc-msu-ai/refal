@@ -11,13 +11,13 @@ CharSet::CharSet(const CharSet &a)
 	: bs(a)
 {
 }
-CharSet::CharSet(unsigned char a)
+CharSet::CharSet(char a)
 {
-		set(int(a));
+		set(int((unsigned char)a));
 }
 CharSet::CharSet(unsigned char a, unsigned char b)
 {
-	for(int i = a; i < int(b); ++i)
+	for(int i = a; i <= int(b); ++i)
 		set(i);
 }
 CharSet::CharSet(const char *s)

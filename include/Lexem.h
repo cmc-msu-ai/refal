@@ -37,8 +37,8 @@ public:
 struct NumberLexem : public SimpleLexem
 {
 public:
-	NumberLexem(LexemType t = INDEFINITELY)
-		: SimpleLexem(t)
+	NumberLexem(LexemType t = INDEFINITELY, unsigned int n = 0)
+		: SimpleLexem(t), value(n)
 	{
 	}
 	

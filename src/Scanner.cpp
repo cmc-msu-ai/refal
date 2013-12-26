@@ -60,12 +60,14 @@ Scanner::Scanner(istream &i, ostream &e)
 				input.unget();
 			})
 	[B]
-		(CharSet('\r'), Z, false, ACTION
+		(CharSet('\r'), Z, true, ACTION
 			{
+				l = new SimpleLexem(LINE_FEED);
 				inc_line();
 			})
-		(CharSet('\n'), H, false, ACTION
+		(CharSet('\n'), H, true, ACTION
 			{
+				l = new SimpleLexem(LINE_FEED);
 				inc_line();
 			})
 		(CharSet(" \t"), B)
@@ -93,7 +95,7 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				l = new SimpleLexem(EQUALITY);
 			})
-		(idstart, C, false, ACTION
+		(idsym, C, false, ACTION
 			{
 				l = new StringLexem(IDENTIFIER);
 				input.unget();
@@ -109,13 +111,107 @@ Scanner::Scanner(istream &i, ostream &e)
 		(B, false, ACTION
 			{
 				/* error */
-				std::cout << c;
 			})
 	[D]
 		(CharSet('\''), B, true)
+		(CharSet('\\'), E, false)
+		(CharSet(0, 31) + CharSet(127), D, false, ACTION
+			{
+				/* error */
+			})
 		(D, false, ACTION
 			{
 				static_cast<StringLexem&>(*l).value += c;
+			})
+	[E]
+		(CharSet('0', '7'), N, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += c-'0';
+			})
+		(CharSet('x'), P, false)
+		(CharSet('\0'), E, false, ACTION
+			{
+				/* error */
+			})
+		(CharSet("aA"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\a';
+			})
+		(CharSet("bB"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\b';
+			})
+		(CharSet("fF"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\f';
+			})
+		(CharSet("nN"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\n';
+			})
+		(CharSet("rR"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\r';
+			})
+		(CharSet("tT"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\t';
+			})
+		(CharSet("vV"), D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += '\v';
+			})
+		(D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += c;
+			})
+	[N]
+		(CharSet('0', '7'), N, false, ACTION
+			{
+				char &e = static_cast<StringLexem&>(*l).value.back();
+				e = (e << 3) + c-'0';
+			})
+		(D, false, ACTION
+			{
+				input.unget();
+			})
+	[P]
+		(CharSet('a', 'f'), Q, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += 10+c-'a';
+			})
+		(CharSet('A', 'F'), Q, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += 10+c-'a';
+			})
+		(CharSet('0', '9'), Q, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += c-'0';
+			})
+		(D, false, ACTION
+			{
+				static_cast<StringLexem&>(*l).value += 'x';
+				input.unget();
+			})
+	[Q]
+		(CharSet('a', 'f'), Q, false, ACTION
+			{
+				char &e = static_cast<StringLexem&>(*l).value.back();
+				e = (e << 4) + 10+c-'a';
+			})
+		(CharSet('A', 'F'), Q, false, ACTION
+			{
+				char &e = static_cast<StringLexem&>(*l).value.back();
+				e = (e << 4) + 10+c-'A';
+			})
+		(CharSet('0', '9'), Q, false, ACTION
+			{
+				char &e = static_cast<StringLexem&>(*l).value.back();
+				e = (e << 4) + c-'0';
+			})
+		(D, false, ACTION
+			{
+				input.unget();
 			})
 	[C]
 		(idsym, C, false, ACTION
@@ -149,11 +245,12 @@ Scanner::Scanner(istream &i, ostream &e)
 	[I]
 		(idstart, K, false, ACTION
 			{
-				/* label */
+				l = new StringLexem(LABEL);
+				input.unget();
 			})
 		(num, J, false, ACTION
 			{
-				/* number */
+				l = new NumberLexem(NUMBER, c-'0');
 			})
 		(I, false, ACTION
 			{
@@ -162,12 +259,10 @@ Scanner::Scanner(istream &i, ostream &e)
 	[J]
 		(num, J, false, ACTION
 			{
-				/* number */
+				NumberLexem& nl = static_cast<NumberLexem&>(*l);
+				nl.value = nl.value * 10 + c-'0';
 			})
-		(CharSet('/'), B, false, ACTION
-			{
-				/* made number */
-			})
+		(CharSet('/'), B, true)
 		(J, false, ACTION
 			{
 				/* error */
@@ -175,12 +270,9 @@ Scanner::Scanner(istream &i, ostream &e)
 	[K]
 		(idsym, K, false, ACTION
 			{
-				/* label */
+				static_cast<StringLexem&>(*l).value += c;
 			})
-		(CharSet('/'), B, false, ACTION
-			{
-				/* made label */
-			})
+		(CharSet('/'), B, true)
 		(B, false, ACTION
 			{
 				/* error */
@@ -249,15 +341,14 @@ void Scanner::inc_line()
 
 bool Scanner::operator>>(Lexem &lexem)
 {
-	bool status = input.good();
 	for(char curr = input.get(); input.good(); curr = input.get())
 	{
 		sym_count++;
 		if(switch_functions[switch_table[state][int((unsigned char)curr)]]
 					(lexem, curr))
-			break;
+			return true;
 	}
-	return status;
+	return false;
 }
 
 Scanner &Scanner::operator[](State s)

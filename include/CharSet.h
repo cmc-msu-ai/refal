@@ -8,7 +8,7 @@ class CharSet : public std::bitset<256>
 public:
 	CharSet();
 	CharSet(const CharSet &a);
-	CharSet(unsigned char a);
+	CharSet(char a);
 	CharSet(unsigned char a, unsigned char b);
 	CharSet(const char *s);
 	~CharSet();

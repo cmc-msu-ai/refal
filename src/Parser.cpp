@@ -31,25 +31,22 @@ Parser::Parser(istream &input, ostream &errors)
 	Lexem lexem;
 	while(scanner >> lexem)
 	{
-		if(lexem)
+		switch(lexem->type)
 		{
-			switch(lexem->type)
-			{
-			case STRING:
-			case QUALIFIER:
-			case LABEL:
-			case IDENTIFIER:
-				cout << types[lexem->type] << "|" << 
-					static_cast<StringLexem*>(lexem.get())->value << "|" << endl;
-				break;
-			case NUMBER:
-				cout << types[lexem->type] << ":" <<
-					static_cast<NumberLexem*>(lexem.get())->value << "." << endl;
-				break;
-			default:
-				cout << types[lexem->type] << endl;
-				break;
-			}
+		case STRING:
+		case QUALIFIER:
+		case LABEL:
+		case IDENTIFIER:
+			cout << types[lexem->type] << "|" << 
+				static_cast<StringLexem*>(lexem.get())->value << "|" << endl;
+			break;
+		case NUMBER:
+			cout << types[lexem->type] << ":" <<
+				static_cast<NumberLexem*>(lexem.get())->value << "." << endl;
+			break;
+		default:
+			cout << types[lexem->type] << endl;
+			break;
 		}
 		//std::cin.get();
 	}
