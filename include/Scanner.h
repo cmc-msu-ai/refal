@@ -6,60 +6,13 @@
 #include <string>
 #include <functional>
 #include "CharSet.h"
+#include "Lexem.h"
 
 using std::istream;
 using std::ostream;
 using std::string;
 using std::vector;
 using std::function;
-
-class BasicLexem
-{
-public:
-	BasicLexem();
-	virtual ~BasicLexem() = 0;
-};
-
-class Lexem
-{
-	friend class Scanner;
-public:
-	Lexem();
-	~Lexem();
-	
-	Lexem(const Lexem &l);
-	Lexem &operator=(const Lexem &l);
-public:
-	enum LexemType
-	{
-		INDEFINITELY, COMMA, LESS, GREAT, RIGHT_PAREN,
-		LINE_FEED, LEFT_PAREN, PARAGRAPH, EQUALITY,
-		NUMBER,
-		STRING, QUALIFIER, LABEL, IDENTIFIER
-	};
-private:
-	LexemType type;
-	/*union
-	{
-		unsigned int number;
-		const char *string;
-	};*/
-	string text;
-	static const char *types[14];
-public:
-	LexemType Type() const
-	{
-		return type;
-	}
-	const string &String() const
-	{
-		return text;
-	}
-	const char *StringType() const
-	{
-		return types[type];
-	}
-};
 
 class Scanner
 {
@@ -79,7 +32,7 @@ private:
 	
 	enum State
 	{
-		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, Z, Y, STATES_COUNT
+		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, Z, Y, X, STATES_COUNT
 	};	
 	typedef function<bool(Lexem&, char c)> TSwitchFunc;
 	typedef function<void(Lexem&, char c)> TActionFunc;

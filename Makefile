@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -g -std=c++0x
 
-CPPFILES = main.cpp Scanner.cpp Refal2.cpp Parser.cpp CharSet.cpp
+CPPFILES = main.cpp Refal2.cpp Scanner.cpp Lexem.cpp Parser.cpp CharSet.cpp
 
 SRC_DIR = src
 INCLUDE_DIR = include
