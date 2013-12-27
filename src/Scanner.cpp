@@ -7,10 +7,15 @@ Scanner::Scanner(istream &i, ostream &e)
 	: input(i), errors(e), state(H), line_count(1), sym_count(0)
 {
 	for(int i = 0; i < STATES_COUNT; ++i)
+	{
+		finally_table[i] = 0;
 		for(int j = 0; j < 256; j++)
 			switch_table[i][j] = 0;
+	}
 	
 	switch_functions.push_back([](Lexem &l, char c){return false;});
+	finally_functions.push_back([](Lexem &l){return false;});
+	finally_functions.push_back([](Lexem &l){return true;});
 	
 	static const CharSet num = CharSet('0', '9');
 	static const CharSet idstart = CharSet('a', 'z') +
@@ -19,6 +24,7 @@ Scanner::Scanner(istream &i, ostream &e)
 	
 	(*this)
 	#define ACTION [&](Lexem &l, char c) -> void
+	#define FINALLY_ACTION [&](Lexem &l) -> void
 	[H]
 		(CharSet('\n'), H, false, ACTION
 			{
@@ -123,6 +129,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				static_cast<StringLexem&>(*l).value += c;
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[E]
 		(CharSet('0', '7'), N, false, ACTION
 			{
@@ -165,6 +175,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				static_cast<StringLexem&>(*l).value += c;
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[N]
 		(CharSet('0', '7'), N, false, ACTION
 			{
@@ -174,6 +188,10 @@ Scanner::Scanner(istream &i, ostream &e)
 		(D, false, ACTION
 			{
 				input.unget();
+			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
 			})
 	[P]
 		(CharSet('a', 'f'), Q, false, ACTION
@@ -192,6 +210,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				static_cast<StringLexem&>(*l).value += 'x';
 				input.unget();
+			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
 			})
 	[Q]
 		(CharSet('a', 'f'), Q, false, ACTION
@@ -213,6 +235,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				input.unget();
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[C]
 		(idsym, C, false, ACTION
 			{
@@ -222,6 +248,7 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				input.unget();
 			})
+		(true)
 	[F]
 		(idstart, G, false, ACTION
 			{
@@ -232,6 +259,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				/* error */
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[G]
 		(idsym, G, false, ACTION
 			{
@@ -239,6 +270,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(CharSet(':'), B, true)
 		(G, false, ACTION
+			{
+				/* error */
+			})
+		(false, FINALLY_ACTION
 			{
 				/* error */
 			})
@@ -256,6 +291,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				/* error */
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[J]
 		(num, J, false, ACTION
 			{
@@ -267,6 +306,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				/* error */
 			})
+		(false, FINALLY_ACTION
+			{
+				/* error */
+			})
 	[K]
 		(idsym, K, false, ACTION
 			{
@@ -274,6 +317,10 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(CharSet('/'), B, true)
 		(B, false, ACTION
+			{
+				/* error */
+			})
+		(false, FINALLY_ACTION
 			{
 				/* error */
 			})
@@ -297,6 +344,10 @@ Scanner::Scanner(istream &i, ostream &e)
 				inc_line();
 			})
 		(L, false, ACTION
+			{
+				/* error */
+			})
+		(false, FINALLY_ACTION
 			{
 				/* error */
 			})
@@ -325,6 +376,7 @@ Scanner::Scanner(istream &i, ostream &e)
 				input.unget();
 			})			
 	#undef ACTION
+	#undef FINALLY_ACTION
 	;
 }
 
@@ -341,6 +393,9 @@ void Scanner::inc_line()
 
 bool Scanner::operator>>(Lexem &lexem)
 {
+	if(!input.good())
+		return false;
+
 	for(char curr = input.get(); input.good(); curr = input.get())
 	{
 		sym_count++;
@@ -348,6 +403,9 @@ bool Scanner::operator>>(Lexem &lexem)
 					(lexem, curr))
 			return true;
 	}
+	if(finally_functions[finally_table[state]](lexem))
+		return true;
+	
 	return false;
 }
 
@@ -402,5 +460,24 @@ Scanner &Scanner::operator()(State ns, bool lex_done, const TActionFunc &action)
 	for(int j = 0; j < 256; j++)
 		if(switch_table[state][j] == 0)
 			switch_table[state][j] = fnumber;
+	return *this;
+}
+
+Scanner &Scanner::operator()(bool lex_done, const TFinallyActionFunc &action)
+{
+	const int fnumber = finally_functions.size();
+	finally_functions.push_back(
+		[&, lex_done, action](Lexem &l)
+		{
+			action(l);
+			return lex_done;
+		});
+	finally_table[state] = fnumber;
+	return *this;
+}
+
+Scanner &Scanner::operator()(bool lex_done)
+{
+	finally_table[state] = lex_done ? 1 : 0;
 	return *this;
 }
