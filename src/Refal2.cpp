@@ -19,10 +19,12 @@ Refal2::~Refal2()
 bool Refal2::Load(istream &input, ostream &errors)
 {
 	Parser parser(input, errors);
-	status = true;
+	status = parser.Status();
 	return status;
 }
 
 void Refal2::Run(istream &input, ostream &output) const
 {
+	if(!status)
+		return;
 }

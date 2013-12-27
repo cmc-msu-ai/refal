@@ -26,6 +26,7 @@ const char *types[14] =
 };
 
 Parser::Parser(istream &input, ostream &errors)
+	: status(true)
 {
 	Scanner scanner(input, errors);
 	Lexem lexem;
@@ -50,6 +51,7 @@ Parser::Parser(istream &input, ostream &errors)
 		}
 		//std::cin.get();
 	}
+	status = scanner.Status();
 }
 
 Parser::~Parser()

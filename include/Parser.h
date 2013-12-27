@@ -14,6 +14,13 @@ private:
 public:
 	Parser(istream&, ostream&);
 	~Parser();
+	
+	bool Status()
+	{
+		return status;
+	}
+private:
+	bool status;
 };
 
 #endif

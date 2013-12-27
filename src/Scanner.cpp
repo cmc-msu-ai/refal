@@ -1,10 +1,21 @@
 #include "Scanner.h"
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include "Lexem.h"
 
+const char *Scanner::errors_table[] =
+{
+	"Unforeseen character",
+	"Unclosed string",
+	"Wrong first character of qualifier",
+	"Unclosed qualifier",
+	"Wrong first character of label",
+	"Unclosed label"
+};
+
 Scanner::Scanner(istream &i, ostream &e)
-	: input(i), errors(e), state(H), line_count(1), sym_count(0)
+	: input(i), errors(e), status(true), state(H), line_count(1), sym_count(0)
 {
 	for(int i = 0; i < STATES_COUNT; ++i)
 	{
@@ -37,7 +48,7 @@ Scanner::Scanner(istream &i, ostream &e)
 		(CharSet(" \t"), A)
 		(B, false, ACTION
 			{
-				input.unget();
+				unget();
 			})
 	[Z]
 		(CharSet('\r'), Z, false, ACTION
@@ -48,7 +59,7 @@ Scanner::Scanner(istream &i, ostream &e)
 		(CharSet(" \t"), A)
 		(B, false, ACTION
 			{
-				input.unget();
+				unget();
 			})
 	[A]
 		(CharSet('\r'), Z, false, ACTION
@@ -63,7 +74,7 @@ Scanner::Scanner(istream &i, ostream &e)
 		(B, true, ACTION
 			{
 				l = new SimpleLexem(PARAGRAPH);
-				input.unget();
+				unget();
 			})
 	[B]
 		(CharSet('\r'), Z, true, ACTION
@@ -104,7 +115,7 @@ Scanner::Scanner(istream &i, ostream &e)
 		(idsym, C, false, ACTION
 			{
 				l = new StringLexem(IDENTIFIER);
-				input.unget();
+				unget();
 			})
 		(CharSet(':'), F)
 		(CharSet('/'), I)
@@ -116,14 +127,14 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(B, false, ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 	[D]
 		(CharSet('\''), B, true)
 		(CharSet('\\'), E, false)
 		(CharSet(0, 31) + CharSet(127), D, false, ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 		(D, false, ACTION
 			{
@@ -131,7 +142,7 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 	[E]
 		(CharSet('0', '7'), N, false, ACTION
@@ -141,7 +152,7 @@ Scanner::Scanner(istream &i, ostream &e)
 		(CharSet('x'), P, false)
 		(CharSet('\0'), E, false, ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 		(CharSet("aA"), D, false, ACTION
 			{
@@ -177,7 +188,7 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_STRING);
 			})
 	[N]
 		(CharSet('0', '7'), N, false, ACTION
@@ -187,11 +198,11 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(D, false, ACTION
 			{
-				input.unget();
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_STRING);
 			})
 	[P]
 		(CharSet('a', 'f'), Q, false, ACTION
@@ -209,11 +220,11 @@ Scanner::Scanner(istream &i, ostream &e)
 		(D, false, ACTION
 			{
 				static_cast<StringLexem&>(*l).value += 'x';
-				input.unget();
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_STRING);
 			})
 	[Q]
 		(CharSet('a', 'f'), Q, false, ACTION
@@ -233,11 +244,11 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(D, false, ACTION
 			{
-				input.unget();
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_STRING);
 			})
 	[C]
 		(idsym, C, false, ACTION
@@ -246,22 +257,23 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(B, true, ACTION
 			{
-				input.unget();
+				unget();
 			})
 		(true)
 	[F]
 		(idstart, G, false, ACTION
 			{
 				l = new StringLexem(QUALIFIER);
-				input.unget();
+				unget();
 			})
-		(F, false, ACTION
+		(B, false, ACTION
 			{
-				/* error */
+				error(WRONG_FIRST_QUALIFIERS_CHAR);
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_QUALIFIER);
 			})
 	[G]
 		(idsym, G, false, ACTION
@@ -269,31 +281,33 @@ Scanner::Scanner(istream &i, ostream &e)
 				static_cast<StringLexem&>(*l).value += c;
 			})
 		(CharSet(':'), B, true)
-		(G, false, ACTION
+		(B, true, ACTION
 			{
-				/* error */
+				error(UNCLOSED_QUALIFIER);
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_QUALIFIER);
 			})
 	[I]
 		(idstart, K, false, ACTION
 			{
 				l = new StringLexem(LABEL);
-				input.unget();
+				unget();
 			})
 		(num, J, false, ACTION
 			{
 				l = new NumberLexem(NUMBER, c-'0');
 			})
-		(I, false, ACTION
+		(B, false, ACTION
 			{
-				/* error */
+				error(WRONG_FIRST_LABELS_CHAR);
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 	[J]
 		(num, J, false, ACTION
@@ -302,13 +316,14 @@ Scanner::Scanner(istream &i, ostream &e)
 				nl.value = nl.value * 10 + c-'0';
 			})
 		(CharSet('/'), B, true)
-		(J, false, ACTION
+		(B, true, ACTION
 			{
-				/* error */
+				error(UNCLOSED_LABEL);
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_LABEL);
 			})
 	[K]
 		(idsym, K, false, ACTION
@@ -316,13 +331,14 @@ Scanner::Scanner(istream &i, ostream &e)
 				static_cast<StringLexem&>(*l).value += c;
 			})
 		(CharSet('/'), B, true)
-		(B, false, ACTION
+		(B, true, ACTION
 			{
-				/* error */
+				error(UNCLOSED_LABEL);
+				unget();
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNCLOSED_LABEL);
 			})
 	[X]
 		(CharSet('\r'), Z, false, ACTION
@@ -345,11 +361,11 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(L, false, ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 		(false, FINALLY_ACTION
 			{
-				/* error */
+				error(UNFORESEEN_CHARACTER);
 			})
 	[M]
 		(CharSet(" \t"), M)
@@ -363,7 +379,7 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(B, false, ACTION
 			{
-				input.unget();
+				unget();
 			})
 	[Y]
 		(CharSet(" \t\n"), M)
@@ -373,8 +389,8 @@ Scanner::Scanner(istream &i, ostream &e)
 			})
 		(B, false, ACTION
 			{
-				input.unget();
-			})			
+				unget();
+			})
 	#undef ACTION
 	#undef FINALLY_ACTION
 	;
@@ -389,6 +405,19 @@ void Scanner::inc_line()
 	line_count++;
 	sym_count = 0;
 	std::cout << std::endl << line_count << std::endl;
+}
+
+void Scanner::unget()
+{
+	sym_count--;
+	input.unget();
+}
+
+void Scanner::error(Error e)
+{
+	status = false;
+	errors << std::setw(4) << line_count << ":" << std::setw(3) << sym_count
+				<< ": Error: " << errors_table[e] << std::endl;
 }
 
 bool Scanner::operator>>(Lexem &lexem)
