@@ -1,50 +1,23 @@
-N - непустая последовательность символов '\n' '\r' '\t' ' ', обязательно
-	оканчивающаяся на один из символов '\n' '\r'
-T - непустая последовательность символов '\t' ' ' в начале строки
-I - идентификатор, непустая последовательность латинских букв, цифр и символа
-	'_', обязательно начинающаяся с буквы или '_' и не длиннее 8 символов
-Z - непустая последовательность цифр
-Y - непустая последовательность любых символов ASCII (с экранированием)
-X - латинская буква или цифра
+S ->	IDENTIFIER `START` LINE_FEED { A LINE_FEED } `END`
 
-{...}  - вхождение выражения ... 0 или более раз
-[...]  - вхождение выражения ... 0 или 1 раз
+A ->	PARAGRAPH D | Q | F
 
---------------------------------------------------------------------------------
+D ->	`ENTRY` `go` |
+		`EXTRN` IDENTIFIER [ LEFT_PAREN IDENTIFIER RIGHT_PAREN ]
+				{ COMMA IDENTIFIER [ LEFT_PAREN IDENTIFIER RIGHT_PAREN ] }
+		`EMPTY` IDENTIFIER { COMMA IDENTIFIER }
+		
+Q ->	IDENTIFIER `S` X
+X ->	{ [ B ] [ LEFT_PAREN B RIGHT_PAREN ] }
+B ->	QUALIFIER | STRING | LABEL | NUMBER |
+		`S` | `F` | `N` | `O` | `L` | `D` | `B` | `W`
 
-S -> I 'START' N A { A } 'END'
+F ->	IDENTIFIER [ LINE_FEED ] C { LINE_FEED PARAGRAPH C }
+C ->	( `L` | `R` | ) P EQUALITY E
+P ->	{ T }
+T ->	STRING | LABEL | NUMBER | V | LEFT_PAREN P RIGHT_PAREN
+E ->	{ G }
+G ->	STRING | LABEL | NUMBER | V | LEFT_PAREN E RIGHT_PAREN |
+		LESS IDENTIFIER E GREAT
 
-# единица программы
-A -> T B N | C N | F N
-
-# директива
-B -> 'ENTRY' 'GO' | 'EMPTY' I { ',' I } | 'EXTRN' J { ',' J }
-J -> I [ '(' I ')' ]
-
-# описание спецификатора
-С -> I 'S' { D }
-D -> ['(' H ')'] | H
-H -> ':' I ':' | '/' I '/' | 'S' | 'F' | 'N' | 'O' | 'L' | 'D' | 'B' | 'W'
-		| '/' Z '/' | '''' Y ''''
-
-# функция
-F -> I G { N T G } | 'GO' '=' E
-
-# рефал-предложение
-G -> | [ K ] { M } '=' E
-K -> 'L' | 'R'
-
-# выражение-образец
-M -> '''' Y '''' | '/' Z '/' | '/' I '/' | '(' M ')' | Q
-
-# переменная
-Q -> L [ '(' { D } ')' ] X
-L -> 'S' | 'W' | 'E' | 'V'
-
-# выражение
-E -> { R }
-R -> '''' Y '''' | '/' I '/' | '/' Z '/' | Q | '(' R ')' | '<' I E '>'
-
---------------------------------------------------------------------------------
-
-# O P Q U V W
+V ->	( `S` | `W` | `E` | `V` ) [ LEFT_PAREN X RIGHT_PAREN ] IDENTIFIER(1)
