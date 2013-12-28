@@ -1,14 +1,14 @@
 program START
-extrn print, printm, prout, proutm
-extrn br, dg, cp, rp
-extrn chartof, ftochar, functab
-extrn libget, opnget, clsget
-extrn symb, numb, plus(add), minus(sub), mul, dr, nrel
-entry go
-empty true, false, comma, begin, of, else, notequal, end, until, to, do
-empty then, dot, greatequal, program, lessequal, equal, semicolon, less
-empty boolean, lparen, endcase, integer, great, colon, rparen, assign
-empty _beg, _rep, _cas, error
+ extrn print, printm, prout, proutm
+ extrn br, dg, cp, rp
+ extrn chartof, ftochar, functab
+ extrn libget, opnget, clsget
+ extrn symb, numb, plus(add), minus(sub), mul, dr, nrel
+ entry go
+ empty true, false, comma, begin, of, else, notequal, end, until, to, do
+ empty then, dot, greatequal, program, lessequal, equal, semicolon, less
+ empty boolean, lparen, endcase, integer, great, colon, rparen, assign
+ empty _beg, _rep, _cas, error
 
 abc S ('abccd')
 bbb S :abc:

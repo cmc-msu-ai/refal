@@ -421,6 +421,7 @@ Scanner::Scanner(istream &i, ostream &e)
 	#undef ACTION
 	#undef FINALLY_ACTION
 	;
+	state = H;
 }
 
 Scanner::~Scanner()
