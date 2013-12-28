@@ -1,24 +1,46 @@
-S ->	IDENTIFIER `start` { LINE_FEED A }
+LETTER			-> `a` | `b` | ... | `z` | `A` | `B` | ... | `Z`
+DIGIT			-> `0` | `1` | ... | `9`
+LEFT_PAREN		-> `(`
+RIGHT_PAREN		-> `)`
+COMMA			-> `,`
+EQUALITY		-> `=`
+LESS			-> `<`
+GREAT			-> `>`
+QUALIFIER		-> `:` I `:`
+LABEL			-> `/` I `/`
+NUMBER			-> `/` DIGIT { DIGIT } `/`
+STRING like string constant in C
+LETTER_OR_DIGIT -> LETTER | DIGIT
+I				-> LETTER { LETTER_OR_DIGIT }
+LINE_FEED		-> { (`\n` | `\r` | `\t` | ` `) } (`\r` | `\n`)
+SPACE			-> { (`\t` | ` `) }
 
-A ->	PARAGRAPH D | IDENTIFIER K
+S ->	I SPACE `start` LINE_FEED { A }
 
-D ->	`entry` `go` |
-		`extrn` IDENTIFIER [ LEFT_PAREN IDENTIFIER RIGHT_PAREN ]
-				{ COMMA IDENTIFIER [ LEFT_PAREN IDENTIFIER RIGHT_PAREN ] }
-		`empty` IDENTIFIER { COMMA IDENTIFIER }
+A ->	SPACE D | I K
+
+D ->	`entry` SPACE `go` LINE_FEED |
+		`extrn` SPACE I [ LEFT_PAREN I RIGHT_PAREN ] [SPACE]
+				{ COMMA [SPACE] I [ LEFT_PAREN I RIGHT_PAREN ] } LINE_FEED |
+		`empty` SPACE I { [SPACE] COMMA [SPACE] I } LINE_FEED |
 		`end`
 
-K ->	`S` X | [ LINE_FEED ] C { LINE_FEED PARAGRAPH C }
+K ->	SPACE W | { LINE_FEED SPACE C } LINE_FEED
+W ->	`S` Y | C { LINE_FEED SPACE C } LINE_FEED
+Y ->	SPACE X LINE_FEED |
+			[ LEFT_PAREN X [SPACE] RIGHT_PAREN ] LETTER_OR_DIGIT N
 
-X ->	{ [ B ] [ LEFT_PAREN B RIGHT_PAREN ] }
+X ->	{ ( [SPACE] B | [SPACE] LEFT_PAREN [SPACE] B [SPACE] RIGHT_PAREN ) }
 B ->	QUALIFIER | STRING | LABEL | NUMBER |
 		`s` | `f` | `n` | `o` | `l` | `d` | `b` | `w`
 
-C ->	( `l` | `r` | ) P EQUALITY E
-P ->	{ T }
-T ->	STRING | LABEL | NUMBER | V | LEFT_PAREN P RIGHT_PAREN
-E ->	{ G }
-G ->	STRING | LABEL | NUMBER | V | LEFT_PAREN E RIGHT_PAREN |
-		LESS IDENTIFIER E GREAT
+C ->	( `l` | `r` | ) N
+N ->	P [SPACE] EQUALITY [SPACE] E
+P ->	{ [SPACE] T }
+T ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] P [SPACE] RIGHT_PAREN
+E ->	{ [SPACE] G }
+G ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] E [SPACE] RIGHT_PAREN |
+		LESS I SPACE E [SPACE] GREAT
 
-V ->	( `s` | `w` | `e` | `v` ) [ LEFT_PAREN X RIGHT_PAREN ] IDENTIFIER(1)
+V ->	( `s` | `w` | `e` | `v` )
+			[ LEFT_PAREN X [SPACE] RIGHT_PAREN ] LETTER_OR_DIGIT
