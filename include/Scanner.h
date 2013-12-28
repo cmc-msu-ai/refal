@@ -40,12 +40,13 @@ private:
 	
 	enum State
 	{
-		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, Z, Y, X, STATES_COUNT
+		H, A, B, C, D, E, F, G, I, J, K, L, M, N, P, Q, Z, Y, X, V, STATES_COUNT
 	};	
 	enum Error
 	{
 		UNFORESEEN_CHARACTER,
 		UNCLOSED_STRING,
+		WRONG_LINE_FEED_IN_STRING,
 		WRONG_FIRST_QUALIFIERS_CHAR,
 		UNCLOSED_QUALIFIER,
 		WRONG_FIRST_LABELS_CHAR,

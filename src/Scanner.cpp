@@ -8,6 +8,7 @@ const char *Scanner::errors_table[] =
 {
 	"Unforeseen character",
 	"Unclosed string",
+	"wrong line feed in string",
 	"Wrong first character of qualifier",
 	"Unclosed qualifier",
 	"Wrong first character of label",
@@ -136,6 +137,18 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				error(UNFORESEEN_CHARACTER);
 			})
+		(CharSet('\r'), V, false, ACTION
+			{
+				error(WRONG_LINE_FEED_IN_STRING);
+				inc_line();
+				static_cast<StringLexem&>(*l).value += '\r';
+			})
+		(CharSet('\n'), D, false, ACTION
+			{
+				error(WRONG_LINE_FEED_IN_STRING);
+				inc_line();
+				static_cast<StringLexem&>(*l).value += '\n';
+			})
 		(D, false, ACTION
 			{
 				static_cast<StringLexem&>(*l).value += c;
@@ -144,7 +157,21 @@ Scanner::Scanner(istream &i, ostream &e)
 			{
 				error(UNFORESEEN_CHARACTER);
 			})
+	[V]
+		(CharSet('\n'), V, false, ACTION
+			{
+				error(WRONG_LINE_FEED_IN_STRING);
+				static_cast<StringLexem&>(*l).value += '\n';
+			})
+		(D, false, ACTION
+			{
+				unget();
+			})
 	[E]
+		(CharSet("\r\n"), D, false, ACTION
+			{
+				unget();
+			})
 		(CharSet('0', '7'), N, false, ACTION
 			{
 				static_cast<StringLexem&>(*l).value += c-'0';
