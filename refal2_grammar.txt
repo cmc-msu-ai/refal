@@ -11,36 +11,57 @@ LABEL			-> `/` I `/`
 NUMBER			-> `/` DIGIT { DIGIT } `/`
 STRING like string constant in C
 LETTER_OR_DIGIT -> LETTER | DIGIT
-I				-> (LETTER | `_`) { (LETTER_OR_DIGIT | `_`) }
 LINE_FEED		-> { (`\n` | `\r` | `\t` | ` `) } (`\r` | `\n`)
 SPACE			-> { (`\t` | ` `) }
 
-S ->	I SPACE `start` LINE_FEED { A }
+# ------------------------------------------------------------------------------
+I	-> IB IL
+IL	-> IS IL |
+IB	-> LETTER | `_`
+IS	-> LETTER | DIGIT | `_`
+WS	-> SPACE |
 
-A ->	SPACE D | I K
+S	-> I SPACE `start` LINE_FEED A
 
-D ->	`entry` SPACE `go` LINE_FEED |
-		`extrn` SPACE I [ LEFT_PAREN I RIGHT_PAREN ] [SPACE]
-				{ COMMA [SPACE] I [ LEFT_PAREN I RIGHT_PAREN ] } LINE_FEED |
-		`empty` SPACE I { [SPACE] COMMA [SPACE] I } LINE_FEED |
-		`end`
+# ------------------------------------------------------------------------------
+A	-> SPACE D | I K A
 
-K ->	SPACE W | { LINE_FEED SPACE C } LINE_FEED
-W ->	`S` Y | C { LINE_FEED SPACE C } LINE_FEED
-Y ->	SPACE X LINE_FEED |
-			[ LEFT_PAREN X [SPACE] RIGHT_PAREN ] LETTER_OR_DIGIT N
+# ------------------------------------------------------------------------------
+D	-> D1 LINE_FEED A | D2 LINE_FEED A | D3 LINE_FEED A | D4 | C
 
-X ->	{ ( [SPACE] B | [SPACE] LEFT_PAREN [SPACE] B [SPACE] RIGHT_PAREN ) }
-B ->	QUALIFIER | STRING | LABEL | NUMBER |
+D1	-> `extrn` SPACE D1E D1L
+D1L	-> WS COMMA WS D1E D1L |
+D1E	-> I | LEFT_PAREN WS I WS RIGHT_PAREN
+				
+D2	-> `empty` SPACE I D2L
+D2L	-> WS COMMA WS I D2L |
+
+D3	-> `entry` SPACE `go`
+
+D4	-> `end`
+
+# ------------------------------------------------------------------------------
+K ->	SPACE W | LINE_FEED
+W ->	`S` Y | C
+Y ->	SPACE X LINE_FEED | VS LETTER_OR_DIGIT N
+
+#-------------------------------------------------------------------------------
+C	-> CT N
+CT	-> `l` | `r` |
+N	-> P WS EQUALITY WS E LINE_FEED
+P	-> WS T P |
+E	-> WS TE E |
+T	-> STRING | LABEL | NUMBER | V | LEFT_PAREN P WS RIGHT_PAREN
+TE	-> TE | LESS I E WS GREAT
+
+#-------------------------------------------------------------------------------
+X	-> WS XE X |
+XE	-> B | LEFT_PAREN WS B WS RIGHT_PAREN
+B	-> QUALIFIER | STRING | LABEL | NUMBER |
 		`s` | `f` | `n` | `o` | `l` | `d` | `b` | `w`
 
-C ->	( `l` | `r` | ) N
-N ->	P [SPACE] EQUALITY [SPACE] E
-P ->	{ [SPACE] T }
-T ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] P [SPACE] RIGHT_PAREN
-E ->	{ [SPACE] G }
-G ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] E [SPACE] RIGHT_PAREN |
-		LESS I E [SPACE] GREAT
+# ------------------------------------------------------------------------------
+V	-> VT VS LETTER_OR_DIGIT
+VT	-> `s` | `w` | `e` | `v`
+VS	-> LEFT_PAREN X WS RIGHT_PAREN |
 
-V ->	( `s` | `w` | `e` | `v` )
-			[ LEFT_PAREN X [SPACE] RIGHT_PAREN ] LETTER_OR_DIGIT
