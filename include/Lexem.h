@@ -8,48 +8,62 @@ using std::string;
 enum LexemType
 {
 	INDEFINITELY,
-	COMMA,
-	LESS,
-	GREAT,
+	LETTER_OR_DIGIT,
 	LEFT_PAREN,
 	RIGHT_PAREN,
-	LINE_FEED,
-	PARAGRAPH,
+	COMMA,
 	EQUALITY,
-	NUMBER,
-	STRING,
+	LESS,
+	GREAT,
 	QUALIFIER,
 	LABEL,
-	IDENTIFIER
+	NUMBER,
+	STRING,
+	LINE_FEED,
+	SPACE
 };
 
 struct SimpleLexem
 {
 public:
-	SimpleLexem(LexemType t = INDEFINITELY)
-		: type(t)
+	SimpleLexem(unsigned int l = 0, unsigned int p = 0,
+				LexemType t = INDEFINITELY)
+		: type(t), line(l), offset(p)
 	{
 	}
 	
 	LexemType type;
+	unsigned int line, offset;
 };
 
 struct NumberLexem : public SimpleLexem
 {
 public:
-	NumberLexem(LexemType t = INDEFINITELY, unsigned int n = 0)
-		: SimpleLexem(t), value(n)
+	NumberLexem(unsigned int l = 0, unsigned int p = 0, unsigned int n = 0)
+		: SimpleLexem(l, p, NUMBER), value(n)
 	{
 	}
 	
 	unsigned int value;
 };
 
+struct LetterOrDigitLexem : public SimpleLexem
+{
+public:
+	LetterOrDigitLexem(unsigned int l = 0, unsigned int p = 0, char v = '\0')
+		: SimpleLexem(l, p, LETTER_OR_DIGIT), value(v)
+	{
+	}
+
+	char value;
+};
+
 struct StringLexem : public SimpleLexem
 {
 public:
-	StringLexem(LexemType t = INDEFINITELY)
-		: SimpleLexem(t)
+	StringLexem(unsigned int l = 0, unsigned int p = 0,
+					LexemType t = INDEFINITELY)
+		: SimpleLexem(l, p, t)
 	{
 	}
 

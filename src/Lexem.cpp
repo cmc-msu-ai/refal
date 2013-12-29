@@ -35,10 +35,12 @@ void Lexem::freep()
 
 	switch(l->type)
 	{
+	case LETTER_OR_DIGIT:
+		delete static_cast<LetterOrDigitLexem*>(l);
+		break;
 	case STRING:
 	case QUALIFIER:
 	case LABEL:
-	case IDENTIFIER:
 		delete static_cast<StringLexem*>(l);
 		break;
 	case NUMBER:

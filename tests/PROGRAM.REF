@@ -303,5 +303,5 @@ def2    /error/e3 =
         s1s2e3 = <def3(<cp<ftochar s2>>)s1s2e3>
 def3    ()s1s2e3 = <br<ftochar s2>'='s1e3>
         (v4)s1s2e3 = /error/<PROUT 'id 's2' already exist'>
-* end of variables
+ * end of variables
  end

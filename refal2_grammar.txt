@@ -11,7 +11,7 @@ LABEL			-> `/` I `/`
 NUMBER			-> `/` DIGIT { DIGIT } `/`
 STRING like string constant in C
 LETTER_OR_DIGIT -> LETTER | DIGIT
-I				-> LETTER { LETTER_OR_DIGIT }
+I				-> (LETTER | `_`) { (LETTER_OR_DIGIT | `_`) }
 LINE_FEED		-> { (`\n` | `\r` | `\t` | ` `) } (`\r` | `\n`)
 SPACE			-> { (`\t` | ` `) }
 
@@ -40,7 +40,7 @@ P ->	{ [SPACE] T }
 T ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] P [SPACE] RIGHT_PAREN
 E ->	{ [SPACE] G }
 G ->	STRING | LABEL | NUMBER | V | LEFT_PAREN [SPACE] E [SPACE] RIGHT_PAREN |
-		LESS I SPACE E [SPACE] GREAT
+		LESS I E [SPACE] GREAT
 
 V ->	( `s` | `w` | `e` | `v` )
 			[ LEFT_PAREN X [SPACE] RIGHT_PAREN ] LETTER_OR_DIGIT
