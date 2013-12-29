@@ -405,6 +405,7 @@ void Scanner::init_switch_table()
 	[A]
 		(CharSet("\r\n"), H)
 		(CharSet(" \t"), A)
+		(CharSet('+'), B)
 		(CharSet('*'), X, RETURN_LEXEM, ACTION
 			{
 				l = new SimpleLexem(line, offset, LINE_FEED);

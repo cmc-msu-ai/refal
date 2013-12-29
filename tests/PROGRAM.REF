@@ -29,7 +29,8 @@ work2   ()/_beg/(e1)/dot/e2 = <exops e1>
         e1 =
 
 read    v1 = v1<read <libget>>
-           = <clsget>
+           =   +
+		   <clsget>
 * lexical
 lex     s(L)1e(LD)2s((LD))3e4 = <chartof s1e2><lex s3e4>
         v(D)1s((D))2e3 = <numb v1><lex s2e3>
