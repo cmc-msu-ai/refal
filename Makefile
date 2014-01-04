@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -g -std=c++0x -o3
+CXXFLAGS = -Wall -g -std=c++0x -O3
 
 CPPFILES = main.cpp Refal2.cpp Scanner.cpp Lexem.cpp Parser.cpp CharSet.cpp
 
