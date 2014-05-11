@@ -1,5 +1,5 @@
 if (make all)
 then
 	echo '---------------------------------------------------------------------'
-	./build/bin/refal2 "tests/PROGRAM.REF"
+	./build/bin/refal2
 fi

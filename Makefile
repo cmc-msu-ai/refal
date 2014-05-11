@@ -1,7 +1,8 @@
 CXX = g++
-CXXFLAGS = -Wall -g -std=c++0x -O3
+CXXFLAGS = -Wall -g
+# -std=c++0x -O3
 
-CPPFILES = main.cpp Refal2.cpp Scanner.cpp Lexem.cpp Parser.cpp CharSet.cpp
+CPPFILES = main.cpp Refal.cpp Compiler.cpp Lang.cpp
 
 SRC_DIR = src
 INCLUDE_DIR = include
@@ -45,4 +46,4 @@ $(DEPS_DIR)/deps.mk: $(DEPS)
 
 clean:
 	rm -f bridge.touch
-	rm -R -f build
+	rm -Rf build

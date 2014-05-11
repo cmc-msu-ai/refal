@@ -1,0 +1,51 @@
+<ws>				::= <space> |
+<identifier> 		::= <letter> <identifier1>
+<identifier1>		::= <letter-or-digit> <identifier1> |
+
+<line>				::= <space> <A> | <letter> <B>
+<A>					::= `e` <C> | <D>
+<C>					::= `n` <E> | `x` <F> | `m` <G>
+<E>					::= `d` | `try` <space> <identifier> | <D>
+<F>					::= `trn` <space> <extrn> | `pty` <space> <extrn> | <D>
+
+<extrn>				::= <identifier> <ws> <extrn1> <ws> <extrn2>
+<extrn1>			::= `(` <ws> <identifier> <ws> `)` |
+<extrn2>			::= `,` <ws> <identifier> <ws> <extrn1> <ws> <extrn2> |
+
+<empty>				::= <identifier> <empty1>
+<empty1>			::= <ws> `,` <ws> <identifier> <empty1> |
+
+<B>					::= <identifier1> <G>
+<G>					::= | <space> <H>
+<H>					::= `s` <K> | <rule>
+<K>					::= <space> <qualifier> | <var-define> <D>
+
+<D>					::= <pattern> `=` <ws> <expression>
+
+<rule>				::= <dir-auth> <pattern> `=` <ws> <expression>
+<dir-auth>			::= `L` <space> | `R` <space> |
+
+<pattern>			::= <pattern-term> <ws> <pattern> |
+<pattern-term>		::= <var> | <number> | <label> |
+						<string> | `(` <ws> <pattern> <ws> `)`
+
+<expression>		::= <expression-term> <ws> <expression> |
+<expression-term>	::= <var> | <number> | <label> | <string> |
+						`(` <ws> <expression> <ws> `)` |
+						 | `<` <identifier> <space> <expression> `>`
+
+<number>			::= `/` <digit> <digit-sequence> `/`
+<digit-sequence>	::= <digit> <digit-sequence> |
+<label>				::= `/` <identifier> `/`
+<string>			::= `'` <C-string> `'`
+
+<var>				::= <var-type> <var-define>
+<var-type>			::= `s` | `e` | `v` | `w`
+<var-define>		::= <letter-or-digit> |
+						`(` <ws> <qualifier> `)` <letter-or-digit> |
+						`:` <identifier> `:` <letter-or-digit>
+
+<qualifier>			::= <qualifier-term> <ws> <qualifier> |
+<qualifier-term>	::= <qualifier-elem> | `(` <ws> <qualifier-elem> <ws> `)`
+<qualifier-elem>	::= `:` <identifier> `:` | <string> | <label> | <number>  |
+						`S` | `F` | `N` | `O` | `L` | `D` | `B` | `W`
