@@ -62,7 +62,7 @@ bool Scanner::operator>>(Lexem &lexem)
 {
 	if(!input.good())
 		return false;
-
+	
 	for(char curr = input.get(); input.good(); curr = input.get())
 	{
 		if(curr == '\n')
@@ -72,7 +72,7 @@ bool Scanner::operator>>(Lexem &lexem)
 		}
 		else
 			offset++;
-
+	
 		if(switch_functions[switch_table[state][int((unsigned char)curr)]]
 					(lexem, curr))
 			return true;

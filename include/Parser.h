@@ -2,6 +2,7 @@
 #define _PARSER__H_
 
 #include <iostream>
+#include "Scanner.h"
 
 using std::istream;
 using std::ostream;
@@ -21,6 +22,16 @@ public:
 	}
 private:
 	bool status;
+	Scanner scanner;
+	Lexem lexem;
+	
+	void getlexem();
+	
+	void WS();
+	bool I(string&);
+	void S();
+	void A();
+	void D();
 };
 
 #endif

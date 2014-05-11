@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include <iostream>
+#include <string>
 #include <iomanip>
 #include "Scanner.h"
 
@@ -8,6 +9,7 @@ using std::ostream;
 using std::cout;
 using std::endl;
 using std::setw;
+using std::string;
 
 const char *types[15] =
 {
@@ -28,10 +30,9 @@ const char *types[15] =
 };
 
 Parser::Parser(istream &input, ostream &errors)
-	: status(true)
+	: status(true), scanner(input, errors)
 {
-	Scanner scanner(input, errors);
-	Lexem lexem;
+#if 1
 	while(scanner >> lexem)
 	{
 		cout << setw(4) << lexem->line << ":" <<
@@ -60,8 +61,72 @@ Parser::Parser(istream &input, ostream &errors)
 		//std::cin.get();
 	}
 	status = scanner.Status();
+#else
+	S();
+#endif
 }
 
 Parser::~Parser()
+{
+}
+
+void Parser::getlexem()
+{
+	scanner >> lexem;
+}
+
+void Parser::WS()
+{
+	if(lexem->type == SPACE)
+		getlexem();
+}
+
+bool Parser::I(string &i)
+{
+	int line = lexem->line, offset = lexem->offset;
+	
+	i.clear();
+	for(; lexem->type == LETTER_OR_DIGIT; getlexem())
+		i += tolower(static_cast<LetterOrDigitLexem*>(lexem.get())->value);
+	
+	if(i.empty())
+	{
+		/* error: identifier expected */
+	}
+	else if(i.front() >= '0' && i.front() <= '9')
+	{
+		/* error: identifier can't begin with digit */
+	}
+	else
+		return true;
+	
+	return false;
+}
+
+void Parser::S()
+{
+	/* S -> I SPACE `start` LINE_FEED A */
+	string i;
+	I(i);
+	if(I(i) && i != "start")
+	{
+		/* error: `start` expected */
+	}
+}
+
+void Parser::A()
+{
+	/* A -> SPACE D | I K A */
+	if(lexem->type == SPACE)
+		D();
+	else
+	{
+		I();
+		K();
+		A();
+	}
+}
+
+void Parser::D()
 {
 }
