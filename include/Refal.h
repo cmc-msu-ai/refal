@@ -1,188 +1,124 @@
-#ifndef _REFAL_H_
-#define _REFAL_H_
+#ifndef REFAL2_H
+#define REFAL2_H
+
+//#include "temporary_struct.h"
 
 #include <map>
 #include <string>
+#include <iostream>
+#include <fstream>
 
-using std::map;
-using std::string;
-
-class Compiler;
-class Lang;
-
-class Refal
+namespace refal2
 {
-    friend class Compiler;
-    friend class Lang;
 
+struct Rule;
+struct Operation;
+struct Qualifier;
+
+struct Function
+{
 public:
-    Refal();
-    ~Refal();
-
-    bool SetPattern(const char *text);
-    bool AddQualifier(const char *name, const char *text);
-    bool Equ(const char *text, int *result);
-
-private:
-    /* types */
-    typedef unsigned int RefalLabel;
-    typedef unsigned int RefalNumber;
-    typedef char RefalChar;
-
-    /* Qualifier struct */
-    struct Qualifier
-    {
-        enum Type
-        {
-            S, F, N, O, L, D, W, B, NG, SL, SN, SC, Q
-        };
-        
-        Type type;
-        Qualifier *next;
-        
-        Qualifier(Type type);
-    };
-
-    struct QualifierLabel : Qualifier
-    {
-        RefalLabel label;
-        
-        QualifierLabel(RefalLabel label);
-    };
-
-    struct QualifierNumber : Qualifier
-    {
-        RefalNumber number;
-        
-        QualifierNumber(RefalNumber number);
-    };
-
-    struct QualifierChar : Qualifier
-    {
-        RefalChar c;
-        
-        QualifierChar(RefalChar c);
-    };
-
-    struct QualifierQualifier : Qualifier
-    {
-        Qualifier *qualifier;
-        
-        QualifierQualifier(Qualifier *qualifier);
-    };
-    
-    /* Expression struct */
-    struct Base
-    {
-        enum Type
-        {
-            NUMBER, LABEL, CHAR, VARIABLE, LEFT_PAREN, RIGHT_PAREN
-        };
-        
-        Type type;
-        Base *next, *prev;
-
-    protected:
-        Base(Type t);
-    };
-
-    struct LeftParen : Base
-    {
-        Base *right_paren;
-        
-        LeftParen();
-    };
-
-    struct RightParen : Base
-    {
-        Base *left_paren;
-        
-        RightParen();
-    };
-
-    struct Number : Base
-    {
-        RefalNumber number;
-        
-        Number(RefalNumber n);
-    };
-
-    struct Label : Base
-    {
-        RefalLabel label;
-        
-        Label(RefalLabel l);
-    };
-
-    struct Char : Base
-    {
-        RefalChar c;
-        
-        Char(RefalChar a);
-    };
-
-    struct Variable : Base
-    {
-        typedef char VariableName;
-        
-        VariableName name;
-        
-        Variable(VariableName name);
-    };
-
-    /* other types */
-    struct Var
-    {
-        Var();
-
-        enum Type
-        {
-            NONE, S = 's', W = 'w', V = 'v', E = 'e'
-        };
-
-        Type type;
-        Qualifier *qualifier;
-        Base *begin, *end;
-    };
-
-    typedef map<string, int> LabelsTable;
-    typedef map<string, Qualifier*> QualifiersTable;
-    typedef Base *PBase;
-
-    enum
-    {
-        VARIABLES_TABLE_SIZE = 128
-    };
-
-private:
-    static bool equS(Base *a, Base *b);
-
-    void resetVariablesTable();
-    bool is_ident(const char *s) const;
-
-    Qualifier *read_qualifier(const char *text, int &i);
-    void free_qualifier(Qualifier *q);
-    static bool check_qualifier(Qualifier *q, Base *e);
-
-    bool read_base(const char *text, PBase &begin, PBase &end,
-                                                    bool with_vars = false);
-    bool describe_variable(char name, Var :: Type type, Qualifier *q);
-    void free_base(Base *base);
-    void compile(Base *begin, Base *end);
-
-    static void print_q(Qualifier *q);
-    static void print_e(Base *e, Base *f = 0);
-
-private:
-    /* fields */
-    Lang *currentLang;
-
-    unsigned int labelsCounter;
-    LabelsTable labelsTable;
-    QualifiersTable qualifiersTable;
-
-    static Var variablesTable[VARIABLES_TABLE_SIZE];
+	union
+	{
+		Rule*      rule;
+		Operation* operation;
+	};
 };
+
+class Refal2;
+
+typedef std::map<std::string, Function>   LabelsTable;
+typedef std::map<std::string, Qualifier*> QualifiersTable;
+typedef LabelsTable::value_type           LabelPair;
+typedef QualifiersTable::value_type       QualifierPair;
+
+enum Type
+{
+	LABEL         = 0x01,
+	CHAR          = 0x02,
+	NUMBER        = 0x04,
+	LEFT_PAREN    = 0x08,
+	RIGHT_PAREN   = 0x10,
+	VARIABLE      = 0x20,
+	LEFT_BRACKET  = 0x40,
+	RIGHT_BRACKET = 0x80
+};
+
+enum
+{
+	SYMBOL        = LABEL | CHAR | NUMBER,
+	PAREN         = LEFT_PAREN | RIGHT_PAREN,
+	BRACKET       = LEFT_BRACKET | RIGHT_BRACKET
+};
+
+struct Code
+{
+	Type type;
+	union
+	{
+		char           c;
+		char           variable_name;
+		unsigned int   number;
+		LabelPair*     label;
+		QualifierPair* another_paren;
+	};
+};
+
+class Reader
+{
+public:
+	enum
+	{
+		END_OF_FILE = -1,
+		TAB_SIZE = 8
+	};
+
+	Reader(Refal2* refal2, std::ostream& error_stream = std::cerr);
+	~Reader();
+
+	void push(char c);
+	bool good() const;
+};
+
+class Compiler
+{
+public:
+	static Operation* compile(Rule* rule);
+};
+
+class Executer
+{
+public:
+	Executer();
+	~Executer();
+
+	bool run(Operation* entry_operation,
+				std::ostream& output_stream, std::ostream& error_stream);
+};
+
+class Refal2
+{
+public:
+	Refal2();
+	~Refal2();
+
+	bool loadFromFile(const std::string& filename,
+						std::ostream& error_stream = std::cerr);
+	bool run(std::ostream& output_stream = std::cout,
+				std::ostream& error_stream = std::cerr);
+
+private:
+	bool read_file(const std::string& filename, std::ostream& error_stream);
+	bool check_names(std::ostream& error_stream);
+
+private:
+	LabelsTable              labels;
+	QualifiersTable          qualifiers;
+	LabelsTable::value_type* entry;
+	Executer                 executer;
+};
+
+} // end of namespace refal2
 
 #endif
 

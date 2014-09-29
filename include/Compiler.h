@@ -1,87 +1,42 @@
-#ifndef _REFAL_COMPILER_H_
-#define _REFAL_COMPILER_H_
+#pragma once
 
-#include "Refal.h"
-#include "Lang.h"
-
-#include <list>
-#include <stack>
+#include "Common.h"
 #include <vector>
 
-using std::list;
-using std::stack;
-using std::vector;
+namespace Refal2 {
 
-class Compiler
-{
+class CCompiler {
 public:
-    static void Compile(Lang *lang, Refal :: Base *begin, Refal :: Base *end,
-                                                        Refal :: Var *table);
+	CCompiler();
+	~CCompiler();
+
+	void Reset();
+
+	void Compile(CRule* function);
 
 private:
-    Compiler(Lang *lang, Refal :: Base *begin, Refal :: Base *end,
-                                                        Refal :: Var *table);
-    ~Compiler();
+	void compile_left_part(CLink* first, CLink* last);
+	void compile_right_part(CLink* first);
 
-private:
-    struct Hole
-    {
-        int left, right;
-        Refal :: Base *begin, *end;
+	CCompiler(const CCompiler&);
+	CCompiler& operator=(const CCompiler&);
 
-        Hole();
-        Hole(int left, int right, Refal::Base *begin, Refal::Base *end);
-    };
+	void process_holes();
+	void element_match();
 
-    struct Var
-    {
-        bool have_value;
-        int mv_jsp;
-        int nel_index;
-        Refal :: Qualifier *qualifier;
-        Refal :: Var :: Type type;
+	struct CHole {
+		CHole(CLink* _begin, CLink* _end): begin(_begin), end(_end) {}
 
-        Var();
-    };
-    typedef list< Hole > HolesTuple;
+		CLink* begin;
+		CLink* end;
+	};
 
-private:
-    bool isVE(const Refal :: Base *elem, int &k) const;
-    bool isVar(const Refal :: Base *elem, int &k) const;
+	typedef std::vector<CHole> THoles;
+	typedef std::vector<THoles> TTuples;
 
-    void processHoles(HolesTuple &holes);
-    void processHoles1(HolesTuple &holes);
-    void processHoles2(HolesTuple &holes, int var);
-    void processHoles3(HolesTuple &holes);
-    void processHoles4(HolesTuple &holes);
-
-    void eoe(int n);
-    void elementMatch(HolesTuple &holes);
-    void holesLDEcompile(HolesTuple &holes);
-
-    void glve(HolesTuple &holes);
-    void glmax(HolesTuple &holes);
-    void grmax(HolesTuple &holes);
-
-    void gnil(HolesTuple &holes);
-    void gcve(HolesTuple &holes, int var);
-    void glb(HolesTuple &holes);
-    void glsc(HolesTuple &holes);
-    void gls(HolesTuple &holes, int var);
-    void glw(HolesTuple &holes, int var);
-    void glved(HolesTuple &holes, int var);
-    void grb(HolesTuple &holes);
-    void grsc(HolesTuple &holes);
-    void grs(HolesTuple &holes, int var);
-    void grw(HolesTuple &holes, int var);
-    void grved(HolesTuple &holes, int var);
-
-private:
-    Lang *lang;
-    HolesTuple::iterator i;
-    int b1, b2, nel, jsp;
-    Var table[128];
+	THoles current_holes;
+	TTuples tuples_stack;
+	THoles::iterator current_hole;
 };
 
-#endif
-
+} // end of namespace refal2
