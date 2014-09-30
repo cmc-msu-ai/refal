@@ -134,8 +134,24 @@ struct CUnitValue {
 
 inline bool operator==(const CUnitLink& link, const CUnitValue& value)
 {
-	return ( link.type == value.type &&
-		(memcmp(&link.value, &value.value, sizeof(CUnitLink::CUnitValue)) == 0) );
+	switch( link.type ) {
+		case CLink::T_char:
+			return ( value.type == CLink::T_char &&
+				link.value.c == value.value.c );
+			break;
+		case CLink::T_label:
+			return ( value.type == CLink::T_label &&
+				link.value.label == value.value.label );
+			break;
+		case CLink::T_number:
+			return ( value.type == CLink::T_number &&
+				link.value.number == value.value.number );
+		default:
+			return ( link.type == value.type &&
+				link.value.paired_paren == value.value.paired_paren );
+			break;
+	}
+	/* assert */
 }
 
 inline bool operator!=(const CUnitLink& link, const CUnitValue& value)
