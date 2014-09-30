@@ -49,6 +49,10 @@ int main(int argc, const char* argv[])
 
 	CUnitLink* left = view.First();
 	CUnitLink* right = view.Last();
+	right = CFieldOfView::Insert(view.First(), CUnitValue(CLink::T_right_paren));
+	left = CFieldOfView::Insert(view.First(), CUnitValue(CLink::T_left_paren));
+	left->PairedParen() = right;
+	right->PairedParen() = left;
 
 	CUnitLink char_value(CUnitLink::T_char);
 	CUnitLink number_value(CUnitLink::T_number);
@@ -60,20 +64,19 @@ int main(int argc, const char* argv[])
 	builder.Add(COperation::OT_matching_complete);
 	char_value.Char() = '%';
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
-	builder.Add(COperation::OT_move_wve, 1);
+	builder.Add(COperation::OT_move_e, 1);
 	char_value.Char() = '$';
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
 	builder.Add(COperation::OT_copy_wve, 3);
 	char_value.Char() = '*';
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
-	builder.Add(COperation::OT_move_wve, 3);
+	builder.Add(COperation::OT_move_e, 3);
 	char_value.Char() = '#';
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
 	builder.Add(COperation::OT_return);
 
 	COperation* go = builder.Add(COperation::OT_matching_complete);
-	builder.Add(COperation::OT_allocate_points_array, 4);
-	builder.Add(COperation::OT_save_point, 0);
+	builder.Add(COperation::OT_insert_left_paren);
 	CUnitLink label_func(CLink::T_label);
 	label_func.Label() = new TLabels::value_type;
 	const_cast<std::string&>(label_func.Label()->first) = "Mama";
@@ -84,15 +87,15 @@ int main(int argc, const char* argv[])
 		char_value.Char() = i[0];
 		number_value.Number() = i - tmp;
 		builder.Add(COperation::OT_insert_symbol, char_value);
-		builder.Add(COperation::OT_insert_parens);
+		builder.Add(COperation::OT_insert_left_paren);
 		builder.Add(COperation::OT_insert_symbol, number_value);
-		builder.Add(COperation::OT_jump_right_paren);
+		builder.Add(COperation::OT_insert_right_paren);
 	}
-	builder.Add(COperation::OT_save_point, 1);
-	builder.Add(COperation::OT_save_point, 2);
+	builder.Add(COperation::OT_insert_right_bracket);
+	builder.Add(COperation::OT_insert_left_paren);
 	builder.Add(COperation::OT_insert_symbol, label_func);
-	builder.Add(COperation::OT_save_point, 3);
-	builder.Add(COperation::OT_return, 4);
+	builder.Add(COperation::OT_insert_right_bracket);
+	builder.Add(COperation::OT_return);
 
 	CExecuter exe;
 
@@ -102,7 +105,7 @@ int main(int argc, const char* argv[])
 	std::cout << "\n-----\n";
 	view.Print();
 	std::cout << "\n-----\n";
-	exe.Run(go, view);
+	exe.Run(go, left, right);
 	std::cout << "\n-----\n";
 	view.Print();
 	std::cout << "\n-----\n";

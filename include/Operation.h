@@ -50,13 +50,13 @@ struct COperation {
 		
 		/* right part operations */
 		OT_insert_symbol, /* one argument symbol */
-		OT_insert_parens, /* no arguments */
-		OT_jump_right_paren, /* no arguments */
-		OT_save_point, /* one argument offset in points array */
-		OT_allocate_points_array, /* one argument points array size */
+		OT_insert_left_paren, /* no arguments */
+		OT_insert_right_paren, /* no arguments */
+		OT_insert_right_bracket, /* no arguments */
 		OT_move_s, /* one argument offset in table */
 		OT_copy_s, /* one argument offset in table */
-		OT_move_wve, /* one argument offset in table */
+		OT_move_e, /* one argument offset in table */
+		OT_move_wv, /* one argument offset in table */
 		OT_copy_wve, /* one argument offset in table */
 		OT_return, /* one argument points array size */
 	};

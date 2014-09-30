@@ -86,442 +86,443 @@ void print(COperation* operation)
 	std::cout << names[operation->Type()] << "\n";
 }
 
-void CExecuter::Run(COperation* operation, const CFieldOfView& view)
+void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 {
-	CTemporary t(view.First(), view.Last(), operation);	
+	lb = first;
+	rb = last;
+	op = operation;
 	try {
 		while( true ) {
-			print(t.op);
-			switch( t.op->Type() ) {
+			print(op);
+			switch( op->Type() ) {
 				case COperation::OT_goto:
-					t.op = t.op->Operation()->operation;
+					op = op->Operation()->operation;
 					break;
 					
 				case COperation::OT_set_next_rule:
-					t.next_rule = t.op->Operation()->operation;
-					COperationOperation::Next(t.op);
+					next_rule = op->Operation()->operation;
+					COperationOperation::Next(op);
 					break;
 
 				case COperation::OT_matching_complete:
-					t.lb = t.first;
-					{
-						CFieldOfView tmp;
-						CFieldOfView::Move(tmp.First(),
-							t.first->Next(), t.last->Prev());
-						t.first = tmp.First();
-						t.last = tmp.Last();
-					}
-					COperation::Next(t.op);
+					lb = first->Prev();
+					COperation::Next(op);
 					break;
 
 				/* left part operations */
 				case COperation::OT_empty_expression_match:
-					if( t.lb->Next() == t.rb ) {
-						COperation::Next(t.op);
+					if( lb->Next() == rb ) {
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_left_symbol_match:
 					
-					if( shift_left(t) && *t.lb == t.op->Unit()->value ) {
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						COperationUnit::Next(t.op);
+					if( shift_left() && *lb == op->Unit()->value ) {
+						table[table_index] = lb;
+						++table_index;
+						COperationUnit::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_symbol_match:
-					if( shift_right(t) && *t.rb == t.op->Unit()->value ) {
-						table[t.table_index] = t.rb;
-						++t.table_index;
-						COperationUnit::Next(t.op);
+					if( shift_right() && *rb == op->Unit()->value ) {
+						table[table_index] = rb;
+						++table_index;
+						COperationUnit::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_left_parens_match:
-					if( shift_left(t) && t.lb->IsLeftParen() ) {
-						t.rb = t.lb->PairedParen();
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						table[t.table_index] = t.rb;
-						++t.table_index;
-						COperation::Next(t.op);
+					if( shift_left() && lb->IsLeftParen() ) {
+						rb = lb->PairedParen();
+						table[table_index] = lb;
+						++table_index;
+						table[table_index] = rb;
+						++table_index;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}				
 					break;
 
 				case COperation::OT_right_parens_match:
-					if( shift_right(t) && t.rb->IsRightParen() ) {
-						t.lb = t.rb->PairedParen();
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						table[t.table_index] = t.rb;
-						++t.table_index;
-						COperation::Next(t.op);
+					if( shift_right() && rb->IsRightParen() ) {
+						lb = rb->PairedParen();
+						table[table_index] = lb;
+						++table_index;
+						table[table_index] = rb;
+						++table_index;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}				
 					break;
 
 				case COperation::OT_set_pointers:
-					t.lb = table[t.op->IntInt()->x];
-					t.rb = table[t.op->IntInt()->y];
-					COperationIntInt::Next(t.op);
+					lb = table[op->IntInt()->x];
+					rb = table[op->IntInt()->y];
+					COperationIntInt::Next(op);
 					break;
 
 				case COperation::OT_left_s_variable_match:
-					if( shift_left(t) && t.lb->IsSymbol() ) {
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						COperation::Next(t.op);
+					if( shift_left() && lb->IsSymbol() ) {
+						table[table_index] = lb;
+						++table_index;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_s_variable_match:
-					if( shift_right(t) && t.rb->IsSymbol() ) {
-						table[t.table_index] = t.rb;
-						++t.table_index;
-						COperation::Next(t.op);
+					if( shift_right() && rb->IsSymbol() ) {
+						table[table_index] = rb;
+						++table_index;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_left_duplicate_s_variable_match:
-					if( shift_left(t) && *t.lb == *table[t.op->Int()->x] )
+					if( shift_left() && *lb == *table[op->Int()->x] )
 					{
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						COperationInt::Next(t.op);
+						table[table_index] = lb;
+						++table_index;
+						COperationInt::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_duplicate_s_variable_match:
-					if( shift_right(t) && *t.rb == *table[t.op->Int()->x] )
+					if( shift_right() && *rb == *table[op->Int()->x] )
 					{
-						table[t.table_index] = t.rb;
-						++t.table_index;
-						COperationInt::Next(t.op);
+						table[table_index] = rb;
+						++table_index;
+						COperationInt::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_closed_e_variable_match:
-					table[t.table_index] = t.lb->Next();
-					++t.table_index;
-					table[t.table_index] = t.rb->Prev();
-					++t.table_index;
-					COperation::Next(t.op);
+					table[table_index] = lb->Next();
+					++table_index;
+					table[table_index] = rb->Prev();
+					++table_index;
+					COperation::Next(op);
 					break;
 
 				case COperation::OT_left_duplicate_wve_variable_match:
-					COperationInt::Next(t.op);
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_right_duplicate_wve_variable_match:
-					COperationInt::Next(t.op);
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_left_w_variable_match:
-					if( shift_left(t) ) {
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						if( t.lb->IsLeftParen() )	{
-							t.lb = t.lb->PairedParen();
+					if( shift_left() ) {
+						table[table_index] = lb;
+						++table_index;
+						if( lb->IsLeftParen() )	{
+							lb = lb->PairedParen();
 						}
-						table[t.table_index] = t.lb;
-						++t.table_index;
-						COperation::Next(t.op);
+						table[table_index] = lb;
+						++table_index;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_w_variable_match:
-					if( shift_right(t) ) {
-						table[t.table_index + 1] = t.rb;
-						if( t.rb->IsRightParen() ) 	{
-							t.rb = t.rb->PairedParen();
+					if( shift_right() ) {
+						table[table_index + 1] = rb;
+						if( rb->IsRightParen() ) 	{
+							rb = rb->PairedParen();
 						}
-						table[t.table_index] = t.rb;
-						t.table_index += 2;
-						COperation::Next(t.op);
+						table[table_index] = rb;
+						table_index += 2;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_check_not_empty:
-					if( table[t.table_index - 1]->Next() ==
-						table[t.table_index - 2] ) {
-						fail(t);
+					if( table[table_index - 1]->Next() ==
+						table[table_index - 2] ) {
+						fail();
 					} else {
-						COperation::Next(t.op);
+						COperation::Next(op);
 					}
 					break;
 
 				case COperation::OT_left_e_variable_match_begin:
-					save(t);
-					++t.stack_depth;
-					table[t.table_index] = t.lb->Next();
-					++t.table_index;
-					table[t.table_index] = t.lb;
-					++t.table_index;
-					COperation::Next(t.op);
-					if( t.op->Is(COperation::OT_left_ve_variable_match) ) {
-						COperation::Next(t.op);
+					save();
+					++stack_depth;
+					table[table_index] = lb->Next();
+					++table_index;
+					table[table_index] = lb;
+					++table_index;
+					COperation::Next(op);
+					if( op->Is(COperation::OT_left_ve_variable_match) ) {
+						COperation::Next(op);
 					} else {
-						COperationQualifier::Next(t.op);
+						COperationQualifier::Next(op);
 					}
 					break;
 
 				case COperation::OT_left_v_variable_match_begin:
-					save(t);
-					table[t.table_index] = t.lb->Next();
-					table[t.table_index + 1] = t.lb;
-					COperation::Next(t.op);
+					save();
+					table[table_index] = lb->Next();
+					table[table_index + 1] = lb;
+					COperation::Next(op);
 					break;
 
 				case COperation::OT_left_ve_variable_match:
-					t.lb = table[t.table_index + 1];
-					if( shift_left(t) ) {
-						if( t.lb->IsLeftParen() ) {
-							t.lb = t.lb->PairedParen();
+					lb = table[table_index + 1];
+					if( shift_left() ) {
+						if( lb->IsLeftParen() ) {
+							lb = lb->PairedParen();
 						}
-						++t.stack_depth;
-						table[t.table_index + 1] = t.lb;
-						t.table_index += 2;
-						COperation::Next(t.op);
+						++stack_depth;
+						table[table_index + 1] = lb;
+						table_index += 2;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_left_ve_variable_with_qualifier_match:
-					t.lb = table[t.table_index + 1];
-					if( shift_left(t) ) {
-						if( t.lb->IsLeftParen() ) {
-							t.lb = t.lb->PairedParen();
+					lb = table[table_index + 1];
+					if( shift_left() ) {
+						if( lb->IsLeftParen() ) {
+							lb = lb->PairedParen();
 						}
 						/* check qualifier */
-						if( t.op->Qualifier()->qualifier->Check(t.lb) ) {
-							++t.stack_depth;
-							table[t.table_index + 1] = t.lb;
-							t.table_index += 2;
-							COperationQualifier::Next(t.op);
+						if( op->Qualifier()->qualifier->Check(lb) ) {
+							++stack_depth;
+							table[table_index + 1] = lb;
+							table_index += 2;
+							COperationQualifier::Next(op);
 						} else {
-							fail(t);
+							fail();
 						}
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_e_variable_match_begin:
-					save(t);
-					++t.stack_depth;
-					table[t.table_index] = t.rb;
-					++t.table_index;
-					table[t.table_index] = t.rb->Prev();
-					++t.table_index;
-					COperation::Next(t.op);
-					if( t.op->Is(COperation::OT_right_ve_variable_match) ) {
-						COperation::Next(t.op);
+					save();
+					++stack_depth;
+					table[table_index] = rb;
+					++table_index;
+					table[table_index] = rb->Prev();
+					++table_index;
+					COperation::Next(op);
+					if( op->Is(COperation::OT_right_ve_variable_match) ) {
+						COperation::Next(op);
 					} else {
-						COperationQualifier::Next(t.op);
+						COperationQualifier::Next(op);
 					}
 					break;
 
 				case COperation::OT_right_v_variable_match_begin:
-					save(t);
-					table[t.table_index] = t.rb;
-					++t.table_index;
-					table[t.table_index] = t.rb->Prev();
-					++t.table_index;
-					COperation::Next(t.op);
+					save();
+					table[table_index] = rb;
+					++table_index;
+					table[table_index] = rb->Prev();
+					++table_index;
+					COperation::Next(op);
 					break;
 
 				case COperation::OT_right_ve_variable_match:
-					t.rb = table[t.table_index];
-					if( shift_right(t) ) {
-						if( t.rb->IsRightParen() ) {
-							t.rb = t.rb->PairedParen();
+					rb = table[table_index];
+					if( shift_right() ) {
+						if( rb->IsRightParen() ) {
+							rb = rb->PairedParen();
 						}
-						++t.stack_depth;
-						table[t.table_index] = t.rb;
-						t.table_index += 2;
-						COperation::Next(t.op);
+						++stack_depth;
+						table[table_index] = rb;
+						table_index += 2;
+						COperation::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_right_ve_variable_with_qualifier_match:
-					t.rb = table[t.table_index];
-					if( shift_right(t) ) {
-						if( t.rb->IsRightParen() ) {
-							t.rb = t.rb->PairedParen();
+					rb = table[table_index];
+					if( shift_right() ) {
+						if( rb->IsRightParen() ) {
+							rb = rb->PairedParen();
 						}
 						/* check qualifier */
-						if( t.op->Qualifier()->qualifier->Check(t.rb) ) {
-							++t.stack_depth;
-							table[t.table_index] = t.rb;
-							t.table_index += 2;
-							COperationQualifier::Next(t.op);
+						if( op->Qualifier()->qualifier->Check(rb) ) {
+							++stack_depth;
+							table[table_index] = rb;
+							table_index += 2;
+							COperationQualifier::Next(op);
 						} else {
-							fail(t);
+							fail();
 						}
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_decriase_stack_depth:
-					t.stack_depth -= operation->Int()->x;
-					COperationInt::Next(t.op);
+					stack_depth -= operation->Int()->x;
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_check_qualifier_last_s_variable:
-					if( t.op->Qualifier()->qualifier->
-						Check(table[t.table_index - 1]) )
+					if( op->Qualifier()->qualifier->
+						Check(table[table_index - 1]) )
 					{
-						COperationQualifier::Next(t.op);
+						COperationQualifier::Next(op);
 					} else {
-						fail(t);
+						fail();
 					}
 					break;
 
 				case COperation::OT_check_qualifier_last_wve_variable:
 					{
-						CUnitLink* i = table[t.table_index - 2]->Prev();
-						CUnitLink* till = table[t.table_index - 1];
+						CUnitLink* i = table[table_index - 2]->Prev();
+						CUnitLink* till = table[table_index - 1];
 						while( i != till ) {
 							i = i->Next();
 							if( i->IsLeftParen() ) {
 								i = i->PairedParen();
 							}
-							if( !( t.op->Qualifier()->qualifier->Check(i) ) ) {
-								fail(t);
+							if( !( op->Qualifier()->qualifier->Check(i) ) ) {
+								fail();
 								break;
 							}
 						}
 						if( i == till ) {
-							COperationQualifier::Next(t.op);
+							COperationQualifier::Next(op);
 						}
 					}
 					break;
 
 				case COperation::OT_left_max_qualifier:
-					t.lb = t.lb->Next();
-					table[t.table_index] = t.lb;
-					++t.table_index;
-					for( ; t.lb != t.rb; t.lb = t.lb->Next() ) {
-						if( !( t.op->Qualifier()->qualifier->Check(t.lb) ) ) {
+					lb = lb->Next();
+					table[table_index] = lb;
+					++table_index;
+					for( ; lb != rb; lb = lb->Next() ) {
+						if( !( op->Qualifier()->qualifier->Check(lb) ) ) {
 							break;
-						} else if( t.lb->IsLeftParen() ) {
-							t.lb = t.lb->PairedParen();
+						} else if( lb->IsLeftParen() ) {
+							lb = lb->PairedParen();
 						}
 					}
-					t.lb = t.lb->Prev();
-					table[t.table_index] = t.lb;
-					++t.table_index;
-					COperationQualifier::Next(t.op);
+					lb = lb->Prev();
+					table[table_index] = lb;
+					++table_index;
+					COperationQualifier::Next(op);
 					break;
 
 				case COperation::OT_right_max_qualifier:
-					t.rb = t.rb->Prev();
-					table[t.table_index + 1] = t.lb;
-					for( ; t.rb != t.lb; t.rb = t.rb->Prev() ) {
-						if( !( t.op->Qualifier()->qualifier->Check(t.rb) ) ) {
+					rb = rb->Prev();
+					table[table_index + 1] = lb;
+					for( ; rb != lb; rb = rb->Prev() ) {
+						if( !( op->Qualifier()->qualifier->Check(rb) ) ) {
 							break;
-						} else if( t.rb->IsRightParen() ) {
-							t.rb = t.rb->PairedParen();
+						} else if( rb->IsRightParen() ) {
+							rb = rb->PairedParen();
 						}
 					}
-					t.rb = t.rb->Next();
-					table[t.table_index] = t.rb;
-					t.table_index += 2;
-					COperationQualifier::Next(t.op);
+					rb = rb->Next();
+					table[table_index] = rb;
+					table_index += 2;
+					COperationQualifier::Next(op);
 					break;
 
 				/* right part operations */
 				case COperation::OT_insert_symbol:
-					t.lb = view.Insert(t.lb, t.op->Unit()->value);
-					COperationUnit::Next(t.op);
+					lb = CFieldOfView::Insert(lb, op->Unit()->value);
+					COperationUnit::Next(op);
 					break;
 
-				case COperation::OT_insert_parens:
+				case COperation::OT_insert_left_paren:
 					{
-						CUnitLink* right_paren = view.Insert(t.lb,
-							CUnitValue(CLink::T_right_paren));
-						CUnitLink* left_paren = view.Insert(t.lb,
+						CUnitLink* paren = CFieldOfView::Insert(lb,
 							CUnitValue(CLink::T_left_paren));
-						right_paren->PairedParen() = left_paren;
-						left_paren->PairedParen() = right_paren;
-						t.lb = left_paren;
+						lb = paren;
 					}
-					COperation::Next(t.op);
+					COperation::Next(op);
 					break;
 
-				case COperation::OT_jump_right_paren:
-					shift_left(t);
-					COperation::Next(t.op);
+				case COperation::OT_insert_right_paren:
+					{
+						CUnitLink* paren = CFieldOfView::Insert(lb,
+							CUnitValue(CLink::T_right_paren));
+						lb = paren;
+					}
+					COperation::Next(op);
 					break;
 
-				case COperation::OT_save_point:
-					t.saved_points[t.op->Int()->x] = t.lb;
-					COperationInt::Next(t.op);
-					break;
-
-				case COperation::OT_allocate_points_array:
-					t.saved_points = new CUnitLink*[t.op->Int()->x];
-					COperationInt::Next(t.op);
+				case COperation::OT_insert_right_bracket:
+					{
+						CUnitLink* paren = CFieldOfView::Insert(lb,
+							CUnitValue(CLink::T_right_paren));
+						lb = paren;
+					}
+					COperation::Next(op);
 					break;
 
 				case COperation::OT_move_s:
-					t.lb =  CFieldOfView::Move(t.lb, table[t.op->Int()->x]);
-					COperationInt::Next(t.op);
+					/* TODO: plan */
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_copy_s:
-					t.lb =  CFieldOfView::Copy(t.lb, table[t.op->Int()->x]);
-					COperationInt::Next(t.op);
+					lb =  CFieldOfView::Copy(lb, table[op->Int()->x]);
+					COperationInt::Next(op);
 					break;
 
-				case COperation::OT_move_wve:
-					t.lb = CFieldOfView::Move(t.lb, table[t.op->Int()->x - 1],
-						table[t.op->Int()->x]);
-					COperationInt::Next(t.op);
+				case COperation::OT_move_e:
+					{
+						int tmp = op->Int()->x;
+						if( table[tmp]->Next() == table[tmp - 1] ) {
+							break;
+						}
+					}
+				case COperation::OT_move_wv:
+					/* TODO: plan */
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_copy_wve:
-					t.lb = CFieldOfView::Copy(t.lb, table[t.op->Int()->x - 1],
-						table[t.op->Int()->x]);
-					COperationInt::Next(t.op);
+					lb = CFieldOfView::Copy(lb, table[op->Int()->x - 1],
+						table[op->Int()->x]);
+					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_return:
-					CFieldOfView::Remove(t.first, t.last);
-					for( int i = 0; i < t.op->Int()->x; i += 2 ) {
-						t.saved_points[i] =  t.saved_points[i]->Next();
+#if 0
+					CFieldOfView::Remove(first, last);
+					for( int i = 0; i < op->Int()->x; i += 2 ) {
+						saved_points[i] =  saved_points[i]->Next();
 					}
-					for( int i = 0; i < t.op->Int()->x; i += 2 ) {
-						CUnitLink* name = t.saved_points[i];
+					for( int i = 0; i < op->Int()->x; i += 2 ) {
+						CUnitLink* name = saved_points[i];
 						if( name->IsLabel() ) {
 							Run(name->Label()->second.operation, CFieldOfView(
-								name, t.saved_points[i + 1]->Next()));
+								name, saved_points[i + 1]->Next()));
 							CFieldOfView::Remove(name);
 						} else {
 							std::cout << "vse ochen' ploho" << i << "\n";
@@ -530,9 +531,9 @@ void CExecuter::Run(COperation* operation, const CFieldOfView& view)
 							/* TOWO: throw: trying to call not label */
 						}
 					}
+#endif
 					return;
 					break;
-
 				default:
 					/* assert */
 					break;
