@@ -1,0 +1,308 @@
+program START
+ extrn print, printm, prout, proutm
+ extrn br, dg, cp, rp
+ extrn chartof, ftochar, functab
+ extrn libget, opnget, clsget
+ extrn symb, numb, plus(add), minus(sub), mul, dr, nrel
+ entry go
+ empty true, false, comma, begin, of, else, notequal, end, until, to, do
+ empty then, dot, greatequal, program, lessequal, equal, semicolon, less
+ empty boolean, lparen, endcase, integer, great, colon, rparen, assign
+ empty _beg, _rep, _cas, error
+
+abc S ('abccd')
+bbb S :abc:
+ 
+go  = 'abc\6752de\xFFtf' +
+<functab/repeat/><functab/until/><functab/const/><functab/false/>+
+ <functab/integer/><functab/boolean/><functab/endcase/><functab/begin/>+
+ <functab/end/><functab/do/><functab/not/><functab/div/><functab/case/>+
+ <functab/then/><functab/or/><functab/of/><functab/and/><functab/else/>+
+ <functab/mod/><functab/true/><functab/to/><functab/for/><functab/var/>+
+ <functab/while/><functab/program/><functab/writeln/><functab/if/>+
+ <work<synt<lex<opnget'program.pas'><read<libget>>>>>
+
+work    /error/e1 =
+        e1 = <work1<skob e1>>
+work1   e1 = <work2(<body e1>)e1>
+work2   ()/_beg/(e1)/dot/e2 = <exops e1>
+        e1 =
+
+read    v1 = v1<read <libget>>
+           =   +
+		   <clsget>
+* lexical
+lex     s(L)1e(LD)2s((LD))3e4 = <chartof s1e2><lex s3e4>
+        v(D)1s((D))2e3 = <numb v1><lex s2e3>
+
+
+
+ ':='e1 = /assign/<lex e1>
+        '<>'e1 = /notequal/<lex e1>
+        '<='e1 = /lessequal/<lex e1>
+        '>='e1 = /greatequal/<lex e1>
+        ';'e1 = /semicolon/<lex e1>
+        '('e2 = /lparen/<lex e2>
+        ')'e2 = /rparen/<lex e2>
+        ','e1 = /comma/<lex e1>
+        '+'e1 = /plus/<lex e1>
+        '-'e1 = /minus/<lex e1>
+        '>'e1 = /great/<lex e1>
+        '<'e1 = /less/<lex e1>
+        '='e1 = /equal/<lex e1>
+        '*'e1 = /mul/<lex e1>
+        ':'e1 = /colon/<lex e1>
+        '.'e1 = /dot/<lex e1>
+        s1e2 = <lex e2>
+        =
+
+skob R  e1s(/lparen//begin//repeat//case/)2e3 =+
+            <skob e1<check<stype s2>e3>>
+        e1 = e1
+
+stype   /lparen/ = /rparen/
+        /begin/ = /end/
+        /repeat/ = /until/
+        /case/ = /endcase/
+
+mark    /rparen/ =
+        /end/ = /_beg/
+        /until/ = /_rep/
+        /endcase/ = /_cas/
+
+check   s1e2s1e3 = <mark s1>(e2)e3
+        s1e2 = e2<PROUT s1' expected'>
+* end of lexical
+* syntactic base
+ident   s(F)1 =
+        e1 = /error/<PROUT 'error ident 'e1>
+
+tonum   /plus/s(N)1 = s1
+        /minus/s(N)1 = '-'s1
+        s(N)1 = s1
+        e1 = /error/<PROUT 'error number 'e1>
+* syntactic
+synt    /program/e1 = <synt1 e1>
+        e1 = /error/<PROUT 'program expected'>
+synt1   s1e2 = <ident s1><synt2 e2>
+        e1 = /error/<PROUT 'identificator expected'>
+synt2   /semicolon/e1 = <synt3 e1>
+        e1 = /error/<PROUT /semicolon/' expected'>
+synt3   e1/var/e2 = <const e1><var e2>
+        e1 = /error/<PROUT /var/' expected'>
+* syntactic const
+const   /const/e1 = <const1 e1>
+        =
+        e1 = /error/<PROUT /const/' expected'>
+const1  s1/equal/e2/semicolon/e3 = <def/const/s1<tonum e2>><const1 e3>
+        =
+        e1 = /error/<PROUT 'error in const 'e1>
+* syntactic var
+var     /begin/e1 = /begin/e1
+        e1/semicolon/e2 = <sec e1><var e2>
+        e1 = /error/<PROUT 'error in var 'e1>
+
+sec     e1/colon//integer/ = <vrlist /integer/e1>
+        e1/colon//boolean/ = <vrlist /boolean/e1>
+        e1 = /error/<PROUT 'error in var section 'e1>
+
+vrlist  s1s2 = <def s1s2>
+        s1s2/comma/e3 = <def s1s2><vrlist s1e3>
+        e1 = /error/<PROUT 'error in section var list 'e1>
+* syntactic body
+body    /_beg/(e1)/dot/e2 = <ops e1>
+        /_beg/(e1)e2 = /error/<PROUT /dot/' expected'>
+
+ops     e1/semicolon/e2 = <op e1><ops e2>
+        e1 = <op e1>
+
+op  /_beg/(e1) = <ops e1>
+    /if/e1/then/e2/else/e3 = <lgexp e1><op e2><op e3>
+    /if/e1/then/e2 = <lgexp e1><op e2>
+    /while/e1/do/e2 = <lgexp e1><op e2>
+    /_rep/(e1)e2 = <ops e1><lgexp e2>
+    /writeln/(e1) = <wrt e1>
+    /for/s(F)1/assign/e2/to/e3/do/e4 = <checkt('for 's1':='e2' to 'e3)+
+        <vartype s1><exp e2><exp e3>><varset s1/0/><op e4>
+    /_cas/(e1/of/e2) = <vrints<exp e1>e2>
+    s(F)1/assign/e2 = <checkt(s1':='e2)<vartype s1><exp e2>><varset s1/0/>
+    =
+    e1 = /error/<PROUT 'incorrect operator 'e1>
+
+wrt     e1/comma/e2 = <wrt1<exp e1>><wrt e2>
+        e1 = <wrt1<exp e1>>
+wrt1    /error/ = /error/
+        e1 =
+
+vrints  /error/e1 =
+        e1 = <vrints1 e1>
+vrints1 s1e2/colon/e3/semicolon/e4 =+
+            <checkt (e2)s1<label e2>><op e3><vrints1 s1e4>
+        s1e2/colon/e3 = <checkt (e2)s1<label e2>><op e3>
+        s1 =
+        e1 = <PROUT 'error in case 'e1>
+
+label   s(/true//false/)1 = /boolean/
+        s(/plus//minus/)1s(N)2 = /integer/
+        s(N)1 = /integer/
+        e1 = /error/
+
+checkt  (e1)/const/e2 = /error/<PROUT 'assign to const in 'e1>
+        (e2)s1s1s1 =
+        (e2)s1s1 =
+        (e1)e2 = /error/<PROUT 'error types in 'e1>
+* end of syntactic
+* expression type checks
+lgexp   e1 = <lgexp1<texp e1>e1>
+lgexp1  /boolean/e1 =
+        s1e2 = /error/<PROUT 'Not logical expression: 'e2>
+
+arexp   e1 = <arexp1<texp e1>e1>
+arexp1  /integer/e1 =
+        s1e2 = /error/<PROUT 'Not integer expression: 'e2>
+
+exp     e1 = <exp1<texp e1>e1>
+exp1    /error/e1 = /error/<PROUT 'error in expression: 'e1>
+        s1e2 = s1
+* expression type control
+tcontr  s1s1s1 = s1
+        s1s1 =
+        s1 = s1
+        e1 = /error/
+
+texp    e1s(/lessequal//greatequal//equal//less//notequal//great/)2e3 =+
+            <tcontr/boolean/<tcontr<texp e1><tsexp e3>>>
+        e1 = <tsexp e1>
+        
+tsexp R e1s(/plus//minus/)2e3 = <tcontr/integer/<tsexp e1><tterm e3>>
+        e1/or/e3 = <tcontr/boolean/<tsexp e1><tterm e3>>
+        e1 = <tterm e1>
+        
+tterm R e1s(/mul//div//mod/)2e3 = <tcontr/integer/<tterm e1><tfact e3>>
+        e1/and/e3 = <tcontr/boolean/<tterm e1><tfact e3>>
+        e1 = <tfact e1>
+
+tfact   (e1) = <texp e1>
+        s(N)1 = /integer/
+        s(/true//false/)1 = /boolean/
+        /not/e1 = <tcontr/boolean/<tcontr/boolean/<tfact e1>>>
+        s(F)1 = <vartst s1>
+        e1 = /error/
+* end of expression type control
+* execute
+exops   e1/semicolon/e2 = <exop e1><exops e2>
+        e1 = <exop e1>
+
+exop    /_beg/(e1) = <exops e1>
+        /if/e1/then/e2/else/e3 = <if<exexp e1>(e2)(e3)>
+        /if/e1/then/e2 = <if<exexp e1>(e2)()>
+        /while/e1/do/e2 = <while<exexp e1>(e1)e2>
+        /_rep/(e1)e2 = <exops e1><repeat<exexp e2>(e2)e1>
+        /writeln/(e1) = <PROUT<writeln e1>>
+        /for/s1/assign/e2/to/e3/do/e4 = <for s1<exexp e2>(<exexp e3>)e4>
+        /_cas/(e1/of/e2) = <case(<exexp e1>)e2>
+        s1/assign/e2 = <varset s1<exexp e2>>
+        =
+
+case    (e1)e2/colon/e3/semicolon/e4 = <cas1<nrel(e1)<label1 e2>>(e3)e4>
+        (e1)e2/colon/e3 = <cas1<nrel(e1)<label1 e2>>(e3)>
+
+cas1    '='(e1)e2(e3)e4 = <exop e3>
+        s5(e1)e2(e3)e4 = <case(e1)e4>
+
+label1  /true/ = /1/
+        /false/ = /0/
+        e1 = <tonum e1>
+
+writeln e1/comma/e2 = <exwrt1<texp e1><exexp e1>>' '<writeln e2>
+        e1 = <exwrt1<texp e1><exexp e1>>
+exwrt1  /boolean//0/ = 'false'
+        /boolean//1/ = 'true'
+        /integer/e1 = <symb e1>
+
+for     s1e2(e3)e4 = <for1 s1(<nrel(e2)e3>)e4>
+for1    s1('>'(e2)e3)e4 = <varset s1e2>
+        s1(s5(e2)e3)e4 = <varset s1e2><exop e4>+
+            <for s1<plus(/1/)e2>(e3)e4>
+
+if      /0/(e1)(e2) = <exop e2>
+        /1/(e1)(e2) = <exop e1>
+
+while   /1/(e1)e2 = <exop e2><while<exexp e1>(e1)e2>
+        /0/e1 =
+
+repeat  /0/(e1)e2 = <exops e2><repeat<exexp e1>(e1)e2>
+        /1/e1 =
+* execute expression
+exexp   e1s(/lessequal//greatequal//equal//less//notequal//great/)2e3 =+
+            <tak s2<comp(<exexp e1>)<exsexp e3>>>
+        e1 = <exsexp e1>
+
+exsexp R e1s(/plus//minus//or/)2e3 = < s2 (<exsexp e1>)<extrm e3>>
+        e1 = <extrm e1>
+
+extrm R e1s(/mul//div//mod//and/)2e3 = < s2 (<extrm e1>)<exfact e3>>
+        e1 = <exfact e1>
+
+exfact  (e1) = <exexp e1>
+        s(N)1 = s1
+        /true/ = /1/
+        /false/ = /0/
+        /not/e1 = <not<exfact e1>>
+        s1 = <varget s1>
+* execute basic operation
+tak     s1e2s1e3 = /1/
+        e1 = /0/
+
+comp    e1 = <comp1<nrel e1>>
+comp1   '<'e1 = /less//lessequal//notequal/
+        '>'e1 = /great//greatequal//notequal/
+        '='e1 = /equal//lessequal//greatequal/
+
+eq      e1 = <eq1<nrel e1>>
+eq1     '='e1 = '='
+        e1 = '!'
+
+dr1     (e1)e('+-')2/0/ = <PROUT 'ERROR: division by zero'>e1(/0/)
+        e1 = <dr e1>
+
+mod     e1 = <mod1<dr1 e1>>
+mod1    e1(e2) = e2
+
+div     e1 = <div1<dr1 e1>>
+div1    e1(e2) = e1
+
+and     (e1)e2 = <and1<eq(/0/)e1><eq(/0/)e2>>
+and1    '!!' = /1/
+        e1 = /0/
+
+or      (e1)e2 = <or1<eq(/0/)e1><eq(/0/)e2>>
+or1     '==' = /0/
+        e1 = /1/
+
+not     /1/ = /0/
+        /0/ = /1/
+* end of execute
+* variables
+varset  s1e2 = <rp<ftochar s1>'='<vartype s1>e2>
+
+varget  s1 = <varget1<cp<ftochar s1>>>
+varget1 s1e2 = e2
+
+vartst  s1 = <vartst1 s1<cp<ftochar s1>>>
+vartst1 s1 = /error/<PROUT 'var 's1' does not exist'>
+        s1/const/v3 = /integer/
+        s1s2v3 = s2
+        s1e2 = /error/<PROUT 'var 's1' not initialized'>
+
+vartype s1 = <vartyp1 s1<cp<ftochar s1>>>
+vartyp1 s1 = /error/<PROUT 'var 's1' does not exist'>
+        s1s2e3 = s2
+
+def     s1s2e3 = <def2<ident s2>s1s2e3>
+def2    /error/e3 =
+        s1s2e3 = <def3(<cp<ftochar s2>>)s1s2e3>
+def3    ()s1s2e3 = <br<ftochar s2>'='s1e3>
+        (v4)s1s2e3 = /error/<PROUT 'id 's2' already exist'>
+ * end of variables
+ end
