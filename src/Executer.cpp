@@ -8,7 +8,13 @@
 namespace Refal2 {
 
 CExecuter::CExecuter():
-	stack_size(0), stack(0), table_size(0), table(0)
+	stack_size(0), stack(0),
+	table_size(0), table(0),
+	lb(0), rb(0),
+	op(0),
+	stack_depth(0),
+	table_index(0),
+	master_term(CLink::T_left_bracket)
 {
 }
 
@@ -70,15 +76,15 @@ const char* names[] = {
 	"OT_left_max_qualifier", /* one argument qualifier */
 	"OT_right_max_qualifier", /* one argument qualifier */
 	"OT_insert_symbol", /* one argument symbol */
-	"OT_insert_parens", /* no arguments */
-	"OT_jump_right_paren", /* no arguments */
-	"OT_save_point", /* one argument offset in points array */
-	"OT_allocate_points_array", /* one argument points array size */
+	"OT_insert_left_paren", /* no arguments */
+	"OT_insert_right_paren", /* no arguments */
+	"OT_insert_right_bracket", /* no arguments */
 	"OT_move_s", /* one argument offset in table */
 	"OT_copy_s", /* one argument offset in table */
-	"OT_move_wve", /* one argument offset in table */
+	"OT_move_e", /* one argument offset in table */
+	"OT_move_wv", /* one argument offset in table */
 	"OT_copy_wve", /* one argument offset in table */
-	"OT_return" /* one argument points array size */
+	"OT_return", /* one argument points array size */
 };
 
 void print(COperation* operation)
@@ -91,6 +97,9 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 	lb = first;
 	rb = last;
 	op = operation;
+	table_index = 0;
+	stack_depth = 0;
+	master_term.PairedParen() = 0;
 	try {
 		while( true ) {
 			print(op);
@@ -100,12 +109,14 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					break;
 					
 				case COperation::OT_set_next_rule:
-					next_rule = op->Operation()->operation;
+					//next_rule = op->Operation()->operation;
 					COperationOperation::Next(op);
 					break;
 
 				case COperation::OT_matching_complete:
-					lb = first->Prev();
+					first = first->Prev();
+					lb = 0;
+					rb = &master_term;
 					COperation::Next(op);
 					break;
 
@@ -453,33 +464,44 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 
 				/* right part operations */
 				case COperation::OT_insert_symbol:
-					lb = CFieldOfView::Insert(lb, op->Unit()->value);
+					first = CFieldOfView::Insert(first, op->Unit()->value);
 					COperationUnit::Next(op);
 					break;
 
 				case COperation::OT_insert_left_paren:
 					{
-						CUnitLink* paren = CFieldOfView::Insert(lb,
+						CUnitLink* left_paren = CFieldOfView::Insert(first,
 							CUnitValue(CLink::T_left_paren));
-						lb = paren;
+						left_paren->PairedParen() = lb;
+						lb = left_paren;
+						first = left_paren;
 					}
 					COperation::Next(op);
 					break;
 
 				case COperation::OT_insert_right_paren:
 					{
-						CUnitLink* paren = CFieldOfView::Insert(lb,
+						CUnitLink* right_paren = CFieldOfView::Insert(first,
 							CUnitValue(CLink::T_right_paren));
-						lb = paren;
+						CUnitLink* left_paren = lb;
+						lb = lb->PairedParen();
+						right_paren->PairedParen() = left_paren;
+						left_paren->PairedParen() = right_paren;
+						first = right_paren;
 					}
 					COperation::Next(op);
 					break;
 
 				case COperation::OT_insert_right_bracket:
 					{
-						CUnitLink* paren = CFieldOfView::Insert(lb,
+						CUnitLink* right_paren = CFieldOfView::Insert(first,
 							CUnitValue(CLink::T_right_paren));
-						lb = paren;
+						CUnitLink* left_paren = lb;
+						lb = lb->PairedParen();
+						right_paren->PairedParen() = left_paren;
+						rb->PairedParen() = right_paren;
+						rb = left_paren;
+						first = right_paren;
 					}
 					COperation::Next(op);
 					break;
@@ -490,16 +512,15 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					break;
 
 				case COperation::OT_copy_s:
-					lb =  CFieldOfView::Copy(lb, table[op->Int()->x]);
+					first =  CFieldOfView::Copy(first, table[op->Int()->x]);
 					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_move_e:
+					if( table[op->Int()->x]->Next() ==
+						table[op->Int()->x - 1] )
 					{
-						int tmp = op->Int()->x;
-						if( table[tmp]->Next() == table[tmp - 1] ) {
-							break;
-						}
+						break;
 					}
 				case COperation::OT_move_wv:
 					/* TODO: plan */
@@ -507,14 +528,14 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					break;
 
 				case COperation::OT_copy_wve:
-					lb = CFieldOfView::Copy(lb, table[op->Int()->x - 1],
+					first = CFieldOfView::Copy(first, table[op->Int()->x - 1],
 						table[op->Int()->x]);
 					COperationInt::Next(op);
 					break;
 
 				case COperation::OT_return:
+					CFieldOfView::Remove(first->Next(), last);
 #if 0
-					CFieldOfView::Remove(first, last);
 					for( int i = 0; i < op->Int()->x; i += 2 ) {
 						saved_points[i] =  saved_points[i]->Next();
 					}

@@ -39,9 +39,10 @@ private:
 	CUnitLink* lb;
 	CUnitLink* rb;
 	COperation* op;
-	COperation* next_rule;
-	int table_index;
 	int stack_depth;
+	int table_index;
+
+	CUnitLink master_term;
 };
 
 inline void CExecuter::fail()
@@ -52,10 +53,6 @@ inline void CExecuter::fail()
 		rb = stack[stack_depth].rb;
 		op = stack[stack_depth].op;
 		table_index = stack[stack_depth].table_index;
-	} else if( next_rule != 0 ) {
-		op = next_rule;
-		next_rule = 0;
-		table_index = 0;
 	} else {
 		/* TODO: throw fail */
 	}

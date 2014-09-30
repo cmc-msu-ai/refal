@@ -47,13 +47,13 @@ int main(int argc, const char* argv[])
 
 	CFieldOfView view;
 
-	CUnitLink* left = view.First();
-	CUnitLink* right = view.Last();
+	CUnitLink* left;
+	CUnitLink* right;
 	right = CFieldOfView::Insert(view.First(), CUnitValue(CLink::T_right_paren));
 	left = CFieldOfView::Insert(view.First(), CUnitValue(CLink::T_left_paren));
 	left->PairedParen() = right;
 	right->PairedParen() = left;
-
+	
 	CUnitLink char_value(CUnitLink::T_char);
 	CUnitLink number_value(CUnitLink::T_number);
 	CUnitLink left_paren(CUnitLink::T_left_paren);
@@ -75,13 +75,13 @@ int main(int argc, const char* argv[])
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
 	builder.Add(COperation::OT_return);
 
-	COperation* go = builder.Add(COperation::OT_matching_complete);
-	builder.Add(COperation::OT_insert_left_paren);
+	COperation* go = builder.Add(COperation::OT_matching_complete); /* = */
+	builder.Add(COperation::OT_insert_left_paren); /* < */
 	CUnitLink label_func(CLink::T_label);
 	label_func.Label() = new TLabels::value_type;
 	const_cast<std::string&>(label_func.Label()->first) = "Mama";
 	label_func.Label()->second.operation = func;
-	builder.Add(COperation::OT_insert_symbol, label_func);
+	builder.Add(COperation::OT_insert_symbol, label_func); /* /Mama/ */
 	const char* tmp = "Hello, World!";
 	for( const char* i = tmp; i[0] != '\0'; ++i ) {
 		char_value.Char() = i[0];
@@ -91,10 +91,10 @@ int main(int argc, const char* argv[])
 		builder.Add(COperation::OT_insert_symbol, number_value);
 		builder.Add(COperation::OT_insert_right_paren);
 	}
-	builder.Add(COperation::OT_insert_right_bracket);
-	builder.Add(COperation::OT_insert_left_paren);
-	builder.Add(COperation::OT_insert_symbol, label_func);
-	builder.Add(COperation::OT_insert_right_bracket);
+	builder.Add(COperation::OT_insert_right_bracket); /* > */
+	builder.Add(COperation::OT_insert_left_paren); /* < */
+	builder.Add(COperation::OT_insert_symbol, label_func); /* /Mama/ */
+	builder.Add(COperation::OT_insert_right_bracket); /* > */
 	builder.Add(COperation::OT_return);
 
 	CExecuter exe;
