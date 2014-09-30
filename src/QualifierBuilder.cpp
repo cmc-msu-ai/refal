@@ -88,7 +88,7 @@ void CQualifierBuilder::Number(TNumber number)
 void CQualifierBuilder::Char(TChar c)
 {
 	if( chars == S_none ) {
-		if( c >= 0 && c < D_ansi_set_size ) {
+		if( c >= 0 && static_cast<int>(c) < D_ansi_set_size ) {
 			if( !ansichars_fixed.test(static_cast<unsigned int>(c)) ) {
 				ansichars.set(static_cast<unsigned int>(c), !negative);
 				ansichars_fixed.set(static_cast<unsigned int>(c));

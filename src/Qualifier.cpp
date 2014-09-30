@@ -40,8 +40,8 @@ bool CQualifier::Check(const CUnitLink* unit) const
 		case CUnitLink::T_char:
 			{
 				TChar c = unit->Char();
-				if( c >= 0 && c < D_ansi_set_size ) {
-					return ansichars.at(c);
+				if( c >= 0 && static_cast<int>(c) < D_ansi_set_size ) {
+					return ansichars.test(c);
 				} else {
 					return ( (chars.Find(c) == 0) != IsIncludeAllChars() );
 				}

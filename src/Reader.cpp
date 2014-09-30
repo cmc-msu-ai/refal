@@ -992,7 +992,7 @@ void CReader::errorc(TLexicalErrorCodes code, char c) {
 void CReader::process_char(char c)
 {
 	if( c == '\r' ) {
-	} else if( c == 128 || ( c <= 31 && c != '\n' && c != '\t' ) ) {
+	} else if( c == '\x7f' || ( c <= '\x1f' && c != '\n' && c != '\t' ) ) {
 		errorc(LEC_unexpected_control_sequence, c); // error
 	} else {
 		switch(scanner.state) {
