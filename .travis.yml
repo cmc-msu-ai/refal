@@ -1,9 +1,0 @@
-language: cpp
-compiler:
-  - gcc
-  - clang
-script: "sh test.sh"
-branches:
-  only:
-    - master
-    - develop
