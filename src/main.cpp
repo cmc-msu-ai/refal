@@ -113,9 +113,7 @@ int main(int argc, const char* argv[])
 	std::cout << "\n-----\n";
 	view.Print();
 	std::cout << "\n-----\n";*/
-
-	std::cin.get();
-
+	
 	return 0;
 }
 
