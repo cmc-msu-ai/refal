@@ -13,12 +13,12 @@ CFieldOfView::CFieldOfView():
 	first->next = last;
 	last->prev = first;
 	first->PairedParen() = last;
-	first->PairedParen() = first;
+	last->PairedParen() = first;
 }
 
 void CFieldOfView::Print() const
 {
-	for( CUnitLink* i = first; i != 0; i = i->Next() ) {
+	for( CUnitLink* i = first->Next(); i != last; i = i->Next() ) {
 		print_link(i);
 	}
 }
@@ -135,8 +135,6 @@ CUnitLink* CFieldOfView::Copy(CUnitLink* location, CUnitLink* what)
 
 CUnitLink* CFieldOfView::Copy(CUnitLink* location, CUnitLink* from, CUnitLink* to)
 {
-	CFieldOfView(from, to).Print();
-	
 	if( from->Prev() != to ) {
 		CUnitLink* begin = CREATE_UNITLINK(*from);
 		CUnitLink* end = begin;

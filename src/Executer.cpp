@@ -44,7 +44,7 @@ void CExecuter::SetTableSize(int new_table_size)
 
 const char* names[] = {
 	"OT_goto", /* one argument operation pointer */
-	"OT_set_next_rule", /* one argument operation pointer */
+	"OT_insert_jump", /* one argument operation pointer */
 	"OT_matching_complete", /* no arguments */
 	"OT_empty_expression_match", /* no arguments */
 	"OT_left_symbol_match", /* one argument symbol */
@@ -99,7 +99,6 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 	op = operation;
 	table_index = 0;
 	stack_depth = 0;
-	master_term.PairedParen() = 0;
 
 	while( true ) {
 		switch( op->Type() ) {
@@ -119,6 +118,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				lb = 0;
 				rb = &master_term;
 				stack_depth = 0;
+				master_term.PairedParen() = 0;
 				COperation::Next(op);
 				break;
 
@@ -553,8 +553,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				/* calling following functions in field of view */
 				{
 					CUnitLink* tmp = 0;
-					for( last = master_term.PairedParen(); last != 0; )
-					{
+					for( last = master_term.PairedParen(); last != 0; )	{
 						first = last->PairedParen();
 						CUnitLink* tmp = first->Next();
 						if( tmp->IsLabel() ) {
