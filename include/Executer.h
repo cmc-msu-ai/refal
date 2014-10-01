@@ -26,13 +26,18 @@ private:
 		int table_index;
 	};
 
+	struct CMove {
+		CUnitLink* location;
+		COperation* op;
+	};
+
 	inline void fail();
 	inline void save();
 	inline bool shift_left();
 	inline bool shift_right();
 
 	int stack_size;
-	CState* stack;
+	void* stack;
 	int table_size;
 	CUnitLink** table;
 
@@ -49,10 +54,11 @@ inline void CExecuter::fail()
 {
 	if( stack_depth > 0 ) {
 		--stack_depth;
-		lb = stack[stack_depth].lb;
-		rb = stack[stack_depth].rb;
-		op = stack[stack_depth].op;
-		table_index = stack[stack_depth].table_index;
+		CState* sp = static_cast<CState*>(stack);
+		lb = sp[stack_depth].lb;
+		rb = sp[stack_depth].rb;
+		op = sp[stack_depth].op;
+		table_index = sp[stack_depth].table_index;
 	} else {
 		/* TODO: throw fail */
 	}
@@ -60,10 +66,11 @@ inline void CExecuter::fail()
 
 inline void CExecuter::save()
 {
-	stack[stack_depth].lb = lb;
-	stack[stack_depth].rb = rb;
-	stack[stack_depth].op = op;
-	stack[stack_depth].table_index = table_index;
+	CState* sp = static_cast<CState*>(stack);
+	sp[stack_depth].lb = lb;
+	sp[stack_depth].rb = rb;
+	sp[stack_depth].op = op;
+	sp[stack_depth].table_index = table_index;
 }
 
 inline bool CExecuter::shift_left()

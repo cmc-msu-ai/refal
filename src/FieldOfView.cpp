@@ -137,11 +137,6 @@ CUnitLink* CFieldOfView::Copy(CUnitLink* location, CUnitLink* from, CUnitLink* t
 {
 	CFieldOfView(from, to).Print();
 	
-	std::cout << "\nAAAA>>>\n";
-	print_link(from);
-	std::cout << "\n";
-	print_link(to->Next());
-	std::cout << "\n<<<AAAA\n\n";
 	if( from->Prev() != to ) {
 		CUnitLink* begin = CREATE_UNITLINK(*from);
 		CUnitLink* end = begin;

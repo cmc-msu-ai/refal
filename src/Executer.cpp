@@ -29,7 +29,7 @@ void CExecuter::SetStackSize(int new_stack_size)
 	if( new_stack_size > stack_size ) {
 		delete[] stack;
 		stack_size = new_stack_size;
-		stack = new CState[stack_size];
+		stack = ::operator new(stack_size);/*new CState[stack_size]*/;
 	}
 }
 
@@ -102,7 +102,6 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 	master_term.PairedParen() = 0;
 
 	while( true ) {
-		print(op);
 		switch( op->Type() ) {
 			case COperation::OT_goto:
 				op = op->Operation()->operation;
@@ -117,6 +116,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				first = first->Prev();
 				lb = 0;
 				rb = &master_term;
+				stack_depth = 0;
 				COperation::Next(op);
 				break;
 
@@ -505,12 +505,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				}
 				COperation::Next(op);
 				break;
-
-			case COperation::OT_move_s:
-				/* TODO: plan */
-				COperationInt::Next(op);
-				break;
-
+				
 			case COperation::OT_copy_s:
 				first =  CFieldOfView::Copy(first, table[op->Int()->x]);
 				COperationInt::Next(op);
@@ -524,7 +519,10 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					break;
 				}
 			case COperation::OT_move_wv:
-				/* TODO: plan */
+			case COperation::OT_move_s:
+				static_cast<CMove*>(stack)[stack_depth].location = first;
+				static_cast<CMove*>(stack)[stack_depth].op = op;
+				++stack_depth;
 				COperationInt::Next(op);
 				break;
 
@@ -535,8 +533,24 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_return:
+				/* do all moves */
+				for( --stack_depth; stack_depth >= 0; --stack_depth ) {
+					op = static_cast<CMove*>(stack)[stack_depth].op;
+					if( op->Is(COperation::OT_move_s) ) {
+						CFieldOfView::Move(
+							static_cast<CMove*>(stack)[stack_depth].location,
+							table[op->Int()->x]);
+					} else {
+						CFieldOfView::Move(
+							static_cast<CMove*>(stack)[stack_depth].location,
+							table[op->Int()->x - 1], table[op->Int()->x]);
+					}
+				}
+
+				/* remove master term */
 				CFieldOfView::Remove(first->Next(), last);
 
+				/* calling following functions in field of view */
 				{
 					CUnitLink* tmp = 0;
 					for( last = master_term.PairedParen(); last != 0; )

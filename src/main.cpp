@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
 
 	CExecuter exe;
 
-	exe.SetStackSize(16);
+	exe.SetStackSize(1024);
 	exe.SetTableSize(128);
 
 	std::cout << "\n-----\n";
