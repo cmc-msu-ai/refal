@@ -14,7 +14,7 @@ struct COperationQualifier;
 struct COperation {
 	enum TOperationType {
 		OT_goto, /* one argument operation pointer */
-		OT_set_next_rule, /* one argument operation pointer */
+		OT_insert_jump, /* one argument operation pointer */
 		OT_matching_complete, /* no arguments */
 
 		/* left part operations */

@@ -107,8 +107,10 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				op = op->Operation()->operation;
 				break;
 					
-			case COperation::OT_set_next_rule:
-				//next_rule = op->Operation()->operation;
+			case COperation::OT_insert_jump:
+				save();
+				states_stack(stack_depth).op = op->Operation()->operation;
+				++stack_depth;
 				COperationOperation::Next(op);
 				break;
 
@@ -520,8 +522,8 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				}
 			case COperation::OT_move_wv:
 			case COperation::OT_move_s:
-				static_cast<CMove*>(stack)[stack_depth].location = first;
-				static_cast<CMove*>(stack)[stack_depth].op = op;
+				moves_stack(stack_depth).location = first;
+				moves_stack(stack_depth).op = op;
 				++stack_depth;
 				COperationInt::Next(op);
 				break;
@@ -535,14 +537,12 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 			case COperation::OT_return:
 				/* do all moves */
 				for( --stack_depth; stack_depth >= 0; --stack_depth ) {
-					op = static_cast<CMove*>(stack)[stack_depth].op;
+					op = moves_stack(stack_depth).op;
 					if( op->Is(COperation::OT_move_s) ) {
-						CFieldOfView::Move(
-							static_cast<CMove*>(stack)[stack_depth].location,
+						CFieldOfView::Move(moves_stack(stack_depth).location,
 							table[op->Int()->x]);
 					} else {
-						CFieldOfView::Move(
-							static_cast<CMove*>(stack)[stack_depth].location,
+						CFieldOfView::Move(moves_stack(stack_depth).location,
 							table[op->Int()->x - 1], table[op->Int()->x]);
 					}
 				}

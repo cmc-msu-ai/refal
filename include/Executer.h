@@ -31,6 +31,9 @@ private:
 		COperation* op;
 	};
 
+	inline CState& states_stack(int i);
+	inline CMove& moves_stack(int i);
+
 	inline void fail();
 	inline void save();
 	inline bool shift_left();
@@ -50,6 +53,16 @@ private:
 	CUnitLink master_term;
 };
 
+inline CExecuter::CState& CExecuter::states_stack(int i)
+{
+	return static_cast<CState*>(stack)[i];
+}
+
+inline CExecuter::CMove& CExecuter::moves_stack(int i)
+{
+	return static_cast<CMove*>(stack)[i];
+}
+
 inline void CExecuter::fail()
 {
 	if( stack_depth > 0 ) {
@@ -60,7 +73,7 @@ inline void CExecuter::fail()
 		op = sp[stack_depth].op;
 		table_index = sp[stack_depth].table_index;
 	} else {
-		/* TODO: throw fail */
+		/* TODO: throw fail recognition impossible */
 	}
 }
 
