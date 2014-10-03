@@ -20,14 +20,14 @@ CExecuter::CExecuter():
 
 CExecuter::~CExecuter()
 {
-	delete[] stack;
+	::operator delete(stack);
 	delete[] table;
 }
 
 void CExecuter::SetStackSize(int new_stack_size)
 {
 	if( new_stack_size > stack_size ) {
-		delete[] stack;
+		::operator delete(stack);
 		stack_size = new_stack_size;
 		stack = ::operator new(stack_size);/*new CState[stack_size]*/;
 	}
