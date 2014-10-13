@@ -101,6 +101,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 	stack_depth = 0;
 
 	while( true ) {
+		//print(op);
 		switch( op->Type() ) {
 			case COperation::OT_goto:
 				op = op->Operation()->operation;
@@ -509,7 +510,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 				
 			case COperation::OT_copy_s:
-				first =  CFieldOfView::Copy(first, table[op->Int()->x]);
+				first = CFieldOfView::Copy(first, table[op->Int()->x]);
 				COperationInt::Next(op);
 				break;
 
@@ -548,7 +549,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				}
 
 				/* remove master term */
-				CFieldOfView::Remove(first->Next(), last);
+				CFieldOfView::Remove(last->PairedParen(), last);
 
 				/* calling following functions in field of view */
 				{

@@ -82,7 +82,7 @@ CQualifier& CQualifier::operator*=(CQualifier& q)
 			flags |= FLAG;\
 			SET1 -= SET2;\
 		} else {\
-			SET1 *= SET2;\
+			SET1 *= SET2;/* TODO: check */\
 		}\
 	}
 

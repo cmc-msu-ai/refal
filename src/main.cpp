@@ -75,7 +75,8 @@ int main(int argc, const char* argv[])
 	builder.Add(COperation::OT_insert_symbol, CUnitValue(char_value));
 	builder.Add(COperation::OT_return);
 
-	COperation* go = builder.Add(COperation::OT_matching_complete); /* = */
+	COperation* go = builder.Add(COperation::OT_empty_expression_match);
+	builder.Add(COperation::OT_matching_complete); /* = */
 	builder.Add(COperation::OT_insert_left_paren); /* < */
 	CUnitLink label_func(CLink::T_label);
 	label_func.Label() = new TLabels::value_type;
@@ -97,6 +98,32 @@ int main(int argc, const char* argv[])
 	builder.Add(COperation::OT_insert_right_bracket); /* > */
 	builder.Add(COperation::OT_return);
 
+	CUnitLink* location = left;
+	for( const char* i = tmp; i[0] != '\0'; ++i ) {
+		char_value.Char() = i[0];
+		location = CFieldOfView::Insert(location, char_value);
+	}
+	
+	COperation* jump = builder.Add(COperation::OT_insert_jump, 0);
+	COperation* reverse = jump;
+	builder.Add(COperation::OT_left_s_variable_match);
+	CUnitLink label_reverse(CLink::T_label);
+	label_reverse.Label() = new TLabels::value_type;
+	const_cast<std::string&>(label_reverse.Label()->first) = "reverse";
+	label_reverse.Label()->second.operation = reverse;
+	builder.Add(COperation::OT_closed_e_variable_match);
+	builder.Add(COperation::OT_matching_complete);
+	builder.Add(COperation::OT_insert_left_paren); /* < */
+	builder.Add(COperation::OT_insert_symbol, label_reverse); /* /reverse/ */
+	builder.Add(COperation::OT_move_e, 2);
+	builder.Add(COperation::OT_insert_right_bracket); /* > */
+	builder.Add(COperation::OT_move_s, 0);
+	builder.Add(COperation::OT_return);
+	jump->Operation()->operation =
+		builder.Add(COperation::OT_empty_expression_match);
+	builder.Add(COperation::OT_matching_complete);
+	builder.Add(COperation::OT_return);
+
 	CExecuter exe;
 
 	exe.SetStackSize(1024);
@@ -105,7 +132,7 @@ int main(int argc, const char* argv[])
 	std::cout << "\n-----\n";
 	view.Print();
 	std::cout << "\n-----\n";
-	exe.Run(go, left, right);
+	exe.Run(reverse, left, right);
 	std::cout << "\n-----\n";
 	view.Print();
 	std::cout << "\n-----\n";
