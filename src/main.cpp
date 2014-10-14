@@ -104,7 +104,7 @@ int main(int argc, const char* argv[])
 		location = CFieldOfView::Insert(location, char_value);
 	}
 	
-	COperation* jump = builder.Add(COperation::OT_insert_jump, 0);
+	COperation* jump = builder.Add(COperation::OT_insert_jump, static_cast<COperation*>(0));
 	COperation* reverse = jump;
 	builder.Add(COperation::OT_left_s_variable_match);
 	CUnitLink label_reverse(CLink::T_label);

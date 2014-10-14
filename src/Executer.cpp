@@ -101,7 +101,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 	stack_depth = 0;
 
 	while( true ) {
-		//print(op);
+		// std::cout << stack_depth << " "; print(op);
 		switch( op->Type() ) {
 			case COperation::OT_goto:
 				op = op->Operation()->operation;
