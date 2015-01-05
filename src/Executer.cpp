@@ -1,9 +1,5 @@
-#include "Executer.h"
-
-#include "FieldOfView.h"
-#include "Operation.h"
-#include "Qualifier.h"
-#include "Common.h"
+#include <iostream>
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -14,7 +10,7 @@ CExecuter::CExecuter():
 	op(0),
 	stack_depth(0),
 	table_index(0),
-	master_term(CLink::T_left_bracket)
+	master_term(UT_LeftBracket)
 {
 }
 
@@ -38,7 +34,7 @@ void CExecuter::SetTableSize(int new_table_size)
 	if( new_table_size > table_size ) {
 		delete[] table;
 		table_size = new_table_size;
-		table = new CUnitLink*[table_size];
+		table = new CUnitNode*[table_size];
 	}
 }
 
@@ -92,7 +88,7 @@ void print(COperation* operation)
 	std::cout << names[operation->Type()] << "\n";
 }
 
-void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
+void CExecuter::Run(COperation* operation, CUnitNode* first, CUnitNode* last)
 {
 	lb = first;
 	rb = last;
@@ -134,7 +130,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 
 			case COperation::OT_left_symbol_match:
 					
-				if( shift_left() && *lb == op->Unit()->value ) {
+				if( shift_left() && CompareUnit( *lb, op->Unit()->value ) ) {
 					table[table_index] = lb;
 					++table_index;
 					COperationUnit::Next(op);
@@ -144,7 +140,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_right_symbol_match:
-				if( shift_right() && *rb == op->Unit()->value ) {
+				if( shift_right() && CompareUnit( *rb, op->Unit()->value ) ) {
 					table[table_index] = rb;
 					++table_index;
 					COperationUnit::Next(op);
@@ -206,7 +202,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_left_duplicate_s_variable_match:
-				if( shift_left() && *lb == *table[op->Int()->x] )
+				if( shift_left() && CompareUnit( *lb, *table[op->Int()->x] ) )
 				{
 					table[table_index] = lb;
 					++table_index;
@@ -217,7 +213,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_right_duplicate_s_variable_match:
-				if( shift_right() && *rb == *table[op->Int()->x] )
+				if( shift_right() && CompareUnit( *rb, *table[op->Int()->x] ) )
 				{
 					table[table_index] = rb;
 					++table_index;
@@ -236,10 +232,12 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_left_duplicate_wve_variable_match:
+				// TODO: check
 				COperationInt::Next(op);
 				break;
 
 			case COperation::OT_right_duplicate_wve_variable_match:
+				// TODO: check
 				COperationInt::Next(op);
 				break;
 
@@ -414,8 +412,8 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 
 			case COperation::OT_check_qualifier_last_wve_variable:
 				{
-					CUnitLink* i = table[table_index - 2]->Prev();
-					CUnitLink* till = table[table_index - 1];
+					CUnitNode* i = table[table_index - 2]->Prev();
+					CUnitNode* till = table[table_index - 1];
 					while( i != till ) {
 						i = i->Next();
 						if( i->IsLeftParen() ) {
@@ -467,50 +465,50 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 
 			/* right part operations */
 			case COperation::OT_insert_symbol:
-				first = CFieldOfView::Insert(first, op->Unit()->value);
+				//first = CFieldOfView::Insert(first, op->Unit()->value);
 				COperationUnit::Next(op);
 				break;
 
 			case COperation::OT_insert_left_paren:
 				{
-					CUnitLink* left_paren = CFieldOfView::Insert(first,
+					/*CUnitLink* left_paren = CFieldOfView::Insert(first,
 						CUnitValue(CLink::T_left_paren));
 					left_paren->PairedParen() = lb;
 					lb = left_paren;
-					first = left_paren;
+					first = left_paren;*/
 				}
 				COperation::Next(op);
 				break;
 
 			case COperation::OT_insert_right_paren:
 				{
-					CUnitLink* right_paren = CFieldOfView::Insert(first,
+					/*CUnitLink* right_paren = CFieldOfView::Insert(first,
 						CUnitValue(CLink::T_right_paren));
 					CUnitLink* left_paren = lb;
 					lb = lb->PairedParen();
 					right_paren->PairedParen() = left_paren;
 					left_paren->PairedParen() = right_paren;
-					first = right_paren;
+					first = right_paren;*/
 				}
 				COperation::Next(op);
 				break;
 
 			case COperation::OT_insert_right_bracket:
 				{
-					CUnitLink* right_paren = CFieldOfView::Insert(first,
+					/*CUnitLink* right_paren = CFieldOfView::Insert(first,
 						CUnitValue(CLink::T_right_paren));
 					CUnitLink* left_paren = lb;
 					lb = lb->PairedParen();
 					right_paren->PairedParen() = left_paren;
 					rb->PairedParen() = right_paren;
 					rb = left_paren;
-					first = right_paren;
+					first = right_paren;*/
 				}
 				COperation::Next(op);
 				break;
 				
 			case COperation::OT_copy_s:
-				first = CFieldOfView::Copy(first, table[op->Int()->x]);
+				//first = CFieldOfView::Copy(first, table[op->Int()->x]);
 				COperationInt::Next(op);
 				break;
 
@@ -530,8 +528,8 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				break;
 
 			case COperation::OT_copy_wve:
-				first = CFieldOfView::Copy(first, table[op->Int()->x - 1],
-					table[op->Int()->x]);
+				/*first = CFieldOfView::Copy(first, table[op->Int()->x - 1],
+					table[op->Int()->x]);*/
 				COperationInt::Next(op);
 				break;
 
@@ -540,17 +538,18 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 				for( --stack_depth; stack_depth >= 0; --stack_depth ) {
 					op = moves_stack(stack_depth).op;
 					if( op->Is(COperation::OT_move_s) ) {
-						CFieldOfView::Move(moves_stack(stack_depth).location,
-							table[op->Int()->x]);
+						/*CFieldOfView::Move(moves_stack(stack_depth).location,
+							table[op->Int()->x]);*/
 					} else {
-						CFieldOfView::Move(moves_stack(stack_depth).location,
-							table[op->Int()->x - 1], table[op->Int()->x]);
+						/*CFieldOfView::Move(moves_stack(stack_depth).location,
+							table[op->Int()->x - 1], table[op->Int()->x]);*/
 					}
 				}
 
 				/* remove master term */
-				CFieldOfView::Remove(last->PairedParen(), last);
+				//CFieldOfView::Remove(last->PairedParen(), last);
 
+#if 0
 				/* calling following functions in field of view */
 				{
 					CUnitLink* tmp = 0;
@@ -559,7 +558,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 						CUnitLink* tmp = first->Next();
 						if( tmp->IsLabel() ) {
 							TLabel label = tmp->Label();
-							CFieldOfView::Remove(tmp);
+							//CFieldOfView::Remove(tmp);
 							tmp = first->PairedParen();
 							//try {
 								Run(label->second.operation, first, last);
@@ -573,6 +572,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 						last = tmp;
 					}
 				}
+#endif
 				return;
 				break;
 			default:

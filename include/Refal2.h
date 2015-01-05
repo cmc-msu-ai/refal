@@ -20,6 +20,11 @@ typedef int TVariableIndex;
 #include <QualifierBuilder.h>
 #include <Variables.h>
 #include <Function.h>
+#include <FunctionCompiler.h>
 #include <Label.h>
 #include <Scanner.h>
 #include <Parser.h>
+#include <Operation.h>
+#include <Operations.h>
+#include <OperationsBuilder.h>
+#include <Executer.h>

@@ -2,9 +2,7 @@
 
 #include <bitset>
 #include <vector>
-#include "Variables.h"
-#include "Function.h"
-#include "Unit.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "FieldOfView.h"
-#include "Operation.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -13,21 +12,21 @@ public:
 	void SetStackSize(int new_stack_size);
 	void SetTableSize(int new_table_size);
 
-	void Run(COperation* operation, CUnitLink* first, CUnitLink* last);
+	void Run(COperation* operation, CUnitNode* first, CUnitNode* last);
 	
 private:
 	CExecuter(const CExecuter&);
 	CExecuter& operator=(const CExecuter&);
 
 	struct CState {
-		CUnitLink* lb;
-		CUnitLink* rb;
+		CUnitNode* lb;
+		CUnitNode* rb;
 		COperation* op;
 		int table_index;
 	};
 
 	struct CMove {
-		CUnitLink* location;
+		CUnitNode* location;
 		COperation* op;
 	};
 
@@ -42,15 +41,15 @@ private:
 	int stack_size;
 	void* stack;
 	int table_size;
-	CUnitLink** table;
+	CUnitNode** table;
 
-	CUnitLink* lb;
-	CUnitLink* rb;
+	CUnitNode* lb;
+	CUnitNode* rb;
 	COperation* op;
 	int stack_depth;
 	int table_index;
 
-	CUnitLink master_term;
+	CUnitNode master_term;
 };
 
 inline CExecuter::CState& CExecuter::states_stack(int i)

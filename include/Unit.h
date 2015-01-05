@@ -30,7 +30,11 @@ void PrintUnit(const CUnit& unit);
 void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode);
 inline void PrintUnitList(const CUnitList& unitList);
 
+bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
+
 class CUnit {
+	friend bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
+
 public:
 	explicit CUnit(TUnitType _type): type(_type) {}
 	
@@ -81,6 +85,9 @@ class CUnitNode : public CUnit {
 	friend class CUnitList;
 
 public:
+	explicit CUnitNode(TUnitType _type): CUnit(_type), prev(0), next(0) {}
+	CUnitNode(const CUnit& unit): CUnit(unit), prev(0), next(0) {}
+
 	CUnitNode* Next() { return next; }
 	const CUnitNode* Next() const { return next; }
 	
@@ -88,9 +95,6 @@ public:
 	const CUnitNode* Prev() const { return prev; }
 	
 private:
-	explicit CUnitNode(TUnitType _type): CUnit(_type), prev(0), next(0) {}
-	CUnitNode(const CUnit& unit): CUnit(unit), prev(0), next(0) {}
-	
 	CUnitNode* prev;
 	CUnitNode* next;
 };

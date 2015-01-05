@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Qualifier.h"
-#include "Common.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -124,13 +123,13 @@ struct COperationIntInt : public COperation {
 };
 
 struct COperationUnit : public COperation {
-	COperationUnit(const CUnitValue& _value): value(_value) {}
-	COperationUnit(TOperationType type, const CUnitValue& _value):
+	COperationUnit(const CUnit& _value): value(_value) {}
+	COperationUnit(TOperationType type, const CUnit& _value):
 		COperation(type), value(_value) {}
 
 	//inline static void Next(COperation*& operation);
 	
-	CUnitValue value;
+	CUnit value;
 };
 
 struct COperationQualifier : public COperation {

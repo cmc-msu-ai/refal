@@ -1,9 +1,4 @@
-#include "OperationsBuilder.h"
-
-#include "Operations.h"
-#include "Operation.h"
-#include "Qualifier.h"
-#include "Common.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -107,7 +102,7 @@ COperationIntInt* COperationsBuilder::Add(COperation::TOperationType type,
 }
 
 COperationUnit* COperationsBuilder::Add(COperation::TOperationType type,
-	const CUnitValue& value)
+	const CUnit& value)
 {
 	COperationUnit* op = ReserveUnit();
 	op->type = type;

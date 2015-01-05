@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Operation.h"
-#include "Common.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 

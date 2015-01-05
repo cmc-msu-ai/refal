@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Operations.h"
-#include "Operation.h"
-#include "Qualifier.h"
-#include "Common.h"
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -24,7 +21,7 @@ public:
 	COperationInt* Add(COperation::TOperationType type, int x);
 	COperationIntInt* Add(COperation::TOperationType type, int x, int y);
 	COperationUnit* Add(COperation::TOperationType type,
-		const CUnitValue& value);
+		const CUnit& value);
 	COperationQualifier* Add(COperation::TOperationType type,
 		const CQualifier* qualifier);
 

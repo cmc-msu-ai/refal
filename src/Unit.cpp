@@ -48,6 +48,38 @@ void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode)
 	PrintUnit(*fromNode);
 }
 
+bool CompareUnit(const CUnit& unitA, const CUnit& unitB)
+{
+	if( unitA.type != unitB.type ) {
+		return false;
+	}
+
+	switch( unitA.type ) {
+		case UT_Char:
+			return ( unitA.c == unitB.c );
+			break;
+		case UT_Label:
+			return ( unitA.label == unitB.label );
+			break;
+		case UT_Number:
+			return ( unitA.number == unitB.number );
+			break;
+		case UT_Variable:
+			return ( unitA.variable == unitB.variable );
+			break;
+		case UT_LeftParen:
+		case UT_RightParen:
+		case UT_LeftBracket:
+		case UT_RightBracket:
+			return true;
+			break;
+		default:
+			break;
+	}
+	assert( false );
+	return false;
+}
+
 void CUnitList::Assign(CUnitNode* _first, CUnitNode* _last)
 {
 	Empty();

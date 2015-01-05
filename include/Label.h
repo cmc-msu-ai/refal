@@ -36,7 +36,6 @@ private:
 
 		CLabelInfo(const TLabelMap::const_iterator& _labelPtr):
 			labelPtr(_labelPtr) {}
-			
 	};
 
 	void alloc();
