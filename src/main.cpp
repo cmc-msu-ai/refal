@@ -43,13 +43,19 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 	printf("CVariablesBuilder error: %s\n", errorText[errorCode]);
 }
 
-int main()
+int main(int argc, const char* argv[])
 {
 	try {
+		const char* filename = "C:\\Users\\Антон\\YandexDisk\\MyFiles\\Education\\3 курс\\5 семестр\\практикум на эвм\\Интерпретация паскаль-программы\\PROGRAM__.REF";
+
+		if( argc == 2 ) {
+			filename = argv[1];
+		}
+
 		CMyClass ca;
 		CParser parser( &ca );
 
-		std::ifstream f("C:\\Users\\Антон\\YandexDisk\\MyFiles\\Education\\3 курс\\5 семестр\\практикум на эвм\\Интерпретация паскаль-программы\\PROGRAM__.REF");
+		std::ifstream f( filename );
 		if( !f.good() ) {
 			std::cerr << "Can't open file\n";
 			return 1;
@@ -64,7 +70,8 @@ int main()
 				parser.AddChar(c);
 			}
 		}
-	} catch(...) {
+	} catch(bool) {
+		return 1;
 	}
 
 	return 0;
