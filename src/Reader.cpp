@@ -100,10 +100,10 @@ CQualifier* CReader::create_qualifier()
 {
 	if( !qualifier_builder.IsNegative() ) {
 		if( !right_paren_was_last ) {
-			qualifier_builder.Negative();
+			qualifier_builder.AddNegative();
 		}
 		CQualifier* q = new CQualifier();
-		qualifier_builder.Get(q);
+		qualifier_builder.Export(q);
 		qualifier_builder.Reset();
 		return q;
 	} else {
@@ -122,7 +122,7 @@ bool CReader::process_qualifier(Lexem lexem)
 			{
 				TLabels::iterator i = common.labels.find(lower(lexem_buffer));
 				if( i != common.labels.end() ) {
-					qualifier_builder.Label(&(*i));
+					qualifier_builder.AddLabel(&(*i));
 				} else {
 					/* TODO: ERROR */
 					return false;
@@ -130,18 +130,18 @@ bool CReader::process_qualifier(Lexem lexem)
 			}
 			break;
 		case LEXEM_NUMBER:
-			qualifier_builder.Number(lexem_number);
+			qualifier_builder.AddNumber(lexem_number);
 			break;
 		case LEXEM_STRING:
 			for( std::string::const_iterator i = lexem_buffer.begin();
 				i != lexem_buffer.end(); ++ i )
 			{
-				qualifier_builder.Char(*i);
+				qualifier_builder.AddChar(*i);
 			}
 			break;
 		case LEXEM_LEFT_PAREN:
 			if( !qualifier_builder.IsNegative() ) {
-				qualifier_builder.Negative();
+				qualifier_builder.AddNegative();
 			} else {
 				/* TODO: ERROR */
 				return false;
@@ -149,7 +149,7 @@ bool CReader::process_qualifier(Lexem lexem)
 			break;
 		case LEXEM_RIGHT_PAREN:
 			if( qualifier_builder.IsNegative() ) {
-				qualifier_builder.Negative();
+				qualifier_builder.AddNegative();
 				right_paren_was_last = true;
 			} else {
 				/* TODO: ERROR */
@@ -163,35 +163,35 @@ bool CReader::process_qualifier(Lexem lexem)
 				switch( *i ) {
 					case 'w' :
 					case 'W' :
-						qualifier_builder.W();
+						qualifier_builder.AddW();
 						break;
 					case 's' :
 					case 'S' :
-						qualifier_builder.S();
+						qualifier_builder.AddS();
 						break;
 					case 'b' :
 					case 'B' :
-						qualifier_builder.B();
+						qualifier_builder.AddB();
 						break;
 					case 'f' :
 					case 'F' :
-						qualifier_builder.F();
+						qualifier_builder.AddF();
 						break;
 					case 'n' :
 					case 'N' :
-						qualifier_builder.N();
+						qualifier_builder.AddN();
 						break;
 					case 'o' :
 					case 'O' :
-						qualifier_builder.O();
+						qualifier_builder.AddO();
 						break;
 					case 'd' :
 					case 'D' :
-						qualifier_builder.D();
+						qualifier_builder.AddD();
 						break;
 					case 'l' :
 					case 'L' :
-						qualifier_builder.L();
+						qualifier_builder.AddL();
 						break;
 					default:
 						/* TODO: ERROR */
@@ -205,7 +205,7 @@ bool CReader::process_qualifier(Lexem lexem)
 				TQualifiers::const_iterator i =
 					common.qualifiers.find(lower(lexem_buffer));
 				if( i != common.qualifiers.end() ) {
-					qualifier_builder.Qualifier(*(i->second));
+					qualifier_builder.AddQualifier(*(i->second));
 				} else {
 					/* TODO: ERROR */
 					return false;
@@ -305,7 +305,7 @@ bool CReader::finalize_left_part()
 {   
 	std::cout << "finalize_left_part{}\n";
 
-	function_builder.EndOfLeftPart();
+	function_builder.EndOfLeft();
 	
 	return true;
 }
@@ -425,6 +425,53 @@ bool CReader::append_right_bracket()
 	}
 
 	return true;
+}
+
+bool CReader::processLine()
+{
+	Lexem lexem;
+	CFunctionBuilder functionBuilder;
+
+	switch( lexem ) {
+		case LEXEM_BLANK:
+			break;
+		case LEXEM_IDENT:
+			break;
+		case LEXEM_EQUAL:
+			functionBuilder.AddEndOfLeft();
+			break;
+		case LEXEM_COMMA:
+			/* TODO: error */
+			break;
+		case LEXEM_LABEL:
+			// TODO: functionBuilder.AddLabel();
+			break;
+		case LEXEM_NUMBER:
+			functionBuilder.AddNumber( lexemNumber );
+			break;
+		case LEXEM_STRING:
+			for( int i = 0; i < lexemString.size(); i++ ) {
+				functionBuilder.AddChar( lexemString[i] );
+			}
+			break;
+		case LEXEM_NEWLINE:
+			break;
+		case LEXEM_QUALIFIER:
+			/* TODO: error */
+			break;
+		case LEXEM_LEFT_PAREN:
+			functionBuilder.AddLeftParen();
+			break;
+		case LEXEM_RIGHT_PAREN:
+			functionBuilder.AddRightParen();
+			break;
+		case LEXEM_LEFT_BRACKET:
+			functionBuilder.AddLeftBracket();
+			break;
+		case LEXEM_RIGHT_BRACKET:
+			functionBuilder.AddRightBracket();
+			break;
+	}
 }
 
 bool CReader::process_function(Lexem lexem)
@@ -642,6 +689,224 @@ bool CReader::process_function(Lexem lexem)
 
 	return true;
 }
+
+#if 0
+bool CReader::process_function(Lexem lexem)
+{
+	if( current_function == common.labels.end() ) {
+		/* TODO: error unexpected rule */
+		return false;
+	}
+	
+	switch( rule_parser.state ) {
+		case CRuleParser::S_begin :
+			if( lexem == LEXEM_BLANK ) {
+			} else if( lexem == LEXEM_IDENT ) {
+				if( lexem_buffer == "L" || lexem_buffer == "l" ) {
+					rule_parser.state = CRuleParser::S_begin_order;
+				} else if( lexem_buffer == "R" || lexem_buffer == "r" ) {
+					rule_parser.state = CRuleParser::S_begin_order;
+					function_builder.RightDirection(); // action
+				} else {
+					rule_parser.state = CRuleParser::S_begin_left_part;
+					return process_function(lexem);
+				}
+			} else {
+				rule_parser.state = CRuleParser::S_begin_left_part;
+				return process_function(lexem);
+			}
+			break;
+		case CRuleParser::S_begin_order :
+			if( lexem == LEXEM_BLANK ) {
+				rule_parser.state = CRuleParser::S_begin_left_part;
+			} else {
+				/* TODO: ERROR expected BLANK after MATCHING DIRECTION */
+				return false;
+			}
+			break;
+		case CRuleParser::S_begin_left_part :
+			if( lexem == LEXEM_BLANK ) {
+			} else if( lexem == LEXEM_EQUAL ) {
+				rule_parser.state = CRuleParser::S_begin_right_part;
+				return finalize_left_part(); // action
+			} else if( lexem == LEXEM_STRING ) {
+				return append_string(); // action
+			} else if( lexem == LEXEM_LABEL ) {
+				return append_label(); // action
+			} else if( lexem == LEXEM_NUMBER ) {
+				return append_number(); // action
+			} else if( lexem == LEXEM_LEFT_PAREN ) {
+				return append_left_paren(); // action
+			} else if( lexem == LEXEM_RIGHT_PAREN ) {
+				return append_right_paren(); // action
+			} else if( lexem == LEXEM_IDENT ) {
+				char c = ::tolower(lexem_buffer[0]);
+				if( c == 's' || c == 'w' || c == 'v' || c == 'e' ) {
+					rule_parser.state = CRuleParser::S_begin_variable;
+					lexem_buffer.erase(0, 1);
+					++offset;
+					rule_parser.variable_type = c; // action
+					rule_parser.variable_qualifier = 0; // action
+				
+					if( !lexem_buffer.empty() ) {
+						return process_function(lexem);
+					}
+				} else {
+					/* TODO: ERROR incorrect variable type */
+					return false;
+				}
+			} else {
+				/* TODO: ERROR */
+				return false;
+			}
+			break;
+		case CRuleParser::S_begin_variable :
+			if( lexem == LEXEM_LEFT_PAREN ) {
+				rule_parser.state = CRuleParser::S_begin_qualifier;
+				rule_parser.paren_balance_counter = 1;
+				qualifier_builder.Reset(); // action
+			} else if( lexem == LEXEM_QUALIFIER ) {
+				rule_parser.state =
+					CRuleParser::S_begin_variable_qualifier;
+				qualifier_builder.Reset(); // action
+				if( !process_qualifier(LEXEM_QUALIFIER) ) { // action
+					/* TODO: ERROR incorrect qualifier */
+					return false;
+				}
+			} else {
+				rule_parser.state =
+					CRuleParser::S_begin_variable_qualifier;
+				return process_function(lexem);
+			}
+			break;
+		case CRuleParser::S_begin_variable_qualifier :
+			if( lexem == LEXEM_IDENT ) {
+				char name = lexem_buffer[0];
+				if( isalnum(name) ) {
+					rule_parser.state = CRuleParser::S_begin_left_part;
+					lexem_buffer.erase(0, 1);
+					++offset;
+					
+					if( !append_variable(rule_parser.variable_type, name,
+						rule_parser.variable_qualifier) )
+					{
+						return false;
+					}
+				
+					if( !lexem_buffer.empty() ) {
+						return process_function(lexem);
+					}
+				} else {
+					/* TODO: ERROR */
+					return false;
+				}
+			} else {
+				/* TODO: ERROR */
+				return false;
+			}
+			break;
+		case CRuleParser::S_begin_qualifier :
+			if( lexem == LEXEM_RIGHT_PAREN &&
+				rule_parser.paren_balance_counter == 1 )
+			{
+				rule_parser.state =
+					CRuleParser::S_begin_variable_qualifier;
+				return set_variable_qualifier();
+			} else {
+				if( lexem == LEXEM_LEFT_PAREN ) {
+					++rule_parser.paren_balance_counter;
+				} else if( lexem == LEXEM_RIGHT_PAREN ) {
+					--rule_parser.paren_balance_counter;
+				}
+				
+				if( !process_qualifier(lexem) ) {
+					/* TODO: ERROR incorrect qualifier */
+					return false;
+				}
+			}
+			break;
+		case CRuleParser::S_begin_right_part :
+			switch( lexem ) {
+				case LEXEM_BLANK :
+					break;
+				case LEXEM_NEWLINE :
+					rule_parser.state = CRuleParser::S_begin;
+					if( rule_parser.stack.empty() ) {
+						return finalize_rule();
+					} else {
+						/* TODO: ERROR */
+					}
+					break;
+				case LEXEM_STRING :
+					return append_string();
+					break;
+				case LEXEM_LABEL :
+					return append_label();
+					break;
+				case LEXEM_NUMBER :
+					return append_number();
+					break;
+				case LEXEM_LEFT_PAREN :
+					return append_left_paren();
+					break;
+				case LEXEM_RIGHT_PAREN :
+					return append_right_paren();
+					break;
+				case LEXEM_LEFT_BRACKET :
+					rule_parser.state =
+						CRuleParser::S_begin_left_bracket;
+					return append_left_bracket();
+					break;
+				case LEXEM_RIGHT_BRACKET :
+					return append_right_bracket();
+					break;
+				case LEXEM_IDENT :
+					{
+						char t = tolower(lexem_buffer[0]);
+						char n = lexem_buffer[1];
+			
+						if( t == 's' || t == 'w' || t == 'v' || t == 'e' ) {
+							if( isalnum(n) ) {
+								lexem_buffer.erase(0, 2);
+								offset += 2;
+
+								if( !append_variable(t, n) ) {
+									return false;
+								}
+					
+								if( !lexem_buffer.empty() ) {
+									return process_function(lexem);
+								}
+							} else {
+								/* TODO: ERROR */
+								return false;
+							}
+						} else {
+							/* TODO: ERROR incorrect variable type */
+							return false;
+						}
+					}
+					break;
+				default :
+					/* TODO: ERROR */
+					return false;
+			}
+			break;
+		case CRuleParser::S_begin_left_bracket :
+			rule_parser.state = CRuleParser::S_begin_right_part;
+			if( lexem == LEXEM_IDENT ) {
+				return append_label();
+			} else {
+				return process_function(lexem);
+			}
+			break;
+		default :
+			break;
+	}
+
+	return true;
+}
+#endif
 
 // ----------------------------------------------------------------------------
 

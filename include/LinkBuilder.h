@@ -9,28 +9,27 @@ public:
 	CLinkBuilder(): begin(0) { Reset(); }
 	~CLinkBuilder() { Reset(); }
 
-	static void Free(CLink** link);
+	static void Free(CUnitLink** link);
 
 	void Reset();
-	void Get(CLink** link_begin, CLink** link_end);
+	void Get(CUnitLink** link_begin, CUnitLink** link_end);
 	
 	CUnitLink* Char(TChar c);
 	CUnitLink* Label(TLabel label);
 	CUnitLink* Number(TNumber number);
-	CVariableLink* Variable(TVariableType type = '\0',
-		TVariableName name = '\0', CQualifier* qualifier = 0);
+	CUnitLink* Variable(TVariableIndex variable);
 	CUnitLink* LeftParen();
 	CUnitLink* RightParen();
-	CLink* LeftBracket();
-	CLink* RightBracket();
+	CUnitLink* LeftBracket();
+	CUnitLink* RightBracket();
 private:
 	CLinkBuilder(const CLinkBuilder&);
 	CLinkBuilder& operator=(const CLinkBuilder&);
 
-	void link(CLink* link);
+	void link(CUnitLink* link);
 
-	CLink* begin;
-	CLink* end;
+	CUnitLink* begin;
+	CUnitLink* end;
 };
 
 } // end of namespace Refal2

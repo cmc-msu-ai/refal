@@ -1,6 +1,5 @@
 #include "Refal.h"
 
-#if 0
 namespace refal2
 {
 	Refal2::Refal2()
@@ -112,4 +111,3 @@ namespace refal2
 		return true;
 	}
 }
-#endif

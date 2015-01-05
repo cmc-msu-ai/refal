@@ -6,40 +6,40 @@
 
 namespace Refal2 {
 
-void print_link(const CLink* link)
+void print_link(const CUnitLink* link)
 {  
 	switch( link->Type() )
 	{
-	case CLink::T_char :
+	case CUnitLink::T_char :
 		std::cout << "\'" << link->Char() << "\' ";
 		break;
-	case CLink::T_label :
+	case CUnitLink::T_label :
 		std::cout << "/" << link->Label()->first << "/ ";
 		break;
-	case CLink::T_number :
+	case CUnitLink::T_number :
 		std::cout << "/" << link->Number() << "/ ";
 		break;
-	case CLink::T_variable :
+	case CUnitLink::T_variable :
 		{
-			const CVariableLink* var = link->Variable();
+			/*const CVariableLink* var = link->Variable();
 			if( var->qualifier == 0 ) {
 				std::cout << var->variable_type << var->variable_name << " ";
 			} else {
 				std::cout << var->variable_type << "()" <<
 					var->variable_name << " ";
-			}
+			}*/
 		}
 		break;
-	case CLink::T_left_paren :
+	case CUnitLink::T_left_paren :
 		std::cout << "( ";
 		break;
-	case CLink::T_right_paren :
+	case CUnitLink::T_right_paren :
 		std::cout << ") ";
 		break;
-	case CLink::T_left_bracket :
+	case CUnitLink::T_left_bracket :
 		std::cout << "< ";
 		break;
-	case CLink::T_right_bracket :
+	case CUnitLink::T_right_bracket :
 		std::cout << "> ";
 		break;
 	default:
@@ -53,13 +53,13 @@ void print_rule(const CRule* rule)
 		std::cout << "R ";
 	}
 
-	for( CLink* i = rule->left_part_begin; i != 0; i = i->next ) {
+	for( CUnitLink* i = rule->left_part_begin; i != 0; i = i->next ) {
 		print_link(i);
 	}
 
 	std::cout << " = ";
 	
-	for( CLink* i = rule->right_part_begin; i != 0; i = i->next ) {
+	for( CUnitLink* i = rule->right_part_begin; i != 0; i = i->next ) {
 		print_link(i);
 	}
 }

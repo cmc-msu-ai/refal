@@ -1,4 +1,48 @@
-#if 1
+#include <fstream>
+#include <iostream>
+#include <Refal2.h>
+
+using namespace Refal2;
+
+class CMyClass : public IScannerListener,
+	public IParserListener,
+	public IFunctionBuilderListener
+{
+public:
+	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c) {}
+	virtual void OnParserError(const TParserErrorCodes errorCode) {}
+	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes errorCode) {}
+	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes errorCode) {}
+};
+
+int main()
+{
+	try {
+		CMyClass ca;
+		CParser parser( &ca );
+
+		std::ifstream f("C:\\Users\\Антон\\YandexDisk\\MyFiles\\Education\\3 курс\\5 семестр\\практикум на эвм\\Интерпретация паскаль-программы\\PROGRAM__.REF");
+		if( !f.good() ) {
+			std::cerr << "Can't open file\n";
+			return 1;
+		}
+
+		while( true ) {
+			int c = f.get();
+			if( c == -1 ) {
+				parser.AddEndOfFile();
+				break;
+			} else {
+				parser.AddChar(c);
+			}
+		}
+	} catch(...) {
+	}
+
+	return 0;
+}
+
+#if 0
 #include "OperationsBuilder.h"
 #include "QualifierBuilder.h"
 #include "FunctionBuilder.h"
@@ -143,8 +187,8 @@ int main(int argc, const char* argv[])
 	
 	return 0;
 }
-
-#else
+#endif
+#if 0
 
 #include "Common.h"
 #include "Reader.h"

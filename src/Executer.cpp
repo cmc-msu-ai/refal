@@ -163,7 +163,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					COperation::Next(op);
 				} else {
 					fail();
-				}				
+				}
 				break;
 
 			case COperation::OT_right_parens_match:
@@ -176,7 +176,7 @@ void CExecuter::Run(COperation* operation, CUnitLink* first, CUnitLink* last)
 					COperation::Next(op);
 				} else {
 					fail();
-				}				
+				}
 				break;
 
 			case COperation::OT_set_pointers:

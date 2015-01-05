@@ -34,6 +34,11 @@ void CQualifier::print() const
 	std::cout << "\n\n";
 }
 
+void CQualifier::MoveTo(CQualifier* toQualifier)
+{
+	//toQualifier->ansichars.
+}
+
 bool CQualifier::Check(const CUnitLink* unit) const
 {
 	switch( unit->Type() ) {

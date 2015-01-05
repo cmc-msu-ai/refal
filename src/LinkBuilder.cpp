@@ -4,54 +4,15 @@
 
 namespace Refal2 {
 
-void CLinkBuilder::Free(CLink** link)
+void CLinkBuilder::Free(CUnitLink** link)
 {
-	CLink* i = *link;
+	CUnitLink* i = *link;
 	*link = 0;
 
 	while( i != 0 ) {
-		CLink* tmp = i;
+		CUnitLink* tmp = i;
 		i = i->next;
-
-		if( (tmp->type & CLink::T_unit) != 0 ) {
-			delete static_cast<CUnitLink*>(tmp);
-		} else if( tmp->type == CLink::T_variable ) {
-			delete static_cast<CVariableLink*>(tmp);
-		} else {
-			delete tmp;
-		}
-
-		/*
-		switch( tmp->type )
-		{
-			case CLink::T_char :
-				delete static_cast<CCharLink*>(tmp);
-				break;
-			case CLink::T_label :
-				delete static_cast<CLabelLink*>(tmp);
-				break;
-			case CLink::T_number :
-				delete static_cast<CNumberLink*>(tmp);
-				break;
-			case CLink::T_variable :
-				delete static_cast<CVariableLink*>(tmp);
-				break;
-			case CLink::T_left_paren :
-				delete static_cast<CLeftParenLink*>(tmp);
-				break;
-			case CLink::T_right_paren :
-				delete static_cast<CRightParenLink*>(tmp);
-				break;
-			case CLink::T_left_bracket :
-				delete static_cast<CLeftBracketLink*>(tmp);
-				break;
-			case CLink::T_right_bracket :
-				delete static_cast<CRightBracketLink*>(tmp);
-				break;
-			default:
-				break;
-		}
-		*/
+		delete tmp;
 	}
 }
 
@@ -65,7 +26,7 @@ void CLinkBuilder::Reset()
 	end = 0;
 }
 
-void CLinkBuilder::Get(CLink** link_begin, CLink** link_end)
+void CLinkBuilder::Get(CUnitLink** link_begin, CUnitLink** link_end)
 {
 	if( link_begin != 0 || link_end != 0 ) {
 		if( link_begin != 0 ) {
@@ -83,7 +44,7 @@ void CLinkBuilder::Get(CLink** link_begin, CLink** link_end)
 	
 CUnitLink* CLinkBuilder::Char(TChar c)
 {
-	CUnitLink* tmp = new CUnitLink(CLink::T_char);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_char);
 	tmp->Char() = c;
 	link(tmp);
 	return tmp;
@@ -91,7 +52,7 @@ CUnitLink* CLinkBuilder::Char(TChar c)
 
 CUnitLink* CLinkBuilder::Label(TLabel label)
 {
-	CUnitLink* tmp = new CUnitLink(CLink::T_label);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_label);
 	tmp->Label() = label;
 	link(tmp);
 	return tmp;
@@ -99,49 +60,49 @@ CUnitLink* CLinkBuilder::Label(TLabel label)
 
 CUnitLink* CLinkBuilder::Number(TNumber number)
 {
-	CUnitLink* tmp = new CUnitLink(CLink::T_number);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_number);
 	tmp->Number() = number;
 	link(tmp);
 	return tmp;
 }
 
-CVariableLink* CLinkBuilder::Variable(TVariableType type, TVariableName name,
-	CQualifier* qualifier)
+CUnitLink* CLinkBuilder::Variable(TVariableIndex variable)
 {
-	CVariableLink* tmp = new CVariableLink(type, name, qualifier);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_variable);
+	tmp->Variable() = variable;
 	link(tmp);
 	return tmp;
 }
 
 CUnitLink* CLinkBuilder::LeftParen()
 {
-	CUnitLink* tmp = new CUnitLink(CLink::T_left_paren);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_left_paren);
 	link(tmp);
 	return tmp;
 }
 
 CUnitLink* CLinkBuilder::RightParen()
 {
-	CUnitLink* tmp = new CUnitLink(CLink::T_right_paren);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_right_paren);
 	link(tmp);
 	return tmp;
 }
 
-CLink* CLinkBuilder::LeftBracket()
+CUnitLink* CLinkBuilder::LeftBracket()
 {
-	CLink* tmp = new CLink(CLink::T_left_bracket);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_left_bracket);
 	link(tmp);
 	return tmp;
 }
 
-CLink* CLinkBuilder::RightBracket()
+CUnitLink* CLinkBuilder::RightBracket()
 {
-	CLink* tmp = new CLink(CLink::T_right_bracket);
+	CUnitLink* tmp = new CUnitLink(CUnitLink::T_right_bracket);
 	link(tmp);
 	return tmp;
 }
 
-void CLinkBuilder::link(CLink* link)
+void CLinkBuilder::link(CUnitLink* link)
 {
 	if( begin == 0 ) {
 		begin = link;

@@ -8,40 +8,27 @@ namespace Refal2 {
 
 class CQualifierBuilder {
 public:
-	CQualifierBuilder()
-	{
-		Reset();
-	}
+	CQualifierBuilder()	{ Reset(); }
 
 	void Reset();
-	void Get(CQualifier* qualifier);
+	void Export(CQualifier* qualifier);
 	
-	void Label(TLabel label);
-	void Number(TNumber number);
-	void Char(TChar c);
-	void Qualifier(const CQualifier& qualifier);
-	void Negative();
-	bool IsNegative() const
-	{
-		return negative;
-	}
-	void S()
-	{
-		F();
-		N();
-		O();
-	}
-	void F();
-	void N();
-	void O();
-	void L();
-	void D();
-	void W()
-	{
-		S();
-		B();
-	}
-	void B();
+	bool IsNegative() const { return negative; }
+
+	void AddChar(TChar c);
+	void AddLabel(TLabel label);
+	void AddNumber(TNumber number);
+	void AddQualifier(const CQualifier& qualifier);
+	void AddNegative() { negative = !negative; }
+
+	void AddS() { AddF(); AddN(); AddO(); }
+	void AddF();
+	void AddN();
+	void AddO();
+	void AddL();
+	void AddD();
+	void AddW() { AddS(); AddB(); }
+	void AddB();
 
 private:
 	CQualifierBuilder(const CQualifierBuilder&);
@@ -58,20 +45,17 @@ private:
 	TStatus terms;
 	TStatus chars;
 
-	CSetBuilder<TChar> chars_builder;
-	CSetBuilder<TLabel> labels_builder;
-	CSetBuilder<TNumber> numbers_builder;
+	CSetBuilder<TChar> charsBuilder;
+	CSetBuilder<TLabel> labelsBuilder;
+	CSetBuilder<TNumber> numbersBuilder;
 
 	TAnsiSet ansichars;
-	TAnsiSet ansichars_fixed;
+	TAnsiSet ansicharsFixed;
 
-	static void make_from_string(TAnsiSet& set, const char* ansi);
-	static TAnsiSet make_ansi_L();
-	static TAnsiSet make_ansi_D();
+	static TAnsiSet makeFromString(const char* ansiString);
 
-	static const TAnsiSet ansi_L;
-	static const TAnsiSet ansi_D;
+	static const TAnsiSet ansiL;
+	static const TAnsiSet ansiD;
 };
 
 } // end of namespace refal2
-

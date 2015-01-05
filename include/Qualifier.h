@@ -1,9 +1,9 @@
 #pragma once
 
-#include "FastSet.h"
-#include "Common.h"
-#include <bitset>
 #include <set>
+#include <bitset>
+#include "Label.h"
+#include "FastSet.h"
 
 template<class T>
 void print_set(const std::set<T>& set)
@@ -31,6 +31,9 @@ class CQualifier {
 	friend class CQualifierBuilder;
 public:
 	CQualifier(): flags(0) {}
+
+	void Reset();
+	void MoveTo(CQualifier* toQualifier);
 
 	CQualifier& operator*=(CQualifier&);
 	void print() const;
