@@ -9,10 +9,10 @@ class CFastSet {
 public:
 	typedef std::set<T> TSet;
 
-	CFastSet();
+	CFastSet(): elements(0), size(0) {}
 	CFastSet(const TSet&);
 	CFastSet(const CFastSet&);
-	~CFastSet();
+	~CFastSet() { Empty(); }
 
 	CFastSet& operator=(const CFastSet&);
 	CFastSet& operator=(const TSet&);
@@ -20,7 +20,9 @@ public:
 	CFastSet& operator*=(const CFastSet&);
 	CFastSet& operator-=(const CFastSet&);
 
-	void Swap(CFastSet&);
+	bool IsEmpty() const { return ( size == 0 ); }
+	void Empty();
+	void Swap(CFastSet* toSwap);
 
 	const T* Find(const T element) const;
 
@@ -31,13 +33,6 @@ private:
 	T* elements;
 	int size;
 };
-
-template<class T>
-CFastSet<T>::CFastSet():
-	elements(0),
-	size(0)
-{
-}
 
 template<class T>
 CFastSet<T>::CFastSet(const TSet& set):
@@ -59,12 +54,6 @@ CFastSet<T>::CFastSet(const CFastSet& set):
 	size(set.size)
 {
 	memcpy(elements, set.elements, size * sizeof(T));
-}
-
-template<class T>
-CFastSet<T>::~CFastSet()
-{
-	delete[] elements;
 }
 
 template<class T>
@@ -175,15 +164,25 @@ CFastSet<T>& CFastSet<T>::operator-=(const CFastSet& set)
 }
 
 template<class T>
-void CFastSet<T>::Swap(CFastSet<T>& set)
+void CFastSet<T>::Empty()
 {
-	int tmp = size;
-	size = set.size;
-	set.size = tmp;
+	size = 0;
+	delete[] elements;
+	elements = 0;
+}
 
-	T* tmpe = elements;
-	elements = set.elements;
-	set.elements = tmpe;
+template<class T>
+void CFastSet<T>::Swap(CFastSet<T>* set)
+{
+	if( set != this ) {
+		int tmp = size;
+		size = set->size;
+		set->size = tmp;
+
+		T* tmpe = elements;
+		elements = set->elements;
+		set->elements = tmpe;
+	}
 }
 
 template<class T>

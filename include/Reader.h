@@ -70,8 +70,6 @@ private:
 		RW
 	};
 
-	bool processLine();
-
 	enum TReaderErrorsCodes {
 		RE_cant_create_qualifier,
 		RE_unclosed_left_paren_in_qualifier,

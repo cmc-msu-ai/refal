@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SetBuilder.h"
-#include "Qualifier.h"
 #include <bitset>
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -34,13 +33,13 @@ private:
 	CQualifierBuilder(const CQualifierBuilder&);
 	CQualifierBuilder& operator=(const CQualifierBuilder&);
 
+	bool negative;
+
 	enum TStatus {
 		S_none,
 		S_yes,
 		S_no
 	};
-
-	bool negative;
 	
 	TStatus terms;
 	TStatus chars;

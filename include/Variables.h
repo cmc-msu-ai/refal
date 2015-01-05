@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdio.h>
 #include <Refal2.h>
 
 namespace Refal2 {
@@ -43,7 +42,7 @@ private:
 		TVariableType type;
 		int initialOffset;
 		int currentOffset;
-		//CQualifier qualifier;
+		CQualifier qualifier;
 	};
 	
 	CVariable* variables;
@@ -101,7 +100,7 @@ private:
 		TVariableIndex name;
 		TVariableType type;
 		int count;
-		//CQualifier qualifier;
+		CQualifier qualifier;
 	};
 
 	CVariableInfo variables[variablesSize];

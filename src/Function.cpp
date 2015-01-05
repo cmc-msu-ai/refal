@@ -117,22 +117,26 @@ void CFunctionBuilder::AddEndOfRight()
 	state = FBS_Direction;
 }
 
-void CFunctionBuilder::AddVariable(TVariableType type, TVariableName name,
+void CFunctionBuilder::AddLeftVariable(TVariableType type, TVariableName name,
 	CQualifier* qualifier)
 {
-	assert( state != FBS_Direction );
+	assert( state == FBS_Left );
 	
-	TVariableIndex index;
-	
-	if( state == FBS_Left ) {
-		index = variablesBuilder.AddLeft( name, type, qualifier );
-	} else {
-		if( qualifier != 0 ) {
-			error( FBEC_IllegalQualifierInRightPart );
+	TVariableIndex index = variablesBuilder.AddLeft( name, type, qualifier );	
+	if( !HasErrors() ) {
+		if( index == InvalidVariableIndex ) {
+			SetErrors();
+		} else {
+			acc.AppendVariable( index );
 		}
-		index = variablesBuilder.AddRight( name, type );
 	}
+}
+
+void CFunctionBuilder::AddRightVariable(TVariableType type, TVariableName name)
+{
+	assert( state == FBS_Right );
 	
+	TVariableIndex index = variablesBuilder.AddRight( name, type );
 	if( !HasErrors() ) {
 		if( index == InvalidVariableIndex ) {
 			SetErrors();

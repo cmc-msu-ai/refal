@@ -427,53 +427,6 @@ bool CReader::append_right_bracket()
 	return true;
 }
 
-bool CReader::processLine()
-{
-	Lexem lexem;
-	CFunctionBuilder functionBuilder;
-
-	switch( lexem ) {
-		case LEXEM_BLANK:
-			break;
-		case LEXEM_IDENT:
-			break;
-		case LEXEM_EQUAL:
-			functionBuilder.AddEndOfLeft();
-			break;
-		case LEXEM_COMMA:
-			/* TODO: error */
-			break;
-		case LEXEM_LABEL:
-			// TODO: functionBuilder.AddLabel();
-			break;
-		case LEXEM_NUMBER:
-			functionBuilder.AddNumber( lexemNumber );
-			break;
-		case LEXEM_STRING:
-			for( int i = 0; i < lexemString.size(); i++ ) {
-				functionBuilder.AddChar( lexemString[i] );
-			}
-			break;
-		case LEXEM_NEWLINE:
-			break;
-		case LEXEM_QUALIFIER:
-			/* TODO: error */
-			break;
-		case LEXEM_LEFT_PAREN:
-			functionBuilder.AddLeftParen();
-			break;
-		case LEXEM_RIGHT_PAREN:
-			functionBuilder.AddRightParen();
-			break;
-		case LEXEM_LEFT_BRACKET:
-			functionBuilder.AddLeftBracket();
-			break;
-		case LEXEM_RIGHT_BRACKET:
-			functionBuilder.AddRightBracket();
-			break;
-	}
-}
-
 bool CReader::process_function(Lexem lexem)
 {
 	if( current_function == common.labels.end() ) {

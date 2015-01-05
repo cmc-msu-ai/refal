@@ -119,8 +119,9 @@ public:
 	inline void AddChar(TChar c);
 	inline void AddLabel(TLabel label);
 	inline void AddNumber(TNumber number);
-	void AddVariable(TVariableType type, TVariableName name,
+	void AddLeftVariable(TVariableType type, TVariableName name,
 		CQualifier* qualifier = 0);
+	void AddRightVariable(TVariableType type, TVariableName name);
 	void AddLeftParen();
 	void AddRightParen();
 	void AddLeftBracket();

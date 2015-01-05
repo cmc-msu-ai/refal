@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <Refal2.h>
 
@@ -29,8 +30,22 @@ enum TParserState {
 	PS_BeginExtrnRightParen,
 	PS_BeginExtrnOnlyComma,
 	
-	PS_ProcessQualifier,
-	PS_ProcessRule
+	PS_BeginProcessNamedQualifier,
+	PS_ProcessNamedQualifier,
+	PS_ProcessNamedQualifierAfterRightParen,
+	PS_ProcessNamedQualifierAfterError,
+
+	PS_BeginProcessVariableQualifier,
+	PS_ProcessVariableQualifier,
+	PS_ProcessVariableQualifierAfterRightParen,
+	PS_ProcessVariableQualifierAfterError,
+
+	PS_ProcessRuleDirection,
+	PS_ProcessLeftPartOfRule,
+	PS_ProcessLeftPartOfRuleAfterVariableType,
+	PS_ProcessLeftPartOfRuleAfterVariableQualifier,
+	PS_ProcessRightPartOfRule,
+	PS_ProcessRightPartOfRuleAfterLeftBracket
 };
 
 enum TParserErrorCodes {
@@ -51,13 +66,16 @@ protected:
 	virtual void ProcessLexem();
 
 private:
-	void processRule();
-	void processQualifier();
+	void processNamedQualifier(const bool afterRightParen = false);
+	void processNamedQualifierAfterError();
+
+	void addNamedQualifier();
+
+	void processVariableQualifier(const bool afterRightParen = false);
+	void processVariableQualifierAfterError();
 
 	void addDeclarationOfFunction(const std::string& name);
-	void addEndOfFunction();
-
-	void addDeclarationOfQualifier(const std::string& name);
+	void addEndOfFunction();	
 
 	void addEmptyFunction(const std::string& name);
 	void addEntryFunction(const std::string& name);
@@ -66,9 +84,16 @@ private:
 	TParserState state;
 	int storedOffset;
 	std::string storedName;
+
+	TVariableType variableType;
+	CFunction* currentFunction;
 	CFunctionBuilder functionBuilder;
-	//CFunction* currentFunction;
-	//CQualifier* currentQualifier;
+
+	typedef std::map<std::string, CQualifier> TQualifierMap;
+
+	CQualifier currentQualifier;
+	TQualifierMap namedQualifiers;
+	CQualifierBuilder qualifierBuilder;
 };
 
 inline CParser::CParser(IParserListener* listener):

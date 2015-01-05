@@ -5,11 +5,11 @@ namespace Refal2 {
 void CVariables::Reset()
 {
 	if( variables != 0 ) {
-		delete variables;
+		delete[] variables;
 		variables = 0;
 	}
 	if( values != 0 ) {
-		delete values;
+		delete[] values;
 		values = 0;
 	}
 	capacity = 0;
@@ -73,7 +73,7 @@ void CVariablesBuilder::Reset()
 	
 	for( int i = 0; i < variablesSize; ++i ) {
 		variables[i].type = '\0';
-		//variables[i].qualifier.Reset();
+		variables[i].qualifier.Empty();
 	}
 }
 
@@ -89,9 +89,9 @@ TVariableIndex CVariablesBuilder::AddLeft(TVariableName name,
 			var.name = countOfVariables;
 			var.type = type;
 			var.count = 1;
-			/*if( qualifier != 0 ) {
-				qualifier->MoveTo( &var.qualifier );
-			}*/
+			if( qualifier != 0 ) {
+				qualifier->Move( &var.qualifier );
+			}
 			++countOfVariables;
 			return var.name;
 		} else {
@@ -99,9 +99,9 @@ TVariableIndex CVariablesBuilder::AddLeft(TVariableName name,
 		}
 	} else if( var.type == type ) {
 		var.count++;
-		/*if( qualifier != 0 ) {
+		if( qualifier != 0 ) {
 			var.qualifier.DestructiveIntersection( qualifier );
-		}*/
+		}
 		return var.name;
 	} else {
 		error( VBEC_TypeOfVariableDoesNotMatch );
@@ -127,23 +127,25 @@ TVariableIndex CVariablesBuilder::AddRight(TVariableName name, TVariableType typ
 
 void CVariablesBuilder::Export(CVariables* variablesObject)
 {
-	variablesObject->allocVariables(countOfVariables);
-	CVariables::CVariable* _variables = variablesObject->variables;
+	if( countOfVariables > 0 ) {
+		variablesObject->allocVariables(countOfVariables);
+		CVariables::CVariable* _variables = variablesObject->variables;
 	
-	int offset = 0;
-	for( int i = 0; i < variablesSize; i++ ) {
-		CVariableInfo& var = variables[i];
+		int offset = 0;
+		for( int i = 0; i < variablesSize; i++ ) {
+			CVariableInfo& var = variables[i];
 		
-		if( var.type != '\0' ) {
-			_variables[var.name].type = var.type;
-			//var.qualifier.MoveTo( &_variables[var.name].qualifier );
-			_variables[var.name].initialOffset = offset;
-			_variables[var.name].currentOffset = offset;
-			offset += var.count;
+			if( var.type != '\0' ) {
+				_variables[var.name].type = var.type;
+				var.qualifier.Move( &_variables[var.name].qualifier );
+				_variables[var.name].initialOffset = offset;
+				_variables[var.name].currentOffset = offset;
+				offset += var.count;
+			}
 		}
+		variablesObject->setCapacity(offset);
+		Reset();
 	}
-	variablesObject->setCapacity(offset);
-	Reset();
 }
 
 } // end of namespace refal2

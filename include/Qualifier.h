@@ -2,74 +2,70 @@
 
 #include <set>
 #include <bitset>
-#include "Label.h"
-#include "FastSet.h"
-
-template<class T>
-void print_set(const std::set<T>& set)
-{
-	std::cout << "{";
-	typename std::set<T>::const_iterator i = set.begin();
-	for( ; i != set.end(); )
-	{
-		std::cout << *i;
-		++i;
-		if( i != set.end() ) {
-			std::cout << ", ";
-		} else {
-			break;
-		}
-	}
-	std::cout << "}";
-}
+#include <Refal2.h>
 
 namespace Refal2 {
 
-typedef std::bitset<D_ansi_set_size> TAnsiSet;
+class CQualifier;
+
+void PrintQualifier(const CQualifier& qualifier);
+
+const int AnsiSetSize = 128;
+typedef std::bitset<AnsiSetSize> TAnsiSet;
+
+enum TQualifierIncludeFlags {
+	QIF_Terms = 0x1,
+	QIF_AllChars = 0x2,
+	QIF_AllLabels = 0x4,
+	QIF_AllNumbers = 0x8
+};
 
 class CQualifier {
 	friend class CQualifierBuilder;
+	friend void PrintQualifier(const CQualifier& qualifier);
+
 public:
 	CQualifier(): flags(0) {}
 
-	void Reset();
-	void MoveTo(CQualifier* toQualifier);
+	void Empty();
+	void Move(CQualifier* toQualifier);
 
-	CQualifier& operator*=(CQualifier&);
-	void print() const;
+	void DestructiveIntersection(CQualifier* withQualifier);
+	bool Check(const CUnit* unit) const;
 
-	bool Check(const CUnitLink* unit) const;
+	int GetIncludeFlags() const { return flags; }
+	inline bool IsIncludeAllChars() const;
+	inline bool IsIncludeAllLabels() const;
+	inline bool IsIncludeAllNumbers() const;
+	inline bool IsIncludeTerms() const;
 
-	bool IsIncludeAllChars() const
-	{
-		return ( (flags & F_all_chars) != 0 );
-	}
-	bool IsIncludeAllLabels() const
-	{
-		return ( (flags & F_all_labels) != 0 );
-	}
-	bool IsIncludeAllNumbers() const
-	{
-		return ( (flags & F_all_numbers) != 0 );
-	}
-	bool IsIncludeTerms() const
-	{
-		return ( (flags & F_terms) != 0 );
-	}
 private:
+	int flags;
 	TAnsiSet ansichars;
 	CFastSet<TChar> chars;
 	CFastSet<TLabel> labels;
 	CFastSet<TNumber> numbers;
-
-	enum TFlag {
-		F_terms = 0x1,
-		F_all_chars = 0x2,
-		F_all_labels = 0x4,
-		F_all_numbers = 0x8
-	};
-	int flags;
 };
+
+inline bool CQualifier::IsIncludeAllChars() const
+{
+	return ( (flags & QIF_AllChars) != 0 );
+}
+
+inline bool CQualifier::IsIncludeAllLabels() const
+{
+	return ( (flags & QIF_AllLabels) != 0 );
+}
+
+inline bool CQualifier::IsIncludeAllNumbers() const
+{
+	return ( (flags & QIF_AllNumbers) != 0 );
+}
+
+inline bool CQualifier::IsIncludeTerms() const
+{
+	return ( (flags & QIF_Terms) != 0 );
+}
 
 } // end of namespace refal2
 

@@ -11,9 +11,13 @@ typedef int TVariableIndex;
 
 } // end of namespace Refal2
 
+#include <FastSet.h>
+#include <SetBuilder.h>
 #include <Assert.h>
 #include <Listener.h>
 #include <Unit.h>
+#include <Qualifier.h>
+#include <QualifierBuilder.h>
 #include <Variables.h>
 #include <Function.h>
 #include <Label.h>

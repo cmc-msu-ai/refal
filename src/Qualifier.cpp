@@ -1,89 +1,122 @@
-#include "Qualifier.h"
-
+#include <set>
+#include <bitset>
 #include <iostream>
+#include <Refal2.h>
 
 namespace Refal2 {
 
-void CQualifier::print() const
+template<class T>
+static void PrintSet(const std::set<T>& set)
 {
-	if( IsIncludeAllChars() ) {
+	std::cout << "{";
+	typename std::set<T>::const_iterator i = set.begin();
+	for( ; i != set.end(); )
+	{
+		std::cout << *i;
+		++i;
+		if( i != set.end() ) {
+			std::cout << ", ";
+		} else {
+			break;
+		}
+	}
+	std::cout << "}";
+}
+
+void PrintQualifier(const CQualifier& qualifier)
+{
+	if( qualifier.IsIncludeAllChars() ) {
 		std::cout << "O \\ ";
 	}
-	print_set(static_cast<std::set<TChar> >(chars));
+	PrintSet(static_cast<std::set<TChar> >(qualifier.chars));
 	std::cout << "\n";
 
-	if( IsIncludeAllLabels() ) {
+	if( qualifier.IsIncludeAllLabels() ) {
 		std::cout << "F \\";
 	}
 	std::set<TLabel> a;
-	labels.GetSet(a);
+	qualifier.labels.GetSet(a);
 	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		std::cout << " /" << (*i)->first << "/";
+		std::cout << " /" << LabelTable.GetLabelText(*i) << "/";
 	}
 	std::cout << "\n";
 
-	if( IsIncludeAllNumbers() ) {
+	if( qualifier.IsIncludeAllNumbers() ) {
 		std::cout << "N \\ ";
 	}
-	print_set(static_cast<std::set<TNumber> >(numbers));
+	PrintSet(static_cast<std::set<TNumber> >(qualifier.numbers));
 	std::cout << "\n";
 
-	if( IsIncludeTerms() ) {
+	if( qualifier.IsIncludeTerms() ) {
 		std::cout << "B";
 	}
 	std::cout << "\n\n";
 }
 
-void CQualifier::MoveTo(CQualifier* toQualifier)
+void CQualifier::Empty()
 {
-	//toQualifier->ansichars.
+	flags = 0;
+	ansichars.reset();
+	chars.Empty();
+	labels.Empty();
+	numbers.Empty();
 }
 
-bool CQualifier::Check(const CUnitLink* unit) const
+void CQualifier::Move(CQualifier* toQualifier)
 {
-	switch( unit->Type() ) {
-		case CUnitLink::T_char:
+	toQualifier->flags = flags;
+	toQualifier->ansichars = ansichars;
+	toQualifier->chars.Swap( &chars );
+	toQualifier->labels.Swap( &labels );
+	toQualifier->numbers.Swap( &numbers );
+	Empty();
+}
+
+bool CQualifier::Check(const CUnit* unit) const
+{
+	switch( unit->GetType() ) {
+		case UT_Char:
 			{
 				TChar c = unit->Char();
-				if( c >= 0 && static_cast<int>(c) < D_ansi_set_size ) {
+				if( c >= 0 && static_cast<int>(c) < AnsiSetSize ) {
 					return ansichars.test(c);
 				} else {
 					return ( (chars.Find(c) == 0) != IsIncludeAllChars() );
 				}
 			}
 			break;
-		case CUnitLink::T_label:
+		case UT_Label:
 			return ( (labels.Find(unit->Label()) == 0)
 				!= IsIncludeAllLabels() );
 			break;
-		case CUnitLink::T_number:
+		case UT_Number:
 			return ( (numbers.Find(unit->Number()) == 0)
 				!= IsIncludeAllNumbers() );
 			break;
-		case CUnitLink::T_left_paren:
-		case CUnitLink::T_right_paren:
+		case UT_LeftParen:
+		case UT_RightParen:
 			return IsIncludeTerms();
 			break;
 		default:
-			/* assert */
+			assert( false );
 			break;
 	}
-	/* assert */
+	assert( false );
 	return false;
 }
 
-CQualifier& CQualifier::operator*=(CQualifier& q)
+void CQualifier::DestructiveIntersection(CQualifier* withQualifier)
 {
 #define INTERSECT(FLAG, SET1, SET2) \
 	if( (flags & FLAG) != 0 ) {\
-		if( (q.flags & FLAG) != 0 ) {\
+		if( (withQualifier->flags & FLAG) != 0 ) {\
 			SET1 *= SET2;\
 		} else {\
 			SET1 -= SET2;\
 		}\
 	} else {\
-		if( (q.flags & FLAG) != 0 ) {\
-			SET1.Swap(SET2);\
+		if( (withQualifier->flags & FLAG) != 0 ) {\
+			SET1.Swap( &SET2 );\
 			flags |= FLAG;\
 			SET1 -= SET2;\
 		} else {\
@@ -91,16 +124,15 @@ CQualifier& CQualifier::operator*=(CQualifier& q)
 		}\
 	}
 
-	INTERSECT(F_all_chars, chars, q.chars);
-	INTERSECT(F_all_labels, labels, q.labels);
-	INTERSECT(F_all_numbers, numbers, q.numbers);
+	INTERSECT(QIF_AllChars, chars, withQualifier->chars);
+	INTERSECT(QIF_AllLabels, labels, withQualifier->labels);
+	INTERSECT(QIF_AllNumbers, numbers, withQualifier->numbers);
 #undef INTERSECT
 
-	if( ((flags & q.flags) & F_terms) == 0 ) {
-		flags &= ~F_terms;
+	if( ((flags & withQualifier->flags) & QIF_Terms) == 0 ) {
+		flags &= ~QIF_Terms;
 	}
-	ansichars &= q.ansichars;
-	return *this;
+	ansichars &= withQualifier->ansichars;
 }
 
 } // end of namespace refal2

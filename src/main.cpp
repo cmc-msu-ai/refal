@@ -11,9 +11,37 @@ class CMyClass : public IScannerListener,
 public:
 	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c) {}
 	virtual void OnParserError(const TParserErrorCodes errorCode) {}
-	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes errorCode) {}
-	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes errorCode) {}
+	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes errorCode);
+	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes errorCode);
 };
+
+void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes errorCode)
+{
+	static const char* errorText[] = {
+		"FBEC_ThereAreNoRulesInFunction",
+		"FBEC_IllegalLeftBracketInLeftPart",
+		"FBEC_IllegalRightBracketInLeftPart",
+		"FBEC_RightParenDoesNotMatchLeftParen",
+		"FBEC_RightBracketDoesNotMatchLeftBracket",
+		"FBEC_UnclosedLeftParenInLeftPart",
+		"FBEC_UnclosedLeftParenInRightPart",
+		"FBEC_UnclosedLeftBracketInRightPart",
+		"FBEC_IllegalQualifierInRightPart"
+	};
+	
+	printf("CFunctionBuilder error: %s\n", errorText[errorCode]);
+}
+
+void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes errorCode)
+{
+	static const char* errorText[] = {
+		"VBEC_NoSuchTypeOfVariable",
+		"VBEC_TypeOfVariableDoesNotMatch",
+		"VBEC_NoSuchVariableInLeftPart"
+	};
+	
+	printf("CVariablesBuilder error: %s\n", errorText[errorCode]);
+}
 
 int main()
 {

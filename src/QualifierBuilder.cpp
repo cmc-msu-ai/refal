@@ -1,7 +1,5 @@
-#include "QualifierBuilder.h"
-#include "SetBuilder.h"
-#include "Qualifier.h"
 #include <bitset>
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -35,31 +33,36 @@ void CQualifierBuilder::Reset()
 
 void CQualifierBuilder::Export(CQualifier* qualifier)
 {
+	qualifier->Empty();
+
 	AddW();
 
 	qualifier->ansichars = ansichars;
 	if( terms == S_yes ) {
-		qualifier->flags |= CQualifier::F_terms;
+		qualifier->flags |= QIF_Terms;
 	}
+
 	bool tmp;
 	charsBuilder.Export(qualifier->chars, tmp);
 	if( tmp ) {
-		qualifier->flags |= CQualifier::F_all_chars;
+		qualifier->flags |= QIF_AllChars;
 	}
+
 	labelsBuilder.Export(qualifier->labels, tmp);
 	if( tmp ) {
-		qualifier->flags |= CQualifier::F_all_labels;
+		qualifier->flags |= QIF_AllLabels;
 	}
+
 	numbersBuilder.Export(qualifier->numbers, tmp);
 	if( tmp ) {
-		qualifier->flags |= CQualifier::F_all_numbers;
+		qualifier->flags |= QIF_AllNumbers;
 	}
 }
 
 void CQualifierBuilder::AddChar(TChar c)
 {
 	if( chars == S_none ) {
-		if( c >= 0 && static_cast<int>(c) < D_ansi_set_size ) {
+		if( c >= 0 && static_cast<int>(c) < AnsiSetSize ) {
 			if( !ansicharsFixed.test(static_cast<unsigned int>(c)) ) {
 				ansichars.set(static_cast<unsigned int>(c), !negative);
 				ansicharsFixed.set(static_cast<unsigned int>(c));
@@ -215,4 +218,3 @@ void CQualifierBuilder::AddB()
 }
 
 } // end of namespace refal2
-
