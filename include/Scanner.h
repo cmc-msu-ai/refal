@@ -33,13 +33,19 @@ enum TScannerState {
 	SS_NotBeginComment,
 	SS_NotBeginPlus,
 	SS_NotBeginCommentAfterPlus,
-	SS_S, SS_SA, SS_SB, SS_SX, SS_S0, SS_SXA, SS_S0A,
 	SS_BeginLabelOrNumber,
 	SS_NotBeginLabel,
 	SS_NotBeginNumber,
 	SS_Identificator,
 	SS_BeginQualifier,
-	SS_NotBeginQualifier
+	SS_NotBeginQualifier,
+	SS_String,
+	SS_StringAfterQuote,
+	SS_StringAfterBackslash,
+	SS_StringWaitHexadecimalCode,
+	SS_StringHexadecimalCode,
+	SS_StringWaitOctalCode,
+	SS_StringOctalCode
 };
 
 enum TScannerErrorCodes {
@@ -78,6 +84,10 @@ public:
 	inline CScanner(IScannerListener* listener);
 
 	void Reset();
+
+	int GetCharOffset() { return localOffset; }
+	int GetLexemOffset() { return offset; }
+	int GetLine() { return line; }
 
 	void AddChar(char c);
 	void AddEndOfFile() { processEndOfFile(); }
