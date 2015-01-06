@@ -51,7 +51,7 @@ enum TParserState {
 enum TParserErrorCodes {
 };
 
-class IParserListener {
+class IParserListener : public IFunctionBuilderListener {
 public:
 	virtual void OnParserError(const TParserErrorCodes errorCode) = 0;
 };
@@ -62,10 +62,11 @@ public:
 
 	void Reset();
 
-protected:
-	virtual void ProcessLexem();
-
 private:
+	virtual void OnErrors();
+
+	virtual void ProcessLexem();	
+
 	void processNamedQualifier(const bool afterRightParen = false);
 	void processNamedQualifierAfterError();
 
@@ -97,9 +98,9 @@ private:
 };
 
 inline CParser::CParser(IParserListener* listener):
-	CScanner( dynamic_cast<IScannerListener*>(listener) ),
-	CListener<IParserListener>(listener),
-	functionBuilder( dynamic_cast<IFunctionBuilderListener*>(listener) )
+	CScanner( dynamic_cast<IScannerListener*>( listener ) ),
+	CListener<IParserListener>( listener ),
+	functionBuilder( listener )
 {
 	assert( CListener<IParserListener>::HasListener() );
 

@@ -13,6 +13,10 @@ void CParser::Reset()
 	qualifierBuilder.Reset();
 }
 
+void CParser::OnErrors()
+{
+}
+
 void CParser::ProcessLexem()
 {
 	switch( state )
