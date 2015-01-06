@@ -6,8 +6,6 @@
 
 namespace Refal2 {
 
-class CQualifier;
-
 void PrintQualifier(const CQualifier& qualifier);
 
 const int AnsiSetSize = 128;

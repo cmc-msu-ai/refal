@@ -1,34 +1,39 @@
-#include <stdio.h>
+#include <iostream>
 #include <Refal2.h>
 
 namespace Refal2 {
 
-void PrintUnit(const CUnit& unit)
+void PrintUnit(const CUnit& unit, const CVariables* variables)
 {
 	switch( unit.GetType() ) {
 		case UT_Char:
-			printf("'%c' ", unit.Char());
+			std::cout << "'" << unit.Char() << "' ";
 			break;
 		case UT_Label:
-			printf("/%s/ ", LabelTable.GetLabelText( unit.Label() ).c_str() );
+			std::cout << "/" << LabelTable.GetLabelText( unit.Label() ) << "/ ";
 			break;
 		case UT_Number:
-			printf("/%d/ ", unit.Number());
+			std::cout << "/" << unit.Number() << "/ ";
 			break;
 		case UT_Variable:
-			printf("V%d ", unit.Variable());
+			if( variables != 0 ) {
+				std::cout << variables->GetVariable(unit.Variable()).GetType();
+			} else {
+				std::cout << "V";
+			}
+			std::cout << unit.Variable() << " ";
 			break;
 		case UT_LeftParen:
-			printf("( ");
+			std::cout << "( ";
 			break;
 		case UT_RightParen:
-			printf(") ");
+			std::cout << ") ";
 			break;
 		case UT_LeftBracket:
-			printf("< ");
+			std::cout << "< ";
 			break;
 		case UT_RightBracket:
-			printf("> ");
+			std::cout << "> ";
 			break;
 		default:
 			/* assert */
@@ -36,16 +41,17 @@ void PrintUnit(const CUnit& unit)
 	}
 }
 
-void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode)
+void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
+	const CVariables* variables)
 {
 	if( fromNode == 0 || toNode == 0 ) {
 		return;
 	}
 	
 	for( ; fromNode != toNode; fromNode = fromNode->Next() ) {
-		PrintUnit(*fromNode);
+		PrintUnit(*fromNode, variables);
 	}
-	PrintUnit(*fromNode);
+	PrintUnit(*fromNode, variables);
 }
 
 bool CompareUnit(const CUnit& unitA, const CUnit& unitB)

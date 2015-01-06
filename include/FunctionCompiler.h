@@ -6,8 +6,6 @@
 
 namespace Refal2 {
 
-typedef int TTableIndex;
-
 const TTableIndex InvalideTableIndex = -1;
 
 struct CHole {

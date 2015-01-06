@@ -6,9 +6,6 @@ namespace Refal2 {
 
 const int InvalidVariableIndex = -1;
 
-class CVariables;
-class CVariablesBuilder;
-
 const TVariableType InvalidVariableType = '\0';
 
 class CVariable {

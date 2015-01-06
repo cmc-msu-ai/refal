@@ -22,13 +22,11 @@ enum TUnitTypeMask {
 	UTM_Bracket = UT_LeftBracket | UT_RightBracket
 };
 
-class CUnit;
-class CUnitNode;
-class CUnitList;
-
-void PrintUnit(const CUnit& unit);
-void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode);
-inline void PrintUnitList(const CUnitList& unitList);
+void PrintUnit(const CUnit& unit, const CVariables* variables = 0);
+void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
+	const CVariables* variables = 0);
+inline void PrintUnitList(const CUnitList& unitList,
+	const CVariables* variables = 0);
 
 bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
 
@@ -223,9 +221,10 @@ inline CUnitNode* CUnitList::AppendRightBracket(CUnitNode* leftBracket)
 	return Append(unit);
 }
 
-inline void PrintUnitList(const CUnitList& unitList)
+inline void PrintUnitList(const CUnitList& unitList,
+	const CVariables* variables)
 {
-	PrintUnitList(unitList.GetFirst(), unitList.GetLast());
+	PrintUnitList(unitList.GetFirst(), unitList.GetLast(), variables);
 }
 
 } // end of namespace Refal2

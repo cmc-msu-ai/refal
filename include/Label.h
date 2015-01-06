@@ -47,7 +47,4 @@ private:
 	CLabelInfo* table;
 };
 
-// declaration of global label table
-extern CLabelTable LabelTable;
-
 } // end of namespace Refal2

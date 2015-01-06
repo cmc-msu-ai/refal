@@ -5,8 +5,6 @@
 
 namespace Refal2 {
 
-struct CFunctionRule;
-
 void PrintRule(const CFunctionRule* rule);
 void PrintFunction(const CFunctionRule* firstRule);
 
@@ -27,8 +25,6 @@ enum TFunctionState {
 	FS_Parsed,
 	FS_Compiled
 };
-
-class CFunctionCompiler;
 
 class CFunction {
 	friend class CFunctionCompiler;

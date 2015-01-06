@@ -10,9 +10,9 @@ void PrintRule(const CFunctionRule* rule)
 		printf("R");
 	}
 	printf(" ");
-	PrintUnitList( rule->leftPart );
+	PrintUnitList( rule->leftPart, &rule->variables );
 	printf("= ");
-	PrintUnitList( rule->rightPart );
+	PrintUnitList( rule->rightPart, &rule->variables );
 }
 
 void PrintFunction(const CFunctionRule* firstRule)

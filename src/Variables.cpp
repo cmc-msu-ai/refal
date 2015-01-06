@@ -39,6 +39,7 @@ void CVariables::Import(CVariablesBuilder* variablesBuiler)
 				variablesValuesSize += countOfValues;
 
 				variableInfo.qualifier.Move( &variables[j].qualifier );
+				j++;
 			}
 		}
 	}

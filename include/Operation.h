@@ -4,12 +4,6 @@
 
 namespace Refal2 {
 
-struct COperationOperation;
-struct COperationInt;
-struct COperationIntInt;
-struct COperationUnit;
-struct COperationQualifier;
-
 struct COperation {
 	enum TOperationType {
 		OT_goto, /* one argument operation pointer */
