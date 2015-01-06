@@ -1,9 +1,9 @@
 #pragma once
 
-#include "FastSet.h"
-#include <algorithm>
-#include <iterator>
 #include <set>
+#include <iterator>
+#include <algorithm>
+#include <Refal2.h>
 
 namespace Refal2 {
 
@@ -18,7 +18,7 @@ public:
 	}
 
 	void Reset();
-	bool Export(CFastSet<T>&, bool& include_all);
+	void Export(CFastSet<T>*, bool* include_all);
 
 	void Include(const T&);
 	void Include(const TSet&);
@@ -53,20 +53,17 @@ void CSetBuilder<T>::Reset()
 }
 
 template<class T>
-bool CSetBuilder<T>::Export(CFastSet<T>& set, bool& include_all)
+void CSetBuilder<T>::Export(CFastSet<T>* set, bool* include_all)
 {
-	if( full_set_status == S_thru || !thru.empty() ) {
-		return false;
-	}
+	assert( full_set_status != S_thru && thru.empty() );
 	
 	if( full_set_status == S_yes ) {
-		include_all = true;
-		set = no;
+		*include_all = true;
+		*set = no;
 	} else {
-		include_all = false;
-		set = yes;
+		*include_all = false;
+		*set = yes;
 	}
-	return true;
 }
 
 template<class T>
