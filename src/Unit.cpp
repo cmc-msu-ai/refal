@@ -105,26 +105,6 @@ void CUnitList::Empty()
 	last = 0;
 }
 
-void CUnitList::Swap(CUnitList* listToSwap)
-{
-	CUnitNode* tmp = first;
-	first = listToSwap->first;
-	listToSwap->first = tmp;
-	
-	tmp = last;
-	last = listToSwap->last;
-	listToSwap->last = tmp;
-}
-
-void CUnitList::Move(CUnitList* listTo)
-{
-	listTo->Empty();
-	listTo->first = first;
-	listTo->last = last;
-	first = 0;
-	last = 0;
-}
-	
 CUnitNode* CUnitList::InsertBefore(CUnitNode* nodeBefore, const CUnit& unit)
 {
 	CUnitNode* newNode = alloc(unit);

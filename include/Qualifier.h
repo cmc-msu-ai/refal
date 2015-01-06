@@ -51,8 +51,10 @@ private:
 
 inline void CQualifier::Move(CQualifier* moveTo)
 {
-	moveTo->Empty();
-	Swap( moveTo );
+	if( this != moveTo ) {
+		moveTo->Empty();
+		Swap( moveTo );
+	}
 }
 
 inline bool CQualifier::IsIncludeAllChars() const

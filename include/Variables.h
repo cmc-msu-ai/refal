@@ -110,8 +110,10 @@ inline CVariables::CVariables():
 
 inline void CVariables::Move(CVariables* moveTo)
 {
-	moveTo->Reset();
-	Swap( moveTo );
+	if( this != moveTo ) {
+		moveTo->Reset();
+		Swap( moveTo );
+	}
 }
 
 inline CVariable* CVariables::GetVariable(const TVariableIndex variableIndex)

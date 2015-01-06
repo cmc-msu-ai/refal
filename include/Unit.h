@@ -110,8 +110,8 @@ public:
 	void Empty();
 	bool IsEmpty() { return ( first == 0 ); }
 	
-	void Swap(CUnitList* listToSwap);
-	void Move(CUnitList* listTo);
+	inline void Swap(CUnitList* swapWith);
+	inline void Move(CUnitList* moveTo);
 	
 	CUnitNode* GetFirst() { return first; }
 	const CUnitNode* GetFirst() const { return first; }
@@ -164,6 +164,20 @@ private:
 	CUnitNode* first;
 	CUnitNode* last;
 };
+
+inline void CUnitList::Swap(CUnitList* swapWith)
+{
+	std::swap( first, swapWith->first );
+	std::swap( last, swapWith->last );
+}
+
+inline void CUnitList::Move(CUnitList* moveTo)
+{
+	if( this != moveTo ) {
+		moveTo->Empty();
+		Swap( moveTo );
+	}
+}
 
 inline CUnitNode* CUnitList::AppendChar(TChar c)
 {
