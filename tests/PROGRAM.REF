@@ -13,7 +13,7 @@ program START
 abc S ('abccd')
 bbb S :abc:
  
-go  = 'abc\6752de\xFFtf' +
+go  = 'abc6752de\xFFtf' +
 <functab/repeat/><functab/until/><functab/const/><functab/false/>+
  <functab/integer/><functab/boolean/><functab/endcase/><functab/begin/>+
  <functab/end/><functab/do/><functab/not/><functab/div/><functab/case/>+
