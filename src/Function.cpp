@@ -26,16 +26,11 @@ void PrintFunction(const CFunctionRule* firstRule)
 CFunctionBuilder::CFunctionBuilder(IFunctionBuilderListener* listener):
 	CListener(listener),
 	state(FBS_Direction),
-	errors(false),
 	isRightDirection(false),
 	firstRule(0),
 	lastRule(0),
 	variablesBuilder( static_cast<IVariablesBuilderListener*>(listener) )
 {	
-}
-
-void CFunctionBuilder::OnVariablesBuilderError(const TVariablesBuilderErrorCodes)
-{
 }
 
 void CFunctionBuilder::Reset()
@@ -62,12 +57,9 @@ void CFunctionBuilder::Export(CFunction* function)
 	Reset();
 }
 
-void CFunctionBuilder::SetErrors()
+void CFunctionBuilder::OnErrors()
 {
-	if( !errors ) {
-		emptyRules();
-	}
-	errors = true;
+	emptyRules();
 }
 
 void CFunctionBuilder::AddDirection(bool _isRightDirection)

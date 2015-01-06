@@ -88,16 +88,14 @@ public:
 	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes) = 0;
 };
 
-class CFunctionBuilder : public CListener<IFunctionBuilderListener> {
+class CFunctionBuilder : public CErrors,
+	public CListener<IFunctionBuilderListener>
+{
 public:
 	explicit CFunctionBuilder(IFunctionBuilderListener* listener);
 	~CFunctionBuilder() { Reset(); }
 	
-	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes);
-	
-	bool HasErrors() const { return errors; }
-	void SetErrors();
-	inline void ResetErrors();
+	virtual void OnErrors();
 	
 	TFunctionBuilderState GetState() const { return state; }
 	bool IsDirectionState() const { return ( state == FBS_Direction ); }
@@ -133,7 +131,6 @@ private:
 	void addRule();
 	
 	TFunctionBuilderState state;
-	bool errors;
 	bool isRightDirection;
 	CUnitList acc;
 	CUnitList leftPart;
@@ -142,12 +139,6 @@ private:
 	CVariablesBuilder variablesBuilder;
 	std::stack<CUnitNode*> balanceStack;
 };
-
-inline void CFunctionBuilder::ResetErrors()
-{
-	errors = false;
-	Reset();
-}
 
 inline void CFunctionBuilder::emptyStack()
 {
