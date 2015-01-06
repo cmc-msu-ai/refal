@@ -17,7 +17,10 @@ void PrintUnit(const CUnit& unit, const CVariables* variables)
 			break;
 		case UT_Variable:
 			if( variables != 0 ) {
-				std::cout << variables->GetVariable(unit.Variable()).GetType();
+				std::cout <<
+					variables->GetVariable( unit.Variable() ).GetType();
+				PrintQualifier(
+					variables->GetVariable( unit.Variable() ).GetQualifier() );
 			} else {
 				std::cout << "V";
 			}
