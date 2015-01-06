@@ -54,9 +54,9 @@ extern CLabelTable LabelTable;
 
 } // end of namespace Refal2
 
+#include <Assert.h>
 #include <FastSet.h>
 #include <SetBuilder.h>
-#include <Assert.h>
 #include <Listener.h>
 #include <Unit.h>
 #include <Qualifier.h>
