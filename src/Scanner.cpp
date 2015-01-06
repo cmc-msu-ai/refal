@@ -550,39 +550,4 @@ void CScanner::processEndOfFile()
 	ProcessLexem();
 }
 
-void CScanner::error(TScannerErrorCodes errorCode, char c)
-{
-	static const char* errorText[] = {
-		"SEC_UnexpectedControlSequence",
-		"SEC_SymbolAfterPlus",
-		"SEC_UnexpectedCharacter",
-		"SEC_IllegalCharacterInLabelOrNumberBegin",
-		"SEC_IllegalCharacterInLabel",
-		"SEC_IllegalCharacterInNumber",
-		"SEC_IllegalCharacterInQualifierNameBegin",
-		"SEC_IllegalCharacterInQualifierName",
-		"SEC_IllegalCharacterInStringAfterBackslash",
-		"SEC_IllegalCharacterInStringInHexadecimal",
-		"SEC_TryingAppendNullByteToString",
-		"SEC_IllegalCharacterInStringInOctal",
-		"SEC_UnclosedStringConstantAtTheEndOfFile",
-		"SEC_UnclosedStringConstant",
-		"SEC_UnclosedLabelOrNumberAtTheEndOfFile",
-		"SEC_UnclosedLabelOrNumber",
-		"SEC_UnclosedLabelAtTheEndOfFile",
-		"SEC_UnclosedLabel",
-		"SEC_UnclosedNumberAtTheEndOfFile",
-		"SEC_UnclosedNumber",
-		"SEC_UnclosedQualifierAtTheEndOfFile",
-		"SEC_UnclosedQualifier",
-		"SEC_UnexpectedEndOfFil"
-	};
-
-	std::cout << "ScannerError: " << line << ": " << localOffset << ": ";
-	if( c != '\0' ) {
-		std::cout << c << ": ";
-	}
-	std::cout << errorText[errorCode] << "\n";
-}
-
 } // end of namespace Refal2

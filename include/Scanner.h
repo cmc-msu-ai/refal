@@ -111,24 +111,30 @@ protected:
 private:
 	void processChar(char c);
 	void processEndOfFile();
-	void error(const TScannerErrorCodes errorCode, char c = '\0');
+	inline void error(const TScannerErrorCodes errorCode, const char c = '\0');
 
 	TScannerState state;
 	int localOffset;
 	unsigned int stringCharCodeAcc;
 };
 
-inline CScanner::CScanner(IScannerListener* listener):
+inline CScanner::CScanner(IScannerListener* listener = 0):
 	CListener(listener)
 {
-	assert( HasListener() );
-
 	Reset();
 }
 
 inline bool CScanner::identificatorIs(const std::string& toCompare) const
 {
 	return ( lexem == L_Identificator && toCompare == ToLower( lexemString ) );
+}
+
+inline void CScanner::error(const TScannerErrorCodes errorCode, const char c)
+{
+	SetErrors();
+	if( HasListener() ) {
+		GetListener()->OnScannerError( errorCode, c );
+	}
 }
 
 } // end of namespace Refal2
