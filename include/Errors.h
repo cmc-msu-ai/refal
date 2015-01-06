@@ -10,6 +10,7 @@ public:
 	void ResetErrors() { errors = false; }
 	bool HasErrors() const { return errors; }
 	
+protected:
 	virtual void OnErrors() {};
 	
 private:

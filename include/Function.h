@@ -95,8 +95,6 @@ public:
 	explicit CFunctionBuilder(IFunctionBuilderListener* listener);
 	~CFunctionBuilder() { Reset(); }
 	
-	virtual void OnErrors();
-	
 	TFunctionBuilderState GetState() const { return state; }
 	bool IsDirectionState() const { return ( state == FBS_Direction ); }
 	bool IsLeftState() const { return ( state == FBS_Left ); }
@@ -120,10 +118,12 @@ public:
 	void AddRightParen();
 	void AddLeftBracket();
 	void AddRightBracket();
-	
+
 private:
 	CFunctionBuilder(const CFunctionBuilder&);
 	CFunctionBuilder& operator=(const CFunctionBuilder&);
+
+	virtual void OnErrors();
 	
 	inline void emptyStack();	
 	inline void error(const TFunctionBuilderErrorCodes errorCode);
