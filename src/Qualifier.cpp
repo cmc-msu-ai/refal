@@ -65,7 +65,7 @@ static void printChars(const CFastSet<TChar>& chars, const TAnsiSet& ansichars,
 		std::cout << "'";
 	}
 	std::set<TChar> a;
-	chars.GetSet(a);
+	chars.GetSet( &a );
 	for( std::set<TChar>::const_iterator i = a.begin(); i != a.end(); ++i ) {
 		std::cout << *i;
 	}
@@ -90,7 +90,7 @@ static void printLabels(const CFastSet<TLabel>& labels, bool isIncludeAll)
 	}
 
 	std::set<TLabel> a;
-	labels.GetSet(a);
+	labels.GetSet( &a );
 	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
 		std::cout << "/" << LabelTable.GetLabelText(*i) << "/";
 	}
@@ -113,7 +113,7 @@ static void printNumbers(const CFastSet<TNumber>& numbers, bool isIncludeAll)
 	}
 
 	std::set<TNumber> a;
-	numbers.GetSet(a);
+	numbers.GetSet( &a );
 	for( std::set<TNumber>::const_iterator i = a.begin(); i != a.end(); ++i ) {
 		std::cout << "/" << *i << "/";
 	}
@@ -182,17 +182,15 @@ bool CQualifier::Check(const CUnit* unit) const
 			if( c >= 0 && static_cast<int>(c) < AnsiSetSize ) {
 				return ansichars.test(c);
 			} else {
-				return ( ( chars.Find(c) == 0 ) == IsIncludeAllChars() );
+				return ( chars.Has(c) != IsIncludeAllChars() );
 			}
 			break;
 		}
 		case UT_Label:
-			return ( ( labels.Find( unit->Label() ) == 0 )
-				== IsIncludeAllLabels() );
+			return ( labels.Has( unit->Label() ) != IsIncludeAllLabels() );
 			break;
 		case UT_Number:
-			return ( ( numbers.Find( unit->Number() ) == 0 )
-				== IsIncludeAllNumbers() );
+			return ( numbers.Has( unit->Number() ) != IsIncludeAllNumbers() );
 			break;
 		case UT_LeftParen:
 		case UT_RightParen:

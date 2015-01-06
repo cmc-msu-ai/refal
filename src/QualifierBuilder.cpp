@@ -107,7 +107,7 @@ void CQualifierBuilder::AddQualifier(const CQualifier& qualifier)
 			ansichars &= ansicharsFixed | (~qualifier.ansichars);
 			/* chars */
 			if( qualifier.IsIncludeAllChars() ) {
-				charsBuilder.ExcludeAllExcept(qualifier.chars);
+				charsBuilder.ExcludeAllExcept( qualifier.chars );
 			} else {
 				charsBuilder.Exclude(qualifier.chars);
 			}
@@ -116,7 +116,7 @@ void CQualifierBuilder::AddQualifier(const CQualifier& qualifier)
 			ansichars |= (~ansicharsFixed) & qualifier.ansichars;
 			/* chars */
 			if( qualifier.IsIncludeAllChars() ) {
-				charsBuilder.IncludeAllExcept(qualifier.chars);
+				charsBuilder.IncludeAllExcept( qualifier.chars );
 			} else {
 				charsBuilder.Include(qualifier.chars);
 			}
@@ -126,26 +126,26 @@ void CQualifierBuilder::AddQualifier(const CQualifier& qualifier)
 	if( negative ) {
 		/* labels */
 		if( qualifier.IsIncludeAllLabels() ) {
-			labelsBuilder.ExcludeAllExcept(qualifier.labels);
+			labelsBuilder.ExcludeAllExcept( qualifier.labels );
 		} else {
 			labelsBuilder.Exclude(qualifier.labels);
 		}
 		/* numbers */
 		if( qualifier.IsIncludeAllNumbers() ) {
-			numbersBuilder.ExcludeAllExcept(qualifier.numbers);
+			numbersBuilder.ExcludeAllExcept( qualifier.numbers );
 		} else {
 			numbersBuilder.Exclude(qualifier.numbers);
 		}
 	} else {
 		/* labels */
 		if( qualifier.IsIncludeAllLabels() ) {
-			labelsBuilder.IncludeAllExcept(qualifier.labels);
+			labelsBuilder.IncludeAllExcept( qualifier.labels );
 		} else {
 			labelsBuilder.Include(qualifier.labels);
 		}
 		/* numbers */
 		if( qualifier.IsIncludeAllNumbers() ) {
-			numbersBuilder.IncludeAllExcept(qualifier.numbers);
+			numbersBuilder.IncludeAllExcept( qualifier.numbers );
 		} else {
 			numbersBuilder.Include(qualifier.numbers);
 		}

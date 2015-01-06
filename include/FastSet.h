@@ -1,15 +1,17 @@
 #pragma once
 
-#include <algorithm>
-#include <set>
 #include <string.h>
+#include <set>
+#include <algorithm>
+#include <Refal2.h>
+
 
 template<class T>
 class CFastSet {
 public:
 	typedef std::set<T> TSet;
 
-	CFastSet(): elements(0), size(0) {}
+	CFastSet(): elementsSize(0), elements(0) {}
 	CFastSet(const TSet&);
 	CFastSet(const CFastSet&);
 	~CFastSet() { Empty(); }
@@ -17,43 +19,44 @@ public:
 	CFastSet& operator=(const CFastSet&);
 	CFastSet& operator=(const TSet&);
 
+	inline void Empty();
+	bool IsEmpty() const { return ( elementsSize == 0 ); }
+	inline void Swap(CFastSet* swapWith);
+	inline void Move(CFastSet* moveTo);
+
+	int GetSize() { return elementsSize; }
+	void GetSet(TSet* set) const { *set = *this; }
+	inline operator TSet() const;
+
 	CFastSet& operator*=(const CFastSet&);
-	CFastSet& operator-=(const CFastSet&);
+	CFastSet& operator+=(const CFastSet&);
+	CFastSet& operator-=(const CFastSet&);	
 
-	bool IsEmpty() const { return ( size == 0 ); }
-	void Empty();
-	void Swap(CFastSet* toSwap);
-
-	const T* Find(const T element) const;
-
-	void GetSet(TSet&) const;
-	operator TSet() const;
+	bool Has(const T element) const;
 
 private:
+	int elementsSize;
 	T* elements;
-	int size;
 };
 
 template<class T>
 CFastSet<T>::CFastSet(const TSet& set):
-	elements(new T[set.size()]),
-	size(set.size())
+	elementsSize( set.size() ),
+	elements(new T[elementsSize])
 {
 	int i = 0;
-	typename TSet::const_iterator j = set.begin();
-	while( j != set.end() ) {
+	for( typename TSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
 		elements[i] = *j;
-		++i;
-		++j;
+		i++;
 	}
 }
 
 template<class T>
 CFastSet<T>::CFastSet(const CFastSet& set):
-	elements(new T[set.size]),
-	size(set.size)
+	elementsSize( set.elementsSize ),
+	elements(new T[elementsSize])
 {
-	memcpy(elements, set.elements, size * sizeof(T));
+	::memcpy( elements, set.elements, elementsSize * sizeof(T) );
 }
 
 template<class T>
@@ -61,9 +64,9 @@ CFastSet<T>& CFastSet<T>::operator=(const CFastSet& set)
 {
 	if( this != &set ) {
 		delete[] elements;
-		size = set.size;
-		elements = new T[size];
-		memcpy(elements, set.elements, size * sizeof(T));
+		elementsSize = set.elementsSize;
+		elements = new T[elementsSize];
+		::memcpy( elements, set.elements, elementsSize * sizeof(T) );
 	}
 
 	return *this;
@@ -73,16 +76,61 @@ template<class T>
 CFastSet<T>& CFastSet<T>::operator=(const TSet& set)
 {
 	delete[] elements;
-	size = set.size();
-	elements = new T[size];
+	elementsSize = set.size();
+	elements = new T[elementsSize];
 	
 	int i = 0;
-	typename TSet::const_iterator j = set.begin();
-	while( j != set.end() ) {
+	for( typename TSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
 		elements[i] = *j;
-		++i;
-		++j;
+		i++;
 	}
+
+	return *this;
+}
+
+template<class T>
+inline void CFastSet<T>::Empty()
+{
+	elementsSize = 0;
+	delete[] elements;
+	elements = 0;
+}
+
+template<class T>
+inline void CFastSet<T>::Swap(CFastSet<T>* swapWith)
+{
+	std::swap( elementsSize, swapWith->elementsSize );
+	std::swap( elements, swapWith->elements );
+}
+
+template<class T>
+inline void CFastSet<T>::Move(CFastSet<T>* moveTo)
+{
+	if( this != moveTo ) {
+		moveTo->Empty();
+		Swap( moveTo );
+	}
+}
+
+template<class T>
+inline CFastSet<T>::operator TSet() const
+{
+	return TSet(elements, elements + elementsSize);
+}
+
+template<class T>
+CFastSet<T>& CFastSet<T>::operator+=(const CFastSet& set)
+{
+	TSet a;
+	GetSet( &a );
+	TSet b;
+	set.GetSet( &b );
+	TSet result;
+
+	std::set_union( a.begin(), a.end(), b.begin(), b.end(),
+		std::inserter( result, result.end() ) );
+
+	*this = result;
 
 	return *this;
 }
@@ -90,37 +138,16 @@ CFastSet<T>& CFastSet<T>::operator=(const TSet& set)
 template<class T>
 CFastSet<T>& CFastSet<T>::operator*=(const CFastSet& set)
 {
-	if( this != &set ) {
-		int j = 0;
-		int i = 0;
-		T* src = elements;
-		T* dst = elements;
+	TSet a;
+	GetSet( &a );
+	TSet b;
+	set.GetSet( &b );
+	TSet result;
 
-		while( i < size && j < set.size ) {
-			if( set.elements[j] < src[0] ) {
-				++j;
-				while( j < set.size && set.elements[j] < src[0] ) {
-					++j;
-				}
-				if( j == set.size ) {
-					break;
-				}
-			}
+	std::set_intersection( a.begin(), a.end(), b.begin(), b.end(),
+		std::inserter( result, result.end() ) );
 
-			if( dst != src ) {
-				memmove(dst, src, sizeof(T));
-			}
-
-			if( ! (src[0] < set.elements[j]) ) {
-				++dst;
-			}
-
-			++src;
-			++i;
-		}
-
-		size = dst - elements;
-	}
+	*this = result;
 
 	return *this;
 }
@@ -128,100 +155,24 @@ CFastSet<T>& CFastSet<T>::operator*=(const CFastSet& set)
 template<class T>
 CFastSet<T>& CFastSet<T>::operator-=(const CFastSet& set)
 {
-	if( this != &set ) {
-		int j = 0;
-		int i = 0;
-		T* src = elements;
-		T* dst = elements;
+	TSet a;
+	GetSet( &a );
+	TSet b;
+	set.GetSet( &b );
+	TSet result;
 
-		while( i < size && j < set.size ) {
-			if( set.elements[j] < src[0] ) {
-				++j;
-				while( j < set.size && set.elements[j] < src[0] ) {
-					++j;
-				}
-				if( j == set.size ) {
-					break;
-				}
-			}
+	std::set_difference( a.begin(), a.end(), b.begin(), b.end(),
+		std::inserter( result, result.end() ) );
 
-			if( dst != src ) {
-				memmove(dst, src, sizeof(T));
-			}
-
-			if( src[0] < set.elements[j] ) {
-				++dst;
-			}
-
-			++src;
-			++i;
-		}
-
-		size = dst - elements;
-	}
+	*this = result;
 
 	return *this;
 }
 
 template<class T>
-void CFastSet<T>::Empty()
+bool CFastSet<T>::Has(const T element) const
 {
-	size = 0;
-	delete[] elements;
-	elements = 0;
+	TSet tmpSet;
+	GetSet( &tmpSet );
+	return ( tmpSet.count( element ) == 1 );
 }
-
-template<class T>
-void CFastSet<T>::Swap(CFastSet<T>* set)
-{
-	if( set != this ) {
-		int tmp = size;
-		size = set->size;
-		set->size = tmp;
-
-		T* tmpe = elements;
-		elements = set->elements;
-		set->elements = tmpe;
-	}
-}
-
-template<class T>
-void CFastSet<T>::GetSet(TSet& set) const
-{
-	set = TSet(elements, elements + size);
-}
-
-template<class T>
-CFastSet<T>::operator TSet() const
-{
-	return TSet(elements, elements + size);
-}
-
-template<class T>
-const T* CFastSet<T>::Find(const T element) const
-{
-	int l = 0;
-	int r = size;
-
-	if( size == 0 || element < elements[0] ) {
-		return 0;
-	}
-
-	while( l < r )
-	{
-		int i = (l + r) / 2;
-		
-		if( elements[i] < element ) {
-			l = i + 1;
-		} else {
-			r = i;
-		}
-	}
-
-	if( r < size && !( element < elements[r] ) ) {
-		return ( elements + r );
-	}
-
-	return 0;
-}
-
