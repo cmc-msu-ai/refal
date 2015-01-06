@@ -7,7 +7,6 @@ CParser::CParser(IParserListener* listener):
 	CScanner( dynamic_cast<IScannerListener*>( listener ) ),
 	CListener<IParserListener>( listener )
 {
-	assert( CListener<IParserListener>::HasListener() );
 	functionBuilder.SetListener( this );
 	Reset();
 }

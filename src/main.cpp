@@ -8,7 +8,7 @@ class CMyClass : public IScannerListener, public IParserListener
 {
 public:
 	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c);
-	virtual void OnParserError(const TParserErrorCodes errorCode) {}
+	virtual void OnParserError(const TParserErrorCodes errorCode);
 	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes errorCode);
 	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes errorCode);
 };
@@ -46,6 +46,10 @@ void CMyClass::OnScannerError(const TScannerErrorCodes errorCode, char c)
 		std::cout << c << ": ";
 	}*/
 	std::cout << errorText[errorCode] << "\n";
+}
+
+void CMyClass::OnParserError(const TParserErrorCodes errorCode)
+{
 }
 
 void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes errorCode)
