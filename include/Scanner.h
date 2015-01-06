@@ -81,7 +81,7 @@ public:
 
 class CScanner : public CErrors, public CListener<IScannerListener> {
 public:
-	inline CScanner(IScannerListener* listener);
+	inline CScanner(IScannerListener* listener = 0);
 
 	void Reset();
 
@@ -118,7 +118,7 @@ private:
 	unsigned int stringCharCodeAcc;
 };
 
-inline CScanner::CScanner(IScannerListener* listener = 0):
+inline CScanner::CScanner(IScannerListener* listener):
 	CListener(listener)
 {
 	Reset();
