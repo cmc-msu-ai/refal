@@ -29,6 +29,13 @@ public:
 	void AddW() { AddS(); AddB(); }
 	void AddB();
 
+	static TAnsiSet MakeFromString(const char* ansiString);
+
+	static const char* Alphabet;
+	static const char* Numbers;
+	static const TAnsiSet AnsiL;
+	static const TAnsiSet AnsiD;
+
 private:
 	CQualifierBuilder(const CQualifierBuilder&);
 	CQualifierBuilder& operator=(const CQualifierBuilder&);
@@ -50,11 +57,6 @@ private:
 
 	TAnsiSet ansichars;
 	TAnsiSet ansicharsFixed;
-
-	static TAnsiSet makeFromString(const char* ansiString);
-
-	static const TAnsiSet ansiL;
-	static const TAnsiSet ansiD;
 };
 
 } // end of namespace refal2

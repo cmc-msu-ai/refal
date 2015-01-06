@@ -3,11 +3,14 @@
 
 namespace Refal2 {
 
-const TAnsiSet CQualifierBuilder::ansiL =
-	makeFromString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-const TAnsiSet CQualifierBuilder::ansiD = makeFromString("0123456789");
+const char* CQualifierBuilder::Alphabet = "abcdefghijklmnopqrstuvwxyz"
+											"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char* CQualifierBuilder::Numbers = "0123456789";
 
-TAnsiSet CQualifierBuilder::makeFromString(const char* ansiString)
+const TAnsiSet CQualifierBuilder::AnsiL = MakeFromString( Alphabet );
+const TAnsiSet CQualifierBuilder::AnsiD = MakeFromString( Numbers );
+
+TAnsiSet CQualifierBuilder::MakeFromString(const char* ansiString)
 {
 	TAnsiSet set;
 	for( ; ansiString[0] != '\0'; ++ansiString ) {
@@ -33,28 +36,29 @@ void CQualifierBuilder::Reset()
 
 void CQualifierBuilder::Export(CQualifier* qualifier)
 {
-	qualifier->Empty();
-
 	AddW();
 
+	qualifier->flags = 0;
 	qualifier->ansichars = ansichars;
 	if( terms == S_yes ) {
 		qualifier->flags |= QIF_Terms;
 	}
 
-	bool tmp;
-	charsBuilder.Export(qualifier->chars, tmp);
-	if( tmp ) {
+	bool isIncludeAllChars = false;
+	charsBuilder.Export( &qualifier->chars, &isIncludeAllChars );
+	if( isIncludeAllChars ) {
 		qualifier->flags |= QIF_AllChars;
 	}
 
-	labelsBuilder.Export(qualifier->labels, tmp);
-	if( tmp ) {
+	bool isIncludeAllLabels = false;
+	labelsBuilder.Export( &qualifier->labels, &isIncludeAllLabels );
+	if( isIncludeAllLabels ) {
 		qualifier->flags |= QIF_AllLabels;
 	}
 
-	numbersBuilder.Export(qualifier->numbers, tmp);
-	if( tmp ) {
+	bool isIncludeAllNumbers = false;
+	numbersBuilder.Export( &qualifier->numbers, &isIncludeAllNumbers);
+	if( isIncludeAllNumbers ) {
 		qualifier->flags |= QIF_AllNumbers;
 	}
 }
@@ -190,11 +194,11 @@ void CQualifierBuilder::AddL()
 {
 	if( chars == S_none ) {
 		if( negative ) {
-			ansichars &= ~ansiL | ansicharsFixed;
+			ansichars &= ~AnsiL | ansicharsFixed;
 		} else {
-			ansichars |= ansiL & (~ansicharsFixed);
+			ansichars |= AnsiL & (~ansicharsFixed);
 		}
-		ansicharsFixed |= ansiL;
+		ansicharsFixed |= AnsiL;
 	}
 }
 
@@ -202,11 +206,11 @@ void CQualifierBuilder::AddD()
 {
 	if( chars == S_none ) {
 		if( negative ) {
-			ansichars &= ~ansiD | ansicharsFixed;
+			ansichars &= ~AnsiD | ansicharsFixed;
 		} else {
-			ansichars |= ansiD & (~ansicharsFixed);
+			ansichars |= AnsiD & (~ansicharsFixed);
 		}
-		ansicharsFixed |= ansiD;
+		ansicharsFixed |= AnsiD;
 	}
 }
 

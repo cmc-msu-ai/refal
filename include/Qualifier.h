@@ -6,8 +6,6 @@
 
 namespace Refal2 {
 
-void PrintQualifier(const CQualifier& qualifier);
-
 const int AnsiSetSize = 128;
 typedef std::bitset<AnsiSetSize> TAnsiSet;
 
@@ -15,8 +13,11 @@ enum TQualifierIncludeFlags {
 	QIF_Terms = 0x1,
 	QIF_AllChars = 0x2,
 	QIF_AllLabels = 0x4,
-	QIF_AllNumbers = 0x8
+	QIF_AllNumbers = 0x8,
+	QIF_All = QIF_Terms | QIF_AllChars | QIF_AllLabels | QIF_AllNumbers
 };
+
+void PrintQualifier(const CQualifier& qualifier);
 
 class CQualifier {
 	friend class CQualifierBuilder;
@@ -26,7 +27,10 @@ public:
 	CQualifier(): flags(0) {}
 
 	void Empty();
-	void Move(CQualifier* toQualifier);
+	bool IsEmpty() const;
+
+	void Swap(CQualifier* swapWith);
+	inline void Move(CQualifier* moveTo);
 
 	void DestructiveIntersection(CQualifier* withQualifier);
 	bool Check(const CUnit* unit) const;
@@ -44,6 +48,12 @@ private:
 	CFastSet<TLabel> labels;
 	CFastSet<TNumber> numbers;
 };
+
+inline void CQualifier::Move(CQualifier* moveTo)
+{
+	moveTo->Empty();
+	Swap( moveTo );
+}
 
 inline bool CQualifier::IsIncludeAllChars() const
 {
