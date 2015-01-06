@@ -30,7 +30,8 @@ CFunctionBuilder::CFunctionBuilder(IFunctionBuilderListener* listener):
 	firstRule(0),
 	lastRule(0),
 	variablesBuilder( static_cast<IVariablesBuilderListener*>(listener) )
-{	
+{
+	assert( HasListener() );
 }
 
 void CFunctionBuilder::Reset()
