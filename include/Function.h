@@ -92,7 +92,7 @@ class CFunctionBuilder : public CErrors,
 	public CListener<IFunctionBuilderListener>
 {
 public:
-	explicit CFunctionBuilder(IFunctionBuilderListener* listener);
+	explicit CFunctionBuilder(IFunctionBuilderListener* listener = 0);
 	~CFunctionBuilder() { Reset(); }
 	
 	TFunctionBuilderState GetState() const { return state; }
@@ -150,7 +150,9 @@ inline void CFunctionBuilder::emptyStack()
 inline void CFunctionBuilder::error(const TFunctionBuilderErrorCodes errorCode)
 {
 	SetErrors();
-	GetListener()->OnFunctionBuilderError( errorCode );
+	if( HasListener() ) {
+		GetListener()->OnFunctionBuilderError( errorCode );
+	}
 }
 
 inline void CFunctionBuilder::AddChar(TChar c)

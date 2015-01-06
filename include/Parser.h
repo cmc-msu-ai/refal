@@ -56,11 +56,16 @@ public:
 	virtual void OnParserError(const TParserErrorCodes errorCode) = 0;
 };
 
-class CParser : public CScanner, public CListener<IParserListener> {
+class CParser : public CScanner, public CListener<IParserListener>,
+	public IFunctionBuilderListener
+{
 public:
-	inline CParser(IParserListener* listener);
+	CParser(IParserListener* listener);
 
 	void Reset();
+
+	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes ec);
+	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes ec);
 
 private:
 	virtual void OnErrors();
@@ -96,15 +101,5 @@ private:
 	TQualifierMap namedQualifiers;
 	CQualifierBuilder qualifierBuilder;
 };
-
-inline CParser::CParser(IParserListener* listener):
-	CScanner( dynamic_cast<IScannerListener*>( listener ) ),
-	CListener<IParserListener>( listener ),
-	functionBuilder( listener )
-{
-	assert( CListener<IParserListener>::HasListener() );
-
-	Reset();
-}
 
 } // end of namespace Refal2

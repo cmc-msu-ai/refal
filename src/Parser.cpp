@@ -3,6 +3,15 @@
 
 namespace Refal2 {
 
+CParser::CParser(IParserListener* listener):
+	CScanner( dynamic_cast<IScannerListener*>( listener ) ),
+	CListener<IParserListener>( listener )
+{
+	assert( CListener<IParserListener>::HasListener() );
+	functionBuilder.SetListener( this );
+	Reset();
+}
+
 void CParser::Reset()
 {
 	state = PS_Begin;
@@ -13,8 +22,19 @@ void CParser::Reset()
 	qualifierBuilder.Reset();
 }
 
+void CParser::OnFunctionBuilderError(const TFunctionBuilderErrorCodes ec) {
+	SetErrors();
+	CListener<IParserListener>::GetListener()->OnFunctionBuilderError( ec );
+}
+
+void CParser::OnVariablesBuilderError(const TVariablesBuilderErrorCodes ec) {
+	SetErrors();
+	CListener<IParserListener>::GetListener()->OnVariablesBuilderError( ec );
+}
+
 void CParser::OnErrors()
 {
+	functionBuilder.SetErrors();
 }
 
 void CParser::ProcessLexem()

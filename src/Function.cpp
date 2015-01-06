@@ -31,7 +31,6 @@ CFunctionBuilder::CFunctionBuilder(IFunctionBuilderListener* listener):
 	lastRule(0),
 	variablesBuilder( static_cast<IVariablesBuilderListener*>(listener) )
 {
-	assert( HasListener() );
 }
 
 void CFunctionBuilder::Reset()

@@ -161,7 +161,7 @@ class CVariablesBuilder : public CListener<IVariablesBuilderListener> {
 	friend class CVariables;
 
 public:
-	explicit CVariablesBuilder(IVariablesBuilderListener* listener);
+	explicit CVariablesBuilder(IVariablesBuilderListener* listener = 0);
 	
 	void Reset();
 	inline void Export(CVariables* variables);
@@ -221,7 +221,9 @@ inline bool CVariablesBuilder::checkType(const TVariableType type)
 
 inline void CVariablesBuilder::error(const TVariablesBuilderErrorCodes errorCode)
 {
-	GetListener()->OnVariablesBuilderError( errorCode );
+	if( HasListener() ) {
+		GetListener()->OnVariablesBuilderError( errorCode );
+	}
 }
 
 } // end of namespace refal2
