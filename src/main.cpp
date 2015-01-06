@@ -35,6 +35,7 @@ void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes e
 void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes errorCode)
 {
 	static const char* errorText[] = {
+		"VBEC_InvalidVatiableName",
 		"VBEC_NoSuchTypeOfVariable",
 		"VBEC_TypeOfVariableDoesNotMatch",
 		"VBEC_NoSuchVariableInLeftPart"
@@ -46,7 +47,7 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 int main(int argc, const char* argv[])
 {
 	try {
-		const char* filename = "C:\\Users\\Антон\\YandexDisk\\MyFiles\\Education\\3 курс\\5 семестр\\практикум на эвм\\Интерпретация паскаль-программы\\PROGRAM__.REF";
+		const char* filename = "C:\\Need Files\\github\\cmc-msu-ai\\refal\\tests\\PROGRAM.REF";
 
 		if( argc == 2 ) {
 			filename = argv[1];
@@ -78,16 +79,9 @@ int main(int argc, const char* argv[])
 }
 
 #if 0
-#include "OperationsBuilder.h"
-#include "QualifierBuilder.h"
-#include "FunctionBuilder.h"
-#include "FieldOfView.h"
-#include "Qualifier.h"
-#include "Executer.h"
-#include "FastSet.h"
-#include "Common.h"
 #include <iostream>
 #include <fstream>
+#include <Refal2.h>
 
 using namespace Refal2;
 
@@ -220,65 +214,6 @@ int main(int argc, const char* argv[])
 	view.Print();
 	std::cout << "\n-----\n";*/
 	
-	return 0;
-}
-#endif
-#if 0
-
-#include "Common.h"
-#include "Reader.h"
-#include <iostream>
-#include <fstream>
-
-int main(int argc, const char* argv[])
-{
-	const char* const default_filename = "test_program.ref";
-	const char* filename = default_filename;
-
-	if( argc >= 2 ) {
-		filename = argv[1];
-	}
-
-	std::ifstream f(filename);
-
-	if( !f.good() )
-	{
-		std::cerr << "Can't open file\n";
-		return 1;
-	}
-
-	Refal2::CCommonReader common;
-	Refal2::CReader reader(common);
-
-	while( true ) {
-		int c = f.get();
-		if( c == -1 ) {
-			reader.End();
-			break;
-		} else {
-			reader.Step(c);
-		}
-	}
-
-	if( reader.GetStatus() != Refal2::CReader::S_ok ) {
-		return 1;
-	}
-
-	for( Refal2::TLabels::const_iterator i = common.labels.begin();
-		i != common.labels.end(); ++i )
-	{
-		if( i->second.rule != 0 &&
-			i->second.rule != common.EMPTY_FUNCTION &&
-			i->second.rule != common.EXTRN_FUNCTION )
-		{
-			std::cout << "FUNCTION: " << i->first << "\n";
-			print_function(i->second.rule);
-			std::cout << "\n\n";
-		}
-	}
-
-	std::cin.get();
-
 	return 0;
 }
 #endif

@@ -85,8 +85,8 @@ private:
 	int storedOffset;
 	std::string storedName;
 
+	TLabel currentFunction;
 	TVariableType variableType;
-	CFunction* currentFunction;
 	CFunctionBuilder functionBuilder;
 
 	typedef std::map<std::string, CQualifier> TQualifierMap;

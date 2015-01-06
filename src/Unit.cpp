@@ -10,10 +10,10 @@ void PrintUnit(const CUnit& unit)
 			printf("'%c' ", unit.Char());
 			break;
 		case UT_Label:
-			printf("/L%d/ ", unit.Label());
+			printf("/%s/ ", LabelTable.GetLabelText( unit.Label() ).c_str() );
 			break;
 		case UT_Number:
-			printf("/N%d/ ", unit.Number());
+			printf("/%d/ ", unit.Number());
 			break;
 		case UT_Variable:
 			printf("V%d ", unit.Variable());

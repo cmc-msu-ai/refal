@@ -6,6 +6,11 @@ namespace Refal2 {
 void CParser::Reset()
 {
 	state = PS_Begin;
+	storedName.clear();
+	currentFunction = InvalidLabel;
+	functionBuilder.Reset();
+	namedQualifiers.clear();
+	qualifierBuilder.Reset();
 }
 
 void CParser::ProcessLexem()
@@ -802,12 +807,32 @@ void CParser::processVariableQualifierAfterError()
 
 void CParser::addDeclarationOfFunction(const std::string& name)
 {
-	std::cout << name << "\n";
-	functionBuilder.Reset();
+	addEndOfFunction();
+
+	currentFunction = LabelTable.AddLabel( name );
+	CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
+
+	if( !tmpFunction->IsDeclared() ) {
+		currentFunction = InvalidLabel;
+		// TODO: error, ignore
+	} else {
+		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
+		tmpFunction->SetDefined();
+	}
 }
 
 void CParser::addEndOfFunction()
 {
+	if( currentFunction != InvalidLabel ) {
+		CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
+		functionBuilder.Export( tmpFunction );
+		PrintFunction( tmpFunction->firstRule );
+
+		std::cout << "addEndOfFunction: {" <<
+			LabelTable.GetLabelText( currentFunction ) << "}\n";
+
+		currentFunction = InvalidLabel;
+	}
 	functionBuilder.Reset();
 }
 
