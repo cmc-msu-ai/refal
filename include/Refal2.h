@@ -8,6 +8,7 @@ typedef int TLabel;
 typedef unsigned char TVariableName;
 typedef char TVariableType;
 typedef int TVariableIndex;
+typedef int TTableIndex;
 
 } // end of namespace Refal2
 

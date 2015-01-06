@@ -72,7 +72,7 @@ TVariablesMask CFunctionCompiler::makeVariablesMask(const CHole& hole) const
 {
 	TVariablesMask variablesMask;
 	for( const CUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
-		if( i->IsVariable() && !variables.HaveValue( i->Variable() ) ) {
+		if( i->IsVariable() && !variables.IsSet( i->Variable() ) ) {
 			variablesMask.set( i->Variable() );
 		}
 	}
@@ -170,7 +170,7 @@ void CFunctionCompiler::matchElement()
 
 bool CFunctionCompiler::tryMatchLeftVariable(CUnitNode* left)
 {
-	switch( variables.GetType( left->Variable() ) ) {
+	switch( variables.GetVariable( left->Variable() )->GetType() ) {
 		case 's':
 			matchLeftS();
 			return true;
@@ -181,7 +181,7 @@ bool CFunctionCompiler::tryMatchLeftVariable(CUnitNode* left)
 			break;
 		case 'v':
 		case 'e':
-			if( variables.HaveValue( left->Variable() ) ) {
+			if( variables.IsSet( left->Variable() ) ) {
 				matchLeftDuplicateVE();
 				return true;
 			}
@@ -195,7 +195,7 @@ bool CFunctionCompiler::tryMatchLeftVariable(CUnitNode* left)
 
 bool CFunctionCompiler::tryMatchRightVariable(CUnitNode* right)
 {
-	switch( variables.GetType( right->Variable() ) ) {
+	switch( variables.GetVariable( right->Variable() )->GetType() ) {
 		case 's':
 			matchRightS();
 			return true;
@@ -206,7 +206,7 @@ bool CFunctionCompiler::tryMatchRightVariable(CUnitNode* right)
 			break;
 		case 'v':
 		case 'e':
-			if( variables.HaveValue( right->Variable() ) ) {
+			if( variables.IsSet( right->Variable() ) ) {
 				matchRightDuplicateVE();
 				return true;
 			}

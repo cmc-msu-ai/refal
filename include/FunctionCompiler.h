@@ -41,8 +41,8 @@ private:
 	inline CUnitNode* detachRightUnitInCurrentHole();
 	
 	inline bool isMarkedVariable(CUnitNode* unit);
-	inline bool isVE(CUnitNode* unit);
-	inline bool isFreeVE(CUnitNode* unit);
+	inline bool isVE(CUnitNode* unit) const;
+	inline bool isFreeVE(CUnitNode* unit) const;
 
 	TVariablesMask makeVariablesMask(const CHole& hole) const;
 	void splitIntoClasses(CHole* const holes);
@@ -98,15 +98,15 @@ inline bool CFunctionCompiler::isMarkedVariable(CUnitNode* unit)
 		markedVariables.test( unit->Variable() ) );
 }
 
-inline bool CFunctionCompiler::isVE(CUnitNode* unit)
+inline bool CFunctionCompiler::isVE(CUnitNode* unit) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
-		variables.TypeIs( unit->Variable(), 'v', 'e' ) );
+		variables.GetVariable( unit->Variable() ).TypeIs( 'v', 'e' ) );
 }
 
-inline bool CFunctionCompiler::isFreeVE(CUnitNode* unit)
+inline bool CFunctionCompiler::isFreeVE(CUnitNode* unit) const
 {
-	return ( isVE(unit) && !variables.HaveValue( unit->Variable() ) );
+	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
 }
 
 } // end of namespace refal2
