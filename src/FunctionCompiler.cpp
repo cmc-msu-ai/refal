@@ -150,7 +150,7 @@ void CFunctionCompiler::matchElement()
 		CUnitNode* left = currentHole->hole.GetFirst();
 		CUnitNode* right = currentHole->hole.GetLast();
 	
-		if( left == left && isFreeVE(left) ) {
+		if( left == right && isFreeVE(left) ) {
 			matchClosedE();
 		} else if( left->IsParen() ) {
 			matchLeftParens();
