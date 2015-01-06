@@ -677,6 +677,9 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 				state = PS_ProcessVariableQualifierAfterRightParen;
 			} else {
 				state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+				if( !afterRightParen ) {
+					qualifierBuilder.AddNegative();
+				}
 				qualifierBuilder.Export( &currentQualifier );
 			}
 			break;
