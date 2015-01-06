@@ -86,7 +86,4 @@ void CLabelTable::grow(const TLabelMap::const_iterator& labelPtr)
 	++tableFirstFree;
 }
 
-// definition of global label table
-CLabelTable LabelTable;
-
 } // end of namespace Refal2

@@ -13,6 +13,7 @@ set(SOURCE src/Executer.cpp
 			src/Parser.cpp
 			src/Qualifier.cpp
 			src/QualifierBuilder.cpp
+			src/Refal2.cpp
 			src/Scanner.cpp
 			src/Unit.cpp
 			src/Variables.cpp)

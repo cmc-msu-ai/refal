@@ -49,7 +49,7 @@ class CVariable;
 class CVariables;
 class CVariablesBuilder;
 
-// global variables
+// declaration of global variables
 extern CLabelTable LabelTable;
 
 } // end of namespace Refal2
