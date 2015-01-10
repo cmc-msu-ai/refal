@@ -157,7 +157,8 @@ public:
 	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes) = 0;
 };
 
-class CVariablesBuilder : public CErrors,
+class CVariablesBuilder :
+	public CErrors,
 	public CListener<IVariablesBuilderListener>
 {
 	friend class CVariables;

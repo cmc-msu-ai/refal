@@ -88,7 +88,8 @@ public:
 	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes) = 0;
 };
 
-class CFunctionBuilder : public CVariablesBuilder,
+class CFunctionBuilder :
+	public CVariablesBuilder,
 	public CListener<IFunctionBuilderListener>
 {
 public:

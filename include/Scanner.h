@@ -79,7 +79,10 @@ public:
 	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c) = 0;
 };
 
-class CScanner : public CFunctionBuilder, public CListener<IScannerListener> {
+class CScanner :
+	public CFunctionBuilder,
+	public CListener<IScannerListener>
+{
 public:
 	inline CScanner(IScannerListener* listener = 0);
 

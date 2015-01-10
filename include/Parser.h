@@ -56,7 +56,9 @@ public:
 	virtual void OnParserError(const TParserErrorCodes errorCode) = 0;
 };
 
-class CParser : public CScanner, public CListener<IParserListener>
+class CParser :
+	public CScanner,
+	public CListener<IParserListener>
 {
 public:
 	CParser(IParserListener* listener = 0);
