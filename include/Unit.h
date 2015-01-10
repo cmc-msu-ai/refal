@@ -113,11 +113,12 @@ public:
 	inline void Move(CUnitList* moveTo);
 	
 	inline CUnitNode* DetachFirst();
-	inline CUnitNode* DetachLast();
-
+	inline void RemoveFirst();
 	CUnitNode* GetFirst() { return first; }
 	const CUnitNode* GetFirst() const { return first; }
 	
+	inline CUnitNode* DetachLast();
+	inline void RemoveLast();
 	CUnitNode* GetLast() { return last; }
 	const CUnitNode* GetLast() const { return last; }
 	
@@ -188,11 +189,21 @@ inline CUnitNode* CUnitList::DetachFirst()
 	return detachedNode;
 }
 
+inline void CUnitList::RemoveFirst()
+{
+	free( DetachFirst() );
+}
+
 inline CUnitNode* CUnitList::DetachLast()
 {
 	CUnitNode* detachedNode = GetLast();
 	Detach( detachedNode );
 	return detachedNode;
+}
+
+inline void CUnitList::RemoveLast()
+{
+	free( DetachLast() );
 }
 
 inline CUnitNode* CUnitList::AppendChar(TChar c)
