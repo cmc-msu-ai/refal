@@ -100,8 +100,7 @@ private:
 class CUnitList {
 public:
 	CUnitList(): first(0), last(0) {}
-	CUnitList(CUnitNode* _first, CUnitNode* _last):
-		first(_first), last(_last) {}
+	CUnitList(CUnitNode* first, CUnitNode* last);
 	
 	~CUnitList() { Empty(); }
 	

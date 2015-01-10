@@ -89,6 +89,12 @@ bool CompareUnit(const CUnit& unitA, const CUnit& unitB)
 	return false;
 }
 
+CUnitList::CUnitList(CUnitNode* _first, CUnitNode* _last):
+	first( _first ), last( _last )
+{
+	assert( _first != 0 && _last != 0 );
+}
+
 void CUnitList::Assign(CUnitNode* _first, CUnitNode* _last)
 {
 	Empty();
