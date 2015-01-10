@@ -7,6 +7,10 @@ namespace Refal2 {
 const int InvalidVariableIndex = -1;
 
 const TVariableType InvalidVariableType = '\0';
+const TVariableType VariableTypeS = 's';
+const TVariableType VariableTypeW = 'w';
+const TVariableType VariableTypeV = 'v';
+const TVariableType VariableTypeE = 'e';
 
 class CVariable {
 	friend class CVariables;
@@ -57,7 +61,8 @@ inline bool CVariable::TypeIs(const TVariableType tA,
 
 inline bool CVariable::IsValidType(const TVariableType type)
 {
-	return ( type == 's' || type == 'w' || type == 'v' || type == 'e' );
+	return ( type == VariableTypeS || type == VariableTypeW ||
+		type == VariableTypeV || type == VariableTypeE );
 }
 
 inline bool CVariable::IsValidName(const TVariableName name)
