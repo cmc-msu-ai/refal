@@ -112,6 +112,9 @@ public:
 	inline void Swap(CUnitList* swapWith);
 	inline void Move(CUnitList* moveTo);
 	
+	inline CUnitNode* DetachFirst();
+	inline CUnitNode* DetachLast();
+
 	CUnitNode* GetFirst() { return first; }
 	const CUnitNode* GetFirst() const { return first; }
 	
@@ -176,6 +179,20 @@ inline void CUnitList::Move(CUnitList* moveTo)
 		moveTo->Empty();
 		Swap( moveTo );
 	}
+}
+
+inline CUnitNode* CUnitList::DetachFirst()
+{
+	CUnitNode* detachedNode = GetFirst();
+	Detach( detachedNode );
+	return detachedNode;
+}
+
+inline CUnitNode* CUnitList::DetachLast()
+{
+	CUnitNode* detachedNode = GetLast();
+	Detach( detachedNode );
+	return detachedNode;
 }
 
 inline CUnitNode* CUnitList::AppendChar(TChar c)
