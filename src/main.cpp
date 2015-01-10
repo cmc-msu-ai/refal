@@ -4,7 +4,11 @@
 
 using namespace Refal2;
 
-class CMyClass : public IScannerListener, public IParserListener
+class CMyClass :
+	public IVariablesBuilderListener,
+	public IFunctionBuilderListener,
+	public IScannerListener,
+	public IParserListener
 {
 public:
 	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c);

@@ -7,6 +7,7 @@ namespace Refal2 {
 
 void CScanner::Reset()
 {
+	CFunctionBuilder::Reset();
 	line = 1;
 	offset = 0;
 	lexemString.clear();

@@ -51,25 +51,19 @@ enum TParserState {
 enum TParserErrorCodes {
 };
 
-class IParserListener : public IFunctionBuilderListener {
+class IParserListener {
 public:
 	virtual void OnParserError(const TParserErrorCodes errorCode) = 0;
 };
 
-class CParser : public CScanner, public CListener<IParserListener>,
-	public IFunctionBuilderListener
+class CParser : public CScanner, public CListener<IParserListener>
 {
 public:
 	CParser(IParserListener* listener = 0);
 	
 	void Reset();
 	
-	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes ec);
-	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes ec);
-	
 private:
-	virtual void OnErrors();
-	
 	virtual void ProcessLexem();
 	
 	inline void error(const TParserErrorCodes errorCode);
@@ -95,7 +89,6 @@ private:
 	
 	TLabel currentFunction;
 	TVariableType variableType;
-	CFunctionBuilder functionBuilder;
 	
 	typedef std::map<std::string, CQualifier> TQualifierMap;
 	

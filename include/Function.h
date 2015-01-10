@@ -83,12 +83,12 @@ enum TFunctionBuilderErrorCodes {
 	FBEC_IllegalQualifierInRightPart
 };
 
-class IFunctionBuilderListener : public IVariablesBuilderListener {
+class IFunctionBuilderListener {
 public:
 	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes) = 0;
 };
 
-class CFunctionBuilder : public CErrors,
+class CFunctionBuilder : public CVariablesBuilder,
 	public CListener<IFunctionBuilderListener>
 {
 public:
@@ -136,7 +136,6 @@ private:
 	CUnitList leftPart;
 	CFunctionRule* firstRule;
 	CFunctionRule* lastRule;
-	CVariablesBuilder variablesBuilder;
 	std::stack<CUnitNode*> balanceStack;
 };
 
@@ -150,8 +149,9 @@ inline void CFunctionBuilder::emptyStack()
 inline void CFunctionBuilder::error(const TFunctionBuilderErrorCodes errorCode)
 {
 	SetErrors();
-	if( HasListener() ) {
-		GetListener()->OnFunctionBuilderError( errorCode );
+	if( CListener<IFunctionBuilderListener>::HasListener() ) {
+		CListener<IFunctionBuilderListener>::GetListener()->
+			OnFunctionBuilderError( errorCode );
 	}
 }
 

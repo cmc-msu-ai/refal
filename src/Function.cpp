@@ -24,21 +24,21 @@ void PrintFunction(const CFunctionRule* firstRule)
 }
 
 CFunctionBuilder::CFunctionBuilder(IFunctionBuilderListener* listener):
-	CListener(listener),
+	CVariablesBuilder( dynamic_cast<IVariablesBuilderListener*>(listener) ),
+	CListener<IFunctionBuilderListener>(listener),
 	state(FBS_Direction),
 	isRightDirection(false),
 	firstRule(0),
-	lastRule(0),
-	variablesBuilder( static_cast<IVariablesBuilderListener*>(listener) )
+	lastRule(0)
 {
 }
 
 void CFunctionBuilder::Reset()
 {
+	CVariablesBuilder::Reset();
 	state = FBS_Direction;
 	acc.Empty();
 	emptyRules();
-	variablesBuilder.Reset();
 	emptyStack();
 }
 
@@ -60,6 +60,7 @@ void CFunctionBuilder::Export(CFunction* function)
 void CFunctionBuilder::OnErrors()
 {
 	emptyRules();
+	CVariablesBuilder::OnErrors();
 }
 
 void CFunctionBuilder::AddDirection(bool _isRightDirection)
@@ -101,7 +102,7 @@ void CFunctionBuilder::AddEndOfRight()
 	
 	if( HasErrors() ) {
 		acc.Empty();
-		variablesBuilder.Reset();
+		CVariablesBuilder::Reset();
 	} else {
 		addRule();
 	}
@@ -114,7 +115,7 @@ void CFunctionBuilder::AddLeftVariable(TVariableType type, TVariableName name,
 {
 	assert( state == FBS_Left );
 	
-	TVariableIndex index = variablesBuilder.AddLeft( name, type, qualifier );	
+	TVariableIndex index = CVariablesBuilder::AddLeft( name, type, qualifier );	
 	if( !HasErrors() ) {
 		if( index == InvalidVariableIndex ) {
 			SetErrors();
@@ -128,7 +129,7 @@ void CFunctionBuilder::AddRightVariable(TVariableType type, TVariableName name)
 {
 	assert( state == FBS_Right );
 	
-	TVariableIndex index = variablesBuilder.AddRight( name, type );
+	TVariableIndex index = CVariablesBuilder::AddRight( name, type );
 	if( !HasErrors() ) {
 		if( index == InvalidVariableIndex ) {
 			SetErrors();
@@ -214,7 +215,7 @@ void CFunctionBuilder::addRule()
 	CFunctionRule* newRule = new CFunctionRule( isRightDirection );
 	leftPart.Move( &(newRule->leftPart) );
 	acc.Move( &(newRule->rightPart) );
-	variablesBuilder.Export( &(newRule->variables) );
+	CVariablesBuilder::Export( &(newRule->variables) );
 	
 	if( firstRule != 0 ) {
 		lastRule->nextRule = newRule;

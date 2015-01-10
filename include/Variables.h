@@ -157,7 +157,9 @@ public:
 	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes) = 0;
 };
 
-class CVariablesBuilder : public CListener<IVariablesBuilderListener> {
+class CVariablesBuilder : public CErrors,
+	public CListener<IVariablesBuilderListener>
+{
 	friend class CVariables;
 
 public:
@@ -221,6 +223,7 @@ inline bool CVariablesBuilder::checkType(const TVariableType type)
 
 inline void CVariablesBuilder::error(const TVariablesBuilderErrorCodes errorCode)
 {
+	SetErrors();
 	if( HasListener() ) {
 		GetListener()->OnVariablesBuilderError( errorCode );
 	}

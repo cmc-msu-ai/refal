@@ -7,33 +7,17 @@ CParser::CParser(IParserListener* listener):
 	CScanner( dynamic_cast<IScannerListener*>( listener ) ),
 	CListener<IParserListener>( listener )
 {
-	functionBuilder.SetListener( this );
 	Reset();
 }
 
 void CParser::Reset()
 {
+	CScanner::Reset();
 	state = PS_Begin;
 	storedName.clear();
 	currentFunction = InvalidLabel;
-	functionBuilder.Reset();
 	namedQualifiers.clear();
 	qualifierBuilder.Reset();
-}
-
-void CParser::OnFunctionBuilderError(const TFunctionBuilderErrorCodes ec) {
-	SetErrors();
-	CListener<IParserListener>::GetListener()->OnFunctionBuilderError( ec );
-}
-
-void CParser::OnVariablesBuilderError(const TVariablesBuilderErrorCodes ec) {
-	SetErrors();
-	CListener<IParserListener>::GetListener()->OnVariablesBuilderError( ec );
-}
-
-void CParser::OnErrors()
-{
-	functionBuilder.SetErrors();
 }
 
 void CParser::ProcessLexem()
@@ -287,13 +271,13 @@ void CParser::ProcessLexem()
 			if( lexem == L_Blank ) {
 			} else if( identificatorIs("l") ) {
 				state = PS_ProcessLeftPartOfRule;
-				functionBuilder.AddDirection();
+				CFunctionBuilder::AddDirection();
 			} else if( identificatorIs("r") ) {
 				state = PS_ProcessLeftPartOfRule;
-				functionBuilder.AddDirection( true /* isRightDirection */ );
+				CFunctionBuilder::AddDirection( true /* isRightDirection */ );
 			} else {
 				state = PS_ProcessLeftPartOfRule;
-				functionBuilder.AddDirection();
+				CFunctionBuilder::AddDirection();
 				ProcessLexem();
 			}
 			break;
@@ -303,30 +287,30 @@ void CParser::ProcessLexem()
 					break;
 				case L_Equal:
 					state = PS_ProcessRightPartOfRule;
-					functionBuilder.AddEndOfLeft();
+					CFunctionBuilder::AddEndOfLeft();
 					break;
 				case L_Comma:
 					// TODO: error, ignore
 					break;
 				case L_Label:
-					functionBuilder.AddLabel( lexemLabel );
+					CFunctionBuilder::AddLabel( lexemLabel );
 					break;
 				case L_Number:
-					functionBuilder.AddNumber( lexemNumber );
+					CFunctionBuilder::AddNumber( lexemNumber );
 					break;
 				case L_String:
 					for( std::size_t i = 0; i < lexemString.size(); i++ ) {
-						functionBuilder.AddChar( lexemString[i] );
+						CFunctionBuilder::AddChar( lexemString[i] );
 					}
 					break;
 				case L_Qualifier:
 					// TODO: error, ignore
 					break;
 				case L_LeftParen:
-					functionBuilder.AddLeftParen();
+					CFunctionBuilder::AddLeftParen();
 					break;
 				case L_RightParen:
-					functionBuilder.AddRightParen();
+					CFunctionBuilder::AddRightParen();
 					break;
 				case L_LeftBracket:
 					// TODO: error, ignore
@@ -340,7 +324,7 @@ void CParser::ProcessLexem()
 
 						if( i < lexemString.size() - 1 ) {
 							TVariableName name = lexemString[i + 1];
-							functionBuilder.AddLeftVariable( type, name );
+							CFunctionBuilder::AddLeftVariable( type, name );
 							offset += 2;
 						} else {
 							state = PS_ProcessLeftPartOfRuleAfterVariableType;
@@ -350,8 +334,8 @@ void CParser::ProcessLexem()
 					break;
 				case L_Newline:
 					state = PS_Begin;
-					functionBuilder.AddEndOfLeft();
-					functionBuilder.AddEndOfRight();
+					CFunctionBuilder::AddEndOfLeft();
+					CFunctionBuilder::AddEndOfRight();
 					// TODO: error
 					break;
 				case L_EndOfFile:
@@ -387,7 +371,7 @@ void CParser::ProcessLexem()
 			if( lexem == L_Identificator ) {
 				TVariableName name = lexemString[0];
 				lexemString.erase(0, 1);
-				functionBuilder.AddLeftVariable( variableType, name,
+				CFunctionBuilder::AddLeftVariable( variableType, name,
 					&currentQualifier );
 
 				if( !lexemString.empty() ) {
@@ -403,37 +387,37 @@ void CParser::ProcessLexem()
 				case L_Blank:
 					break;
 				case L_Equal:
-					functionBuilder.AddEndOfLeft();
+					CFunctionBuilder::AddEndOfLeft();
 					break;
 				case L_Comma:
 					// TODO: error, ignore
 					break;
 				case L_Label:
-					functionBuilder.AddLabel( lexemLabel );
+					CFunctionBuilder::AddLabel( lexemLabel );
 					break;
 				case L_Number:
-					functionBuilder.AddNumber( lexemNumber );
+					CFunctionBuilder::AddNumber( lexemNumber );
 					break;
 				case L_String:
 					for( std::size_t i = 0; i < lexemString.size(); i++ ) {
-						functionBuilder.AddChar( lexemString[i] );
+						CFunctionBuilder::AddChar( lexemString[i] );
 					}
 					break;
 				case L_Qualifier:
 					// TODO: error, ignore
 					break;
 				case L_LeftParen:
-					functionBuilder.AddLeftParen();
+					CFunctionBuilder::AddLeftParen();
 					break;
 				case L_RightParen:
-					functionBuilder.AddRightParen();
+					CFunctionBuilder::AddRightParen();
 					break;
 				case L_LeftBracket:
 					state = PS_ProcessRightPartOfRuleAfterLeftBracket;
-					functionBuilder.AddLeftBracket();
+					CFunctionBuilder::AddLeftBracket();
 					break;
 				case L_RightBracket:
-					functionBuilder.AddRightBracket();
+					CFunctionBuilder::AddRightBracket();
 					break;
 				case L_Identificator:
 					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
@@ -441,7 +425,7 @@ void CParser::ProcessLexem()
 
 						if( i < lexemString.size() - 1 ) {
 							TVariableName name = lexemString[i + 1];
-							functionBuilder.AddRightVariable( type, name );
+							CFunctionBuilder::AddRightVariable( type, name );
 							offset += 2;
 						} else {
 							// TODO: error, ignore
@@ -449,7 +433,7 @@ void CParser::ProcessLexem()
 					}
 					break;
 				case L_Newline:
-					functionBuilder.AddEndOfRight();
+					CFunctionBuilder::AddEndOfRight();
 					state = PS_Begin;
 					break;
 				case L_EndOfFile:
@@ -467,7 +451,7 @@ void CParser::ProcessLexem()
 			state = PS_ProcessRightPartOfRule;
 			if( lexem == L_Identificator ) {
 				TLabel label = LabelTable.AddLabel( ToLower( lexemString ) );
-				functionBuilder.AddLabel( label );
+				CFunctionBuilder::AddLabel( label );
 			} else {
 				ProcessLexem();
 			}
@@ -851,7 +835,7 @@ void CParser::addEndOfFunction()
 {
 	if( currentFunction != InvalidLabel ) {
 		CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-		functionBuilder.Export( tmpFunction );
+		CFunctionBuilder::Export( tmpFunction );
 		PrintFunction( tmpFunction->firstRule );
 
 		std::cout << "addEndOfFunction: {" <<
@@ -859,7 +843,7 @@ void CParser::addEndOfFunction()
 
 		currentFunction = InvalidLabel;
 	}
-	functionBuilder.Reset();
+	CFunctionBuilder::Reset();
 }
 
 void CParser::addNamedQualifier()

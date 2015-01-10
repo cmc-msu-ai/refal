@@ -79,7 +79,7 @@ public:
 	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c) = 0;
 };
 
-class CScanner : public CErrors, public CListener<IScannerListener> {
+class CScanner : public CFunctionBuilder, public CListener<IScannerListener> {
 public:
 	inline CScanner(IScannerListener* listener = 0);
 
@@ -119,7 +119,8 @@ private:
 };
 
 inline CScanner::CScanner(IScannerListener* listener):
-	CListener(listener)
+	CFunctionBuilder( dynamic_cast<IFunctionBuilderListener*>( listener ) ),
+	CListener<IScannerListener>(listener)
 {
 	Reset();
 }
@@ -132,8 +133,9 @@ inline bool CScanner::identificatorIs(const std::string& toCompare) const
 inline void CScanner::error(const TScannerErrorCodes errorCode, const char c)
 {
 	SetErrors();
-	if( HasListener() ) {
-		GetListener()->OnScannerError( errorCode, c );
+	if( CListener<IScannerListener>::HasListener() ) {
+		CListener<IScannerListener>::GetListener()->
+			OnScannerError( errorCode, c );
 	}
 }
 
