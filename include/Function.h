@@ -5,8 +5,8 @@
 
 namespace Refal2 {
 
-void PrintRule(const CFunctionRule* rule);
-void PrintFunction(const CFunctionRule* firstRule);
+void PrintRule(const CFunctionRule& rule);
+void PrintFunction(const CFunction& function);
 
 struct CFunctionRule {
 	CUnitList leftPart;
@@ -28,7 +28,8 @@ enum TFunctionState {
 
 class CFunction {
 	friend class CFunctionCompiler;
-	
+	friend void PrintFunction(const CFunction& function);
+
 public:
 	CFunction(TFunctionState state = FS_Declared):
 		functionState(state), firstRule(0) {}
@@ -42,7 +43,7 @@ public:
 	inline void SetDefined();
 	inline void SetParsed(CFunctionRule** firstRule);
 	
-/*private:*/
+private:
 	TFunctionState functionState;
 	union {
 		CFunctionRule* firstRule;

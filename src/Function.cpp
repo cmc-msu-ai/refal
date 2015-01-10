@@ -3,22 +3,24 @@
 
 namespace Refal2 {
 
-void PrintRule(const CFunctionRule* rule)
+void PrintRule(const CFunctionRule& rule)
 {
 	printf("\t");
-	if( rule->isRightDirection ) {
+	if( rule.isRightDirection ) {
 		printf("R");
 	}
 	printf(" ");
-	PrintUnitList( rule->leftPart, &rule->variables );
+	PrintUnitList( rule.leftPart, &rule.variables );
 	printf("= ");
-	PrintUnitList( rule->rightPart, &rule->variables );
+	PrintUnitList( rule.rightPart, &rule.variables );
 }
 
-void PrintFunction(const CFunctionRule* firstRule)
+void PrintFunction(const CFunction& function)
 {
-	for( ; firstRule != 0; firstRule = firstRule->nextRule ) {
-		PrintRule( firstRule );
+	for( const CFunctionRule* rule = function.firstRule; rule != 0;
+		rule = rule->nextRule )
+	{
+		PrintRule( *rule );
 		printf("\n");
 	}
 }

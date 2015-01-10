@@ -112,6 +112,15 @@ int main(int argc, const char* argv[])
 				parser.AddChar(c);
 			}
 		}
+		
+		std::cout << "\n--------------------------------------------------\n\n";
+
+		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
+			i = LabelTable.GetNextLabel( i ) )
+		{
+			std::cout << "{" << LabelTable.GetLabelText( i ) << "}\n";
+		}
+
 	} catch(bool) {
 		return 1;
 	}

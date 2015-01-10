@@ -87,21 +87,21 @@ void CParser::ProcessLexem()
 				state = PS_BeginProcessNamedQualifier;
 			} else {
 				addDeclarationOfFunction( storedName ); // action
-
+				
 				TLexem tmpLexem = lexem;
 				state = PS_ProcessRuleDirection;
-					
+				
 				std::string tmpLexemString( "s" );
 				lexemString.swap( tmpLexemString );
-
+				
 				std::swap( offset, storedOffset );
-
+				
 				lexem = L_Identificator;
 				ProcessLexem();
-			
+				
 				lexemString.swap( tmpLexemString );
 				std::swap( offset, storedOffset );
-
+				
 				lexem = tmpLexem;
 				ProcessLexem();
 			}
@@ -335,7 +335,7 @@ void CParser::ProcessLexem()
 				case L_Identificator:
 					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
 						TVariableType type = ::tolower( lexemString[i] );
-
+						
 						if( i < lexemString.size() - 1 ) {
 							TVariableName name = lexemString[i + 1];
 							CFunctionBuilder::AddLeftVariable( type, name );
@@ -387,7 +387,7 @@ void CParser::ProcessLexem()
 				lexemString.erase(0, 1);
 				CFunctionBuilder::AddLeftVariable( variableType, name,
 					&currentQualifier );
-
+				
 				if( !lexemString.empty() ) {
 					offset++;
 					ProcessLexem();
@@ -436,7 +436,7 @@ void CParser::ProcessLexem()
 				case L_Identificator:
 					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
 						TVariableType type = ::tolower( lexemString[i] );
-
+						
 						if( i < lexemString.size() - 1 ) {
 							TVariableName name = lexemString[i + 1];
 							CFunctionBuilder::AddRightVariable( type, name );
@@ -849,15 +849,15 @@ void CParser::addEndOfFunction()
 {
 	if( currentFunction != InvalidLabel ) {
 		CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-
+		
 		if( !tmpFunction->IsDeclared() ) {
 			CFunctionBuilder::Export( tmpFunction );
-
-			PrintFunction( tmpFunction->firstRule );
+			
+			PrintFunction( *tmpFunction );
 			std::cout << "addEndOfFunction: {" <<
 				LabelTable.GetLabelText( currentFunction ) << "}\n";
 		}
-
+		
 		currentFunction = InvalidLabel;
 		CFunctionBuilder::Reset();
 	}
