@@ -36,7 +36,7 @@ void CScanner::ProcessLexem()
 		case L_String:
 			std::cout << "'" << lexemString << "' ";
 			break;
-		case L_Newline:
+		case L_NewLine:
 			std::cout << "\n";
 			break;
 		case L_EndOfFile:
@@ -157,7 +157,7 @@ void CScanner::processChar(char c)
 				} else if( c == '\n' ) {
 					state = SS_BeginOfLine;
 					offset = localOffset;
-					lexem = L_Newline;
+					lexem = L_NewLine;
 					ProcessLexem();
 				} else if( c == '\'' ) {
 					state = SS_String;
@@ -209,7 +209,7 @@ void CScanner::processChar(char c)
 				} else if( c == '\n' ) {
 					state = SS_BeginOfLine;
 					offset = localOffset;
-					lexem = L_Newline;
+					lexem = L_NewLine;
 					ProcessLexem();
 				} else {
 					state = SS_NotBeginOfLine;
@@ -223,7 +223,7 @@ void CScanner::processChar(char c)
 				if( c == '\n' ) {
 					state = SS_BeginOfLine;
 					offset = localOffset;
-					lexem = L_Newline;
+					lexem = L_NewLine;
 					ProcessLexem();
 				}
 				break;
@@ -489,7 +489,7 @@ void CScanner::processEndOfFile()
 		case SS_NotBeginBlank:
 		case SS_NotBeginComment:
 			offset = localOffset;
-			lexem = L_Newline;
+			lexem = L_NewLine;
 			ProcessLexem();
 			break;
 

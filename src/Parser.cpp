@@ -31,34 +31,40 @@ void CParser::ProcessLexem()
 				addEndOfFunction(); // action
 			} else if( lexem == L_Blank ) {
 				state = PS_BeginBlank;
+			} else if( lexem = L_EndOfFile ) {
+				addEndOfFunction(); // action
 			} else {
 				state = PS_WaitNewline;
 				addEndOfFunction(); // action
-				/* TODO: ERROR */
+				error( PEC_LineShouldBeginWithIdentifierOrSpace );
 			}
 			break;
 		case PS_OnlyNewline:
-			if( lexem == L_Newline ) {
+			if( lexem == L_NewLine ) {
 				state = PS_Begin;
+			} else if( lexem == L_EndOfFile ) {
+				addEndOfFunction(); // action
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				error( PEC_NewLineExpected );
 			}
 			break;
 		case PS_WaitNewline:
-			if( lexem == L_Newline ) {
+			if( lexem == L_NewLine ) {
 				state = PS_Begin;
+			} else if( lexem == L_EndOfFile ) {
+				state = PS_Begin;
+				addEndOfFunction(); // action
 			}
 			break;
 		case PS_BeginIdent:
-			if( lexem == L_Newline ) {
+			if( lexem == L_NewLine || lexem == L_EndOfFile ) {
 				state = PS_Begin;
 				addEndOfFunction(); // action
 			} else if( lexem == L_Blank ) {
 				state = PS_BeginIdentBlank;
 			} else {
-				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				error( PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine );
 			}
 			break;
 		case PS_BeginIdentBlank:
@@ -68,6 +74,8 @@ void CParser::ProcessLexem()
 			} else if( identificatorIs( "s" ) ) {
 				state = PS_BeginIdentBlankS;
 				storedOffset = offset;
+			} else if( lexem == L_EndOfFile ) {
+				/* TODO: error */
 			} else {
 				addDeclarationOfFunction( storedName ); // action
 				state = PS_ProcessRuleDirection;
@@ -156,7 +164,7 @@ void CParser::ProcessLexem()
 			}
 			break;
 		case PS_BeginEmptyIdent:
-			if( lexem == L_Newline ) {
+			if( lexem == L_NewLine ) {
 				state = PS_Begin;
 			} else if( lexem == L_Comma ) {
 				state = PS_BeginEmptyComma;
@@ -187,7 +195,7 @@ void CParser::ProcessLexem()
 			}
 			break;
 		case PS_BeginExtrnIdent:
-			if( lexem == L_Newline ) {
+			if( lexem == L_NewLine ) {
 				state = PS_Begin;
 				addExtrnFunction( storedName, storedName ); // action
 			} else if( lexem == L_Comma ) {
@@ -223,7 +231,7 @@ void CParser::ProcessLexem()
 		case PS_BeginExtrnOnlyComma:
 			if( lexem == L_Comma ) {
 				state = PS_BeginExtrnComma;
-			} else if( lexem == L_Newline ) {
+			} else if( lexem == L_NewLine ) {
 				state = PS_Begin;
 			} else if( lexem == L_Blank ) {
 			} else {
@@ -234,9 +242,12 @@ void CParser::ProcessLexem()
 		/* end of extrn */
 		/* process named qualifier */
 		case PS_BeginProcessNamedQualifier:
-			qualifierBuilder.Reset();
-			// TODO: check errors
-			state = PS_ProcessNamedQualifier;
+			if( HasErrors() ) {
+				state = PS_ProcessNamedQualifierAfterError;
+			} else {
+				qualifierBuilder.Reset();
+				state = PS_ProcessNamedQualifier;
+			}
 			ProcessLexem();
 			break;
 		case PS_ProcessNamedQualifier:
@@ -251,9 +262,12 @@ void CParser::ProcessLexem()
 			break;
 		/* process variable qualifer */
 		case PS_BeginProcessVariableQualifier:
-			qualifierBuilder.Reset();
-			// TODO: check errors
-			state = PS_ProcessVariableQualifier;
+			if( HasErrors() ) {
+				state = PS_ProcessVariableQualifierAfterError;
+			} else {
+				qualifierBuilder.Reset();
+				state = PS_ProcessVariableQualifier;
+			}
 			ProcessLexem();
 			break;
 		case PS_ProcessVariableQualifier:
@@ -332,14 +346,14 @@ void CParser::ProcessLexem()
 						}
 					}
 					break;
-				case L_Newline:
+				case L_NewLine:
 					state = PS_Begin;
 					CFunctionBuilder::AddEndOfLeft();
 					CFunctionBuilder::AddEndOfRight();
 					// TODO: error
 					break;
 				case L_EndOfFile:
-					lexem = L_Newline;
+					lexem = L_NewLine;
 					ProcessLexem();
 					lexem = L_EndOfFile;
 					ProcessLexem();
@@ -432,12 +446,12 @@ void CParser::ProcessLexem()
 						}
 					}
 					break;
-				case L_Newline:
+				case L_NewLine:
 					CFunctionBuilder::AddEndOfRight();
 					state = PS_Begin;
 					break;
 				case L_EndOfFile:
-					lexem = L_Newline;
+					lexem = L_NewLine;
 					ProcessLexem();
 					lexem = L_EndOfFile;
 					ProcessLexem();
@@ -543,7 +557,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			}
 			break;
 		}
-		case L_Newline:
+		case L_NewLine:
 			if( !afterRightParen ) {
 				qualifierBuilder.AddNegative();
 			}
@@ -552,7 +566,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			state = PS_Begin;
 			break;
 		case L_EndOfFile:
-			lexem = L_Newline;
+			lexem = L_NewLine;
 			processNamedQualifier( afterRightParen );
 			lexem = L_EndOfFile;
 			ProcessLexem();
@@ -622,7 +636,7 @@ void CParser::processNamedQualifierAfterError()
 			}
 			break;
 		}
-		case L_Newline:
+		case L_NewLine:
 			state = PS_Begin;
 			break;
 		case L_EndOfFile:
@@ -723,7 +737,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 			}
 			break;
 		}
-		case L_Newline:
+		case L_NewLine:
 		case L_EndOfFile:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
@@ -803,7 +817,7 @@ void CParser::processVariableQualifierAfterError()
 			}
 			break;
 		}
-		case L_Newline:
+		case L_NewLine:
 		case L_EndOfFile:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
@@ -823,11 +837,11 @@ void CParser::addDeclarationOfFunction(const std::string& name)
 	CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
 
 	if( !tmpFunction->IsDeclared() ) {
-		currentFunction = InvalidLabel;
 		// TODO: error, ignore
 	} else {
-		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
 		tmpFunction->SetDefined();
+
+		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
 	}
 }
 
@@ -835,15 +849,18 @@ void CParser::addEndOfFunction()
 {
 	if( currentFunction != InvalidLabel ) {
 		CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-		CFunctionBuilder::Export( tmpFunction );
-		PrintFunction( tmpFunction->firstRule );
 
-		std::cout << "addEndOfFunction: {" <<
-			LabelTable.GetLabelText( currentFunction ) << "}\n";
+		if( !tmpFunction->IsDeclared() ) {
+			CFunctionBuilder::Export( tmpFunction );
+
+			PrintFunction( tmpFunction->firstRule );
+			std::cout << "addEndOfFunction: {" <<
+				LabelTable.GetLabelText( currentFunction ) << "}\n";
+		}
 
 		currentFunction = InvalidLabel;
+		CFunctionBuilder::Reset();
 	}
-	CFunctionBuilder::Reset();
 }
 
 void CParser::addNamedQualifier()

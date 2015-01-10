@@ -12,7 +12,7 @@ enum TLexem {
 	L_Label,
 	L_Number,
 	L_String,
-	L_Newline,
+	L_NewLine,
 	L_EndOfFile,
 	L_Qualifier,
 	L_LeftParen,

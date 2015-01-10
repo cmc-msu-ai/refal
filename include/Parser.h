@@ -49,6 +49,9 @@ enum TParserState {
 };
 
 enum TParserErrorCodes {
+	PEC_LineShouldBeginWithIdentifierOrSpace,
+	PEC_NewLineExpected,
+	PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine
 };
 
 class IParserListener {
@@ -64,6 +67,8 @@ public:
 	CParser(IParserListener* listener = 0);
 	
 	void Reset();
+
+	TLabel GetCurrentFunction() const { return currentFunction; }
 	
 private:
 	virtual void ProcessLexem();
