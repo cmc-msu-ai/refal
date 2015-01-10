@@ -9,6 +9,12 @@ void PrintRule(const CFunctionRule& rule);
 void PrintFunction(const CFunction& function);
 
 struct CFunctionRule {
+	friend class CFunctionBuilder;
+	friend class CFunctionCompiler;
+	friend void PrintRule(const CFunctionRule& rule);
+	friend void PrintFunction(const CFunction& function);
+
+private:
 	CUnitList leftPart;
 	CUnitList rightPart;
 	CVariables variables;
