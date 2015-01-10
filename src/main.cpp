@@ -54,6 +54,13 @@ void CMyClass::OnScannerError(const TScannerErrorCodes errorCode, char c)
 
 void CMyClass::OnParserError(const TParserErrorCodes errorCode)
 {
+	static const char* errorText[] = {
+		"PEC_LineShouldBeginWithIdentifierOrSpace",
+		"PEC_NewLineExpected",
+		"PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine"
+	};
+
+	std::cout << errorText[errorCode] << "\n";
 }
 
 void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes errorCode)
@@ -88,7 +95,7 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 int main(int argc, const char* argv[])
 {
 	try {
-		const char* filename = "C:\\Need Files\\github\\cmc-msu-ai\\refal\\tests\\PROGRAM.REF";
+		const char* filename = "C:\\Need Files\\github\\cmc-msu-ai\\refal\\tests\\simple.ref";
 
 		if( argc == 2 ) {
 			filename = argv[1];
@@ -118,7 +125,14 @@ int main(int argc, const char* argv[])
 		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
 			i = LabelTable.GetNextLabel( i ) )
 		{
-			std::cout << "{" << LabelTable.GetLabelText( i ) << "}\n";
+			CFunction* function = LabelTable.GetLabelFunction( i );
+			std::cout << "{START:" << LabelTable.GetLabelText( i ) << "}\n";
+			//PrintFunction( *function );
+			if( function->IsParsed() ) {
+				CFunctionCompiler compiler;
+				compiler.Compile( function );
+			}
+			std::cout << "{END:" << LabelTable.GetLabelText( i ) << "}\n";
 		}
 
 	} catch(bool) {

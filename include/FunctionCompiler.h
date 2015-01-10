@@ -31,9 +31,11 @@ struct CHolesTuple {
 
 class CFunctionCompiler {
 public:
-	void compileRule(CFunctionRule* rule);
+	void Compile(CFunction* function);
 
 private:
+
+	void compileRule(CFunctionRule* rule);
 	void removeCurrentHole();
 	inline CUnitNode* detachLeftUnitInCurrentHole();
 	inline CUnitNode* detachRightUnitInCurrentHole();

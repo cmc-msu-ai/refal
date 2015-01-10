@@ -4,6 +4,15 @@
 
 namespace Refal2 {
 
+void CFunctionCompiler::Compile(CFunction* function)
+{
+	for( CFunctionRule* rule = function->firstRule; rule != 0;
+		rule = rule->nextRule )
+	{
+		compileRule( rule );
+	}
+}
+
 void CFunctionCompiler::removeCurrentHole()
 {
 	if( currentHole == firstHole ) {

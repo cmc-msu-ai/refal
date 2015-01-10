@@ -13,7 +13,7 @@ struct CFunctionRule {
 	friend class CFunctionCompiler;
 	friend void PrintRule(const CFunctionRule& rule);
 	friend void PrintFunction(const CFunction& function);
-
+	
 private:
 	CUnitList leftPart;
 	CUnitList rightPart;
@@ -53,7 +53,7 @@ private:
 	TFunctionState functionState;
 	union {
 		CFunctionRule* firstRule;
-		/*COperation* firstOperation;*/
+		COperation* firstOperation;
 	};
 };
 
