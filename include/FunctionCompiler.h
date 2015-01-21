@@ -8,14 +8,66 @@ namespace Refal2 {
 
 const TTableIndex InvalideTableIndex = -1;
 
-struct CHole {
+class CHole : public CUnitList {
+public:
+	inline bool CompareLeftAndRight(const TTableIndex leftToCompare,
+		const TTableIndex rightToCompare) const;
+
+	void SetLeft(const TTableIndex _left) { left = _left; }
+	TTableIndex GetLeft() const { return left; }
+	void SetRight(const TTableIndex _right) { right = _right; }
+	TTableIndex GetRight() const { return right; }
+
+private:
+	TTableIndex left;
+	TTableIndex right;
+};
+
+inline bool CHole::CompareLeftAndRight(const TTableIndex leftToCompare,
+	const TTableIndex rightToCompare) const
+{
+	return ( left == leftToCompare && right == rightToCompare );
+}
+
+class CHoleNode : public CHole {
+public:
+
+
+private:
+	CHoleNode* next;
+};
+
+#if 0
+class CHole {
+	friend class CHoleList;
+
+public:
 	CUnitList hole;
-	TTableIndex left, right;
+	TTableIndex left;
+	TTableIndex right;
+
+private:
 	CHole* nextHole;
 	
 	CHole(TTableIndex _left = 0, TTableIndex _right = 1):
 		left(_left), right(_right), nextHole(0) {}
 };
+
+class CHoleList {
+public:
+
+	CHole* Get();
+	void Next();
+	void First();
+	void Remove();
+
+	void Add(CUnitList* hole, const TTableIndex left,
+		const TTableIndex right);
+
+private:
+	CHole* first;
+};
+#endif
 
 const int MaxCountOfDifferentVariablesInRule = 64;
 
@@ -29,20 +81,22 @@ struct CHolesTuple {
 		firstHole(_firstHole), stackDepth(_stackDepth) {}
 };
 
-class CFunctionCompiler {
-public:
-	void Compile(CFunction* function);
+class CFunctionCompilerBase {
+protected:
+	CVariables variables;
+};
+
+class CLeftPartCompiler : public CFunctionCompilerBase {
+protected:
+	void CompileLeftPart(CUnitList* leftPart, const bool isRightDirection);
 
 private:
-
-	void compileRule(CFunctionRule* rule);
-	void removeCurrentHole();
-	inline CUnitNode* detachLeftUnitInCurrentHole();
-	inline CUnitNode* detachRightUnitInCurrentHole();
+	//void removeHole();
+	//void insertHole();
 	
-	inline bool isMarkedVariable(CUnitNode* unit);
-	inline bool isVE(CUnitNode* unit) const;
-	inline bool isFreeVE(CUnitNode* unit) const;
+	inline bool isMarkedVariable(TUnitNode* unit);
+	inline bool isVE(TUnitNode* unit) const;
+	inline bool isFreeVE(TUnitNode* unit) const;
 
 	TVariablesMask makeVariablesMask(const CHole& hole) const;
 	void splitIntoClasses(CHole* const holes);
@@ -50,8 +104,8 @@ private:
 	void matchVE();
 	
 	void matchElement();
-	bool tryMatchLeftVariable(CUnitNode* left);
-	bool tryMatchRightVariable(CUnitNode* right);
+	bool tryMatchLeftVariable(TUnitNode* left);
+	bool tryMatchRightVariable(TUnitNode* right);
 	
 	void matchEmptyExpression();
 	void matchClosedE();
@@ -66,47 +120,52 @@ private:
 	void matchLeftDuplicateVE();
 	void matchRightDuplicateVE();
 
-	TTableIndex currentLeft;
-	TTableIndex currentRight;
-	TTableIndex tableIndex;
+	TTableIndex top;
+	TTableIndex left;
+	TTableIndex right;
+	CHoleNode* hole;
+	CHoleNode* firstHole;
+
+#if 0
 	TVariablesMask markedVariables;
 	int markedStackDepth[MaxCountOfDifferentVariablesInRule];
 	std::vector<CHolesTuple> classes;
-	CVariables variables;
-	CHole* currentHole;
-	CHole* firstHole;
 	int stackDepth;
+#endif
 };
 
-inline CUnitNode* CFunctionCompiler::detachLeftUnitInCurrentHole()
-{
-	CUnitNode* tmp = currentHole->hole.GetFirst();
-	currentHole->hole.Detach( tmp );
-	return tmp;
-}
-
-inline CUnitNode* CFunctionCompiler::detachRightUnitInCurrentHole()
-{
-	CUnitNode* tmp = currentHole->hole.GetLast();
-	currentHole->hole.Detach( tmp );
-	return tmp;
-}
-
-inline bool CFunctionCompiler::isMarkedVariable(CUnitNode* unit)
+#if 0
+inline bool CLeftPartCompiler::isMarkedVariable(TUnitNode* unit)
 {
 	return ( unit != 0 && unit->IsVariable() &&
 		markedVariables.test( unit->Variable() ) );
 }
+#endif
 
-inline bool CFunctionCompiler::isVE(CUnitNode* unit) const
+inline bool CLeftPartCompiler::isVE(TUnitNode* unit) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
 		variables.GetVariable( unit->Variable() ).TypeIs( 'v', 'e' ) );
 }
 
-inline bool CFunctionCompiler::isFreeVE(CUnitNode* unit) const
+inline bool CLeftPartCompiler::isFreeVE(TUnitNode* unit) const
 {
 	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
 }
+
+// ----------------------------------------------------------------------------
+
+class CRightPartCompiler : public CLeftPartCompiler {
+protected:
+	void CompileRightPart(CUnitList* rightPart);
+};
+
+class CFunctionCompiler : public CRightPartCompiler {
+public:
+	void Compile(CFunction* function);
+
+private:
+	void compileRule(CFunctionRule* rule);
+};
 
 } // end of namespace refal2

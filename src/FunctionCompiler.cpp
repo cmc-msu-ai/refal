@@ -4,47 +4,24 @@
 
 namespace Refal2 {
 
-void CFunctionCompiler::Compile(CFunction* function)
+void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
+	const bool isRightDirection)
 {
-	for( CFunctionRule* rule = function->firstRule; rule != 0;
-		rule = rule->nextRule )
-	{
-		compileRule( rule );
-	}
+
 }
 
-void CFunctionCompiler::removeCurrentHole()
-{
-	if( currentHole == firstHole ) {
-		firstHole = currentHole->nextHole;
-		delete currentHole;
-		currentHole = firstHole;
-	} else {
-		CHole* i = firstHole; 
-		while( i->nextHole != currentHole ) {
-			i = i->nextHole;
-		}
-		
-		i->nextHole = currentHole->nextHole;
-		delete currentHole;
-		currentHole = i;
-	}
-}
-
-void CFunctionCompiler::compileRule(CFunctionRule* rule)
-{
-	firstHole = new CHole;
-	rule->leftPart.Move( &(firstHole->hole) );
-	rule->variables.Move( &variables );
-	
+#if 0
+void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
+	const bool isRightDirection)
+{	
 	do {
 		// HSCH
 		currentHole = firstHole;
 		
 		// HSCH 1
 		do {
-			CUnitNode* left = currentHole->hole.GetFirst();
-			CUnitNode* right = currentHole->hole.GetLast();
+			TUnitNode* left = currentHole->hole.GetFirst();
+			TUnitNode* right = currentHole->hole.GetLast();
 			
 			if( isMarkedVariable(left) )
 			{
@@ -77,10 +54,10 @@ void CFunctionCompiler::compileRule(CFunctionRule* rule)
 	} while( firstHole != 0 );
 }
 
-TVariablesMask CFunctionCompiler::makeVariablesMask(const CHole& hole) const
+TVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
 {
 	TVariablesMask variablesMask;
-	for( const CUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
+	for( const TUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
 		if( i->IsVariable() && !variables.IsSet( i->Variable() ) ) {
 			variablesMask.set( i->Variable() );
 		}
@@ -97,7 +74,7 @@ struct CHoleInfo {
 		hole(_hole), classid(0) {}
 };
 
-void CFunctionCompiler::splitIntoClasses(CHole* const holes)
+void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 {
 	std::vector<CHoleInfo> info;	
 	for( CHole* i = holes; i != 0; i = i->nextHole ) {
@@ -139,7 +116,25 @@ void CFunctionCompiler::splitIntoClasses(CHole* const holes)
 	}
 }
 
-void CFunctionCompiler::matchVE()
+void CLeftPartCompiler::removeCurrentHole()
+{
+	if( currentHole == firstHole ) {
+		firstHole = currentHole->nextHole;
+		delete currentHole;
+		currentHole = firstHole;
+	} else {
+		CHole* i = firstHole; 
+		while( i->nextHole != currentHole ) {
+			i = i->nextHole;
+		}
+		
+		i->nextHole = currentHole->nextHole;
+		delete currentHole;
+		currentHole = i;
+	}
+}
+
+void CLeftPartCompiler::matchVE()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchVE()\n");
@@ -147,17 +142,19 @@ void CFunctionCompiler::matchVE()
 	delete detachLeftUnitInCurrentHole();
 }
 
-void CFunctionCompiler::matchElement()
+#endif
+
+void CLeftPartCompiler::matchElement()
 {
-	//if( currentLeft != currentHole->left || currentRight != currentHole->Right ) {
-		/* TODO: SB( currentHole->left, currentHole->Right ) */
-	//}
-	
-	if( currentHole->hole.IsEmpty() ) {
+	if( !hole->CompareLeftAndRight( left, right ) ) {
+		// TODO: add SB( hole->GetLeft(), hole->GetRight() );
+	}
+
+	if( hole->IsEmpty() ) {
 		matchEmptyExpression();
 	} else {
-		CUnitNode* left = currentHole->hole.GetFirst();
-		CUnitNode* right = currentHole->hole.GetLast();
+		TUnitNode* left = hole->GetFirst();
+		TUnitNode* right = hole->GetLast();
 	
 		if( left == right && isFreeVE(left) ) {
 			matchClosedE();
@@ -177,19 +174,19 @@ void CFunctionCompiler::matchElement()
 	}
 }
 
-bool CFunctionCompiler::tryMatchLeftVariable(CUnitNode* left)
+bool CLeftPartCompiler::tryMatchLeftVariable(TUnitNode* left)
 {
 	switch( variables.GetVariable( left->Variable() )->GetType() ) {
-		case 's':
+		case VariableTypeS:
 			matchLeftS();
 			return true;
 			break;
-		case 'w':
+		case VariableTypeW:
 			matchLeftW();
 			return true;
 			break;
-		case 'v':
-		case 'e':
+		case VariableTypeV:
+		case VariableTypeE:
 			if( variables.IsSet( left->Variable() ) ) {
 				matchLeftDuplicateVE();
 				return true;
@@ -202,19 +199,19 @@ bool CFunctionCompiler::tryMatchLeftVariable(CUnitNode* left)
 	return false;
 }
 
-bool CFunctionCompiler::tryMatchRightVariable(CUnitNode* right)
+bool CLeftPartCompiler::tryMatchRightVariable(TUnitNode* right)
 {
 	switch( variables.GetVariable( right->Variable() )->GetType() ) {
-		case 's':
+		case VariableTypeS:
 			matchRightS();
 			return true;
 			break;
-		case 'w':
+		case VariableTypeW:
 			matchRightW();
 			return true;
 			break;
-		case 'v':
-		case 'e':
+		case VariableTypeV:
+		case VariableTypeE:
 			if( variables.IsSet( right->Variable() ) ) {
 				matchRightDuplicateVE();
 				return true;
@@ -227,121 +224,144 @@ bool CFunctionCompiler::tryMatchRightVariable(CUnitNode* right)
 	return false;
 }
 
-void CFunctionCompiler::matchEmptyExpression()
+void CLeftPartCompiler::matchEmptyExpression()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchEmptyExpression()\n");
-	removeCurrentHole();
+	//removeHole();
 }
 
-void CFunctionCompiler::matchClosedE()
+void CLeftPartCompiler::matchClosedE()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchClosedE()\n");
-	delete detachLeftUnitInCurrentHole();
-	removeCurrentHole();
+	hole->RemoveFirst();
+	//removeHole();
 }
 
-void CFunctionCompiler::matchLeftParens()
+void CLeftPartCompiler::matchLeftParens()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftParens()\n");
 	
-	CUnitNode* begin = currentHole->hole.GetFirst();
-	CUnitNode* end = currentHole->hole.GetLast();
-	CUnitNode* beginNew = begin->PairedParen()->Next();
-	CUnitNode* endNew = 0;
+	TUnitNode* begin = hole->GetFirst();
+	TUnitNode* end = hole->GetLast();
+	TUnitNode* beginNew = begin->PairedParen()->Next();
+	TUnitNode* endNew = 0;
 	if( beginNew != 0 ) {
 		endNew = end;
-		currentHole->hole.Detach( beginNew, endNew );
+		hole->Detach( beginNew, endNew );
 	}
 	
-	delete detachLeftUnitInCurrentHole();
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveFirst();
+	hole->RemoveLast();
 	
-	CHole* tmp = new CHole;
+	/*CHole* tmp = new CHole;
 	tmp->hole.Assign( beginNew, endNew );
 	tmp->nextHole = currentHole->nextHole;
-	currentHole->nextHole = tmp;
+	currentHole->nextHole = tmp;*/
 }
 
-void CFunctionCompiler::matchRightParens()
+void CLeftPartCompiler::matchRightParens()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchRightParens()\n");
 	
-	CUnitNode* begin = currentHole->hole.GetFirst();
-	CUnitNode* end = currentHole->hole.GetLast();
-	CUnitNode* beginNew = 0;
-	CUnitNode* endNew = end->PairedParen()->Prev();
+	TUnitNode* begin = hole->GetFirst();
+	TUnitNode* end = hole->GetLast();
+	TUnitNode* beginNew = 0;
+	TUnitNode* endNew = end->PairedParen()->Prev();
 	if( endNew != 0 ) {
 		beginNew = begin;
-		currentHole->hole.Detach( beginNew, endNew );
+		hole->Detach( beginNew, endNew );
 	}
 	
-	delete detachLeftUnitInCurrentHole();
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveFirst();
+	hole->RemoveLast();
 	
-	CHole* tmp = new CHole;
+	/*CHole* tmp = new CHole;
 	tmp->hole.Assign( beginNew, endNew );
 	tmp->nextHole = currentHole->nextHole;
-	currentHole->nextHole = tmp;
+	currentHole->nextHole = tmp;*/
 }
 
-void CFunctionCompiler::matchLeftSymbol()
+void CLeftPartCompiler::matchLeftSymbol()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftSymbol()\n");
-	delete detachLeftUnitInCurrentHole();
+	hole->RemoveFirst();
 }
 
-void CFunctionCompiler::matchRightSymbol()
+void CLeftPartCompiler::matchRightSymbol()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchRightSymbol()\n");
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveLast();
 }
 
-void CFunctionCompiler::matchLeftS()
+void CLeftPartCompiler::matchLeftS()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftS()\n");
-	delete detachLeftUnitInCurrentHole();
+	hole->RemoveFirst();
 }
 
-void CFunctionCompiler::matchRightS()
+void CLeftPartCompiler::matchRightS()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchRightS()\n");
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveLast();
 }
 
-void CFunctionCompiler::matchLeftW()
+void CLeftPartCompiler::matchLeftW()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftW()\n");
-	delete detachLeftUnitInCurrentHole();
+	hole->RemoveFirst();
+
 }
 
-void CFunctionCompiler::matchRightW()
+void CLeftPartCompiler::matchRightW()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchRightW()\n");
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveLast();
 }
 
-void CFunctionCompiler::matchLeftDuplicateVE()
+void CLeftPartCompiler::matchLeftDuplicateVE()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftDuplicateVE()\n");
-	delete detachLeftUnitInCurrentHole();
+	hole->RemoveFirst();
 }
 
-void CFunctionCompiler::matchRightDuplicateVE()
+void CLeftPartCompiler::matchRightDuplicateVE()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchRightDuplicateVE()\n");
-	delete detachRightUnitInCurrentHole();
+	hole->RemoveLast();
+}
+
+void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
+{
+}
+
+void CFunctionCompiler::Compile(CFunction* function)
+{
+	assert( function->IsParsed() );
+
+	for( CFunctionRule* rule = function->firstRule; rule != 0;
+		rule = rule->nextRule )
+	{
+		compileRule( rule );
+	}
+}
+
+void CFunctionCompiler::compileRule(CFunctionRule* rule)
+{
+	rule->variables.Move( &variables );
+	CompileLeftPart( &rule->leftPart, rule->isRightDirection );
+	CompileRightPart( &rule->rightPart );
 }
 
 } // end of namespace refal2
