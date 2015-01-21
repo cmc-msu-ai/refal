@@ -41,7 +41,6 @@ class IScannerListener;
 class CScanner;
 
 class CUnit;
-class CUnitNode;
 class CUnitList;
 
 class CVariable;

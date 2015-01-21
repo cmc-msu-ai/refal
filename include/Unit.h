@@ -4,6 +4,8 @@
 
 namespace Refal2 {
 
+typedef CNodeList<CUnit>::TNode TUnitNode;
+
 enum TUnitType {
 	UT_Char = 0x01,
 	UT_Label = 0x02,
@@ -23,12 +25,11 @@ enum TUnitTypeMask {
 };
 
 void PrintUnit(const CUnit& unit, const CVariables* variables = 0);
-void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
+bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
+void PrintUnitList(const TUnitNode* fromNode, const TUnitNode* toNode,
 	const CVariables* variables = 0);
 inline void PrintUnitList(const CUnitList& unitList,
-	const CVariables* variables = 0);
-
-bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
+	const CVariables* variables);
 
 class CUnit {
 	friend bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
@@ -65,8 +66,8 @@ public:
 	bool IsLeftBracket() const { return ( (type & UT_LeftBracket) != 0 ); }
 	bool IsRightBracket() const { return ( (type & UT_RightBracket) != 0 ); }
 	
-	CUnitNode*& PairedParen() { return pairedParen; }
-	const CUnitNode* PairedParen() const { return pairedParen; }
+	TUnitNode*& PairedParen() { return pairedParen; }
+	const TUnitNode* PairedParen() const { return pairedParen; }
 
 private:
 	TUnitType type;
@@ -74,198 +75,86 @@ private:
 		TChar c;
 		TLabel label;
 		TNumber number;
-		CUnitNode* pairedParen;
+		TUnitNode* pairedParen;
 		TVariableIndex variable;
 	};
 };
 
-class CUnitNode : public CUnit {
-	friend class CUnitList;
-
+class CUnitList : public CNodeList<CUnit> {
 public:
-	explicit CUnitNode(TUnitType _type): CUnit(_type), prev(0), next(0) {}
-	CUnitNode(const CUnit& unit): CUnit(unit), prev(0), next(0) {}
+	CUnitList() {}
+	CUnitList(TUnitNode* first, TUnitNode* last): CNodeList( first, last ) {}
 
-	CUnitNode* Next() { return next; }
-	const CUnitNode* Next() const { return next; }
-	
-	CUnitNode* Prev() { return prev; }
-	const CUnitNode* Prev() const { return prev; }
-	
-private:
-	CUnitNode* prev;
-	CUnitNode* next;
+	inline TUnitNode* AppendChar(TChar c);
+	inline TUnitNode* AppendLabel(TLabel label);
+	inline TUnitNode* AppendNumber(TNumber number);
+	inline TUnitNode* AppendVariable(TVariableIndex variable);
+	inline TUnitNode* AppendLeftParen(TUnitNode* rightParen = 0);
+	inline TUnitNode* AppendRightParen(TUnitNode* leftParen = 0);
+	inline TUnitNode* AppendLeftBracket(TUnitNode* rightBracket = 0);
+	inline TUnitNode* AppendRightBracket(TUnitNode* leftBracket = 0);
 };
 
-class CUnitList {
-public:
-	CUnitList(): first(0), last(0) {}
-	CUnitList(CUnitNode* first, CUnitNode* last);
-	
-	~CUnitList() { Empty(); }
-	
-	void Assign(CUnitNode* _first, CUnitNode* _last);
-		
-	void Empty();
-	bool IsEmpty() { return ( first == 0 ); }
-	
-	inline void Swap(CUnitList* swapWith);
-	inline void Move(CUnitList* moveTo);
-	
-	inline CUnitNode* DetachFirst();
-	inline void RemoveFirst();
-	CUnitNode* GetFirst() { return first; }
-	const CUnitNode* GetFirst() const { return first; }
-	
-	inline CUnitNode* DetachLast();
-	inline void RemoveLast();
-	CUnitNode* GetLast() { return last; }
-	const CUnitNode* GetLast() const { return last; }
-	
-	CUnitNode* InsertBefore(CUnitNode* nodeBefore, const CUnit& unit);
-	
-	CUnitNode* InsertAfter(CUnitNode* nodeAfter, const CUnit& unit)
-		{ return InsertAfter(nodeAfter, alloc(unit)); }
-	CUnitNode* InsertAfter(CUnitNode* nodeAfter, CUnitNode* node)
-		{ InsertAfter(nodeAfter, node, node); return node; }
-	void InsertAfter(CUnitNode* nodeAfter, CUnitNode* fromNode,
-		CUnitNode* toNode);
-	
-	void Detach(CUnitNode* node) { Detach(node, node); }
-	void Detach(CUnitNode* fromNode, CUnitNode* toNode);
-	
-	void Remove(CUnitNode* node) { Detach(node); free(node); }
-	void Remove(CUnitNode* fromNode, CUnitNode* toNode);
-	
-	void Move(CUnitNode* nodeAfter, CUnitNode* node)
-		{ InsertAfter(nodeAfter, node); }
-	void Move(CUnitNode* nodeAfter, CUnitNode* fromNode, CUnitNode* toNode)
-		{ InsertAfter(nodeAfter, fromNode, toNode); }
-
-	void Copy(CUnitNode* nodeAfter, CUnitNode* node)
-		{ Copy(nodeAfter, node, node); }
-	void Copy(CUnitNode* nodeAfter, CUnitNode* fromNode, CUnitNode* toNode);
-	
-	CUnitNode* Append(const CUnit& unit);
-	inline CUnitNode* AppendChar(TChar c);
-	inline CUnitNode* AppendLabel(TLabel label);
-	inline CUnitNode* AppendNumber(TNumber number);
-	inline CUnitNode* AppendVariable(TVariableIndex variable);
-	inline CUnitNode* AppendLeftParen(CUnitNode* rightParen = 0);
-	inline CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
-	inline CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
-	inline CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
-	
-	static void Duplicate(const CUnitNode* fromNode, const CUnitNode* toNode,
-		CUnitNode** fromNodeCopy, CUnitNode** toNodeCopy);
-	
-private:
-	static CUnitNode* alloc(TUnitType type);
-	static CUnitNode* alloc(const CUnit& unit);
-	static void free(CUnitNode* node);
-
-	CUnitNode* first;
-	CUnitNode* last;
-};
-
-inline void CUnitList::Swap(CUnitList* swapWith)
+inline TUnitNode* CUnitList::AppendChar(TChar c)
 {
-	std::swap( first, swapWith->first );
-	std::swap( last, swapWith->last );
-}
-
-inline void CUnitList::Move(CUnitList* moveTo)
-{
-	if( this != moveTo ) {
-		moveTo->Empty();
-		Swap( moveTo );
-	}
-}
-
-inline CUnitNode* CUnitList::DetachFirst()
-{
-	CUnitNode* detachedNode = GetFirst();
-	Detach( detachedNode );
-	return detachedNode;
-}
-
-inline void CUnitList::RemoveFirst()
-{
-	free( DetachFirst() );
-}
-
-inline CUnitNode* CUnitList::DetachLast()
-{
-	CUnitNode* detachedNode = GetLast();
-	Detach( detachedNode );
-	return detachedNode;
-}
-
-inline void CUnitList::RemoveLast()
-{
-	free( DetachLast() );
-}
-
-inline CUnitNode* CUnitList::AppendChar(TChar c)
-{
-	CUnit unit(UT_Char);
+	CUnit unit( UT_Char );
 	unit.Char() = c;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendLabel(TLabel label)
+inline TUnitNode* CUnitList::AppendLabel(TLabel label)
 {
-	CUnit unit(UT_Label);
+	CUnit unit( UT_Label );
 	unit.Label() = label;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendNumber(TNumber number)
+inline TUnitNode* CUnitList::AppendNumber(TNumber number)
 {
-	CUnit unit(UT_Number);
+	CUnit unit( UT_Number );
 	unit.Number() = number;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendVariable(TVariableIndex variable)
+inline TUnitNode* CUnitList::AppendVariable(TVariableIndex variable)
 {
-	CUnit unit(UT_Variable);
+	CUnit unit( UT_Variable );
 	unit.Variable() = variable;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendLeftParen(CUnitNode* rightParen)
+inline TUnitNode* CUnitList::AppendLeftParen(TUnitNode* rightParen)
 {
-	CUnit unit(UT_LeftParen);
+	CUnit unit( UT_LeftParen );
 	unit.PairedParen() = rightParen;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendRightParen(CUnitNode* leftParen)
+inline TUnitNode* CUnitList::AppendRightParen(TUnitNode* leftParen)
 {
-	CUnit unit(UT_RightParen);
+	CUnit unit( UT_RightParen );
 	unit.PairedParen() = leftParen;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendLeftBracket(CUnitNode* rightBracket)
+inline TUnitNode* CUnitList::AppendLeftBracket(TUnitNode* rightBracket)
 {
-	CUnit unit(UT_LeftBracket);
+	CUnit unit( UT_LeftBracket );
 	unit.PairedParen() = rightBracket;
-	return Append(unit);
+	return Append( unit );
 }
 
-inline CUnitNode* CUnitList::AppendRightBracket(CUnitNode* leftBracket)
+inline TUnitNode* CUnitList::AppendRightBracket(TUnitNode* leftBracket)
 {
-	CUnit unit(UT_RightBracket);
+	CUnit unit( UT_RightBracket );
 	unit.PairedParen() = leftBracket;
-	return Append(unit);
+	return Append( unit );
 }
 
 inline void PrintUnitList(const CUnitList& unitList,
 	const CVariables* variables)
 {
-	PrintUnitList(unitList.GetFirst(), unitList.GetLast(), variables);
+	PrintUnitList( unitList.GetFirst(), unitList.GetLast(), variables );
 }
 
 } // end of namespace Refal2

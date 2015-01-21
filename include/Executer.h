@@ -12,21 +12,21 @@ public:
 	void SetStackSize(int new_stack_size);
 	void SetTableSize(int new_table_size);
 
-	void Run(COperation* operation, CUnitNode* first, CUnitNode* last);
+	void Run(COperation* operation, TUnitNode* first, TUnitNode* last);
 	
 private:
 	CExecuter(const CExecuter&);
 	CExecuter& operator=(const CExecuter&);
 
 	struct CState {
-		CUnitNode* lb;
-		CUnitNode* rb;
+		TUnitNode* lb;
+		TUnitNode* rb;
 		COperation* op;
 		int table_index;
 	};
 
 	struct CMove {
-		CUnitNode* location;
+		TUnitNode* location;
 		COperation* op;
 	};
 
@@ -41,15 +41,15 @@ private:
 	int stack_size;
 	void* stack;
 	int table_size;
-	CUnitNode** table;
+	TUnitNode** table;
 
-	CUnitNode* lb;
-	CUnitNode* rb;
+	TUnitNode* lb;
+	TUnitNode* rb;
 	COperation* op;
 	int stack_depth;
 	int table_index;
 
-	CUnitNode master_term;
+	TUnitNode master_term;
 };
 
 inline CExecuter::CState& CExecuter::states_stack(int i)

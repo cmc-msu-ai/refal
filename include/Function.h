@@ -108,7 +108,7 @@ public:
 	bool IsLeftState() const { return ( state == FBS_Left ); }
 	bool IsRightState() const { return ( state == FBS_Right ); }
 	
-	const CUnitNode* GetLastAddedUnit() const { return acc.GetLast(); }
+	const TUnitNode* GetLastAddedUnit() const { return acc.GetLast(); }
 	
 	void Reset();
 	void Export(CFunction* function);
@@ -144,7 +144,7 @@ private:
 	CUnitList leftPart;
 	CFunctionRule* firstRule;
 	CFunctionRule* lastRule;
-	std::stack<CUnitNode*> balanceStack;
+	std::stack<TUnitNode*> balanceStack;
 };
 
 inline void CFunctionBuilder::emptyStack()

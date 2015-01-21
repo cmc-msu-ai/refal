@@ -44,7 +44,7 @@ void PrintUnit(const CUnit& unit, const CVariables* variables)
 	}
 }
 
-void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
+void PrintUnitList(const TUnitNode* fromNode, const TUnitNode* toNode,
 	const CVariables* variables)
 {
 	if( fromNode == 0 || toNode == 0 ) {
@@ -52,9 +52,9 @@ void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
 	}
 	
 	for( ; fromNode != toNode; fromNode = fromNode->Next() ) {
-		PrintUnit(*fromNode, variables);
+		PrintUnit( *fromNode, variables );
 	}
-	PrintUnit(*fromNode, variables);
+	PrintUnit( *fromNode, variables );
 }
 
 bool CompareUnit(const CUnit& unitA, const CUnit& unitB)
@@ -87,142 +87,6 @@ bool CompareUnit(const CUnit& unitA, const CUnit& unitB)
 	}
 	assert( false );
 	return false;
-}
-
-CUnitList::CUnitList(CUnitNode* _first, CUnitNode* _last):
-	first( _first ), last( _last )
-{
-	assert( _first != 0 && _last != 0 );
-}
-
-void CUnitList::Assign(CUnitNode* _first, CUnitNode* _last)
-{
-	Empty();
-	first = _first;
-	last = _last;
-}
-
-void CUnitList::Empty()
-{
-	if( first != 0 ) {
-		Remove(first, last);
-	}
-	first = 0;
-	last = 0;
-}
-
-CUnitNode* CUnitList::InsertBefore(CUnitNode* nodeBefore, const CUnit& unit)
-{
-	CUnitNode* newNode = alloc(unit);
-	
-	newNode->next = nodeBefore;
-	newNode->prev = nodeBefore->prev;
-	if( nodeBefore == first ) {
-		first = newNode;
-	} else {
-		nodeBefore->prev->next = newNode;
-	}
-	nodeBefore->prev = newNode;
-	
-	return newNode;
-}
-
-void CUnitList::InsertAfter(CUnitNode* nodeAfter, CUnitNode* fromNode,
-	CUnitNode* toNode)
-{
-	Detach(fromNode, toNode);
-
-	toNode->next = nodeAfter->next;
-	fromNode->prev = nodeAfter;
-	if( nodeAfter == last ) {
-		last = toNode;
-	} else {
-		nodeAfter->next->prev = toNode;
-	}
-	nodeAfter->next = fromNode;
-}
-
-void CUnitList::Detach(CUnitNode* fromNode, CUnitNode* toNode)
-{
-	if( fromNode->prev != 0 ) {
-		fromNode->prev->next = toNode->next;
-	}
-	if( toNode->next != 0 ) {
-		toNode->next->prev = fromNode->prev;
-	}
-	if( fromNode == first ) {
-		first = toNode->next;
-	}
-	if( toNode == last ) {
-		last = fromNode->prev;
-	}
-	fromNode->prev = 0;
-	toNode->next = 0;
-}
-
-void CUnitList::Remove(CUnitNode* fromNode, CUnitNode* toNode)
-{
-	Detach(fromNode, toNode);
-	
-	while( fromNode != toNode ) {
-		CUnitNode* tmp = fromNode;
-		fromNode = fromNode->next;
-		free(tmp);
-	}
-	free(fromNode);
-}
-
-void CUnitList::Copy(CUnitNode* nodeAfter, CUnitNode* fromNode,
-	CUnitNode* toNode)
-{
-	CUnitNode* fromNodeCopy = 0;
-	CUnitNode* toNodeCopy = 0;
-	Duplicate(fromNode, toNode, &fromNodeCopy, &toNodeCopy);
-	InsertAfter(nodeAfter, fromNodeCopy, toNodeCopy);
-}
-
-CUnitNode* CUnitList::Append(const CUnit& unit)
-{
-	if( last != 0 ) {
-		InsertAfter(last, unit);
-	} else {
-		first = alloc(unit);
-		last = first;
-	}
-	return last;
-}
-
-void CUnitList::Duplicate(const CUnitNode* fromNode, const CUnitNode* toNode,
-	CUnitNode** fromNodeCopy, CUnitNode** toNodeCopy)
-{
-	CUnitNode* tmpFirst = alloc(*fromNode);
-	CUnitNode* tmpLast = tmpFirst;
-	
-	while( fromNode != toNode ) {
-		fromNode = fromNode->next;
-		
-		tmpLast->next = alloc(*fromNode);
-		tmpLast->next->prev = tmpLast;
-		tmpLast = tmpLast->next;
-	}
-	
-	*fromNodeCopy = tmpFirst;
-	*toNodeCopy = tmpLast;
-}
-
-CUnitNode* CUnitList::alloc(TUnitType type)
-{
-	return new CUnitNode(type);
-}
-
-CUnitNode* CUnitList::alloc(const CUnit& unit)
-{
-	return new CUnitNode(unit);
-}
-
-void CUnitList::free(CUnitNode* node)
-{
-	delete node;
 }
 
 } // end of namespace Refal2

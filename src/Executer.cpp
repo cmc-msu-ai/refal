@@ -10,7 +10,7 @@ CExecuter::CExecuter():
 	op(0),
 	stack_depth(0),
 	table_index(0),
-	master_term(UT_LeftBracket)
+	master_term( CUnit(UT_LeftBracket) )
 {
 }
 
@@ -34,7 +34,7 @@ void CExecuter::SetTableSize(int new_table_size)
 	if( new_table_size > table_size ) {
 		delete[] table;
 		table_size = new_table_size;
-		table = new CUnitNode*[table_size];
+		table = new TUnitNode*[table_size];
 	}
 }
 
@@ -88,7 +88,7 @@ void print(COperation* operation)
 	std::cout << names[operation->Type()] << "\n";
 }
 
-void CExecuter::Run(COperation* operation, CUnitNode* first, CUnitNode* last)
+void CExecuter::Run(COperation* operation, TUnitNode* first, TUnitNode* last)
 {
 	lb = first;
 	rb = last;
@@ -412,8 +412,8 @@ void CExecuter::Run(COperation* operation, CUnitNode* first, CUnitNode* last)
 
 			case COperation::OT_check_qualifier_last_wve_variable:
 				{
-					CUnitNode* i = table[table_index - 2]->Prev();
-					CUnitNode* till = table[table_index - 1];
+					TUnitNode* i = table[table_index - 2]->Prev();
+					TUnitNode* till = table[table_index - 1];
 					while( i != till ) {
 						i = i->Next();
 						if( i->IsLeftParen() ) {
