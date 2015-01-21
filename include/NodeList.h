@@ -43,12 +43,12 @@ public:
 	inline void Move(CNodeList* moveTo);
 	
 	inline TNode* DetachFirst();
-	inline void RemoveFirst();
+	void RemoveFirst() { free( DetachFirst() ); }
 	TNode* GetFirst() { return first; }
 	const TNode* GetFirst() const { return first; }
 	
 	inline TNode* DetachLast();
-	inline void RemoveLast();
+	void RemoveLast() { free( DetachLast() ); }
 	TNode* GetLast() { return last; }
 	const TNode* GetLast() const { return last; }
 	
@@ -85,6 +85,38 @@ private:
 	TNode* first;
 	TNode* last;
 };
+
+template<class T>
+inline void CNodeList<T>::Swap(CNodeList* swapWith)
+{
+	std::swap( first, swapWith->first );
+	std::swap( last, swapWith->last );
+}
+
+template<class T>
+inline void CNodeList<T>::Move(CNodeList* moveTo)
+{
+	if( this != moveTo ) {
+		moveTo->Empty();
+		Swap( moveTo );
+	}
+}
+
+template<class T>
+inline typename CNodeList<T>::TNode* CNodeList<T>::DetachFirst()
+{
+	TNode* detachedNode = GetFirst();
+	Detach( detachedNode );
+	return detachedNode;
+}
+
+template<class T>
+inline typename CNodeList<T>::TNode* CNodeList<T>::DetachLast()
+{
+	TNode* detachedNode = GetLast();
+	Detach( detachedNode );
+	return detachedNode;
+}
 
 template<class T>
 CNodeList<T>::CNodeList(TNode* _first, TNode* _last):
