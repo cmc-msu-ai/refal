@@ -1,0 +1,10 @@
+simple START
+	EMPTY just_empty_label, simple_empty_label
+	ENTRY go
+	
+go = <rev /just_empty_label/ /127/ 'abc' /simple_empty_label/ 'def' /943/ >
+
+rev w1e2 = <rev e2>w1
+	=
+
+	END

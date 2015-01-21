@@ -95,7 +95,7 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 int main(int argc, const char* argv[])
 {
 	try {
-		const char* filename = "C:\\Need Files\\github\\cmc-msu-ai\\refal\\tests\\simple.ref";
+		const char* filename = "..\\tests\\simple.ref";
 
 		if( argc == 2 ) {
 			filename = argv[1];
