@@ -31,7 +31,7 @@ void CParser::ProcessLexem()
 				addEndOfFunction(); // action
 			} else if( lexem == L_Blank ) {
 				state = PS_BeginBlank;
-			} else if( lexem = L_EndOfFile ) {
+			} else if( lexem == L_EndOfFile ) {
 				addEndOfFunction(); // action
 			} else {
 				state = PS_WaitNewline;
