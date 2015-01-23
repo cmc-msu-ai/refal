@@ -84,7 +84,7 @@ public:
 	inline void Move(CVariables* moveTo);
 
 	inline CVariable* GetVariable(const TVariableIndex variableIndex);
-	inline const CVariable& GetVariable(
+	inline const CVariable* GetVariable(
 		const TVariableIndex variableIndex) const;
 
 	inline bool IsValidVariableIndex(const TVariableIndex variableIndex) const;
@@ -128,12 +128,12 @@ inline CVariable* CVariables::GetVariable(const TVariableIndex variableIndex)
 	return &variables[variableIndex];
 }
 
-inline const CVariable& CVariables::GetVariable(
+inline const CVariable* CVariables::GetVariable(
 	const TVariableIndex variableIndex) const
 {
 	assert( IsValidVariableIndex( variableIndex ) );
 
-	return variables[variableIndex];
+	return &variables[variableIndex];
 }
 
 inline bool CVariables::IsValidVariableIndex(
