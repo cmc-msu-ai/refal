@@ -70,6 +70,8 @@ inline void CFunction::SetParsed(CFunctionRule** _firstRule)
 	
 	firstRule = *_firstRule;
 	*_firstRule = 0;
+
+	functionState = FS_Parsed;
 }
 
 enum TFunctionBuilderState {
