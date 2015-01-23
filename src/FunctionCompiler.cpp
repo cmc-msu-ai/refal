@@ -4,10 +4,48 @@
 
 namespace Refal2 {
 
+CHole::CHole(CUnitList* hole, const TTableIndex _left,
+		const TTableIndex _right):
+	left( _left ), right( _right )
+{
+	hole->Move( this );
+}
+
+CHole::CHole(TUnitNode* const first, TUnitNode* const last,
+		const TTableIndex _left, const TTableIndex _right):
+	CUnitList( first, last ), left( _left ), right( _right )
+{
+}
+
+CHole::CHole(const CHole& hole)
+	: left( hole.left ), right( hole.right )
+{
+	const_cast<CHole&>( hole ).Move( this );
+}
+
+CHole& CHole::operator=(const CHole& hole)
+{
+	left = hole.left;
+	right = hole.right;
+	const_cast<CHole&>( hole ).Move( this );
+	return *this;
+}
+
+CLeftPartCompiler::CLeftPartCompiler():
+	top(0), left(0), right(0), hole(0)
+{
+}
+
 void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
 	const bool isRightDirection)
 {
+	holes.Append( CHole( leftPart, 0, 0 ) );
 
+	hole = holes.GetFirst();
+
+	while( !holes.IsEmpty() ) {
+		matchElement();
+	}
 }
 
 #if 0
@@ -116,24 +154,6 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 	}
 }
 
-void CLeftPartCompiler::removeCurrentHole()
-{
-	if( currentHole == firstHole ) {
-		firstHole = currentHole->nextHole;
-		delete currentHole;
-		currentHole = firstHole;
-	} else {
-		CHole* i = firstHole; 
-		while( i->nextHole != currentHole ) {
-			i = i->nextHole;
-		}
-		
-		i->nextHole = currentHole->nextHole;
-		delete currentHole;
-		currentHole = i;
-	}
-}
-
 void CLeftPartCompiler::matchVE()
 {
 	// TODO: action
@@ -143,6 +163,13 @@ void CLeftPartCompiler::matchVE()
 }
 
 #endif
+
+void CLeftPartCompiler::removeHole()
+{
+	THoleList::TNode* nextHole = hole->Next();
+	holes.Remove( hole );
+	hole = nextHole;
+}
 
 void CLeftPartCompiler::matchElement()
 {
@@ -228,15 +255,16 @@ void CLeftPartCompiler::matchEmptyExpression()
 {
 	// TODO: action
 	printf("CFunctionCompiler::matchEmptyExpression()\n");
-	//removeHole();
+	removeHole();
 }
 
 void CLeftPartCompiler::matchClosedE()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchClosedE()\n");
 	hole->RemoveFirst();
-	//removeHole();
+	removeHole();
 }
 
 void CLeftPartCompiler::matchLeftParens()
@@ -256,10 +284,7 @@ void CLeftPartCompiler::matchLeftParens()
 	hole->RemoveFirst();
 	hole->RemoveLast();
 	
-	/*CHole* tmp = new CHole;
-	tmp->hole.Assign( beginNew, endNew );
-	tmp->nextHole = currentHole->nextHole;
-	currentHole->nextHole = tmp;*/
+	holes.InsertAfter( hole, CHole( beginNew, endNew, 0, 0 ) );
 }
 
 void CLeftPartCompiler::matchRightParens()
@@ -279,10 +304,7 @@ void CLeftPartCompiler::matchRightParens()
 	hole->RemoveFirst();
 	hole->RemoveLast();
 	
-	/*CHole* tmp = new CHole;
-	tmp->hole.Assign( beginNew, endNew );
-	tmp->nextHole = currentHole->nextHole;
-	currentHole->nextHole = tmp;*/
+	holes.InsertAfter( hole, CHole( beginNew, endNew, 0, 0 ) );
 }
 
 void CLeftPartCompiler::matchLeftSymbol()
@@ -301,6 +323,7 @@ void CLeftPartCompiler::matchRightSymbol()
 
 void CLeftPartCompiler::matchLeftS()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftS()\n");
 	hole->RemoveFirst();
@@ -308,6 +331,7 @@ void CLeftPartCompiler::matchLeftS()
 
 void CLeftPartCompiler::matchRightS()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchRightS()\n");
 	hole->RemoveLast();
@@ -315,6 +339,7 @@ void CLeftPartCompiler::matchRightS()
 
 void CLeftPartCompiler::matchLeftW()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftW()\n");
 	hole->RemoveFirst();
@@ -323,6 +348,7 @@ void CLeftPartCompiler::matchLeftW()
 
 void CLeftPartCompiler::matchRightW()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchRightW()\n");
 	hole->RemoveLast();
@@ -330,6 +356,7 @@ void CLeftPartCompiler::matchRightW()
 
 void CLeftPartCompiler::matchLeftDuplicateVE()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchLeftDuplicateVE()\n");
 	hole->RemoveFirst();
@@ -337,6 +364,7 @@ void CLeftPartCompiler::matchLeftDuplicateVE()
 
 void CLeftPartCompiler::matchRightDuplicateVE()
 {
+	variables.Set( hole->GetFirst()->Variable(), ++top );
 	// TODO: action
 	printf("CFunctionCompiler::matchRightDuplicateVE()\n");
 	hole->RemoveLast();
@@ -344,6 +372,63 @@ void CLeftPartCompiler::matchRightDuplicateVE()
 
 void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 {
+	CUnitList hole;
+	rightPart->Move( &hole );
+
+	while( !hole.IsEmpty() ) {
+		TUnitNode unit = *hole.GetFirst();
+		hole.RemoveFirst();
+
+		switch( unit.GetType() ) {
+			case UT_Char:
+				printf( "OT_insert_symbol: Char(%c)\n", unit.Char() );
+				break;
+			case UT_Label:
+				printf( "OT_insert_symbol: Label(%s)\n",
+					LabelTable.GetLabelText( unit.Label() ).c_str() );
+				break;
+			case UT_Number:
+				printf( "OT_insert_symbol: Number(%d)\n", unit.Number() );
+				break;
+			case UT_Variable:
+			{
+				TVariableIndex variableIndex = unit.Variable();
+				const CVariable& variable = *variables.GetVariable(
+					variableIndex );
+				TTableIndex valueIndex;
+				if( variables.Get( variableIndex, &valueIndex ) ) {
+					if( variable.TypeIs( VariableTypeS ) ) {
+						printf( "OT_move_s: %d\n", valueIndex );
+					} else if( variable.TypeIs( VariableTypeE ) ) {
+						printf( "OT_move_e: %d\n", valueIndex );
+					} else { // type WV
+						printf( "OT_move_wv: %d\n", valueIndex );
+					}
+				} else {
+					if( variable.TypeIs( VariableTypeS ) ) {
+						printf( "OT_copy_s: %d\n", valueIndex );
+					} else { // type WVE
+						printf( "OT_copy_wve: %d\n", valueIndex );
+					}
+				}
+				break;
+			}
+			case UT_LeftParen:
+				printf( "OT_insert_left_paren\n" );
+				break;
+			case UT_RightParen:
+				printf( "OT_insert_right_paren\n" );
+				break;
+			case UT_LeftBracket:
+				printf( "OT_insert_left_paren\n" );
+				break;
+			case UT_RightBracket:
+				printf( "OT_insert_right_bracket\n" );
+				break;
+			default:
+				assert( false );
+		}
+	}
 }
 
 void CFunctionCompiler::Compile(CFunction* function)

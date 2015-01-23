@@ -10,6 +10,13 @@ const TTableIndex InvalideTableIndex = -1;
 
 class CHole : public CUnitList {
 public:
+	CHole(CUnitList* hole, const TTableIndex left, const TTableIndex right);
+	CHole(TUnitNode* const first, TUnitNode* const last,
+		const TTableIndex left, const TTableIndex right);
+
+	CHole(const CHole&);
+	CHole& operator=(const CHole&);
+
 	inline bool CompareLeftAndRight(const TTableIndex leftToCompare,
 		const TTableIndex rightToCompare) const;
 
@@ -29,56 +36,17 @@ inline bool CHole::CompareLeftAndRight(const TTableIndex leftToCompare,
 	return ( left == leftToCompare && right == rightToCompare );
 }
 
-class CHoleNode : public CHole {
-public:
-
-
-private:
-	CHoleNode* next;
-};
-
-#if 0
-class CHole {
-	friend class CHoleList;
-
-public:
-	CUnitList hole;
-	TTableIndex left;
-	TTableIndex right;
-
-private:
-	CHole* nextHole;
-	
-	CHole(TTableIndex _left = 0, TTableIndex _right = 1):
-		left(_left), right(_right), nextHole(0) {}
-};
-
-class CHoleList {
-public:
-
-	CHole* Get();
-	void Next();
-	void First();
-	void Remove();
-
-	void Add(CUnitList* hole, const TTableIndex left,
-		const TTableIndex right);
-
-private:
-	CHole* first;
-};
-#endif
+typedef CNodeList<CHole> THoleList;
 
 const int MaxCountOfDifferentVariablesInRule = 64;
 
 typedef std::bitset<MaxCountOfDifferentVariablesInRule> TVariablesMask;
 
 struct CHolesTuple {
-	CHole* firstHole;
+	THoleList holes;
 	int stackDepth;
 	
-	explicit CHolesTuple(int _stackDepth, CHole* _firstHole = 0):
-		firstHole(_firstHole), stackDepth(_stackDepth) {}
+	explicit CHolesTuple(int _stackDepth): stackDepth(_stackDepth) {}
 };
 
 class CFunctionCompilerBase {
@@ -88,12 +56,13 @@ protected:
 
 class CLeftPartCompiler : public CFunctionCompilerBase {
 protected:
+	CLeftPartCompiler();
+
 	void CompileLeftPart(CUnitList* leftPart, const bool isRightDirection);
 
 private:
-	//void removeHole();
-	//void insertHole();
-	
+	void removeHole();
+
 	inline bool isMarkedVariable(TUnitNode* unit);
 	inline bool isVE(TUnitNode* unit) const;
 	inline bool isFreeVE(TUnitNode* unit) const;
@@ -123,8 +92,9 @@ private:
 	TTableIndex top;
 	TTableIndex left;
 	TTableIndex right;
-	CHoleNode* hole;
-	CHoleNode* firstHole;
+
+	THoleList holes;
+	THoleList::TNode* hole;
 
 #if 0
 	TVariablesMask markedVariables;
@@ -145,7 +115,7 @@ inline bool CLeftPartCompiler::isMarkedVariable(TUnitNode* unit)
 inline bool CLeftPartCompiler::isVE(TUnitNode* unit) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
-		variables.GetVariable( unit->Variable() ).TypeIs( 'v', 'e' ) );
+		variables.GetVariable( unit->Variable() )->TypeIs( 'v', 'e' ) );
 }
 
 inline bool CLeftPartCompiler::isFreeVE(TUnitNode* unit) const
