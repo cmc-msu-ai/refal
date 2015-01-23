@@ -69,11 +69,11 @@ void CVariables::Set(const TVariableIndex variableIndex,
 {
 	assert( IsValidVariableIndex( variableIndex ) );
 
-	allocVariablesValues();
-
 	CVariable& variable = variables[variableIndex];
 
 	if( variable.position < variable.topPosition ) {
+		allocVariablesValues();
+
 		variablesValues[variable.position] = tableIndex;
 		variable.position++;
 	}
