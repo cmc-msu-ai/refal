@@ -157,6 +157,7 @@ TVariableIndex CVariablesBuilder::AddRight(TVariableName name,
 	CVariableInfo& var = variables[name];
 	
 	if( var.type == type ) {
+		var.countRight++;
 		return var.name;
 	} else {
 		error( ( var.type == InvalidVariableType ) ?
