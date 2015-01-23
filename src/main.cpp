@@ -126,13 +126,13 @@ int main(int argc, const char* argv[])
 			i = LabelTable.GetNextLabel( i ) )
 		{
 			CFunction* function = LabelTable.GetLabelFunction( i );
-			std::cout << "{START:" << LabelTable.GetLabelText( i ) << "}\n";
-			//PrintFunction( *function );
 			if( function->IsParsed() ) {
+				std::cout << "{START:" << LabelTable.GetLabelText( i ) << "}\n";
+				PrintFunction( *function );
 				CFunctionCompiler compiler;
 				compiler.Compile( function );
+				std::cout << "{END:" << LabelTable.GetLabelText( i ) << "}\n";
 			}
-			std::cout << "{END:" << LabelTable.GetLabelText( i ) << "}\n";
 		}
 
 	} catch(bool) {
