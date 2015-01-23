@@ -87,12 +87,12 @@ bool CVariables::Get(const TVariableIndex variableIndex,
 
 	CVariable& variable = variables[variableIndex];
 
-	*tableIndex = variablesValues[variable.position];
-
 	if( variable.position > variable.originPosition ) {
 		variable.position--;
+		*tableIndex = variablesValues[variable.position];
 		return true;
-	} else /* var.currentOffset == var.initialOffset */ {
+	} else /* var.position == var.originPosition */ {
+		*tableIndex = variablesValues[variable.position];
 		return false;
 	}
 }
