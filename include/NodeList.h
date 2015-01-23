@@ -81,6 +81,9 @@ public:
 	TNode* Append(const T& value);
 
 private:
+	CNodeList(const CNodeList&);
+	CNodeList& operator=(const CNodeList&);
+
 	static TNode* alloc(const T& value);
 	static void free(TNode* node);
 	
