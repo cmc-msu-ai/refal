@@ -93,6 +93,7 @@ public:
 	// true if variable have one or more value
 	bool IsSet(const TVariableIndex variableIndex) const;
 	void Set(const TVariableIndex variableIndex, const TTableIndex tableIndex);
+	TTableIndex GetMainValue(const TVariableIndex variableIndex) const;
 	// true if tableIndex is fresh
 	bool Get(const TVariableIndex variableIndex, TTableIndex* tableIndex);
 	

@@ -88,6 +88,12 @@ void CVariables::Set(const TVariableIndex variableIndex,
 	}
 }
 
+TTableIndex CVariables::GetMainValue(const TVariableIndex variableIndex) const
+{
+	assert( IsSet( variableIndex ) );
+	return variablesValues[variables[variableIndex].originPosition];
+}
+
 bool CVariables::Get(const TVariableIndex variableIndex,
 	TTableIndex* tableIndex)
 {
