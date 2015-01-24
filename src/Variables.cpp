@@ -55,6 +55,15 @@ void CVariables::Swap(CVariables* swapWith)
 	std::swap( swapWith->variablesValuesSize, variablesValuesSize );
 }
 
+bool CVariables::IsFull(const TVariableIndex variableIndex) const
+{
+	assert( IsValidVariableIndex( variableIndex ) );
+
+	CVariable& variable = variables[variableIndex];
+
+	return ( variable.position == variable.topPosition );
+}
+
 bool CVariables::IsSet(const TVariableIndex variableIndex) const
 {
 	assert( IsValidVariableIndex( variableIndex ) );

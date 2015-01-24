@@ -88,7 +88,8 @@ public:
 		const TVariableIndex variableIndex) const;
 
 	inline bool IsValidVariableIndex(const TVariableIndex variableIndex) const;
-
+	
+	bool IsFull(const TVariableIndex variableIndex) const;
 	// true if variable have one or more value
 	bool IsSet(const TVariableIndex variableIndex) const;
 	void Set(const TVariableIndex variableIndex, const TTableIndex tableIndex);
