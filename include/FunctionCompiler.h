@@ -13,28 +13,19 @@ public:
 	CHole(CUnitList* hole, const TTableIndex left, const TTableIndex right);
 	CHole(TUnitNode* const first, TUnitNode* const last,
 		const TTableIndex left, const TTableIndex right);
-
+	
 	CHole(const CHole&);
 	CHole& operator=(const CHole&);
-
-	inline bool CompareLeftAndRight(const TTableIndex leftToCompare,
-		const TTableIndex rightToCompare) const;
-
+	
 	void SetLeft(const TTableIndex _left) { left = _left; }
 	TTableIndex GetLeft() const { return left; }
 	void SetRight(const TTableIndex _right) { right = _right; }
 	TTableIndex GetRight() const { return right; }
-
+	
 private:
 	TTableIndex left;
 	TTableIndex right;
 };
-
-inline bool CHole::CompareLeftAndRight(const TTableIndex leftToCompare,
-	const TTableIndex rightToCompare) const
-{
-	return ( left == leftToCompare && right == rightToCompare );
-}
 
 typedef CNodeList<CHole> THoleList;
 
@@ -49,7 +40,7 @@ struct CHolesTuple {
 	explicit CHolesTuple(int _stackDepth): stackDepth(_stackDepth) {}
 };
 
-class CFunctionCompilerBase {
+class CFunctionCompilerBase : protected COperationsBuilder {
 protected:
 	CVariables variables;
 };
@@ -57,20 +48,31 @@ protected:
 class CLeftPartCompiler : public CFunctionCompilerBase {
 protected:
 	CLeftPartCompiler();
-
+	
 	void CompileLeftPart(CUnitList* leftPart, const bool isRightDirection);
-
+	
 private:
 	void removeHole();
-
-	inline bool isMarkedVariable(TUnitNode* unit);
+	
+	typedef void (COperationsBuilder::*TMatchDuplicateFunction)
+		(const TVariableIndex variableIndex, const bool saveInTable);
+	typedef void (COperationsBuilder::*TMatchFunction)
+		(CQualifier*, const bool addValueToTable);
+	
+	bool setVariable(const TVariableIndex variableIndex);
+	void matchVariable(const TVariableIndex variableIndex,
+		const TMatchFunction function);
+	void matchDuplicateVariable(const TVariableIndex variableIndex,
+		const TMatchDuplicateFunction function);
+	
+	//inline bool isMarkedVariable(TUnitNode* unit);
 	inline bool isVE(TUnitNode* unit) const;
 	inline bool isFreeVE(TUnitNode* unit) const;
-
-	TVariablesMask makeVariablesMask(const CHole& hole) const;
-	void splitIntoClasses(CHole* const holes);
 	
-	void matchVE();
+	//TVariablesMask makeVariablesMask(const CHole& hole) const;
+	//void splitIntoClasses(CHole* const holes);
+	
+	void matchVE(const bool isRightDirection);
 	
 	void matchElement();
 	bool tryMatchLeftVariable(TUnitNode* left);
@@ -88,14 +90,14 @@ private:
 	void matchRightW();
 	void matchLeftDuplicateVE();
 	void matchRightDuplicateVE();
-
+	
 	TTableIndex top;
 	TTableIndex left;
 	TTableIndex right;
-
+	
 	THoleList holes;
 	THoleList::TNode* hole;
-
+	
 #if 0
 	TVariablesMask markedVariables;
 	int markedStackDepth[MaxCountOfDifferentVariablesInRule];

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Refal2.h>
-
+#if 0
 namespace Refal2 {
 
 CExecuter::CExecuter():
@@ -583,3 +583,4 @@ void CExecuter::Run(COperation* operation, TUnitNode* first, TUnitNode* last)
 }
 
 } // end of namespace refal2
+#endif

@@ -36,62 +36,7 @@ CLeftPartCompiler::CLeftPartCompiler():
 {
 }
 
-void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
-	const bool isRightDirection)
-{
-	holes.Append( CHole( leftPart, 0, 0 ) );
-
-	hole = holes.GetFirst();
-
-	while( !holes.IsEmpty() ) {
-		matchElement();
-	}
-}
-
 #if 0
-void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
-	const bool isRightDirection)
-{	
-	do {
-		// HSCH
-		currentHole = firstHole;
-		
-		// HSCH 1
-		do {
-			TUnitNode* left = currentHole->hole.GetFirst();
-			TUnitNode* right = currentHole->hole.GetLast();
-			
-			if( isMarkedVariable(left) )
-			{
-				// HSCH 2
-				classes.push_back( CHolesTuple(
-					markedStackDepth[left->Variable()], currentHole ) );
-				markedVariables.reset( left->Variable() );
-				break;
-			} else {
-				// HSCH 3
-				if( left != right && isFreeVE(left) && isFreeVE(right) ) {
-					currentHole = currentHole->nextHole;
-				} else {
-					matchElement();
-					currentHole = firstHole;
-				}
-			}
-		} while( currentHole != 0 );
-		
-		// HSCH 4
-		if( firstHole == 0 ) {
-			if( !classes.empty() ) {
-				// TODO: EOE( stackDepth - classes.back().stackDepth );
-				firstHole = classes.back().firstHole;
-				classes.pop_back();
-			}
-		} else {
-			matchVE();
-		}
-	} while( firstHole != 0 );
-}
-
 TVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
 {
 	TVariablesMask variablesMask;
@@ -153,16 +98,39 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 		classes.push_back( CHolesTuple(stackDepth, holes) );
 	}
 }
-
-void CLeftPartCompiler::matchVE()
-{
-	// TODO: action
-	printf("CFunctionCompiler::matchVE()\n");
-	currentHole = firstHole;
-	delete detachLeftUnitInCurrentHole();
-}
-
 #endif
+
+void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
+	const bool isRightDirection)
+{
+	left = 0;
+	right = 1;
+	top = 2;
+	holes.Append( CHole( leftPart, left, right ) );
+
+	while( true ) {
+		hole = holes.GetFirst();
+
+		while( hole != 0 ) {
+			TUnitNode* left = hole->GetFirst();
+			TUnitNode* right = hole->GetLast();
+
+			if( left != right && isFreeVE( left ) && isFreeVE( right ) ) {
+				hole = hole->Next();
+			} else {
+				matchElement();
+				hole = holes.GetFirst();
+			}
+		}
+
+		if( holes.IsEmpty() ) {
+			break;
+		} else {
+			hole = holes.GetFirst();
+			matchVE( isRightDirection );
+		}
+	}
+}
 
 void CLeftPartCompiler::removeHole()
 {
@@ -171,18 +139,79 @@ void CLeftPartCompiler::removeHole()
 	hole = nextHole;
 }
 
+bool CLeftPartCompiler::setVariable(const TVariableIndex variableIndex)
+{
+	if( !variables.IsFull( variableIndex ) ) {
+		variables.Set( variableIndex, top );
+		top++;
+		if( !variables.GetVariable( variableIndex )->TypeIs( VariableTypeS ) ) {
+			top++;
+		}
+		return true;
+	}
+	return false;
+}
+
+void CLeftPartCompiler::matchVariable(const TVariableIndex variableIndex,
+	const TMatchFunction function)
+{
+	(this->*function)( variables.GetVariable( variableIndex )->GetQualifier(),
+		setVariable( variableIndex ) );
+}
+
+void CLeftPartCompiler::matchDuplicateVariable(
+	const TVariableIndex variableIndex, const TMatchDuplicateFunction function)
+{
+	(this->*function)( variables.GetMainValue( variableIndex ),
+		setVariable( variableIndex ) );
+}
+
+void CLeftPartCompiler::matchVE(const bool isRightDirection)
+{
+	if( isRightDirection ) {
+		TVariableIndex variableIndex = hole->GetLast()->Variable();
+
+		if( variables.GetVariable( variableIndex )->TypeIs( VariableTypeE ) ) {
+			matchVariable( variableIndex,
+				&COperationsBuilder::AddMatchRight_E );
+		} else {
+			matchVariable( variableIndex,
+				&COperationsBuilder::AddMatchRight_V );
+		}
+
+		hole->RemoveLast();
+	} else {
+		TVariableIndex variableIndex = hole->GetFirst()->Variable();
+
+		if( variables.GetVariable( variableIndex )->TypeIs( VariableTypeE ) ) {
+			matchVariable( variableIndex,
+				&COperationsBuilder::AddMatchLeft_E );
+		} else {
+			matchVariable( variableIndex,
+				&COperationsBuilder::AddMatchLeft_V );
+		}
+
+		hole->RemoveFirst();
+	}
+}
+
 void CLeftPartCompiler::matchElement()
 {
-	if( !hole->CompareLeftAndRight( left, right ) ) {
-		// TODO: add SB( hole->GetLeft(), hole->GetRight() );
+	if( left != hole->GetLeft() ) {
+		left = hole->GetLeft();
+		COperationsBuilder::AddSetLeftBorder( left );
 	}
-
+	if( right != hole->GetRight() ) {
+		right = hole->GetRight();
+		COperationsBuilder::AddSetRightBorder( right );
+	}
+	
 	if( hole->IsEmpty() ) {
 		matchEmptyExpression();
 	} else {
 		TUnitNode* left = hole->GetFirst();
 		TUnitNode* right = hole->GetLast();
-	
+		
 		if( left == right && isFreeVE(left) ) {
 			matchClosedE();
 		} else if( left->IsParen() ) {
@@ -253,120 +282,157 @@ bool CLeftPartCompiler::tryMatchRightVariable(TUnitNode* right)
 
 void CLeftPartCompiler::matchEmptyExpression()
 {
-	// TODO: action
-	printf("CFunctionCompiler::matchEmptyExpression()\n");
+	COperationsBuilder::AddMatchEmptyExpression();
 	removeHole();
 }
 
 void CLeftPartCompiler::matchClosedE()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchClosedE()\n");
+	matchVariable( hole->GetFirst()->Variable(),
+		&COperationsBuilder::AddMatchClosed_E );
 	hole->RemoveFirst();
 	removeHole();
 }
 
 void CLeftPartCompiler::matchLeftParens()
 {
-	// TODO: action
-	printf("CFunctionCompiler::matchLeftParens()\n");
+	COperationsBuilder::AddMatchLeftParens();
 	
 	TUnitNode* begin = hole->GetFirst();
 	TUnitNode* end = hole->GetLast();
 	TUnitNode* beginNew = begin->PairedParen()->Next();
 	TUnitNode* endNew = 0;
+
+	CUnitList newHole;
 	if( beginNew != 0 ) {
 		endNew = end;
 		hole->Detach( beginNew, endNew );
+		newHole.Assign( beginNew, endNew );
 	}
 	
 	hole->RemoveFirst();
 	hole->RemoveLast();
 	
-	holes.InsertAfter( hole, CHole( beginNew, endNew, 0, 0 ) );
+	TTableIndex oldRight = right;
+	left = top;
+	top++;
+	right = top;
+	top++;
+	hole->SetLeft( left );
+	hole->SetRight( right );
+	
+	holes.InsertAfter( hole, CHole( &newHole, right, oldRight ) );
 }
 
 void CLeftPartCompiler::matchRightParens()
 {
-	// TODO: action
-	printf("CFunctionCompiler::matchRightParens()\n");
+	COperationsBuilder::AddMatchRightParens();
 	
 	TUnitNode* begin = hole->GetFirst();
 	TUnitNode* end = hole->GetLast();
 	TUnitNode* beginNew = 0;
 	TUnitNode* endNew = end->PairedParen()->Prev();
+	
+	CUnitList newHole;
 	if( endNew != 0 ) {
 		beginNew = begin;
 		hole->Detach( beginNew, endNew );
+		newHole.Assign( beginNew, endNew );
 	}
 	
 	hole->RemoveFirst();
 	hole->RemoveLast();
 	
-	holes.InsertAfter( hole, CHole( beginNew, endNew, 0, 0 ) );
+	TTableIndex oldLeft = left;
+	left = top;
+	top++;
+	right = top;
+	top++;
+	hole->SetLeft( left );
+	hole->SetRight( right );
+	
+	holes.InsertBefore( hole, CHole( &newHole, oldLeft, left ) );
 }
 
 void CLeftPartCompiler::matchLeftSymbol()
 {
-	// TODO: action
-	printf("CFunctionCompiler::matchLeftSymbol()\n");
+	TUnitNode unit = *hole->GetFirst();
+	switch( unit.GetType() ) {
+		case UT_Char:
+			COperationsBuilder::AddMatchLeftChar( unit.Char() );
+			break;
+		case UT_Label:
+			COperationsBuilder::AddMatchLeftLabel( unit.Label() );
+			break;
+		case UT_Number:
+			COperationsBuilder::AddMatchLeftNumber( unit.Number() );
+			break;
+		default:
+			assert( false );
+			break;
+	}
 	hole->RemoveFirst();
 }
 
 void CLeftPartCompiler::matchRightSymbol()
 {
-	// TODO: action
-	printf("CFunctionCompiler::matchRightSymbol()\n");
+	TUnitNode unit = *hole->GetLast();
+	switch( unit.GetType() ) {
+		case UT_Char:
+			COperationsBuilder::AddMatchRightChar( unit.Char() );
+			break;
+		case UT_Label:
+			COperationsBuilder::AddMatchRightLabel( unit.Label() );
+			break;
+		case UT_Number:
+			COperationsBuilder::AddMatchRightNumber( unit.Number() );
+			break;
+		default:
+			assert( false );
+			break;
+	}
 	hole->RemoveLast();
 }
 
 void CLeftPartCompiler::matchLeftS()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchLeftS()\n");
+	matchVariable( hole->GetFirst()->Variable(),
+		&COperationsBuilder::AddMatchLeft_S );
 	hole->RemoveFirst();
 }
 
 void CLeftPartCompiler::matchRightS()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchRightS()\n");
+	matchVariable( hole->GetLast()->Variable(),
+		&COperationsBuilder::AddMatchRight_S );
 	hole->RemoveLast();
 }
 
 void CLeftPartCompiler::matchLeftW()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchLeftW()\n");
+	matchVariable( hole->GetFirst()->Variable(),
+		&COperationsBuilder::AddMatchLeft_W );
 	hole->RemoveFirst();
-
 }
 
 void CLeftPartCompiler::matchRightW()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchRightW()\n");
+	matchVariable( hole->GetLast()->Variable(),
+		&COperationsBuilder::AddMatchRight_W );
 	hole->RemoveLast();
 }
 
 void CLeftPartCompiler::matchLeftDuplicateVE()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchLeftDuplicateVE()\n");
+	matchDuplicateVariable( hole->GetLast()->Variable(),
+		&COperationsBuilder::AddMatchLeftDuplicate_WVE );
 	hole->RemoveFirst();
 }
 
 void CLeftPartCompiler::matchRightDuplicateVE()
 {
-	variables.Set( hole->GetFirst()->Variable(), ++top );
-	// TODO: action
-	printf("CFunctionCompiler::matchRightDuplicateVE()\n");
+	matchDuplicateVariable( hole->GetLast()->Variable(),
+		&COperationsBuilder::AddMatchRightDuplicate_WVE );
 	hole->RemoveLast();
 }
 
@@ -374,56 +440,56 @@ void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 {
 	CUnitList hole;
 	rightPart->Move( &hole );
-
+	
 	while( !hole.IsEmpty() ) {
 		TUnitNode unit = *hole.GetFirst();
 		hole.RemoveFirst();
-
+		
 		switch( unit.GetType() ) {
 			case UT_Char:
-				printf( "OT_insert_symbol: Char(%c)\n", unit.Char() );
+				COperationsBuilder::AddInsertChar( unit.Char() );
 				break;
 			case UT_Label:
-				printf( "OT_insert_symbol: Label(%s)\n",
-					LabelTable.GetLabelText( unit.Label() ).c_str() );
+				COperationsBuilder::AddInsertLabel( unit.Label() );
 				break;
 			case UT_Number:
-				printf( "OT_insert_symbol: Number(%d)\n", unit.Number() );
+				COperationsBuilder::AddInsertNumber( unit.Number() );
 				break;
 			case UT_Variable:
 			{
 				TVariableIndex variableIndex = unit.Variable();
-				const CVariable& variable = *variables.GetVariable(
-					variableIndex );
+				const CVariable& variable =
+					*variables.GetVariable( variableIndex );
 				TTableIndex valueIndex;
+				
 				if( variables.Get( variableIndex, &valueIndex ) ) {
 					if( variable.TypeIs( VariableTypeS ) ) {
-						printf( "OT_move_s: %d\n", valueIndex );
+						COperationsBuilder::AddMove_S( valueIndex );
 					} else if( variable.TypeIs( VariableTypeE ) ) {
-						printf( "OT_move_e: %d\n", valueIndex );
+						COperationsBuilder::AddMove_E( valueIndex );
 					} else { // type WV
-						printf( "OT_move_wv: %d\n", valueIndex );
+						COperationsBuilder::AddMove_WV( valueIndex );
 					}
 				} else {
 					if( variable.TypeIs( VariableTypeS ) ) {
-						printf( "OT_copy_s: %d\n", valueIndex );
-					} else { // type WVE
-						printf( "OT_copy_wve: %d\n", valueIndex );
+						COperationsBuilder::AddCopy_S( valueIndex );
+					} else if( variable.TypeIs( VariableTypeE ) ) {
+						COperationsBuilder::AddCopy_E( valueIndex );
+					} else { // type WV
+						COperationsBuilder::AddCopy_WV( valueIndex );
 					}
 				}
 				break;
 			}
 			case UT_LeftParen:
-				printf( "OT_insert_left_paren\n" );
+			case UT_LeftBracket:
+				COperationsBuilder::AddInsertLeftParen();
 				break;
 			case UT_RightParen:
-				printf( "OT_insert_right_paren\n" );
-				break;
-			case UT_LeftBracket:
-				printf( "OT_insert_left_paren\n" );
+				COperationsBuilder::AddInsertRightParen();
 				break;
 			case UT_RightBracket:
-				printf( "OT_insert_right_bracket\n" );
+				COperationsBuilder::AddInsertRightBracket();
 				break;
 			default:
 				assert( false );
@@ -434,7 +500,7 @@ void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 void CFunctionCompiler::Compile(CFunction* function)
 {
 	assert( function->IsParsed() );
-
+	
 	for( CFunctionRule* rule = function->firstRule; rule != 0;
 		rule = rule->nextRule )
 	{
@@ -446,7 +512,9 @@ void CFunctionCompiler::compileRule(CFunctionRule* rule)
 {
 	rule->variables.Move( &variables );
 	CompileLeftPart( &rule->leftPart, rule->isRightDirection );
+	COperationsBuilder::AddMatchingComplete();
 	CompileRightPart( &rule->rightPart );
+	COperationsBuilder::AddReturn();
 }
 
 } // end of namespace refal2

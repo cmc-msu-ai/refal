@@ -22,13 +22,7 @@ class CFunctionBuilder;
 
 class CLabelTable;
 
-struct COperation;
-struct COperationOperation;
-struct COperationInt;
-struct COperationIntInt;
-struct COperationUnit;
-struct COperationQualifier;
-
+class COperation;
 class COperationsBuilder;
 
 class IParserListener;
@@ -60,7 +54,6 @@ extern CLabelTable LabelTable;
 #include <SetBuilder.h>
 #include <Unit.h>
 #include <Qualifier.h>
-#include <Operation.h>
 #include <QualifierBuilder.h>
 #include <OperationsBuilder.h>
 #include <Variables.h>
@@ -69,4 +62,3 @@ extern CLabelTable LabelTable;
 #include <Label.h>
 #include <Scanner.h>
 #include <Parser.h>
-#include <Executer.h>

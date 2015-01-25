@@ -1,124 +1,283 @@
 #include <Refal2.h>
 
+#include <iostream>
+
 namespace Refal2 {
 
-COperationsBuilder::COperationsBuilder()
+void COperationsBuilder::AddMatchingComplete()
 {
-	last_op = new COperation(COperation::OT_goto);
+	std::cout << "COperationsBuilder::AddMatchingComplete\n";
 }
 
 
-
-COperation* COperationsBuilder::Reserve()
+void COperationsBuilder::AddReturn()
 {
-	COperation* op =
-		static_cast<COperation*>(::operator new(sizeof(COperation)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddReturn\n";
 }
 
-COperationOperation* COperationsBuilder::ReserveOperation()
+
+/* matching operation */
+void COperationsBuilder::AddMatchEmptyExpression()
 {
-	COperationOperation* op = static_cast<COperationOperation*>(
-		::operator new(sizeof(COperationOperation)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddMatchEmptyExpression\n";
 }
 
-COperationInt* COperationsBuilder::ReserveInt()
+
+void COperationsBuilder::AddMatchLeftChar(const TChar c)
 {
-	COperationInt* op =
-		static_cast<COperationInt*>(::operator new(sizeof(COperationInt)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddMatchLeftChar\n";
 }
 
-COperationIntInt* COperationsBuilder::ReserveIntInt()
+
+void COperationsBuilder::AddMatchLeftLabel(const TLabel label)
 {
-	COperationIntInt* op = static_cast<COperationIntInt*>(
-		::operator new(sizeof(COperationIntInt)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddMatchLeftLabel\n";
 }
 
-COperationUnit* COperationsBuilder::ReserveUnit()
+
+void COperationsBuilder::AddMatchLeftNumber(const TNumber number)
 {
-	COperationUnit* op = static_cast<COperationUnit*>(
-		::operator new(sizeof(COperationUnit)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddMatchLeftNumber\n";
 }
 
-COperationQualifier* COperationsBuilder::ReserveQualifier()
+
+void COperationsBuilder::AddMatchRightChar(const TChar c)
 {
-	COperationQualifier* op = static_cast<COperationQualifier*>(
-		::operator new(sizeof(COperationQualifier)));
-	last_op->next = op;
-	last_op = op;
-	return op;
+	std::cout << "COperationsBuilder::AddMatchRightChar\n";
 }
 
-COperation* COperationsBuilder::Add(COperation::TOperationType type)
-{
-	COperation* op = Reserve();
-	op->type = type;
 
-	return op;
+void COperationsBuilder::AddMatchRightLabel(const TLabel label)
+{
+	std::cout << "COperationsBuilder::AddMatchRightLabel\n";
 }
 
-COperationOperation* COperationsBuilder::Add(COperation::TOperationType type,
-	COperation* operation)
-{
-	COperationOperation* op = ReserveOperation();
-	op->type = type;
-	op->operation = operation;
 
-	return op;
+void COperationsBuilder::AddMatchRightNumber(const TNumber number)
+{
+	std::cout << "COperationsBuilder::AddMatchRightNumber\n";
 }
 
-COperationInt* COperationsBuilder::Add(COperation::TOperationType type, int x)
-{
-	COperationInt* op = ReserveInt();
-	op->type = type;
-	op->x = x;
 
-	return op;
+void COperationsBuilder::AddMatchLeftParens()
+{
+	std::cout << "COperationsBuilder::AddMatchLeftParens\n";
 }
 
-COperationIntInt* COperationsBuilder::Add(COperation::TOperationType type,
-	int x, int y)
-{
-	COperationIntInt* op = ReserveIntInt();
-	op->type = type;
-	op->x = x;
-	op->y = y;
 
-	return op;
+void COperationsBuilder::AddMatchRightParens()
+{
+	std::cout << "COperationsBuilder::AddMatchRightParens\n";
 }
 
-COperationUnit* COperationsBuilder::Add(COperation::TOperationType type,
-	const CUnit& value)
-{
-	COperationUnit* op = ReserveUnit();
-	op->type = type;
-	op->value = value;
 
-	return op;
+void COperationsBuilder::AddSetLeftBorder(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddSetLeftBorder\n";
 }
 
-COperationQualifier* COperationsBuilder::Add(COperation::TOperationType type,
-	const CQualifier* qualifier)
-{
-	COperationQualifier* op = ReserveQualifier();
-	op->type = type;
-	op->qualifier = qualifier;
 
-	return op;
+void COperationsBuilder::AddSetRightBorder(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddSetRightBorder\n";
+}
+
+
+void COperationsBuilder::AddMatchLeft_S(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeft_S\n";
+}
+
+
+void COperationsBuilder::AddMatchRight_S(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRight_S\n";
+}
+
+
+void COperationsBuilder::AddMatchLeftDuplicate_S(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_S\n";
+}
+
+
+void COperationsBuilder::AddMatchRightDuplicate_S(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRightDuplicate_S\n";
+}
+
+
+void COperationsBuilder::AddMatchLeft_W(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeft_W\n";
+}
+
+
+void COperationsBuilder::AddMatchRight_W(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRight_W\n";
+}
+
+
+void COperationsBuilder::AddMatchClosed_E(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchClosed_E\n";
+}
+
+
+void COperationsBuilder::AddMatchLeftDuplicate_WVE(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_WVE\n";
+}
+
+
+void COperationsBuilder::AddMatchRightDuplicate_WVE(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRightDuplicate_WVE\n";
+}
+
+
+void COperationsBuilder::AddDecrementStackDepth(const int count)
+{
+	std::cout << "COperationsBuilder::AddDecrementStackDepth\n";
+}
+
+
+void COperationsBuilder::AddCheckNotEmpty()
+{
+	std::cout << "COperationsBuilder::AddCheckNotEmpty\n";
+}
+
+
+/* match left VE-variable */
+void COperationsBuilder::AddMatchLeft_E(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeft_E\n";
+}
+
+
+void COperationsBuilder::AddMatchLeft_V(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeft_V\n";
+}
+
+
+/* match right VE-variable */
+void COperationsBuilder::AddMatchRight_E(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRight_E\n";
+}
+
+
+void COperationsBuilder::AddMatchRight_V(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRight_V\n";
+}
+
+
+/* match by qualifier */
+void COperationsBuilder::AddMacthLeftMaxByQualifier(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMacthLeftMaxByQualifier\n";
+}
+
+
+void COperationsBuilder::AddMacthRightMaxByQualifier(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMacthRightMaxByQualifier\n";
+}
+
+
+/* result builder operation */
+void COperationsBuilder::AddInsertChar(const TChar c)
+{
+	std::cout << "COperationsBuilder::AddInsertChar\n";
+}
+
+
+void COperationsBuilder::AddInsertLabel(const TLabel label)
+{
+	std::cout << "COperationsBuilder::AddInsertLabel\n";
+}
+
+
+void COperationsBuilder::AddInsertNumber(const TNumber number)
+{
+	std::cout << "COperationsBuilder::AddInsertNumber\n";
+}
+
+
+void COperationsBuilder::AddInsertLeftParen()
+{
+	std::cout << "COperationsBuilder::AddInsertLeftParen\n";
+}
+
+
+void COperationsBuilder::AddInsertRightParen()
+{
+	std::cout << "COperationsBuilder::AddInsertRightParen\n";
+}
+
+
+void COperationsBuilder::AddInsertRightBracket()
+{
+	std::cout << "COperationsBuilder::AddInsertRightBracket\n";
+}
+
+
+void COperationsBuilder::AddMove_S(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddMove_S\n";
+}
+
+
+void COperationsBuilder::AddCopy_S(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddCopy_S\n";
+}
+
+
+void COperationsBuilder::AddMove_E(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddMove_E\n";
+}
+
+
+void COperationsBuilder::AddCopy_E(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddCopy_E\n";
+}
+
+
+void COperationsBuilder::AddMove_WV(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddMove_WV\n";
+}
+
+
+void COperationsBuilder::AddCopy_WV(const TTableIndex)
+{
+	std::cout << "COperationsBuilder::AddCopy_WV\n";
+}
+
+COperation* COperationsBuilder::addOperation(const TOperationType type)
+{
+	return 0;
 }
 
 } // end of namespace refal2
