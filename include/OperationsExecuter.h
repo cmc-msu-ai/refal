@@ -124,18 +124,23 @@ private:
 	void shiftRight();
 	void fail();
 	
-	void matchEmptyExpression();
+	
+	void setLeftBorder(const TTableIndex tableIndex);
+	void setRightBorder(const TTableIndex tableIndex);
+
 	void checkNotEmpty();
+	/* matching empty expression */
+	void matchEmptyExpression();
+	/* matching symbols */
 	void matchLeftChar(const TChar c);
 	void matchLeftLabel(const TLabel label);
 	void matchLeftNumber(const TNumber number);
 	void matchRightChar(const TChar c);
 	void matchRightLabel(const TLabel label);
 	void matchRightNumber(const TNumber number);
+	/* matching parens */
 	void matchLeftParens();
 	void matchRightParens();
-	void setLeftBorder(const TTableIndex tableIndex);
-	void setRightBorder(const TTableIndex tableIndex);
 	
 	CUnitList fieldOfView;
 	TUnitNode* left;

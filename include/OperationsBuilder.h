@@ -13,33 +13,63 @@ enum TOperationType {
 	OT_InsertJump,
 	OT_MatchingComplete,
 	OT_Return,
-	/* matching operation */
+	OT_SetLeftBorder, /* TTableIndex */
+	OT_SetRightBorder, /* TTableIndex */
+	OT_DecrementStackDepth, /* TUint32 */
+	OT_CheckNotEmpty,
+	/* matching empty expression */
 	OT_MatchEmptyExpression,
+	/* matching symbols */
 	OT_MatchLeftChar, /* TChar */
 	OT_MatchLeftLabel, /* TLabel */
 	OT_MatchLeftNumber, /* TNumber */
 	OT_MatchRightChar, /* TChar */
 	OT_MatchRightLabel, /* TLabel */
 	OT_MatchRightNumber, /* TNumber */
+	/* matching parens */
 	OT_MatchLeftParens,
 	OT_MatchRightParens,
-	OT_SetLeftBorder, /* TTableIndex */
-	OT_SetRightBorder, /* TTableIndex */
+	/* matching S-variables */
 	OT_MatchLeft_S,
+	OT_MatchLeftSaveToTable_S,
+	OT_MatchLeftWithQualifier_S, /* TQualifierIndex */
+	OT_MatchLeftWithQualifierSaveToTable_S, /* TQualifierIndex */
 	OT_MatchRight_S,
+	OT_MatchRightSaveToTable_S,
+	OT_MatchRightWithQualifier_S, /* TQualifierIndex */
+	OT_MatchRightWithQualifierSaveToTable_S, /* TQualifierIndex */
+	/* matching duplicate of S-variables */
 	OT_MatchLeftDuplicate_S, /* TTableIndex */
+	OT_MatchLeftDuplicateSaveToTable_S, /* TTableIndex */
 	OT_MatchRightDuplicate_S, /* TTableIndex */
+	OT_MatchRightDuplicateSaveToTable_S, /* TTableIndex */
+	/* matching W-variables */
 	OT_MatchLeft_W,
+	OT_MatchLeftSaveToTable_W,
+	OT_MatchLeftWithQualifier_W, /* TQualifierIndex */
+	OT_MatchLeftWithQualifierSaveToTable_W, /* TQualifierIndex */
 	OT_MatchRight_W,
-	OT_MatchClosed_E,
+	OT_MatchRightSaveToTable_W,
+	OT_MatchRightWithQualifier_W, /* TQualifierIndex */
+	OT_MatchRightWithQualifierSaveToTable_W, /* TQualifierIndex */
+	/* matching duplicate of W-variables */
 	OT_MatchLeftDuplicate_WVE, /* TTableIndex */
+	OT_MatchLeftDuplicateSaveToTable_WVE, /* TTableIndex */
 	OT_MatchRightDuplicate_WVE, /* TTableIndex */
-	OT_DecrementStackDepth, /* TUint32 */
-	OT_CheckNotEmpty,
-	OT_CheckQualifier_S, /* TQualifierIndex */
-	OT_CheckQualifier_WVE, /* TQualifierIndex */
+	OT_MatchRightDuplicateSaveToTable_WVE, /* TTableIndex */
+	/* matching closed E-variables */
+	OT_MatchClosed_E,
+	OT_MatchClosedSaveToTable_E,
+	OT_MatchClosedWithQualifier_E, /* TQualifierIndex */
+	OT_MatchClosedWithQualifierSaveToTable_E, /* TQualifierIndex */
+	/* matching by qualifier */
 	OT_MacthLeftMaxByQualifier, /* TQualifierIndex */
+	OT_MacthLeftMaxByQualifierSaveToTable, /* TQualifierIndex */
 	OT_MacthRightMaxByQualifier, /* TQualifierIndex */
+	OT_MacthRightMaxByQualifierSaveToTable, /* TQualifierIndex */
+	/* matching V-variable */
+	/* matching E-variable */
+#if 0
 	/* match left VE-variable */
 	OT_MatchLeftBegin_E,
 	OT_MatchLeftBegin_V,
@@ -52,7 +82,8 @@ enum TOperationType {
 	OT_MatchRightWithQulifierBegin_V, /* TQualifierIndex */
 	OT_MatchRight_E,
 	OT_MatchRightWithQulifier_E, /* TQualifierIndex */
-	/* result builder operation */
+#endif
+	/* making operations */
 	OT_InsertChar, /* TChar */
 	OT_InsertLabel, /* TLabel */
 	OT_InsertNumber, /* TNumber */
@@ -100,41 +131,48 @@ public:
 	
 	void AddMatchingComplete();
 	void AddReturn();
-	/* matching operation */
+	void AddDecrementStackDepth(const int count);
+	void AddCheckNotEmpty();
+	void AddSetLeftBorder(const TTableIndex);
+	void AddSetRightBorder(const TTableIndex);
+	/* matching empty expression */
 	void AddMatchEmptyExpression();
+	/* matching symbols */
 	void AddMatchLeftChar(const TChar c);
 	void AddMatchLeftLabel(const TLabel label);
 	void AddMatchLeftNumber(const TNumber number);
 	void AddMatchRightChar(const TChar c);
 	void AddMatchRightLabel(const TLabel label);
 	void AddMatchRightNumber(const TNumber number);
+	/* matching parens */
 	void AddMatchLeftParens();
 	void AddMatchRightParens();
-	void AddSetLeftBorder(const TTableIndex);
-	void AddSetRightBorder(const TTableIndex);
+	/* matching S-variables */
 	void AddMatchLeft_S(CQualifier* qualifier, const bool saveInTable);
 	void AddMatchRight_S(CQualifier* qualifier, const bool saveInTable);
+	/* matching duplicate of S-variables */
 	void AddMatchLeftDuplicate_S(const TTableIndex, const bool saveInTable);
 	void AddMatchRightDuplicate_S(const TTableIndex, const bool saveInTable);
+	/* matching W-variables */
 	void AddMatchLeft_W(CQualifier* qualifier, const bool saveInTable);
 	void AddMatchRight_W(CQualifier* qualifier, const bool saveInTable);
-	void AddMatchClosed_E(CQualifier* qualifier, const bool saveInTable);
+	/* matching duplicate of W-variables */
 	void AddMatchLeftDuplicate_WVE(const TTableIndex, const bool saveInTable);
 	void AddMatchRightDuplicate_WVE(const TTableIndex, const bool saveInTable);
-	void AddDecrementStackDepth(const int count);
-	void AddCheckNotEmpty();
-	/* match left VE-variable */
-	void AddMatchLeft_E(CQualifier* qualifier, const bool saveInTable);
-	void AddMatchLeft_V(CQualifier* qualifier, const bool saveInTable);
-	/* match right VE-variable */
-	void AddMatchRight_E(CQualifier* qualifier, const bool saveInTable);
-	void AddMatchRight_V(CQualifier* qualifier, const bool saveInTable);
-	/* match by qualifier */
+	/* matching closed E-variables */
+	void AddMatchClosed_E(CQualifier* qualifier, const bool saveInTable);
+	/* matching by qualifier */
 	void AddMacthLeftMaxByQualifier(CQualifier* qualifier,
 		const bool saveInTable);
 	void AddMacthRightMaxByQualifier(CQualifier* qualifier,
 		const bool saveInTable);
-	/* result builder operation */
+	/* matching V-variable */
+	void AddMatchLeft_V(CQualifier* qualifier, const bool saveInTable);
+	void AddMatchRight_V(CQualifier* qualifier, const bool saveInTable);
+	/* matching E-variable */
+	void AddMatchLeft_E(CQualifier* qualifier, const bool saveInTable);
+	void AddMatchRight_E(CQualifier* qualifier, const bool saveInTable);
+	/* making operations */
 	void AddInsertChar(const TChar c);
 	void AddInsertLabel(const TLabel label);
 	void AddInsertNumber(const TNumber number);
