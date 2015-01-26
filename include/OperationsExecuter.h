@@ -114,8 +114,28 @@ public:
 private:
 	COperationsExecuter(const COperationsExecuter&);
 	COperationsExecuter& operator=(const COperationsExecuter&);
-
+	
 	void doOperation();
+
+	void shiftLeft();
+	void shiftRight();
+	void fail();
+
+	void matchEmptyExpression();
+	void checkNotEmpty();
+	void matchLeftChar(const TChar c);
+	void matchLeftLabel(const TLabel label);
+	void matchLeftNumber(const TNumber number);
+	void matchRightChar(const TChar c);
+	void matchRightLabel(const TLabel label);
+	void matchRightNumber(const TNumber number);
+
+	CUnitList fieldOfView;
+	TUnitNode* left;
+	TUnitNode* right;
+
+	TUnitNode** table;
+	TTableIndex tableTop;
 };
 
 } // end of namespace refal2

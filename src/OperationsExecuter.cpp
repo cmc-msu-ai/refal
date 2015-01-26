@@ -704,4 +704,78 @@ void COperationsExecuter::doOperation()
 	}
 }
 
+void COperationsExecuter::shiftLeft()
+{
+}
+
+void COperationsExecuter::shiftRight()
+{
+}
+
+void COperationsExecuter::fail()
+{
+}
+
+void COperationsExecuter::matchEmptyExpression()
+{
+	if( left->Next() != right ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::checkNotEmpty()
+{
+	if( left->Next() == right ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchLeftChar(const TChar c)
+{
+	shiftLeft();
+	if( !left->IsChar() || left->Char() != c ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchLeftLabel(const TLabel label)
+{
+	shiftLeft();
+	if( !left->IsLabel() || left->Label() != label ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchLeftNumber(const TNumber number)
+{
+	shiftLeft();
+	if( !left->IsNumber() || left->Number() != number ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchRightChar(const TChar c)
+{
+	shiftRight();
+	if( !left->IsChar() || left->Char() != c ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchRightLabel(const TLabel label)
+{
+	shiftRight();
+	if( !left->IsLabel() || left->Label() != label ) {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchRightNumber(const TNumber number)
+{
+	shiftRight();
+	if( !left->IsNumber() || left->Number() != number ) {
+		fail();
+	}
+}
+
 } // end of namespace refal2
