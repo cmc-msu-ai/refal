@@ -424,15 +424,27 @@ void CLeftPartCompiler::matchRightW()
 
 void CLeftPartCompiler::matchLeftDuplicateVE()
 {
-	matchDuplicateVariable( hole->GetLast()->Variable(),
-		&COperationsBuilder::AddMatchLeftDuplicate_WVE );
+	TVariableIndex variableIndex = hole->GetFirst()->Variable();
+	if( variables.GetVariable( variableIndex )->TypeIs( VariableTypeV ) ) {
+		matchDuplicateVariable( variableIndex,
+			&COperationsBuilder::AddMatchLeftDuplicate_WV );
+	} else {
+		matchDuplicateVariable( variableIndex,
+			&COperationsBuilder::AddMatchLeftDuplicate_E );
+	}
 	hole->RemoveFirst();
 }
 
 void CLeftPartCompiler::matchRightDuplicateVE()
 {
-	matchDuplicateVariable( hole->GetLast()->Variable(),
-		&COperationsBuilder::AddMatchRightDuplicate_WVE );
+	TVariableIndex variableIndex = hole->GetLast()->Variable();
+	if( variables.GetVariable( variableIndex )->TypeIs( VariableTypeV ) ) {
+		matchDuplicateVariable( variableIndex,
+			&COperationsBuilder::AddMatchRightDuplicate_WV );
+	} else {
+		matchDuplicateVariable( variableIndex,
+			&COperationsBuilder::AddMatchRightDuplicate_E );
+	}
 	hole->RemoveLast();
 }
 

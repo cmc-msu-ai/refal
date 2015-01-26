@@ -124,6 +124,11 @@ void COperationsBuilder::AddMatchRight_W(CQualifier* qualifier,
 	std::cout << "COperationsBuilder::AddMatchRight_W\n";
 }
 
+void COperationsBuilder::AddMatchClosed_V(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchClosed_V\n";
+}
 
 void COperationsBuilder::AddMatchClosed_E(CQualifier* qualifier,
 	const bool saveInTable)
@@ -131,20 +136,31 @@ void COperationsBuilder::AddMatchClosed_E(CQualifier* qualifier,
 	std::cout << "COperationsBuilder::AddMatchClosed_E\n";
 }
 
-
-void COperationsBuilder::AddMatchLeftDuplicate_WVE(const TTableIndex,
+void COperationsBuilder::AddMatchLeftDuplicate_WV(const TTableIndex,
 	const bool saveInTable)
 {
-	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_WVE\n";
+	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_WV\n";
 }
 
 
-void COperationsBuilder::AddMatchRightDuplicate_WVE(const TTableIndex,
+void COperationsBuilder::AddMatchRightDuplicate_WV(const TTableIndex,
 	const bool saveInTable)
 {
-	std::cout << "COperationsBuilder::AddMatchRightDuplicate_WVE\n";
+	std::cout << "COperationsBuilder::AddMatchRightDuplicate_WV\n";
 }
 
+void COperationsBuilder::AddMatchLeftDuplicate_E(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_E\n";
+}
+
+
+void COperationsBuilder::AddMatchRightDuplicate_E(const TTableIndex,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMatchRightDuplicate_E\n";
+}
 
 void COperationsBuilder::AddDecrementStackDepth(const int count)
 {

@@ -52,11 +52,21 @@ enum TOperationType {
 	OT_MatchRightSaveToTable_W,
 	OT_MatchRightWithQualifier_W, /* TQualifierIndex */
 	OT_MatchRightWithQualifierSaveToTable_W, /* TQualifierIndex */
-	/* matching duplicate of W-variables */
-	OT_MatchLeftDuplicate_WVE, /* TTableIndex */
-	OT_MatchLeftDuplicateSaveToTable_WVE, /* TTableIndex */
-	OT_MatchRightDuplicate_WVE, /* TTableIndex */
-	OT_MatchRightDuplicateSaveToTable_WVE, /* TTableIndex */
+	/* matching duplicate of WV-variables */
+	OT_MatchLeftDuplicate_WV, /* TTableIndex */
+	OT_MatchLeftDuplicateSaveToTable_WV, /* TTableIndex */
+	OT_MatchRightDuplicate_WV, /* TTableIndex */
+	OT_MatchRightDuplicateSaveToTable_WV, /* TTableIndex */
+	/* matching duplicate of E-variables */
+	OT_MatchLeftDuplicate_E, /* TTableIndex */
+	OT_MatchLeftDuplicateSaveToTable_E, /* TTableIndex */
+	OT_MatchRightDuplicate_E, /* TTableIndex */
+	OT_MatchRightDuplicateSaveToTable_E, /* TTableIndex */
+	/* matching closed V-variables */
+	OT_MatchClosed_V,
+	OT_MatchClosedSaveToTable_V,
+	OT_MatchClosedWithQualifier_V, /* TQualifierIndex */
+	OT_MatchClosedWithQualifierSaveToTable_V, /* TQualifierIndex */
 	/* matching closed E-variables */
 	OT_MatchClosed_E,
 	OT_MatchClosedSaveToTable_E,
@@ -67,22 +77,28 @@ enum TOperationType {
 	OT_MacthLeftMaxByQualifierSaveToTable, /* TQualifierIndex */
 	OT_MacthRightMaxByQualifier, /* TQualifierIndex */
 	OT_MacthRightMaxByQualifierSaveToTable, /* TQualifierIndex */
-	/* matching V-variable */
-	/* matching E-variable */
-#if 0
 	/* match left VE-variable */
 	OT_MatchLeftBegin_E,
+	OT_MatchLeftBeginSaveToTable_E,
 	OT_MatchLeftBegin_V,
+	OT_MatchLeftBeginSaveToTable_V,
 	OT_MatchLeftWithQulifierBegin_V, /* TQualifierIndex */
+	OT_MatchLeftWithQulifierBeginSaveToTable_V, /* TQualifierIndex */
 	OT_MatchLeft_E,
+	OT_MatchLeftSaveToTable_E,
 	OT_MatchLeftWithQulifier_E, /* TQualifierIndex */
+	OT_MatchLeftWithQulifierSaveToTable_E, /* TQualifierIndex */
 	/* match right VE-variable */
 	OT_MatchRightBegin_E,
+	OT_MatchRightBeginSaveToTable_E,
 	OT_MatchRightBegin_V,
+	OT_MatchRightBeginSaveToTable_V,
 	OT_MatchRightWithQulifierBegin_V, /* TQualifierIndex */
+	OT_MatchRightWithQulifierBeginSaveToTable_V, /* TQualifierIndex */
 	OT_MatchRight_E,
+	OT_MatchRightSaveToTable_E,
 	OT_MatchRightWithQulifier_E, /* TQualifierIndex */
-#endif
+	OT_MatchRightWithQulifierSaveToTable_E, /* TQualifierIndex */
 	/* making operations */
 	OT_InsertChar, /* TChar */
 	OT_InsertLabel, /* TLabel */
@@ -156,11 +172,15 @@ public:
 	/* matching W-variables */
 	void AddMatchLeft_W(CQualifier* qualifier, const bool saveInTable);
 	void AddMatchRight_W(CQualifier* qualifier, const bool saveInTable);
-	/* matching duplicate of W-variables */
-	void AddMatchLeftDuplicate_WVE(const TTableIndex, const bool saveInTable);
-	void AddMatchRightDuplicate_WVE(const TTableIndex, const bool saveInTable);
+	/* matching duplicate of WV-variables */
+	void AddMatchLeftDuplicate_WV(const TTableIndex, const bool saveInTable);
+	void AddMatchRightDuplicate_WV(const TTableIndex, const bool saveInTable);
+	/* matching duplicate of E-variables */
+	void AddMatchLeftDuplicate_E(const TTableIndex, const bool saveInTable);
+	void AddMatchRightDuplicate_E(const TTableIndex, const bool saveInTable);
 	/* matching closed E-variables */
 	void AddMatchClosed_E(CQualifier* qualifier, const bool saveInTable);
+	void AddMatchClosed_V(CQualifier* qualifier, const bool saveInTable);
 	/* matching by qualifier */
 	void AddMacthLeftMaxByQualifier(CQualifier* qualifier,
 		const bool saveInTable);
