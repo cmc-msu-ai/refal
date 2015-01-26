@@ -249,6 +249,12 @@ inline void COperationsExecuter::nextOperation()
 	}
 }
 
+inline bool COperationsExecuter::checkQualifier(TUnitNode* const node,
+	const TQualifierIndex qualifier) const
+{
+	return true;
+}
+
 inline void COperationsExecuter::saveToTable(TUnitNode* const node)
 {
 	table[tableTop] = node;
