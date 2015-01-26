@@ -118,6 +118,9 @@ private:
 	void doOperation();
 	inline void nextOperation();
 	
+	inline bool checkQualifier(TUnitNode* const node,
+		const TQualifierIndex qualifier) const;
+	
 	inline void saveToTable(TUnitNode* const node);
 	inline void saveToTable(TUnitNode* const nodeA, TUnitNode* const nodeB);
 	
@@ -125,6 +128,8 @@ private:
 	
 	inline void shiftLeft();
 	inline void shiftRight();
+
+	inline void saveState();
 	inline void fail();
 	
 	inline void setLeftBorder(const TTableIndex tableIndex);
@@ -278,6 +283,11 @@ inline void COperationsExecuter::shiftRight()
 	}
 }
 
+inline void COperationsExecuter::saveState()
+{
+	// TODO: save state
+}
+
 inline void COperationsExecuter::fail()
 {
 	// TODO: fail
@@ -399,7 +409,7 @@ inline void COperationsExecuter::matchLeftWithQualifier_S(
 	const TQualifierIndex qualifier)
 {
 	shiftLeft();
-	if( !left->IsSymbol() /* || ! TODO: check qualifier */ ) {
+	if( !left->IsSymbol()  || !checkQualifier( left, qualifier ) ) {
 		fail();
 	}
 }
@@ -408,7 +418,7 @@ inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_S(
 	const TQualifierIndex qualifier)
 {
 	shiftLeft();
-	if( left->IsSymbol() /* && TODO: check qualifier */ ) {
+	if( left->IsSymbol() && checkQualifier( left, qualifier ) ) {
 		saveToTable( left );
 	} else {
 		fail();
@@ -437,7 +447,7 @@ inline void COperationsExecuter::matchRightWithQualifier_S(
 	const TQualifierIndex qualifier)
 {
 	shiftRight();
-	if( !right->IsSymbol() /* || ! TODO: check qualifier */ ) {
+	if( !right->IsSymbol() || !checkQualifier( right, qualifier ) ) {
 		fail();
 	}
 }
@@ -446,7 +456,7 @@ inline void COperationsExecuter::matchRightWithQualifierSaveToTable_S(
 	const TQualifierIndex qualifier)
 {
 	shiftRight();
-	if( right->IsSymbol() /* && TODO: check qualifier */ ) {
+	if( right->IsSymbol() && checkQualifier( right, qualifier ) ) {
 		saveToTable( right );
 	} else {
 		fail();
@@ -513,7 +523,7 @@ inline void COperationsExecuter::matchLeftWithQualifier_W(
 	const TQualifierIndex qualifier)
 {
 	shiftLeft();
-	if( false /* TODO: check qualifier */ ) {
+	if( !checkQualifier( left, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -526,7 +536,7 @@ inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_W(
 	const TQualifierIndex qualifier)
 {
 	shiftLeft();
-	if( false /* TODO: check qualifier */ ) {
+	if( !checkQualifier( left, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -559,7 +569,7 @@ inline void COperationsExecuter::matchRightWithQualifier_W(
 	const TQualifierIndex qualifier)
 {
 	shiftRight();
-	if( false /* TODO: check qualifier */ ) {
+	if( !checkQualifier( right, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -572,7 +582,7 @@ inline void COperationsExecuter::matchRightWithQualifierSaveToTable_W(
 	const TQualifierIndex qualifier)
 {
 	shiftRight();
-	if( false /* TODO: check qualifier */ ) {
+	if( !checkQualifier( right, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -755,90 +765,188 @@ inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable(
 
 inline void COperationsExecuter::matchLeftBegin_E()
 {
+	nextOperation();
+	saveState();
+	nextOperation();
 }
 
 inline void COperationsExecuter::matchLeftBeginSaveToTable_E()
 {
+	nextOperation();
+	saveState();
+	saveToTable( 0, 0 );
+	nextOperation();
 }
 
 inline void COperationsExecuter::matchLeftBegin_V()
 {
+	nextOperation();
+	shiftLeft();
+	saveState();
 }
 
 inline void COperationsExecuter::matchLeftBeginSaveToTable_V()
 {
+	nextOperation();
+	shiftLeft();
+	saveState();
+	saveToTable( left, left );
 }
 
 inline void COperationsExecuter::matchLeftWithQulifierBegin_V(
 	const TQualifierIndex qualifier)
 {
+	nextOperation();
+	shiftLeft();
+	if( checkQualifier( left, qualifier ) ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftWithQulifierBeginSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
+	nextOperation();
+	shiftLeft();
+	if( checkQualifier( left, qualifier ) ) {
+		saveState();
+		saveToTable( left, left );
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeft_E()
 {
+	shiftLeft();
+	saveState();
 }
 
 inline void COperationsExecuter::matchLeftSaveToTable_E()
 {
+	shiftLeft();
+	saveState();
+	saveToTable( left );
+	tableTop++;
 }
 
 inline void COperationsExecuter::matchLeftWithQulifier_E(
 	const TQualifierIndex qualifier)
 {
+	shiftLeft();
+	if( checkQualifier( left, qualifier ) ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftWithQulifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
+	shiftLeft();
+	if( checkQualifier( left, qualifier ) ) {
+		saveState();
+		saveToTable( left );
+		tableTop++;
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightBegin_E()
 {
+	nextOperation();
+	saveState();
+	nextOperation();
 }
 
 inline void COperationsExecuter::matchRightBeginSaveToTable_E()
 {
+	nextOperation();
+	saveState();
+	saveToTable( 0, 0 );
+	nextOperation();
 }
 
 inline void COperationsExecuter::matchRightBegin_V()
 {
+	nextOperation();
+	shiftRight();
+	saveState();
 }
 
 inline void COperationsExecuter::matchRightBeginSaveToTable_V()
 {
+	nextOperation();
+	shiftRight();
+	saveState();
+	saveToTable( right, right );
 }
 
 inline void COperationsExecuter::matchRightWithQulifierBegin_V(
 	const TQualifierIndex qualifier)
 {
+	nextOperation();
+	shiftRight();
+	if( checkQualifier( right, qualifier ) ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightWithQulifierBeginSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
+	nextOperation();
+	shiftRight();
+	if( checkQualifier( right, qualifier ) ) {
+		saveState();
+		saveToTable( right, right );
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRight_E()
 {
+	shiftRight();
+	saveState();
 }
 
 inline void COperationsExecuter::matchRightSaveToTable_E()
 {
+	shiftRight();
+	saveState();
+	tableTop++;
+	saveToTable( right );
 }
 
 inline void COperationsExecuter::matchRightWithQulifier_E(
 	const TQualifierIndex qualifier)
 {
+	shiftRight();
+	if( checkQualifier( right, qualifier ) ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightWithQulifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
+	shiftRight();
+	if( checkQualifier( right, qualifier ) ) {
+		saveState();
+		tableTop++;
+		saveToTable( right );
+	} else {
+		fail();
+	}
 }
 
 } // end of namespace refal2
