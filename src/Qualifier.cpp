@@ -160,7 +160,8 @@ void CQualifier::Empty()
 
 bool CQualifier::IsEmpty() const
 {
-	return ( ( ( flags & QIF_All ) == QIF_All ) && ansichars.all() &&
+	// !(~ansichars).any() equal to ansichars.all() from std++11
+	return ( ( ( flags & QIF_All ) == QIF_All ) && !(~ansichars).any() &&
 		chars.IsEmpty() && labels.IsEmpty() && numbers.IsEmpty() );
 }
 
