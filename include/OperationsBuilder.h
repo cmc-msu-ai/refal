@@ -75,7 +75,8 @@ V:Q:X = OT_MatchLeftWithQulifierBegin_V; OT_MatchLeftWithQulifier_E;
 */
 
 class COperation {
-	friend class COperationBuilder;
+	friend class COperationsBuilder;
+	friend class COperationsExecuter;
 
 private:
 	COperation(const TOperationType _type): type( _type ) {}

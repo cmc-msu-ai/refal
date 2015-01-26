@@ -4,11 +4,11 @@ project(Refal2)
 
 include_directories(include)
 
-set(SOURCE src/Executer.cpp
-			src/Function.cpp
+set(SOURCE src/Function.cpp
 			src/FunctionCompiler.cpp
 			src/Label.cpp
 			src/main.cpp
+			src/OperationsExecuter.cpp
 			src/OperationsBuilder.cpp
 			src/Parser.cpp
 			src/Qualifier.cpp

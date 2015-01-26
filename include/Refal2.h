@@ -24,6 +24,7 @@ class CLabelTable;
 
 class COperation;
 class COperationsBuilder;
+class COperationsExecuter;
 
 class IParserListener;
 class CParser;
@@ -62,3 +63,4 @@ extern CLabelTable LabelTable;
 #include <Label.h>
 #include <Scanner.h>
 #include <Parser.h>
+#include <OperationsExecuter.h>

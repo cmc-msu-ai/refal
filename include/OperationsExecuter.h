@@ -4,6 +4,7 @@
 
 namespace Refal2 {
 
+#if 0
 class CExecuter {
 public:
 	CExecuter();
@@ -102,5 +103,19 @@ inline bool CExecuter::shift_right()
 	}
 	return true;
 }
+#endif
+
+// ---------------------------------------------------------------------------
+
+class COperationsExecuter {
+public:
+	COperationsExecuter();
+
+private:
+	COperationsExecuter(const COperationsExecuter&);
+	COperationsExecuter& operator=(const COperationsExecuter&);
+
+	void doOperation();
+};
 
 } // end of namespace refal2
