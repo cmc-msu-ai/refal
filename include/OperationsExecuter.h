@@ -232,10 +232,16 @@ private:
 	
 	TUnitNode** table;
 	TTableIndex tableTop;
+
+	COperation* operation;
 };
 
 inline void COperationsExecuter::nextOperation()
 {
+	operation++;
+	if( operation->type == OT_Goto ) {
+		// TODO: calc new pointer */
+	}
 }
 
 inline void COperationsExecuter::saveToTable(TUnitNode* const node)
@@ -258,14 +264,23 @@ inline bool COperationsExecuter::isEmpty() const
 
 inline void COperationsExecuter::shiftLeft()
 {
+	left = left->Next();
+	if( left == right ) {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::shiftRight()
 {
+	right = right->Prev();
+	if( left == right ) {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::fail()
 {
+	// TODO: fail
 }
 
 inline void COperationsExecuter::setLeftBorder(const TTableIndex tableIndex)
@@ -745,16 +760,20 @@ inline void COperationsExecuter::matchLeftBegin_E()
 inline void COperationsExecuter::matchLeftBeginSaveToTable_E()
 {
 }
+
 inline void COperationsExecuter::matchLeftBegin_V()
 {
 }
+
 inline void COperationsExecuter::matchLeftBeginSaveToTable_V()
 {
 }
+
 inline void COperationsExecuter::matchLeftWithQulifierBegin_V(
 	const TQualifierIndex qualifier)
 {
 }
+
 inline void COperationsExecuter::matchLeftWithQulifierBeginSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
