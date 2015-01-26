@@ -110,17 +110,20 @@ inline bool CExecuter::shift_right()
 class COperationsExecuter {
 public:
 	COperationsExecuter();
-
+	
 private:
 	COperationsExecuter(const COperationsExecuter&);
 	COperationsExecuter& operator=(const COperationsExecuter&);
 	
 	void doOperation();
 
+	inline void saveToTable(TUnitNode* const node);
+	inline void saveToTable(TUnitNode* const nodeA, TUnitNode* const nodeB);
+
 	void shiftLeft();
 	void shiftRight();
 	void fail();
-
+	
 	void matchEmptyExpression();
 	void checkNotEmpty();
 	void matchLeftChar(const TChar c);
@@ -129,13 +132,30 @@ private:
 	void matchRightChar(const TChar c);
 	void matchRightLabel(const TLabel label);
 	void matchRightNumber(const TNumber number);
-
+	void matchLeftParens();
+	void matchRightParens();
+	void setLeftBorder(const TTableIndex tableIndex);
+	void setRightBorder(const TTableIndex tableIndex);
+	
 	CUnitList fieldOfView;
 	TUnitNode* left;
 	TUnitNode* right;
-
+	
 	TUnitNode** table;
 	TTableIndex tableTop;
 };
+
+inline void COperationsExecuter::saveToTable(TUnitNode* const node)
+{
+	table[tableTop] = node;
+	tableTop++;
+}
+
+inline void COperationsExecuter::saveToTable(TUnitNode* const nodeA,
+	TUnitNode* const nodeB)
+{
+	saveToTable( nodeA );
+	saveToTable( nodeB );
+}
 
 } // end of namespace refal2

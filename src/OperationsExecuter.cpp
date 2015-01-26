@@ -778,4 +778,36 @@ void COperationsExecuter::matchRightNumber(const TNumber number)
 	}
 }
 
+void COperationsExecuter::matchLeftParens()
+{
+	shiftLeft();
+	if( left->IsLeftParen() ) {
+		right = left->PairedParen();
+		saveToTable( left, right );
+	} else {
+		fail();
+	}
+}
+
+void COperationsExecuter::matchRightParens()
+{
+	shiftRight();
+	if( right->IsRightParen() ) {
+		left = right->PairedParen();
+		saveToTable( left, right );
+	} else {
+		fail();
+	}
+}
+
+void COperationsExecuter::setLeftBorder(const TTableIndex tableIndex)
+{
+	left = table[tableIndex];
+}
+
+void COperationsExecuter::setRightBorder(const TTableIndex tableIndex)
+{
+	right = table[tableIndex];
+}
+
 } // end of namespace refal2
