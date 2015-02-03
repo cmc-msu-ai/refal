@@ -10,7 +10,7 @@ namespace Refal2 {
 template<class T>
 class CSetBuilder {
 public:
-	typedef ::std::set<T> TSet;
+	typedef std::set<T> CSet;
 
 	CSetBuilder()
 	{
@@ -21,20 +21,20 @@ public:
 	void Export(CFastSet<T>*, bool* include_all);
 
 	void Include(const T&);
-	void Include(const TSet&);
+	void Include(const CSet&);
 	void IncludeAll();
-	void IncludeAllExcept(const TSet&);
+	void IncludeAllExcept(const CSet&);
 
 	void Exclude(const T&);
-	void Exclude(const TSet&);
+	void Exclude(const CSet&);
 	void ExcludeAll();
-	void ExcludeAllExcept(const TSet&);
+	void ExcludeAllExcept(const CSet&);
 	
 private:
 	CSetBuilder(const CSetBuilder&);
 	CSetBuilder& operator=(const CSetBuilder&);
 
-	TSet yes, no, thru;
+	CSet yes, no, thru;
 	enum TStatus {
 		S_thru = 0,
 		S_no = -1,
@@ -67,7 +67,7 @@ void CSetBuilder<T>::Export(CFastSet<T>* set, bool* include_all)
 }
 
 template<class T>
-void CSetBuilder<T>::Include(const TSet& elements)
+void CSetBuilder<T>::Include(const CSet& elements)
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -88,7 +88,7 @@ void CSetBuilder<T>::Include(const TSet& elements)
 									thru.begin(), thru.end(),
 									::std::inserter(yes, yes.end()));
 		}
-		TSet tmp;
+		CSet tmp;
 		::std::set_difference(thru.begin(), thru.end(),
 							  elements.begin(), elements.end(),
 							  ::std::inserter(tmp, tmp.end()));
@@ -99,7 +99,7 @@ void CSetBuilder<T>::Include(const TSet& elements)
 template<class T>
 void CSetBuilder<T>::Include(const T& element)
 {
-	TSet tmp;
+	CSet tmp;
 	tmp.insert(element);
 	Include(tmp);
 }
@@ -107,11 +107,11 @@ void CSetBuilder<T>::Include(const T& element)
 template<class T>
 void CSetBuilder<T>::IncludeAll()
 {
-	IncludeAllExcept(TSet());
+	IncludeAllExcept(CSet());
 }
 
 template<class T>
-void CSetBuilder<T>::IncludeAllExcept(const TSet& elements)
+void CSetBuilder<T>::IncludeAllExcept(const CSet& elements)
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -132,7 +132,7 @@ void CSetBuilder<T>::IncludeAllExcept(const TSet& elements)
 								  elements.begin(), elements.end(),
 								  ::std::inserter(yes, yes.end()));
 		}
-		TSet tmp;
+		CSet tmp;
 		::std::set_intersection(thru.begin(), thru.end(),
 								elements.begin(), elements.end(),
 								::std::inserter(tmp, tmp.end()));
@@ -141,7 +141,7 @@ void CSetBuilder<T>::IncludeAllExcept(const TSet& elements)
 }
 
 template<class T>
-void CSetBuilder<T>::Exclude(const TSet& elements)
+void CSetBuilder<T>::Exclude(const CSet& elements)
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -162,7 +162,7 @@ void CSetBuilder<T>::Exclude(const TSet& elements)
 									thru.begin(), thru.end(),
 									::std::inserter(no, no.end()));
 		}
-		TSet tmp;
+		CSet tmp;
 		::std::set_difference(thru.begin(), thru.end(),
 							  elements.begin(), elements.end(),
 							  ::std::inserter(tmp, tmp.end()));
@@ -173,7 +173,7 @@ void CSetBuilder<T>::Exclude(const TSet& elements)
 template<class T>
 void CSetBuilder<T>::Exclude(const T& element)
 {
-	TSet tmp;
+	CSet tmp;
 	tmp.insert(element);
 	Exclude(tmp);
 }
@@ -181,11 +181,11 @@ void CSetBuilder<T>::Exclude(const T& element)
 template<class T>
 void CSetBuilder<T>::ExcludeAll()
 {
-	ExcludeAllExcept(TSet());
+	ExcludeAllExcept(CSet());
 }
 
 template<class T>
-void CSetBuilder<T>::ExcludeAllExcept(const TSet& elements)
+void CSetBuilder<T>::ExcludeAllExcept(const CSet& elements)
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -206,7 +206,7 @@ void CSetBuilder<T>::ExcludeAllExcept(const TSet& elements)
 								  elements.begin(), elements.end(),
 								  ::std::inserter(no, no.end()));
 		}
-		TSet tmp;
+		CSet tmp;
 		::std::set_intersection(thru.begin(), thru.end(),
 								elements.begin(), elements.end(),
 								::std::inserter(tmp, tmp.end()));
