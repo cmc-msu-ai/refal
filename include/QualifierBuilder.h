@@ -29,12 +29,12 @@ public:
 	void AddW() { AddS(); AddB(); }
 	void AddB();
 
-	static TAnsiSet MakeFromString(const char* ansiString);
+	static CAnsiSet MakeFromString(const char* ansiString);
 
 	static const char* Alphabet;
 	static const char* Numbers;
-	static const TAnsiSet AnsiL;
-	static const TAnsiSet AnsiD;
+	static const CAnsiSet AnsiL;
+	static const CAnsiSet AnsiD;
 
 private:
 	CQualifierBuilder(const CQualifierBuilder&);
@@ -55,8 +55,8 @@ private:
 	CSetBuilder<TLabel> labelsBuilder;
 	CSetBuilder<TNumber> numbersBuilder;
 
-	TAnsiSet ansichars;
-	TAnsiSet ansicharsFixed;
+	CAnsiSet ansichars;
+	CAnsiSet ansicharsFixed;
 };
 
 } // end of namespace refal2

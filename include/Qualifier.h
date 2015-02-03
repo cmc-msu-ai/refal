@@ -7,7 +7,7 @@
 namespace Refal2 {
 
 const int AnsiSetSize = 128;
-typedef std::bitset<AnsiSetSize> TAnsiSet;
+typedef std::bitset<AnsiSetSize> CAnsiSet;
 
 enum TQualifierIncludeFlags {
 	QIF_Terms = 0x1,
@@ -43,7 +43,7 @@ public:
 
 private:
 	int flags;
-	TAnsiSet ansichars;
+	CAnsiSet ansichars;
 	CFastSet<TChar> chars;
 	CFastSet<TLabel> labels;
 	CFastSet<TNumber> numbers;

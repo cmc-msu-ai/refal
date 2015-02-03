@@ -5,7 +5,7 @@
 
 namespace Refal2 {
 
-static void printAnsiSet(const TAnsiSet& ansichars, const std::string& chars,
+static void printAnsiSet(const CAnsiSet& ansichars, const std::string& chars,
 	const std::string& mark)
 {
 	bool isInclude = false;
@@ -32,16 +32,16 @@ static void printAnsiSet(const TAnsiSet& ansichars, const std::string& chars,
 	}
 }
 
-static void printChars(const CFastSet<TChar>& chars, const TAnsiSet& ansichars,
+static void printChars(const CFastSet<TChar>& chars, const CAnsiSet& ansichars,
 	bool isIncludeAll)
 {
-	TAnsiSet L = ansichars & CQualifierBuilder::AnsiL;
-	TAnsiSet D = ansichars & CQualifierBuilder::AnsiD;
+	CAnsiSet L = ansichars & CQualifierBuilder::AnsiL;
+	CAnsiSet D = ansichars & CQualifierBuilder::AnsiD;
 
 	printAnsiSet( L, CQualifierBuilder::Alphabet, "L" );
 	printAnsiSet( D, CQualifierBuilder::Numbers, "D" );
 
-	TAnsiSet other = ansichars & ~(L | D);
+	CAnsiSet other = ansichars & ~(L | D);
 	bool superFlag = other.count() < 31;
 	if( !superFlag ) {
 		other |= CQualifierBuilder::AnsiL | CQualifierBuilder::AnsiD;

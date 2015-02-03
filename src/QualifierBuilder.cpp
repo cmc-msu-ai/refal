@@ -7,12 +7,12 @@ const char* CQualifierBuilder::Alphabet = "abcdefghijklmnopqrstuvwxyz"
 											"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const char* CQualifierBuilder::Numbers = "0123456789";
 
-const TAnsiSet CQualifierBuilder::AnsiL = MakeFromString( Alphabet );
-const TAnsiSet CQualifierBuilder::AnsiD = MakeFromString( Numbers );
+const CAnsiSet CQualifierBuilder::AnsiL = MakeFromString( Alphabet );
+const CAnsiSet CQualifierBuilder::AnsiD = MakeFromString( Numbers );
 
-TAnsiSet CQualifierBuilder::MakeFromString(const char* ansiString)
+CAnsiSet CQualifierBuilder::MakeFromString(const char* ansiString)
 {
-	TAnsiSet set;
+	CAnsiSet set;
 	for( ; ansiString[0] != '\0'; ++ansiString ) {
 		set.set(static_cast<unsigned int>(ansiString[0]));
 	}
