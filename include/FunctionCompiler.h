@@ -31,7 +31,7 @@ typedef CNodeList<CHole> CHoleList;
 
 const int MaxCountOfDifferentVariablesInRule = 64;
 
-typedef std::bitset<MaxCountOfDifferentVariablesInRule> TVariablesMask;
+typedef std::bitset<MaxCountOfDifferentVariablesInRule> CVariablesMask;
 
 struct CHolesTuple {
 	CHoleList holes;
@@ -69,7 +69,7 @@ private:
 	inline bool isVE(TUnitNode* unit) const;
 	inline bool isFreeVE(TUnitNode* unit) const;
 	
-	//TVariablesMask makeVariablesMask(const CHole& hole) const;
+	//CVariablesMask makeVariablesMask(const CHole& hole) const;
 	//void splitIntoClasses(CHole* const holes);
 	
 	void matchVE(const bool isRightDirection);
@@ -99,7 +99,7 @@ private:
 	CHoleList::TNode* hole;
 	
 #if 0
-	TVariablesMask markedVariables;
+	CVariablesMask markedVariables;
 	int markedStackDepth[MaxCountOfDifferentVariablesInRule];
 	std::vector<CHolesTuple> classes;
 	int stackDepth;

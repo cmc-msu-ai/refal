@@ -37,9 +37,9 @@ CLeftPartCompiler::CLeftPartCompiler():
 }
 
 #if 0
-TVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
+CVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
 {
-	TVariablesMask variablesMask;
+	CVariablesMask variablesMask;
 	for( const TUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
 		if( i->IsVariable() && !variables.IsSet( i->Variable() ) ) {
 			variablesMask.set( i->Variable() );
@@ -50,7 +50,7 @@ TVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
 
 struct CHoleInfo {
 	CHole* hole;
-	TVariablesMask variablesMask;
+	CVariablesMask variablesMask;
 	std::size_t classid;
 	
 	CHoleInfo(CHole* _hole = 0):
@@ -69,7 +69,7 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 	for( std::size_t i = 0; i < info.size() - 1; i++ ) {
 		if( info[i].classid == 0 ) {
 			info[i].classid = ++classid;
-			TVariablesMask variablesMask = info[i].variablesMask;
+			CVariablesMask variablesMask = info[i].variablesMask;
 			
 			for( std::size_t j = i + 1; j < info.size(); j++ ) {
 				if( info[j].classid == 0 &&
