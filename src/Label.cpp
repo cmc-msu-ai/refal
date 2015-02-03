@@ -21,9 +21,9 @@ CLabelTable::~CLabelTable()
 
 TLabel CLabelTable::AddLabel(const std::string& labelText)
 {
-	typedef std::pair<TLabelMap::iterator, bool> TPair;
+	typedef std::pair<CLabelMap::iterator, bool> CPair;
 
-	TPair pair = labelMap.insert( std::make_pair( labelText, tableFirstFree ) );
+	CPair pair = labelMap.insert( std::make_pair( labelText, tableFirstFree ) );
 
 	if( pair.second ) {
 		grow( pair.first );
@@ -72,7 +72,7 @@ void CLabelTable::alloc()
 		::operator new( tableSize * sizeof(CLabelInfo) ) );
 }
 
-void CLabelTable::grow(const TLabelMap::const_iterator& labelPtr)
+void CLabelTable::grow(const CLabelMap::const_iterator& labelPtr)
 {
 	if( tableFirstFree == tableSize ) {
 		CLabelInfo* tmp = table;

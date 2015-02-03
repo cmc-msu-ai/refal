@@ -28,20 +28,20 @@ private:
 	CLabelTable(const CLabelTable&);
 	CLabelTable& operator=(const CLabelTable&);
 
-	typedef std::map<std::string, TLabel> TLabelMap;
+	typedef std::map<std::string, TLabel> CLabelMap;
 
 	struct CLabelInfo {
 		CFunction function;
-		TLabelMap::const_iterator labelPtr;
+		CLabelMap::const_iterator labelPtr;
 
-		CLabelInfo(const TLabelMap::const_iterator& _labelPtr):
+		CLabelInfo(const CLabelMap::const_iterator& _labelPtr):
 			labelPtr(_labelPtr) {}
 	};
 
 	void alloc();
-	void grow(const TLabelMap::const_iterator& labelPtr);
+	void grow(const CLabelMap::const_iterator& labelPtr);
 
-	TLabelMap labelMap;
+	CLabelMap labelMap;
 	int tableSize;
 	int tableFirstFree;
 	CLabelInfo* table;

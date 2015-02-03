@@ -865,9 +865,9 @@ void CParser::addEndOfFunction()
 
 void CParser::addNamedQualifier()
 {
-	typedef std::pair<TQualifierMap::iterator, bool> TPair;
+	typedef std::pair<TQualifierMap::iterator, bool> CPair;
 	
-	TPair pair = namedQualifiers.insert(
+	CPair pair = namedQualifiers.insert(
 		std::make_pair( storedName, currentQualifier ) );
 	
 	if( pair.second ) {
