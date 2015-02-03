@@ -4,7 +4,7 @@
 
 namespace Refal2 {
 
-typedef CNodeList<CUnit>::TNode CUnitNode;
+typedef CNodeList<CUnit>::CNodeType CUnitNode;
 
 enum TUnitType {
 	UT_Char = 0x01,

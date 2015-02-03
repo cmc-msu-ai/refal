@@ -134,7 +134,7 @@ void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
 
 void CLeftPartCompiler::removeHole()
 {
-	CHoleList::TNode* nextHole = hole->Next();
+	CHoleNode* nextHole = hole->Next();
 	holes.Remove( hole );
 	hole = nextHole;
 }

@@ -28,6 +28,7 @@ private:
 };
 
 typedef CNodeList<CHole> CHoleList;
+typedef CHoleList::CNodeType CHoleNode;
 
 const int MaxCountOfDifferentVariablesInRule = 64;
 
@@ -96,7 +97,7 @@ private:
 	TTableIndex right;
 	
 	CHoleList holes;
-	CHoleList::TNode* hole;
+	CHoleNode* hole;
 	
 #if 0
 	CVariablesMask markedVariables;
