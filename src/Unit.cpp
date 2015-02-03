@@ -44,7 +44,7 @@ void PrintUnit(const CUnit& unit, const CVariables* variables)
 	}
 }
 
-void PrintUnitList(const TUnitNode* fromNode, const TUnitNode* toNode,
+void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
 	const CVariables* variables)
 {
 	if( fromNode == 0 || toNode == 0 ) {

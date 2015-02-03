@@ -11,7 +11,7 @@ CHole::CHole(CUnitList* hole, const TTableIndex _left,
 	hole->Move( this );
 }
 
-CHole::CHole(TUnitNode* const first, TUnitNode* const last,
+CHole::CHole(CUnitNode* const first, CUnitNode* const last,
 		const TTableIndex _left, const TTableIndex _right):
 	CUnitList( first, last ), left( _left ), right( _right )
 {
@@ -40,7 +40,7 @@ CLeftPartCompiler::CLeftPartCompiler():
 CVariablesMask CLeftPartCompiler::makeVariablesMask(const CHole& hole) const
 {
 	CVariablesMask variablesMask;
-	for( const TUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
+	for( const CUnitNode* i = hole.hole.GetFirst(); i != 0; i = i->Next() ) {
 		if( i->IsVariable() && !variables.IsSet( i->Variable() ) ) {
 			variablesMask.set( i->Variable() );
 		}
@@ -112,8 +112,8 @@ void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
 		hole = holes.GetFirst();
 
 		while( hole != 0 ) {
-			TUnitNode* left = hole->GetFirst();
-			TUnitNode* right = hole->GetLast();
+			CUnitNode* left = hole->GetFirst();
+			CUnitNode* right = hole->GetLast();
 
 			if( left != right && isFreeVE( left ) && isFreeVE( right ) ) {
 				hole = hole->Next();
@@ -209,8 +209,8 @@ void CLeftPartCompiler::matchElement()
 	if( hole->IsEmpty() ) {
 		matchEmptyExpression();
 	} else {
-		TUnitNode* left = hole->GetFirst();
-		TUnitNode* right = hole->GetLast();
+		CUnitNode* left = hole->GetFirst();
+		CUnitNode* right = hole->GetLast();
 		
 		if( left == right && isFreeVE(left) ) {
 			matchClosedE();
@@ -230,7 +230,7 @@ void CLeftPartCompiler::matchElement()
 	}
 }
 
-bool CLeftPartCompiler::tryMatchLeftVariable(TUnitNode* left)
+bool CLeftPartCompiler::tryMatchLeftVariable(CUnitNode* left)
 {
 	switch( variables.GetVariable( left->Variable() )->GetType() ) {
 		case VariableTypeS:
@@ -255,7 +255,7 @@ bool CLeftPartCompiler::tryMatchLeftVariable(TUnitNode* left)
 	return false;
 }
 
-bool CLeftPartCompiler::tryMatchRightVariable(TUnitNode* right)
+bool CLeftPartCompiler::tryMatchRightVariable(CUnitNode* right)
 {
 	switch( variables.GetVariable( right->Variable() )->GetType() ) {
 		case VariableTypeS:
@@ -298,10 +298,10 @@ void CLeftPartCompiler::matchLeftParens()
 {
 	COperationsBuilder::AddMatchLeftParens();
 	
-	TUnitNode* begin = hole->GetFirst();
-	TUnitNode* end = hole->GetLast();
-	TUnitNode* beginNew = begin->PairedParen()->Next();
-	TUnitNode* endNew = 0;
+	CUnitNode* begin = hole->GetFirst();
+	CUnitNode* end = hole->GetLast();
+	CUnitNode* beginNew = begin->PairedParen()->Next();
+	CUnitNode* endNew = 0;
 
 	CUnitList newHole;
 	if( beginNew != 0 ) {
@@ -328,10 +328,10 @@ void CLeftPartCompiler::matchRightParens()
 {
 	COperationsBuilder::AddMatchRightParens();
 	
-	TUnitNode* begin = hole->GetFirst();
-	TUnitNode* end = hole->GetLast();
-	TUnitNode* beginNew = 0;
-	TUnitNode* endNew = end->PairedParen()->Prev();
+	CUnitNode* begin = hole->GetFirst();
+	CUnitNode* end = hole->GetLast();
+	CUnitNode* beginNew = 0;
+	CUnitNode* endNew = end->PairedParen()->Prev();
 	
 	CUnitList newHole;
 	if( endNew != 0 ) {
@@ -356,7 +356,7 @@ void CLeftPartCompiler::matchRightParens()
 
 void CLeftPartCompiler::matchLeftSymbol()
 {
-	TUnitNode unit = *hole->GetFirst();
+	CUnitNode unit = *hole->GetFirst();
 	switch( unit.GetType() ) {
 		case UT_Char:
 			COperationsBuilder::AddMatchLeftChar( unit.Char() );
@@ -376,7 +376,7 @@ void CLeftPartCompiler::matchLeftSymbol()
 
 void CLeftPartCompiler::matchRightSymbol()
 {
-	TUnitNode unit = *hole->GetLast();
+	CUnitNode unit = *hole->GetLast();
 	switch( unit.GetType() ) {
 		case UT_Char:
 			COperationsBuilder::AddMatchRightChar( unit.Char() );
@@ -454,7 +454,7 @@ void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 	rightPart->Move( &hole );
 	
 	while( !hole.IsEmpty() ) {
-		TUnitNode unit = *hole.GetFirst();
+		CUnitNode unit = *hole.GetFirst();
 		hole.RemoveFirst();
 		
 		switch( unit.GetType() ) {

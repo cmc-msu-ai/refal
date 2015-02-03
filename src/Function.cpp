@@ -96,7 +96,7 @@ void CFunctionBuilder::AddEndOfRight()
 	assert( state == FBS_Right );
 	
 	while( !balanceStack.empty() ) {
-		TUnitNode* unit = balanceStack.top();
+		CUnitNode* unit = balanceStack.top();
 		balanceStack.pop();
 		error( unit->IsLeftParen() ? FBEC_UnclosedLeftParenInRightPart :
 			FBEC_UnclosedLeftBracketInRightPart );
@@ -152,7 +152,7 @@ void CFunctionBuilder::AddRightParen()
 {
 	assert( state != FBS_Direction );
 	
-	TUnitNode* leftParen = 0;
+	CUnitNode* leftParen = 0;
 	
 	if( !balanceStack.empty() ) {
 		leftParen = balanceStack.top();
@@ -184,7 +184,7 @@ void CFunctionBuilder::AddRightBracket()
 	if( state == FBS_Left ) {
 		error( FBEC_IllegalRightBracketInLeftPart );
 	} else {
-		TUnitNode* leftBracket = 0;
+		CUnitNode* leftBracket = 0;
 	
 		if( !balanceStack.empty() ) {
 			leftBracket = balanceStack.top();

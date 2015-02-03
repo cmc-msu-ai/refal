@@ -11,7 +11,7 @@ const TTableIndex InvalideTableIndex = -1;
 class CHole : public CUnitList {
 public:
 	CHole(CUnitList* hole, const TTableIndex left, const TTableIndex right);
-	CHole(TUnitNode* const first, TUnitNode* const last,
+	CHole(CUnitNode* const first, CUnitNode* const last,
 		const TTableIndex left, const TTableIndex right);
 	
 	CHole(const CHole&);
@@ -65,9 +65,9 @@ private:
 	void matchDuplicateVariable(const TVariableIndex variableIndex,
 		const TMatchDuplicateFunction function);
 	
-	//inline bool isMarkedVariable(TUnitNode* unit);
-	inline bool isVE(TUnitNode* unit) const;
-	inline bool isFreeVE(TUnitNode* unit) const;
+	//inline bool isMarkedVariable(CUnitNode* unit);
+	inline bool isVE(CUnitNode* unit) const;
+	inline bool isFreeVE(CUnitNode* unit) const;
 	
 	//CVariablesMask makeVariablesMask(const CHole& hole) const;
 	//void splitIntoClasses(CHole* const holes);
@@ -75,8 +75,8 @@ private:
 	void matchVE(const bool isRightDirection);
 	
 	void matchElement();
-	bool tryMatchLeftVariable(TUnitNode* left);
-	bool tryMatchRightVariable(TUnitNode* right);
+	bool tryMatchLeftVariable(CUnitNode* left);
+	bool tryMatchRightVariable(CUnitNode* right);
 	
 	void matchEmptyExpression();
 	void matchClosedE();
@@ -107,20 +107,20 @@ private:
 };
 
 #if 0
-inline bool CLeftPartCompiler::isMarkedVariable(TUnitNode* unit)
+inline bool CLeftPartCompiler::isMarkedVariable(CUnitNode* unit)
 {
 	return ( unit != 0 && unit->IsVariable() &&
 		markedVariables.test( unit->Variable() ) );
 }
 #endif
 
-inline bool CLeftPartCompiler::isVE(TUnitNode* unit) const
+inline bool CLeftPartCompiler::isVE(CUnitNode* unit) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
 		variables.GetVariable( unit->Variable() )->TypeIs( 'v', 'e' ) );
 }
 
-inline bool CLeftPartCompiler::isFreeVE(TUnitNode* unit) const
+inline bool CLeftPartCompiler::isFreeVE(CUnitNode* unit) const
 {
 	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
 }

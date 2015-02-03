@@ -4,7 +4,7 @@
 
 namespace Refal2 {
 
-typedef CNodeList<CUnit>::TNode TUnitNode;
+typedef CNodeList<CUnit>::TNode CUnitNode;
 
 enum TUnitType {
 	UT_Char = 0x01,
@@ -26,7 +26,7 @@ enum TUnitTypeMask {
 
 void PrintUnit(const CUnit& unit, const CVariables* variables = 0);
 bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
-void PrintUnitList(const TUnitNode* fromNode, const TUnitNode* toNode,
+void PrintUnitList(const CUnitNode* fromNode, const CUnitNode* toNode,
 	const CVariables* variables = 0);
 inline void PrintUnitList(const CUnitList& unitList,
 	const CVariables* variables);
@@ -66,8 +66,8 @@ public:
 	bool IsLeftBracket() const { return ( (type & UT_LeftBracket) != 0 ); }
 	bool IsRightBracket() const { return ( (type & UT_RightBracket) != 0 ); }
 	
-	TUnitNode*& PairedParen() { return pairedParen; }
-	const TUnitNode* PairedParen() const { return pairedParen; }
+	CUnitNode*& PairedParen() { return pairedParen; }
+	const CUnitNode* PairedParen() const { return pairedParen; }
 
 private:
 	TUnitType type;
@@ -75,7 +75,7 @@ private:
 		TChar c;
 		TLabel label;
 		TNumber number;
-		TUnitNode* pairedParen;
+		CUnitNode* pairedParen;
 		TVariableIndex variable;
 	};
 };
@@ -83,68 +83,68 @@ private:
 class CUnitList : public CNodeList<CUnit> {
 public:
 	CUnitList() {}
-	CUnitList(TUnitNode* first, TUnitNode* last): CNodeList( first, last ) {}
+	CUnitList(CUnitNode* first, CUnitNode* last): CNodeList( first, last ) {}
 
-	inline TUnitNode* AppendChar(TChar c);
-	inline TUnitNode* AppendLabel(TLabel label);
-	inline TUnitNode* AppendNumber(TNumber number);
-	inline TUnitNode* AppendVariable(TVariableIndex variable);
-	inline TUnitNode* AppendLeftParen(TUnitNode* rightParen = 0);
-	inline TUnitNode* AppendRightParen(TUnitNode* leftParen = 0);
-	inline TUnitNode* AppendLeftBracket(TUnitNode* rightBracket = 0);
-	inline TUnitNode* AppendRightBracket(TUnitNode* leftBracket = 0);
+	inline CUnitNode* AppendChar(TChar c);
+	inline CUnitNode* AppendLabel(TLabel label);
+	inline CUnitNode* AppendNumber(TNumber number);
+	inline CUnitNode* AppendVariable(TVariableIndex variable);
+	inline CUnitNode* AppendLeftParen(CUnitNode* rightParen = 0);
+	inline CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
+	inline CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
+	inline CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
 };
 
-inline TUnitNode* CUnitList::AppendChar(TChar c)
+inline CUnitNode* CUnitList::AppendChar(TChar c)
 {
 	CUnit unit( UT_Char );
 	unit.Char() = c;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendLabel(TLabel label)
+inline CUnitNode* CUnitList::AppendLabel(TLabel label)
 {
 	CUnit unit( UT_Label );
 	unit.Label() = label;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendNumber(TNumber number)
+inline CUnitNode* CUnitList::AppendNumber(TNumber number)
 {
 	CUnit unit( UT_Number );
 	unit.Number() = number;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendVariable(TVariableIndex variable)
+inline CUnitNode* CUnitList::AppendVariable(TVariableIndex variable)
 {
 	CUnit unit( UT_Variable );
 	unit.Variable() = variable;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendLeftParen(TUnitNode* rightParen)
+inline CUnitNode* CUnitList::AppendLeftParen(CUnitNode* rightParen)
 {
 	CUnit unit( UT_LeftParen );
 	unit.PairedParen() = rightParen;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendRightParen(TUnitNode* leftParen)
+inline CUnitNode* CUnitList::AppendRightParen(CUnitNode* leftParen)
 {
 	CUnit unit( UT_RightParen );
 	unit.PairedParen() = leftParen;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendLeftBracket(TUnitNode* rightBracket)
+inline CUnitNode* CUnitList::AppendLeftBracket(CUnitNode* rightBracket)
 {
 	CUnit unit( UT_LeftBracket );
 	unit.PairedParen() = rightBracket;
 	return Append( unit );
 }
 
-inline TUnitNode* CUnitList::AppendRightBracket(TUnitNode* leftBracket)
+inline CUnitNode* CUnitList::AppendRightBracket(CUnitNode* leftBracket)
 {
 	CUnit unit( UT_RightBracket );
 	unit.PairedParen() = leftBracket;

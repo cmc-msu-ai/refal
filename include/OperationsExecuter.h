@@ -13,21 +13,21 @@ public:
 	void SetStackSize(int new_stack_size);
 	void SetTableSize(int new_table_size);
 
-	void Run(COperation* operation, TUnitNode* first, TUnitNode* last);
+	void Run(COperation* operation, CUnitNode* first, CUnitNode* last);
 	
 private:
 	CExecuter(const CExecuter&);
 	CExecuter& operator=(const CExecuter&);
 
 	struct CState {
-		TUnitNode* lb;
-		TUnitNode* rb;
+		CUnitNode* lb;
+		CUnitNode* rb;
 		COperation* op;
 		int table_index;
 	};
 
 	struct CMove {
-		TUnitNode* location;
+		CUnitNode* location;
 		COperation* op;
 	};
 
@@ -42,15 +42,15 @@ private:
 	int stack_size;
 	void* stack;
 	int table_size;
-	TUnitNode** table;
+	CUnitNode** table;
 
-	TUnitNode* lb;
-	TUnitNode* rb;
+	CUnitNode* lb;
+	CUnitNode* rb;
 	COperation* op;
 	int stack_depth;
 	int table_index;
 
-	TUnitNode master_term;
+	CUnitNode master_term;
 };
 
 inline CExecuter::CState& CExecuter::states_stack(int i)
@@ -118,11 +118,11 @@ private:
 	void doOperation();
 	inline void nextOperation();
 	
-	inline bool checkQualifier(TUnitNode* const node,
+	inline bool checkQualifier(CUnitNode* const node,
 		const TQualifierIndex qualifier) const;
 	
-	inline void saveToTable(TUnitNode* const node);
-	inline void saveToTable(TUnitNode* const nodeA, TUnitNode* const nodeB);
+	inline void saveToTable(CUnitNode* const node);
+	inline void saveToTable(CUnitNode* const nodeA, CUnitNode* const nodeB);
 	
 	inline bool isEmpty() const;
 	
@@ -239,10 +239,10 @@ private:
 		const TQualifierIndex qualifier);
 	
 	CUnitList fieldOfView;
-	TUnitNode* left;
-	TUnitNode* right;
+	CUnitNode* left;
+	CUnitNode* right;
 	
-	TUnitNode** table;
+	CUnitNode** table;
 	TTableIndex tableTop;
 
 	COperation* operation;
@@ -256,20 +256,20 @@ inline void COperationsExecuter::nextOperation()
 	}
 }
 
-inline bool COperationsExecuter::checkQualifier(TUnitNode* const node,
+inline bool COperationsExecuter::checkQualifier(CUnitNode* const node,
 	const TQualifierIndex qualifier) const
 {
 	return true;
 }
 
-inline void COperationsExecuter::saveToTable(TUnitNode* const node)
+inline void COperationsExecuter::saveToTable(CUnitNode* const node)
 {
 	table[tableTop] = node;
 	tableTop++;
 }
 
-inline void COperationsExecuter::saveToTable(TUnitNode* const nodeA,
-	TUnitNode* const nodeB)
+inline void COperationsExecuter::saveToTable(CUnitNode* const nodeA,
+	CUnitNode* const nodeB)
 {
 	saveToTable( nodeA );
 	saveToTable( nodeB );
@@ -577,8 +577,8 @@ inline void COperationsExecuter::matchRightWithQualifierSaveToTable_W(
 inline void COperationsExecuter::matchLeftDuplicate_WV(
 	const TTableIndex origin)
 {
-	TUnitNode* originLeft = table[origin];
-	TUnitNode* const originRight = table[origin + 1];
+	CUnitNode* originLeft = table[origin];
+	CUnitNode* const originRight = table[origin + 1];
 	for( ; originLeft != originRight->Next();
 		originLeft = originLeft->Next() )
 	{
@@ -592,9 +592,9 @@ inline void COperationsExecuter::matchLeftDuplicate_WV(
 inline void COperationsExecuter::matchLeftDuplicateSaveToTable_WV(
 	const TTableIndex origin)
 {
-	TUnitNode* originLeft = table[origin];
-	TUnitNode* const originRight = table[origin + 1];
-	TUnitNode* valueBegin = left;
+	CUnitNode* originLeft = table[origin];
+	CUnitNode* const originRight = table[origin + 1];
+	CUnitNode* valueBegin = left;
 	for( ; originLeft != originRight->Next();
 		originLeft = originLeft->Next() )
 	{
@@ -609,8 +609,8 @@ inline void COperationsExecuter::matchLeftDuplicateSaveToTable_WV(
 inline void COperationsExecuter::matchRightDuplicate_WV(
 	const TTableIndex origin)
 {
-	TUnitNode* const originLeft = table[origin];
-	TUnitNode* originRight = table[origin + 1];
+	CUnitNode* const originLeft = table[origin];
+	CUnitNode* originRight = table[origin + 1];
 	for( ; originRight != originLeft->Prev();
 		originRight = originRight->Prev() )
 	{
@@ -624,9 +624,9 @@ inline void COperationsExecuter::matchRightDuplicate_WV(
 inline void COperationsExecuter::matchRightDuplicateSaveToTable_WV(
 	const TTableIndex origin)
 {
-	TUnitNode* const originLeft = table[origin];
-	TUnitNode* originRight = table[origin + 1];
-	TUnitNode* valueEnd = right;
+	CUnitNode* const originLeft = table[origin];
+	CUnitNode* originRight = table[origin + 1];
+	CUnitNode* valueEnd = right;
 	for( ; originRight != originLeft->Prev();
 		originRight = originRight->Prev() )
 	{
@@ -746,7 +746,7 @@ inline void COperationsExecuter::matchClosedWithQualifierSaveToTable_E(
 inline void COperationsExecuter::macthLeftMaxByQualifier_V(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* first = left;
+	CUnitNode* first = left;
 	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
 		left = left->Next();
 	}
@@ -758,7 +758,7 @@ inline void COperationsExecuter::macthLeftMaxByQualifier_V(
 inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* first = left;
+	CUnitNode* first = left;
 	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
 		left = left->Next();
 	}
@@ -772,7 +772,7 @@ inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable_V(
 inline void COperationsExecuter::macthRightMaxByQualifier_V(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* last = right;
+	CUnitNode* last = right;
 	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
 		right = right->Prev();
 	}
@@ -784,7 +784,7 @@ inline void COperationsExecuter::macthRightMaxByQualifier_V(
 inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* last = right;
+	CUnitNode* last = right;
 	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
 		right = right->Prev();
 	}
@@ -806,7 +806,7 @@ inline void COperationsExecuter::macthLeftMaxByQualifier_E(
 inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* first = left;
+	CUnitNode* first = left;
 	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
 		left = left->Next();
 	}
@@ -828,7 +828,7 @@ inline void COperationsExecuter::macthRightMaxByQualifier_E(
 inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
-	TUnitNode* last = right;
+	CUnitNode* last = right;
 	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
 		right = right->Prev();
 	}
