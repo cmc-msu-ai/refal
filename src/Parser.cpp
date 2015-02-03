@@ -368,7 +368,7 @@ void CParser::ProcessLexem()
 				state = PS_BeginProcessVariableQualifier;
 			} else if( lexem == L_Qualifier ) {
 				state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
-				TQualifierMap::const_iterator qualifier = namedQualifiers.end();
+				CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 				qualifier = namedQualifiers.find( ToLower( lexemString ) );
 				if( qualifier != namedQualifiers.end() ) {
 					currentQualifier = qualifier->second;
@@ -502,7 +502,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			break;
 		case L_Qualifier:
 		{
-			TQualifierMap::const_iterator qualifier = namedQualifiers.end();
+			CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier != namedQualifiers.end() ) {
 				qualifierBuilder.AddQualifier( qualifier->second );
@@ -594,7 +594,7 @@ void CParser::processNamedQualifierAfterError()
 			break;
 		case L_Qualifier:
 		{
-			TQualifierMap::const_iterator qualifier = namedQualifiers.end();
+			CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier == namedQualifiers.end() ) {
 				// TODO: error, ignore
@@ -676,7 +676,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 			break;
 		case L_Qualifier:
 		{
-			TQualifierMap::const_iterator qualifier = namedQualifiers.end();
+			CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier != namedQualifiers.end() ) {
 				qualifierBuilder.AddQualifier( qualifier->second );
@@ -768,7 +768,7 @@ void CParser::processVariableQualifierAfterError()
 			break;
 		case L_Qualifier:
 		{
-			TQualifierMap::const_iterator qualifier = namedQualifiers.end();
+			CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier == namedQualifiers.end() ) {
 				// TODO: error, ignore
@@ -865,7 +865,7 @@ void CParser::addEndOfFunction()
 
 void CParser::addNamedQualifier()
 {
-	typedef std::pair<TQualifierMap::iterator, bool> CPair;
+	typedef std::pair<CQualifierMap::iterator, bool> CPair;
 	
 	CPair pair = namedQualifiers.insert(
 		std::make_pair( storedName, currentQualifier ) );

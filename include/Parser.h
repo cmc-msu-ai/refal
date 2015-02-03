@@ -97,10 +97,10 @@ private:
 	TLabel currentFunction;
 	TVariableType variableType;
 	
-	typedef std::map<std::string, CQualifier> TQualifierMap;
+	typedef std::map<std::string, CQualifier> CQualifierMap;
 	
 	CQualifier currentQualifier;
-	TQualifierMap namedQualifiers;
+	CQualifierMap namedQualifiers;
 	CQualifierBuilder qualifierBuilder;
 };
 
