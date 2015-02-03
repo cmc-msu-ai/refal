@@ -126,8 +126,8 @@ private:
 	
 	inline bool isEmpty() const;
 	
-	inline void shiftLeft();
-	inline void shiftRight();
+	inline bool shiftLeft();
+	inline bool shiftRight();
 
 	inline void saveState();
 	inline void fail();
@@ -197,12 +197,19 @@ private:
 	inline void matchClosedWithQualifier_E(const TQualifierIndex qualifier);
 	inline void matchClosedWithQualifierSaveToTable_E(
 		const TQualifierIndex qualifier);
-	/* matching by qualifier */
-	inline void macthLeftMaxByQualifier(const TQualifierIndex qualifier);
-	inline void macthLeftMaxByQualifierSaveToTable(
+	/* matching V-variables by qualifier */
+	inline void macthLeftMaxByQualifier_V(const TQualifierIndex qualifier);
+	inline void macthLeftMaxByQualifierSaveToTable_V(
 		const TQualifierIndex qualifier);
-	inline void macthRightMaxByQualifier(const TQualifierIndex qualifier);
-	inline void macthRightMaxByQualifierSaveToTable(
+	inline void macthRightMaxByQualifier_V(const TQualifierIndex qualifier);
+	inline void macthRightMaxByQualifierSaveToTable_V(
+		const TQualifierIndex qualifier);
+	/* matching E-variables by qualifier */
+	inline void macthLeftMaxByQualifier_E(const TQualifierIndex qualifier);
+	inline void macthLeftMaxByQualifierSaveToTable_E(
+		const TQualifierIndex qualifier);
+	inline void macthRightMaxByQualifier_E(const TQualifierIndex qualifier);
+	inline void macthRightMaxByQualifierSaveToTable_E(
 		const TQualifierIndex qualifier);
 	/* match left VE-variable */
 	inline void matchLeftBegin_E();
@@ -273,20 +280,16 @@ inline bool COperationsExecuter::isEmpty() const
 	return ( left->Next() == right );
 }
 
-inline void COperationsExecuter::shiftLeft()
+inline bool COperationsExecuter::shiftLeft()
 {
 	left = left->Next();
-	if( left == right ) {
-		fail();
-	}
+	return ( left != right );
 }
 
-inline void COperationsExecuter::shiftRight()
+inline bool COperationsExecuter::shiftRight()
 {
 	right = right->Prev();
-	if( left == right ) {
-		fail();
-	}
+	return ( left != right );
 }
 
 inline void COperationsExecuter::saveState()
@@ -325,56 +328,49 @@ inline void COperationsExecuter::checkNotEmpty()
 
 inline void COperationsExecuter::matchLeftChar(const TChar c)
 {
-	shiftLeft();
-	if( !left->IsChar() || left->Char() != c ) {
+	if( !shiftLeft() || !left->IsChar() || left->Char() != c ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchLeftLabel(const TLabel label)
 {
-	shiftLeft();
-	if( !left->IsLabel() || left->Label() != label ) {
+	if( !shiftLeft() || !left->IsLabel() || left->Label() != label ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchLeftNumber(const TNumber number)
 {
-	shiftLeft();
-	if( !left->IsNumber() || left->Number() != number ) {
+	if( !shiftLeft() || !left->IsNumber() || left->Number() != number ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchRightChar(const TChar c)
 {
-	shiftRight();
-	if( !left->IsChar() || left->Char() != c ) {
+	if( !shiftRight() || !left->IsChar() || left->Char() != c ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchRightLabel(const TLabel label)
 {
-	shiftRight();
-	if( !left->IsLabel() || left->Label() != label ) {
+	if( !shiftRight() || !left->IsLabel() || left->Label() != label ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchRightNumber(const TNumber number)
 {
-	shiftRight();
-	if( !left->IsNumber() || left->Number() != number ) {
+	if( !shiftRight() || !left->IsNumber() || left->Number() != number ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchLeftParens()
 {
-	shiftLeft();
-	if( left->IsLeftParen() ) {
+	if( shiftLeft() && left->IsLeftParen() ) {
 		right = left->PairedParen();
 		saveToTable( left, right );
 	} else {
@@ -384,8 +380,7 @@ inline void COperationsExecuter::matchLeftParens()
 
 inline void COperationsExecuter::matchRightParens()
 {
-	shiftRight();
-	if( right->IsRightParen() ) {
+	if( shiftRight() && right->IsRightParen() ) {
 		left = right->PairedParen();
 		saveToTable( left, right );
 	} else {
@@ -395,16 +390,14 @@ inline void COperationsExecuter::matchRightParens()
 
 inline void COperationsExecuter::matchLeft_S()
 {
-	shiftLeft();
-	if( !left->IsSymbol() ) {
+	if( !shiftLeft() || !left->IsSymbol() ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchLeftSaveToTable_S()
 {
-	shiftLeft();
-	if( left->IsSymbol() ) {
+	if( shiftLeft() && left->IsSymbol() ) {
 		saveToTable( left );
 	} else {
 		fail();
@@ -414,8 +407,7 @@ inline void COperationsExecuter::matchLeftSaveToTable_S()
 inline void COperationsExecuter::matchLeftWithQualifier_S(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( !left->IsSymbol()  || !checkQualifier( left, qualifier ) ) {
+	if( !shiftLeft() || !left->IsSymbol() || !checkQualifier( left, qualifier ) ) {
 		fail();
 	}
 }
@@ -423,8 +415,7 @@ inline void COperationsExecuter::matchLeftWithQualifier_S(
 inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_S(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( left->IsSymbol() && checkQualifier( left, qualifier ) ) {
+	if( shiftLeft() && left->IsSymbol() && checkQualifier( left, qualifier ) ) {
 		saveToTable( left );
 	} else {
 		fail();
@@ -433,16 +424,14 @@ inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_S(
 
 inline void COperationsExecuter::matchRight_S()
 {
-	shiftRight();
-	if( !right->IsSymbol() ) {
+	if( !shiftRight() || !right->IsSymbol() ) {
 		fail();
 	}
 }
 
 inline void COperationsExecuter::matchRightSaveToTable_S()
 {
-	shiftRight();
-	if( right->IsSymbol() ) {
+	if( shiftRight() && right->IsSymbol() ) {
 		saveToTable( right );
 	} else {
 		fail();
@@ -452,8 +441,7 @@ inline void COperationsExecuter::matchRightSaveToTable_S()
 inline void COperationsExecuter::matchRightWithQualifier_S(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( !right->IsSymbol() || !checkQualifier( right, qualifier ) ) {
+	if( !shiftRight() || !right->IsSymbol() || !checkQualifier( right, qualifier ) ) {
 		fail();
 	}
 }
@@ -461,8 +449,7 @@ inline void COperationsExecuter::matchRightWithQualifier_S(
 inline void COperationsExecuter::matchRightWithQualifierSaveToTable_S(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( right->IsSymbol() && checkQualifier( right, qualifier ) ) {
+	if( shiftRight() && right->IsSymbol() && checkQualifier( right, qualifier ) ) {
 		saveToTable( right );
 	} else {
 		fail();
@@ -471,8 +458,7 @@ inline void COperationsExecuter::matchRightWithQualifierSaveToTable_S(
 
 inline void COperationsExecuter::matchLeftDuplicate_S(const TTableIndex origin)
 {
-	shiftLeft();
-	if( !CompareUnit( *left, *table[origin] ) ) {
+	if( !shiftLeft() || !CompareUnit( *left, *table[origin] ) ) {
 		fail();
 	}
 }
@@ -480,8 +466,7 @@ inline void COperationsExecuter::matchLeftDuplicate_S(const TTableIndex origin)
 inline void COperationsExecuter::matchLeftDuplicateSaveToTable_S(
 	const TTableIndex origin)
 {
-	shiftLeft();
-	if( CompareUnit( *left, *table[origin] ) ) {
+	if( shiftLeft() && CompareUnit( *left, *table[origin] ) ) {
 		saveToTable( left );
 	} else {
 		fail();
@@ -490,8 +475,7 @@ inline void COperationsExecuter::matchLeftDuplicateSaveToTable_S(
 
 inline void COperationsExecuter::matchRightDuplicate_S(const TTableIndex origin)
 {
-	shiftRight();
-	if( !CompareUnit( *right, *table[origin] ) ) {
+	if( !shiftRight() || !CompareUnit( *right, *table[origin] ) ) {
 		fail();
 	}
 }
@@ -499,8 +483,7 @@ inline void COperationsExecuter::matchRightDuplicate_S(const TTableIndex origin)
 inline void COperationsExecuter::matchRightDuplicateSaveToTable_S(
 	const TTableIndex origin)
 {
-	shiftRight();
-	if( CompareUnit( *right, *table[origin] ) ) {
+	if( shiftRight() && CompareUnit( *right, *table[origin] ) ) {
 		saveToTable( right );
 	} else {
 		fail();
@@ -509,17 +492,15 @@ inline void COperationsExecuter::matchRightDuplicateSaveToTable_S(
 
 inline void COperationsExecuter::matchLeft_W()
 {
-	shiftLeft();
-	if( left->IsParen() ) {
+	if( shiftLeft() && left->IsParen() ) {
 		left = left->PairedParen();
 	}
 }
 
 inline void COperationsExecuter::matchLeftSaveToTable_W()
 {
-	shiftLeft();
-	saveToTable( left );
-	if( left->IsParen() ) {
+	if( shiftLeft() && left->IsParen() ) {
+		saveToTable( left );
 		left = left->PairedParen();
 		saveToTable( left );
 	}
@@ -528,8 +509,7 @@ inline void COperationsExecuter::matchLeftSaveToTable_W()
 inline void COperationsExecuter::matchLeftWithQualifier_W(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( !checkQualifier( left, qualifier ) ) {
+	if( !shiftLeft() || !checkQualifier( left, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -541,8 +521,7 @@ inline void COperationsExecuter::matchLeftWithQualifier_W(
 inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_W(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( !checkQualifier( left, qualifier ) ) {
+	if( !shiftLeft() || !checkQualifier( left, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -555,17 +534,15 @@ inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_W(
 
 inline void COperationsExecuter::matchRight_W()
 {
-	shiftRight();
-	if( left->IsParen() ) {
+	if( shiftRight() && left->IsParen() ) {
 		left = left->PairedParen();
 	}
 }
 
 inline void COperationsExecuter::matchRightSaveToTable_W()
 {
-	shiftRight();
-	saveToTable( right );
-	if( right->IsParen() ) {
+	if( shiftRight() && right->IsParen() ) {
+		saveToTable( right );
 		right = right->PairedParen();
 		saveToTable( right );
 	}
@@ -574,8 +551,7 @@ inline void COperationsExecuter::matchRightSaveToTable_W()
 inline void COperationsExecuter::matchRightWithQualifier_W(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( !checkQualifier( right, qualifier ) ) {
+	if( !shiftRight() || !checkQualifier( right, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -587,8 +563,7 @@ inline void COperationsExecuter::matchRightWithQualifier_W(
 inline void COperationsExecuter::matchRightWithQualifierSaveToTable_W(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( !checkQualifier( right, qualifier ) ) {
+	if( !shiftRight() || !checkQualifier( right, qualifier ) ) {
 		fail();
 		return;
 	}
@@ -604,17 +579,13 @@ inline void COperationsExecuter::matchLeftDuplicate_WV(
 {
 	TUnitNode* originLeft = table[origin];
 	TUnitNode* const originRight = table[origin + 1];
-	
-	shiftLeft();
-	for(; originLeft != originRight; originLeft = originLeft->Next() ) {
-		if( !CompareUnit( *left, *originLeft ) ) {
+	for( ; originLeft != originRight->Next();
+		originLeft = originLeft->Next() )
+	{
+		if( !shiftLeft() || !CompareUnit( *left, *originLeft ) ) {
 			fail();
 			return;
 		}
-		shiftLeft();
-	}
-	if( !CompareUnit( *left, *originLeft ) ) {
-		fail();
 	}
 }
 
@@ -623,21 +594,16 @@ inline void COperationsExecuter::matchLeftDuplicateSaveToTable_WV(
 {
 	TUnitNode* originLeft = table[origin];
 	TUnitNode* const originRight = table[origin + 1];
-	
-	shiftLeft();
-	saveToTable( left );
-	for(; originLeft != originRight; originLeft = originLeft->Next() ) {
-		if( !CompareUnit( *left, *originLeft ) ) {
+	TUnitNode* valueBegin = left;
+	for( ; originLeft != originRight->Next();
+		originLeft = originLeft->Next() )
+	{
+		if( !shiftLeft() || !CompareUnit( *left, *originLeft ) ) {
 			fail();
 			return;
 		}
-		shiftLeft();
 	}
-	if( !CompareUnit( *left, *originLeft ) ) {
-		fail();
-	} else {
-		saveToTable( left );
-	}
+	saveToTable( valueBegin->Next(), left );
 }
 
 inline void COperationsExecuter::matchRightDuplicate_WV(
@@ -645,17 +611,13 @@ inline void COperationsExecuter::matchRightDuplicate_WV(
 {
 	TUnitNode* const originLeft = table[origin];
 	TUnitNode* originRight = table[origin + 1];
-	
-	shiftRight();
-	for(; originRight != originLeft; originRight = originRight->Next() ) {
-		if( !CompareUnit( *right, *originRight ) ) {
+	for( ; originRight != originLeft->Prev();
+		originRight = originRight->Prev() )
+	{
+		if( !shiftRight() || !CompareUnit( *right, *originRight ) ) {
 			fail();
 			return;
 		}
-		shiftRight();
-	}
-	if( !CompareUnit( *right, *originRight ) ) {
-		fail();
 	}
 }
 
@@ -664,21 +626,16 @@ inline void COperationsExecuter::matchRightDuplicateSaveToTable_WV(
 {
 	TUnitNode* const originLeft = table[origin];
 	TUnitNode* originRight = table[origin + 1];
-	
-	shiftRight();
-	saveToTable( right );
-	for(; originRight != originLeft; originRight = originRight->Next() ) {
-		if( !CompareUnit( *right, *originRight ) ) {
+	TUnitNode* valueEnd = right;
+	for( ; originRight != originLeft->Prev();
+		originRight = originRight->Prev() )
+	{
+		if( !shiftRight() || !CompareUnit( *right, *originRight ) ) {
 			fail();
 			return;
 		}
-		shiftRight();
 	}
-	if( !CompareUnit( *right, *originRight ) ) {
-		fail();
-	} else {
-		saveToTable( right );
-	}
+	saveToTable( right, valueEnd->Prev() );
 }
 
 inline void COperationsExecuter::matchLeftDuplicate_E(
@@ -715,58 +672,171 @@ inline void COperationsExecuter::matchRightDuplicateSaveToTable_E(
 
 inline void COperationsExecuter::matchClosed_V()
 {
+	if( isEmpty() ) {
+		fail();
+	} else {
+		matchClosed_E();
+	}
 }
 
 inline void COperationsExecuter::matchClosedSaveToTable_V()
 {
+	saveToTable( left->Next(), right->Prev() );
+	matchClosed_V();
 }
 
 inline void COperationsExecuter::matchClosedWithQualifier_V(
 	const TQualifierIndex qualifier)
 {
+	if( isEmpty() ) {
+		fail();
+	} else {
+		do {
+			left = left->Next();
+			if( !checkQualifier( left, qualifier ) ) {
+				fail();
+				return;
+			}
+		} while( left != right->Prev() );
+	}
 }
 
 inline void COperationsExecuter::matchClosedWithQualifierSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
+	saveToTable( left->Next(), right->Prev() );
+	matchClosedWithQualifier_V( qualifier );
 }
 
 inline void COperationsExecuter::matchClosed_E()
 {
+	while( !isEmpty() ) {
+		left = left->Next();
+	}
 }
 
 inline void COperationsExecuter::matchClosedSaveToTable_E()
 {
+	if( isEmpty() ) {
+		saveToTable( 0, 0 );
+	} else {
+		saveToTable( left->Next(), right->Prev() );
+		matchClosed_E();
+	}
 }
 
 inline void COperationsExecuter::matchClosedWithQualifier_E(
 	const TQualifierIndex qualifier)
 {
+	if( !isEmpty() ) {
+		matchClosedWithQualifier_V( qualifier );
+	}
 }
 
 inline void COperationsExecuter::matchClosedWithQualifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
+	if( isEmpty() ) {
+		saveToTable( 0, 0 );
+	} else {
+		matchClosedWithQualifierSaveToTable_V( qualifier );
+	}
 }
 
-inline void COperationsExecuter::macthLeftMaxByQualifier(
+inline void COperationsExecuter::macthLeftMaxByQualifier_V(
 	const TQualifierIndex qualifier)
 {
+	TUnitNode* first = left;
+	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
+		left = left->Next();
+	}
+	if( left == first ) {
+		fail();
+	}
 }
 
-inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable(
+inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
+	TUnitNode* first = left;
+	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
+		left = left->Next();
+	}
+	if( left == first ) {
+		fail();
+	} else {
+		saveToTable( first->Next(), left );
+	}
 }
 
-inline void COperationsExecuter::macthRightMaxByQualifier(
+inline void COperationsExecuter::macthRightMaxByQualifier_V(
 	const TQualifierIndex qualifier)
 {
+	TUnitNode* last = right;
+	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
+		right = right->Prev();
+	}
+	if( right == last ) {
+		fail();
+	}
 }
 
-inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable(
+inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
+	TUnitNode* last = right;
+	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
+		right = right->Prev();
+	}
+	if( right == last ) {
+		fail();
+	} else {
+		saveToTable( right, last->Prev() );
+	}
+}
+
+inline void COperationsExecuter::macthLeftMaxByQualifier_E(
+	const TQualifierIndex qualifier)
+{
+	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
+		left = left->Next();
+	}
+}
+
+inline void COperationsExecuter::macthLeftMaxByQualifierSaveToTable_E(
+	const TQualifierIndex qualifier)
+{
+	TUnitNode* first = left;
+	while( !isEmpty() && checkQualifier( left->Next(), qualifier ) ) {
+		left = left->Next();
+	}
+	if( left == first ) {
+		saveToTable( 0, 0 );
+	} else {
+		saveToTable( first->Next(), left );
+	}
+}
+
+inline void COperationsExecuter::macthRightMaxByQualifier_E(
+	const TQualifierIndex qualifier)
+{
+	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
+		right = right->Prev();
+	}
+}
+
+inline void COperationsExecuter::macthRightMaxByQualifierSaveToTable_E(
+	const TQualifierIndex qualifier)
+{
+	TUnitNode* last = right;
+	while( !isEmpty() && checkQualifier( right->Prev(), qualifier ) ) {
+		right = right->Prev();
+	}
+	if( right == last ) {
+		saveToTable( 0, 0 );
+	} else {
+		saveToTable( right, last->Prev() );
+	}
 }
 
 inline void COperationsExecuter::matchLeftBegin_E()
@@ -786,25 +856,30 @@ inline void COperationsExecuter::matchLeftBeginSaveToTable_E()
 
 inline void COperationsExecuter::matchLeftBegin_V()
 {
-	nextOperation();
-	shiftLeft();
-	saveState();
+	if( shiftLeft() ) {
+		nextOperation();
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftBeginSaveToTable_V()
 {
-	nextOperation();
-	shiftLeft();
-	saveState();
-	saveToTable( left, left );
+	if( shiftLeft() ) {
+		nextOperation();
+		saveState();
+		saveToTable( left, left );
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftWithQulifierBegin_V(
 	const TQualifierIndex qualifier)
 {
-	nextOperation();
-	shiftLeft();
-	if( checkQualifier( left, qualifier ) ) {
+	if( shiftLeft() && checkQualifier( left, qualifier ) ) {
+		nextOperation();
 		saveState();
 	} else {
 		fail();
@@ -814,9 +889,8 @@ inline void COperationsExecuter::matchLeftWithQulifierBegin_V(
 inline void COperationsExecuter::matchLeftWithQulifierBeginSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
-	nextOperation();
-	shiftLeft();
-	if( checkQualifier( left, qualifier ) ) {
+	if( shiftLeft() && checkQualifier( left, qualifier ) ) {
+		nextOperation();
 		saveState();
 		saveToTable( left, left );
 	} else {
@@ -826,23 +900,28 @@ inline void COperationsExecuter::matchLeftWithQulifierBeginSaveToTable_V(
 
 inline void COperationsExecuter::matchLeft_E()
 {
-	shiftLeft();
-	saveState();
+	if( shiftLeft() ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftSaveToTable_E()
 {
-	shiftLeft();
-	saveState();
-	saveToTable( left );
-	tableTop++;
+	if( shiftLeft() ) {
+		saveState();
+		saveToTable( left );
+		tableTop++;
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchLeftWithQulifier_E(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( checkQualifier( left, qualifier ) ) {
+	if( shiftLeft() && checkQualifier( left, qualifier ) ) {
 		saveState();
 	} else {
 		fail();
@@ -852,8 +931,7 @@ inline void COperationsExecuter::matchLeftWithQulifier_E(
 inline void COperationsExecuter::matchLeftWithQulifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
-	shiftLeft();
-	if( checkQualifier( left, qualifier ) ) {
+	if( shiftLeft() && checkQualifier( left, qualifier ) ) {
 		saveState();
 		saveToTable( left );
 		tableTop++;
@@ -879,9 +957,12 @@ inline void COperationsExecuter::matchRightBeginSaveToTable_E()
 
 inline void COperationsExecuter::matchRightBegin_V()
 {
-	nextOperation();
-	shiftRight();
-	saveState();
+	if( shiftRight() ) {
+		nextOperation();
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightBeginSaveToTable_V()
@@ -895,9 +976,8 @@ inline void COperationsExecuter::matchRightBeginSaveToTable_V()
 inline void COperationsExecuter::matchRightWithQulifierBegin_V(
 	const TQualifierIndex qualifier)
 {
-	nextOperation();
-	shiftRight();
-	if( checkQualifier( right, qualifier ) ) {
+	if( shiftRight() && checkQualifier( right, qualifier ) ) {
+		nextOperation();
 		saveState();
 	} else {
 		fail();
@@ -907,9 +987,8 @@ inline void COperationsExecuter::matchRightWithQulifierBegin_V(
 inline void COperationsExecuter::matchRightWithQulifierBeginSaveToTable_V(
 	const TQualifierIndex qualifier)
 {
-	nextOperation();
-	shiftRight();
-	if( checkQualifier( right, qualifier ) ) {
+	if( shiftRight() && checkQualifier( right, qualifier ) ) {
+		nextOperation();
 		saveState();
 		saveToTable( right, right );
 	} else {
@@ -919,23 +998,28 @@ inline void COperationsExecuter::matchRightWithQulifierBeginSaveToTable_V(
 
 inline void COperationsExecuter::matchRight_E()
 {
-	shiftRight();
-	saveState();
+	if( shiftRight() ) {
+		saveState();
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightSaveToTable_E()
 {
-	shiftRight();
-	saveState();
-	tableTop++;
-	saveToTable( right );
+	if( shiftRight() ) {
+		saveState();
+		tableTop++;
+		saveToTable( right );
+	} else {
+		fail();
+	}
 }
 
 inline void COperationsExecuter::matchRightWithQulifier_E(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( checkQualifier( right, qualifier ) ) {
+	if( shiftRight() && checkQualifier( right, qualifier ) ) {
 		saveState();
 	} else {
 		fail();
@@ -945,8 +1029,7 @@ inline void COperationsExecuter::matchRightWithQulifier_E(
 inline void COperationsExecuter::matchRightWithQulifierSaveToTable_E(
 	const TQualifierIndex qualifier)
 {
-	shiftRight();
-	if( checkQualifier( right, qualifier ) ) {
+	if( shiftRight() && checkQualifier( right, qualifier ) ) {
 		saveState();
 		tableTop++;
 		saveToTable( right );

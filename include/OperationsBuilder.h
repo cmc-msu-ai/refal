@@ -72,11 +72,16 @@ enum TOperationType {
 	OT_MatchClosedSaveToTable_E,
 	OT_MatchClosedWithQualifier_E, /* TQualifierIndex */
 	OT_MatchClosedWithQualifierSaveToTable_E, /* TQualifierIndex */
-	/* matching by qualifier */
-	OT_MacthLeftMaxByQualifier, /* TQualifierIndex */
-	OT_MacthLeftMaxByQualifierSaveToTable, /* TQualifierIndex */
-	OT_MacthRightMaxByQualifier, /* TQualifierIndex */
-	OT_MacthRightMaxByQualifierSaveToTable, /* TQualifierIndex */
+	/* matching V-variables by qualifier */
+	OT_MacthLeftMaxByQualifier_V, /* TQualifierIndex */
+	OT_MacthLeftMaxByQualifierSaveToTable_V, /* TQualifierIndex */
+	OT_MacthRightMaxByQualifier_V, /* TQualifierIndex */
+	OT_MacthRightMaxByQualifierSaveToTable_V, /* TQualifierIndex */
+	/* matching E-variables by qualifier */
+	OT_MacthLeftMaxByQualifier_E, /* TQualifierIndex */
+	OT_MacthLeftMaxByQualifierSaveToTable_E, /* TQualifierIndex */
+	OT_MacthRightMaxByQualifier_E, /* TQualifierIndex */
+	OT_MacthRightMaxByQualifierSaveToTable_E, /* TQualifierIndex */
 	/* match left VE-variable */
 	OT_MatchLeftBegin_E,
 	OT_MatchLeftBeginSaveToTable_E,
@@ -181,10 +186,15 @@ public:
 	/* matching closed E-variables */
 	void AddMatchClosed_E(CQualifier* qualifier, const bool saveInTable);
 	void AddMatchClosed_V(CQualifier* qualifier, const bool saveInTable);
-	/* matching by qualifier */
-	void AddMacthLeftMaxByQualifier(CQualifier* qualifier,
+	/* matching V-variables by qualifier */
+	void AddMacthLeftMaxByQualifier_V(CQualifier* qualifier,
 		const bool saveInTable);
-	void AddMacthRightMaxByQualifier(CQualifier* qualifier,
+	void AddMacthRightMaxByQualifier_V(CQualifier* qualifier,
+		const bool saveInTable);
+	/* matching E-variables by qualifier */
+	void AddMacthLeftMaxByQualifier_E(CQualifier* qualifier,
+		const bool saveInTable);
+	void AddMacthRightMaxByQualifier_E(CQualifier* qualifier,
 		const bool saveInTable);
 	/* matching V-variable */
 	void AddMatchLeft_V(CQualifier* qualifier, const bool saveInTable);

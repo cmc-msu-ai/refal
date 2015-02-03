@@ -204,20 +204,31 @@ void COperationsBuilder::AddMatchRight_V(CQualifier* qualifier,
 }
 
 
-/* match by qualifier */
-void COperationsBuilder::AddMacthLeftMaxByQualifier(CQualifier* qualifier,
+/* matching V-variables by qualifier */
+void COperationsBuilder::AddMacthLeftMaxByQualifier_V(CQualifier* qualifier,
 	const bool saveInTable)
 {
-	std::cout << "COperationsBuilder::AddMacthLeftMaxByQualifier\n";
+	std::cout << "COperationsBuilder::AddMacthLeftMaxByQualifier_V\n";
 }
 
-
-void COperationsBuilder::AddMacthRightMaxByQualifier(CQualifier* qualifier,
+void COperationsBuilder::AddMacthRightMaxByQualifier_V(CQualifier* qualifier,
 	const bool saveInTable)
 {
-	std::cout << "COperationsBuilder::AddMacthRightMaxByQualifier\n";
+	std::cout << "COperationsBuilder::AddMacthRightMaxByQualifier_V\n";
 }
 
+/* matching E-variables by qualifier */
+void COperationsBuilder::AddMacthLeftMaxByQualifier_E(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMacthLeftMaxByQualifier_E\n";
+}
+
+void COperationsBuilder::AddMacthRightMaxByQualifier_E(CQualifier* qualifier,
+	const bool saveInTable)
+{
+	std::cout << "COperationsBuilder::AddMacthRightMaxByQualifier_E\n";
+}
 
 /* result builder operation */
 void COperationsBuilder::AddInsertChar(const TChar c)
