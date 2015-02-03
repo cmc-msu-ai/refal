@@ -27,14 +27,14 @@ private:
 	TTableIndex right;
 };
 
-typedef CNodeList<CHole> THoleList;
+typedef CNodeList<CHole> CHoleList;
 
 const int MaxCountOfDifferentVariablesInRule = 64;
 
 typedef std::bitset<MaxCountOfDifferentVariablesInRule> TVariablesMask;
 
 struct CHolesTuple {
-	THoleList holes;
+	CHoleList holes;
 	int stackDepth;
 	
 	explicit CHolesTuple(int _stackDepth): stackDepth(_stackDepth) {}
@@ -95,8 +95,8 @@ private:
 	TTableIndex left;
 	TTableIndex right;
 	
-	THoleList holes;
-	THoleList::TNode* hole;
+	CHoleList holes;
+	CHoleList::TNode* hole;
 	
 #if 0
 	TVariablesMask markedVariables;
