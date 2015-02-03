@@ -9,15 +9,15 @@
 template<class T>
 class CFastSet {
 public:
-	typedef std::set<T> TSet;
+	typedef std::set<T> CSet;
 
 	CFastSet(): elementsSize(0), elements(0) {}
-	CFastSet(const TSet&);
+	CFastSet(const CSet&);
 	CFastSet(const CFastSet&);
 	~CFastSet() { Empty(); }
 
 	CFastSet& operator=(const CFastSet&);
-	CFastSet& operator=(const TSet&);
+	CFastSet& operator=(const CSet&);
 
 	inline void Empty();
 	bool IsEmpty() const { return ( elementsSize == 0 ); }
@@ -25,8 +25,8 @@ public:
 	inline void Move(CFastSet* moveTo);
 
 	int GetSize() { return elementsSize; }
-	void GetSet(TSet* set) const { *set = *this; }
-	inline operator TSet() const;
+	void GetSet(CSet* set) const { *set = *this; }
+	inline operator CSet() const;
 
 	CFastSet& operator*=(const CFastSet&);
 	CFastSet& operator+=(const CFastSet&);
@@ -40,12 +40,12 @@ private:
 };
 
 template<class T>
-CFastSet<T>::CFastSet(const TSet& set):
+CFastSet<T>::CFastSet(const CSet& set):
 	elementsSize( set.size() ),
 	elements(new T[elementsSize])
 {
 	int i = 0;
-	for( typename TSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
+	for( typename CSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
 		elements[i] = *j;
 		i++;
 	}
@@ -73,14 +73,14 @@ CFastSet<T>& CFastSet<T>::operator=(const CFastSet& set)
 }
 
 template<class T>
-CFastSet<T>& CFastSet<T>::operator=(const TSet& set)
+CFastSet<T>& CFastSet<T>::operator=(const CSet& set)
 {
 	delete[] elements;
 	elementsSize = set.size();
 	elements = new T[elementsSize];
 	
 	int i = 0;
-	for( typename TSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
+	for( typename CSet::const_iterator j = set.begin(); j != set.end(); ++j ) {
 		elements[i] = *j;
 		i++;
 	}
@@ -113,19 +113,19 @@ inline void CFastSet<T>::Move(CFastSet<T>* moveTo)
 }
 
 template<class T>
-inline CFastSet<T>::operator TSet() const
+inline CFastSet<T>::operator CSet() const
 {
-	return TSet(elements, elements + elementsSize);
+	return CSet(elements, elements + elementsSize);
 }
 
 template<class T>
 CFastSet<T>& CFastSet<T>::operator+=(const CFastSet& set)
 {
-	TSet a;
+	CSet a;
 	GetSet( &a );
-	TSet b;
+	CSet b;
 	set.GetSet( &b );
-	TSet result;
+	CSet result;
 
 	std::set_union( a.begin(), a.end(), b.begin(), b.end(),
 		std::inserter( result, result.end() ) );
@@ -138,11 +138,11 @@ CFastSet<T>& CFastSet<T>::operator+=(const CFastSet& set)
 template<class T>
 CFastSet<T>& CFastSet<T>::operator*=(const CFastSet& set)
 {
-	TSet a;
+	CSet a;
 	GetSet( &a );
-	TSet b;
+	CSet b;
 	set.GetSet( &b );
-	TSet result;
+	CSet result;
 
 	std::set_intersection( a.begin(), a.end(), b.begin(), b.end(),
 		std::inserter( result, result.end() ) );
@@ -155,11 +155,11 @@ CFastSet<T>& CFastSet<T>::operator*=(const CFastSet& set)
 template<class T>
 CFastSet<T>& CFastSet<T>::operator-=(const CFastSet& set)
 {
-	TSet a;
+	CSet a;
 	GetSet( &a );
-	TSet b;
+	CSet b;
 	set.GetSet( &b );
-	TSet result;
+	CSet result;
 
 	std::set_difference( a.begin(), a.end(), b.begin(), b.end(),
 		std::inserter( result, result.end() ) );
@@ -172,7 +172,7 @@ CFastSet<T>& CFastSet<T>::operator-=(const CFastSet& set)
 template<class T>
 bool CFastSet<T>::Has(const T element) const
 {
-	TSet tmpSet;
+	CSet tmpSet;
 	GetSet( &tmpSet );
 	return ( tmpSet.count( element ) == 1 );
 }
