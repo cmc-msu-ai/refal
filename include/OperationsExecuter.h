@@ -175,7 +175,6 @@ private:
 	
 	CUnitNode* lastAddedLeftParen;
 	CUnitNode* lastAddedLeftBracket;
-	CUnitNode initialLeftBracket;
 };
 
 inline void COperationsExecuter::nextOperation()
@@ -246,7 +245,7 @@ inline void COperationsExecuter::fail()
 		left = stack[stackTop].left;
 		right = stack[stackTop].right;
 		tableTop = stack[stackTop].tableTop;
-		operation = stack[stackTop].operation;
+		operation = stack[stackTop].operation->Prev();
 	}
 }
 
@@ -884,8 +883,8 @@ inline void COperationsExecuter::matchLeftSaveToTable_E()
 {
 	if( shiftLeft() ) {
 		saveState();
-		saveToTable( left );
 		tableTop++;
+		saveToTable( left );
 	} else {
 		fail();
 	}
@@ -906,8 +905,8 @@ inline void COperationsExecuter::matchLeftWithQulifierSaveToTable_E(
 {
 	if( shiftLeft() && checkQualifier( left, qualifier ) ) {
 		saveState();
-		saveToTable( left );
 		tableTop++;
+		saveToTable( left );
 	} else {
 		fail();
 	}
@@ -982,8 +981,8 @@ inline void COperationsExecuter::matchRightSaveToTable_E()
 {
 	if( shiftRight() ) {
 		saveState();
-		tableTop++;
 		saveToTable( right );
+		tableTop++;
 	} else {
 		fail();
 	}
@@ -1004,8 +1003,8 @@ inline void COperationsExecuter::matchRightWithQulifierSaveToTable_E(
 {
 	if( shiftRight() && checkQualifier( right, qualifier ) ) {
 		saveState();
-		tableTop++;
 		saveToTable( right );
+		tableTop++;
 	} else {
 		fail();
 	}

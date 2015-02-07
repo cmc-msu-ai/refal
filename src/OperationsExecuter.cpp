@@ -10,8 +10,7 @@ COperationsExecuter::COperationsExecuter():
 	operation( 0 ),
 	stackTop( 0 ),
 	lastAddedLeftParen( 0 ),
-	lastAddedLeftBracket( 0 ),
-	initialLeftBracket( CUnit( UT_LeftBracket ) )
+	lastAddedLeftBracket( 0 )
 {
 }
 
@@ -118,11 +117,15 @@ void COperationsExecuter::Run( const TLabel entry )
 	fieldOfView.Append( CUnit( UT_Label ) )->Label() = entry;
 	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
 	right->PairedParen() = left;
-	initialLeftBracket.PairedParen() = right;
 
+	CUnitNode* initialLeftBracketPtr = new CUnitNode( CUnit( UT_LeftParen ) );
+	CUnitNode& initialLeftBracket = *initialLeftBracketPtr;
+	initialLeftBracket.PairedParen() = right;
 	while( initialLeftBracket.PairedParen() != 0 ) {
 		right = initialLeftBracket.PairedParen();
-		left = right->PairedParen()->Next();
+		left = right->PairedParen();
+		CUnitNode* savedNextRightBracket = left->PairedParen();
+		left = left->Next();
 		operation = static_cast<COperationNode*>(
 			LabelTable.GetLabelFunction( left->Label() )->firstOperation );
 		tableTop = 0;
@@ -134,6 +137,7 @@ void COperationsExecuter::Run( const TLabel entry )
 		while( !doOperation() ) {
 			nextOperation();
 		}
+		lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
 	}
 
 	std::cout << "\n\n\n-----------------------------------------\n\n";

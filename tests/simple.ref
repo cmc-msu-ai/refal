@@ -1,10 +1,13 @@
 simple START
-	EMPTY just_empty_label, simple_empty_label
 	ENTRY go
+	EMPTY just_empty_label, simple_empty_label
 	
-go = <rev /just_empty_label/ /127/ 'abc' /simple_empty_label/ 'def' /943/ >
+go = <rev /just_empty_label/ /127/ 'abc' /simple_empty_label/ 'def' /943/ >+
+	<testQ 'DjkdfkgFRUCBTJZDGFSDIUk7676742oiufgUruefu' /11/ /121/ /247/>
 
 rev w1e2 = <rev e2>w1
 	=
 
+testQ e(('abcABC')L)x s('abcABC')q e(LN)y e(D)z = sq(ez)(ex)(ey)
+	
 	END

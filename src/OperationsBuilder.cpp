@@ -29,7 +29,7 @@ void COperationsBuilder::AddReturn()
 	addNoArgumensOperation( OT_Return );
 	if( savedOperation != 0 ) {
 		operations.InsertBefore( operations.GetFirst(),
-			COperation( OT_InsertJump ) )->operation = savedOperation;
+			COperation( OT_InsertJump ) )->operation = savedOperation->Next();
 	}
 	savedOperation = operations.GetLast();
 }
@@ -528,10 +528,14 @@ void COperationsBuilder::addStackDecrementOperation(
 
 TQualifierIndex COperationsBuilder::registerQualifier( CQualifier* qualifier )
 {
-	CQualifier* newQualifier = new CQualifier;
-	qualifier->Move( newQualifier );
+	static CQualifier* last = 0;
+	static CQualifier* newQualifier = 0;
+	if( last != qualifier ) {
+		newQualifier = new CQualifier;
+		qualifier->Move( newQualifier );
+		last = qualifier;
+	}
 	return newQualifier;
-
 }
 
 COperation* COperationsBuilder::addOperation( const TOperationType type )
