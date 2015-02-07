@@ -111,18 +111,20 @@ class COperationsExecuter {
 public:
 	COperationsExecuter();
 	
+	void Run( const TLabel entry );
+
 private:
-	COperationsExecuter(const COperationsExecuter&);
-	COperationsExecuter& operator=(const COperationsExecuter&);
+	COperationsExecuter( const COperationsExecuter& );
+	COperationsExecuter& operator=( const COperationsExecuter& );
 	
 	void doOperation();
 	inline void nextOperation();
 	
-	inline bool checkQualifier(CUnitNode* const node,
-		const TQualifierIndex qualifier) const;
+	inline bool checkQualifier( CUnitNode* const node,
+		const TQualifierIndex qualifier ) const;
 	
-	inline void saveToTable(CUnitNode* const node);
-	inline void saveToTable(CUnitNode* const nodeA, CUnitNode* const nodeB);
+	inline void saveToTable( CUnitNode* const node );
+	inline void saveToTable( CUnitNode* const nodeA, CUnitNode* const nodeB );
 	
 	inline bool isEmpty() const;
 	
@@ -132,111 +134,125 @@ private:
 	inline void saveState();
 	inline void fail();
 	
-	inline void setLeftBorder(const TTableIndex tableIndex);
-	inline void setRightBorder(const TTableIndex tableIndex);
+	inline void setLeftBorder( const TTableIndex tableIndex );
+	inline void setRightBorder( const TTableIndex tableIndex );
 	
 	inline void checkNotEmpty();
 	/* matching empty expression */
 	inline void matchEmptyExpression();
 	/* matching symbols */
-	inline void matchLeftChar(const TChar c);
-	inline void matchLeftLabel(const TLabel label);
-	inline void matchLeftNumber(const TNumber number);
-	inline void matchRightChar(const TChar c);
-	inline void matchRightLabel(const TLabel label);
-	inline void matchRightNumber(const TNumber number);
+	inline void matchLeftChar( const TChar c );
+	inline void matchLeftLabel( const TLabel label );
+	inline void matchLeftNumber( const TNumber number );
+	inline void matchRightChar( const TChar c );
+	inline void matchRightLabel( const TLabel label );
+	inline void matchRightNumber( const TNumber number );
 	/* matching parens */
 	inline void matchLeftParens();
 	inline void matchRightParens();
 	/* matching S-variables */
 	inline void matchLeft_S();
 	inline void matchLeftSaveToTable_S();
-	inline void matchLeftWithQualifier_S(const TQualifierIndex qualifier);
+	inline void matchLeftWithQualifier_S( const TQualifierIndex qualifier );
 	inline void matchLeftWithQualifierSaveToTable_S(
 		const TQualifierIndex qualifier);
 	inline void matchRight_S();
 	inline void matchRightSaveToTable_S();
-	inline void matchRightWithQualifier_S(const TQualifierIndex qualifier);
+	inline void matchRightWithQualifier_S( const TQualifierIndex qualifier );
 	inline void matchRightWithQualifierSaveToTable_S(
 		const TQualifierIndex qualifier);
 	/* matching duplicate of S-variables */
-	inline void matchLeftDuplicate_S(const TTableIndex origin);
-	inline void matchLeftDuplicateSaveToTable_S(const TTableIndex origin);
-	inline void matchRightDuplicate_S(const TTableIndex origin);
-	inline void matchRightDuplicateSaveToTable_S(const TTableIndex origin);
+	inline void matchLeftDuplicate_S( const TTableIndex origin );
+	inline void matchLeftDuplicateSaveToTable_S( const TTableIndex origin );
+	inline void matchRightDuplicate_S( const TTableIndex origin );
+	inline void matchRightDuplicateSaveToTable_S( const TTableIndex origin );
 	/* matching W-variables */
 	inline void matchLeft_W();
 	inline void matchLeftSaveToTable_W();
-	inline void matchLeftWithQualifier_W(const TQualifierIndex qualifier);
+	inline void matchLeftWithQualifier_W( const TQualifierIndex qualifier );
 	inline void matchLeftWithQualifierSaveToTable_W(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	inline void matchRight_W();
 	inline void matchRightSaveToTable_W();
-	inline void matchRightWithQualifier_W(const TQualifierIndex qualifier);
+	inline void matchRightWithQualifier_W( const TQualifierIndex qualifier );
 	inline void matchRightWithQualifierSaveToTable_W(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	/* matching duplicate of WV-variables */
-	inline void matchLeftDuplicate_WV(const TTableIndex origin);
-	inline void matchLeftDuplicateSaveToTable_WV(const TTableIndex origin);
-	inline void matchRightDuplicate_WV(const TTableIndex origin);
-	inline void matchRightDuplicateSaveToTable_WV(const TTableIndex origin);
+	inline void matchLeftDuplicate_WV( const TTableIndex origin );
+	inline void matchLeftDuplicateSaveToTable_WV( const TTableIndex origin );
+	inline void matchRightDuplicate_WV( const TTableIndex origin );
+	inline void matchRightDuplicateSaveToTable_WV( const TTableIndex origin );
 	/* matching duplicate of E-variables */
-	inline void matchLeftDuplicate_E(const TTableIndex origin);
-	inline void matchLeftDuplicateSaveToTable_E(const TTableIndex origin);
-	inline void matchRightDuplicate_E(const TTableIndex origin);
-	inline void matchRightDuplicateSaveToTable_E(const TTableIndex origin);
+	inline void matchLeftDuplicate_E( const TTableIndex origin );
+	inline void matchLeftDuplicateSaveToTable_E( const TTableIndex origin );
+	inline void matchRightDuplicate_E( const TTableIndex origin );
+	inline void matchRightDuplicateSaveToTable_E( const TTableIndex origin );
 	/* matching closed V-variables */
 	inline void matchClosed_V();
 	inline void matchClosedSaveToTable_V();
-	inline void matchClosedWithQualifier_V(const TQualifierIndex qualifier);
+	inline void matchClosedWithQualifier_V( const TQualifierIndex qualifier );
 	inline void matchClosedWithQualifierSaveToTable_V(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	/* matching closed E-variables */
 	inline void matchClosed_E();
 	inline void matchClosedSaveToTable_E();
-	inline void matchClosedWithQualifier_E(const TQualifierIndex qualifier);
+	inline void matchClosedWithQualifier_E( const TQualifierIndex qualifier );
 	inline void matchClosedWithQualifierSaveToTable_E(
 		const TQualifierIndex qualifier);
 	/* matching V-variables by qualifier */
-	inline void macthLeftMaxByQualifier_V(const TQualifierIndex qualifier);
+	inline void macthLeftMaxByQualifier_V( const TQualifierIndex qualifier );
 	inline void macthLeftMaxByQualifierSaveToTable_V(
-		const TQualifierIndex qualifier);
-	inline void macthRightMaxByQualifier_V(const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
+	inline void macthRightMaxByQualifier_V( const TQualifierIndex qualifier );
 	inline void macthRightMaxByQualifierSaveToTable_V(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	/* matching E-variables by qualifier */
-	inline void macthLeftMaxByQualifier_E(const TQualifierIndex qualifier);
+	inline void macthLeftMaxByQualifier_E( const TQualifierIndex qualifier );
 	inline void macthLeftMaxByQualifierSaveToTable_E(
-		const TQualifierIndex qualifier);
-	inline void macthRightMaxByQualifier_E(const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
+	inline void macthRightMaxByQualifier_E( const TQualifierIndex qualifier );
 	inline void macthRightMaxByQualifierSaveToTable_E(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	/* match left VE-variable */
 	inline void matchLeftBegin_E();
 	inline void matchLeftBeginSaveToTable_E();
 	inline void matchLeftBegin_V();
 	inline void matchLeftBeginSaveToTable_V();
-	inline void matchLeftWithQulifierBegin_V(const TQualifierIndex qualifier);
+	inline void matchLeftWithQulifierBegin_V( const TQualifierIndex qualifier );
 	inline void matchLeftWithQulifierBeginSaveToTable_V(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	inline void matchLeft_E();
 	inline void matchLeftSaveToTable_E();
-	inline void matchLeftWithQulifier_E(const TQualifierIndex qualifier);
+	inline void matchLeftWithQulifier_E( const TQualifierIndex qualifier );
 	inline void matchLeftWithQulifierSaveToTable_E(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	/* match right VE-variable */
 	inline void matchRightBegin_E();
 	inline void matchRightBeginSaveToTable_E();
 	inline void matchRightBegin_V();
 	inline void matchRightBeginSaveToTable_V();
-	inline void matchRightWithQulifierBegin_V(const TQualifierIndex qualifier);
+	inline void matchRightWithQulifierBegin_V(
+		const TQualifierIndex qualifier );
 	inline void matchRightWithQulifierBeginSaveToTable_V(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
 	inline void matchRight_E();
 	inline void matchRightSaveToTable_E();
-	inline void matchRightWithQulifier_E(const TQualifierIndex qualifier);
+	inline void matchRightWithQulifier_E( const TQualifierIndex qualifier );
 	inline void matchRightWithQulifierSaveToTable_E(
-		const TQualifierIndex qualifier);
+		const TQualifierIndex qualifier );
+	/* making operations */
+	inline void insertChar( const TChar c );
+	inline void insertLabel( const TLabel label );
+	inline void insertNumber( const TChar c );
+	inline void insertLeftParen();
+	inline void insertRightParen();
+	inline void insertRightBracket();
+	inline void move_S( const TTableIndex tableIndex );
+	inline void copy_S( const TTableIndex tableIndex );
+	inline void move_E( const TTableIndex tableIndex );
+	inline void copy_E( const TTableIndex tableIndex );
+	inline void move_WV( const TTableIndex tableIndex );
+	inline void copy_WV( const TTableIndex tableIndex );
 	
 	CUnitList fieldOfView;
 	CUnitNode* left;
@@ -245,15 +261,15 @@ private:
 	CUnitNode** table;
 	TTableIndex tableTop;
 
-	COperation* operation;
+	COperationNode* operation;
 };
 
 inline void COperationsExecuter::nextOperation()
 {
-	operation++;
-	if( operation->type == OT_Goto ) {
+	operation = operation->Next();
+	//if( operation->type == OT_Goto ) {
 		// TODO: calc new pointer */
-	}
+	//}
 }
 
 inline bool COperationsExecuter::checkQualifier(CUnitNode* const node,
@@ -1036,6 +1052,54 @@ inline void COperationsExecuter::matchRightWithQulifierSaveToTable_E(
 	} else {
 		fail();
 	}
+}
+
+inline void COperationsExecuter::insertChar( const TChar c )
+{
+}
+
+inline void COperationsExecuter::insertLabel( const TLabel label )
+{
+}
+
+inline void COperationsExecuter::insertNumber( const TChar c )
+{
+}
+
+inline void COperationsExecuter::insertLeftParen()
+{
+}
+
+inline void COperationsExecuter::insertRightParen()
+{
+}
+
+inline void COperationsExecuter::insertRightBracket()
+{
+}
+
+inline void COperationsExecuter::move_S( const TTableIndex tableIndex )
+{
+}
+
+inline void COperationsExecuter::copy_S( const TTableIndex tableIndex )
+{
+}
+
+inline void COperationsExecuter::move_E( const TTableIndex tableIndex )
+{
+}
+
+inline void COperationsExecuter::copy_E( const TTableIndex tableIndex )
+{
+}
+
+inline void COperationsExecuter::move_WV( const TTableIndex tableIndex )
+{
+}
+
+inline void COperationsExecuter::copy_WV( const TTableIndex tableIndex )
+{
 }
 
 } // end of namespace refal2

@@ -34,11 +34,12 @@ enum TFunctionState {
 
 class CFunction {
 	friend class CFunctionCompiler;
-	friend void PrintFunction(const CFunction& function);
+	friend class COperationsExecuter;
+	friend void PrintFunction( const CFunction& function );
 
 public:
-	CFunction(TFunctionState state = FS_Declared):
-		functionState(state), firstRule(0) {}
+	CFunction( TFunctionState state = FS_Declared ):
+		functionState( state ), firstRule( 0 ) {}
 
 	TFunctionState GetFunctionState() const { return functionState; }
 	bool IsDeclared() const { return ( functionState == FS_Declared ); }
@@ -47,7 +48,8 @@ public:
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
 	
 	inline void SetDefined();
-	inline void SetParsed(CFunctionRule** firstRule);
+	inline void SetParsed( CFunctionRule** firstRule );
+	inline void SetCompiled( COperation* operation );
 	
 private:
 	TFunctionState functionState;
@@ -64,7 +66,7 @@ inline void CFunction::SetDefined()
 	functionState = FS_Defined;
 }
 
-inline void CFunction::SetParsed(CFunctionRule** _firstRule)
+inline void CFunction::SetParsed( CFunctionRule** _firstRule )
 {
 	assert( functionState == FS_Defined );
 	
@@ -72,6 +74,15 @@ inline void CFunction::SetParsed(CFunctionRule** _firstRule)
 	*_firstRule = 0;
 
 	functionState = FS_Parsed;
+}
+
+inline void CFunction::SetCompiled( COperation* operation )
+{
+	assert( functionState == FS_Parsed );
+
+	firstOperation = operation;
+
+	functionState = FS_Compiled;
 }
 
 enum TFunctionBuilderState {

@@ -5,7 +5,7 @@
 namespace Refal2 {
 
 typedef int TUint32;
-typedef int TOperationAddress;
+typedef COperation* TOperationAddress;
 typedef int TQualifierIndex;
 
 enum TOperationType {
@@ -126,11 +126,11 @@ V:Q:X = OT_MatchLeftWithQulifierBegin_V; OT_MatchLeftWithQulifier_E;
 */
 
 class COperation {
-	friend class CFirstRuleOperationsBuilder;
+	friend class COperationsBuilder;
 	friend class COperationsExecuter;
 
 private:
-	COperation( const TOperationType _type ): type( _type ) {}
+	explicit COperation( const TOperationType _type ): type( _type ) {}
 
 	TOperationType type;
 	union {
@@ -149,10 +149,11 @@ private:
 typedef CNodeList<COperation> COperationList;
 typedef COperationList::CNodeType COperationNode;
 
-class CFirstRuleOperationsBuilder {
+class COperationsBuilder {
 public:
-	CFirstRuleOperationsBuilder() {}
-	void Reset() {}
+	COperationsBuilder() { Reset(); }
+	void Reset();
+	void Export( COperationList& saveTo );
 	
 	void AddMatchingComplete();
 	void AddReturn();
@@ -221,31 +222,28 @@ public:
 	void AddCopy_WV( const TTableIndex );
 
 private:
-	virtual void addNoArgumensOperation( const TOperationType type );
-	virtual void addCharOperation( const TOperationType type, const TChar c );
-	virtual void addLabelOperation( const TOperationType type,
+	void addNoArgumensOperation( const TOperationType type );
+	void addCharOperation( const TOperationType type, const TChar c );
+	void addLabelOperation( const TOperationType type,
 		const TLabel label );
-	virtual void addNumberOperation( const TOperationType type,
+	void addNumberOperation( const TOperationType type,
 		const TNumber number );
-	virtual void addTableIndexOperation( const TOperationType type,
+	void addTableIndexOperation( const TOperationType type,
 		const TTableIndex tableIndex );
-	virtual void addQualifierIndexOperation( const TOperationType type,
+	void addQualifierIndexOperation( const TOperationType type,
 		CQualifier* qualifier );
-	virtual void addOperation_VE( const TOperationType type );
-	virtual void addOperation_VE( const TOperationType type,
+	void addOperation_VE( const TOperationType type );
+	void addOperation_VE( const TOperationType type,
 		CQualifier* qualifier );
-	virtual void addStackDecrementOperation( const TUint32 stackDecrement );
-
+	void addStackDecrementOperation( const TUint32 stackDecrement );
+	
 	TQualifierIndex registerQualifier( CQualifier* qualifier );
 	COperation* addOperation( const TOperationType type );
-
+	void addOperation( const COperation& operation );
+	
 	COperationList operations;
-};
-
-//-----------------------------------------------------------------------------
-
-class COperationsBuilder : public CFirstRuleOperationsBuilder {
-private:
+	COperationNode* savedOperation;
+	int numberOfOperations;
 };
 
 } // end of namespace refal2

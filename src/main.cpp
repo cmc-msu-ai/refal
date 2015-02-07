@@ -95,8 +95,8 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 int main(int argc, const char* argv[])
 {
 	try {
-		//const char* filename = "../tests/simple.ref";
-		const char* filename = "../tests/PROGRAM.REF";
+		const char* filename = "../tests/simple.ref";
+		//const char* filename = "../tests/PROGRAM.REF";
 
 		if( argc == 2 ) {
 			filename = argv[1];
@@ -123,6 +123,7 @@ int main(int argc, const char* argv[])
 		
 		std::cout << "\n--------------------------------------------------\n\n";
 
+		COperationList program;
 		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
 			i = LabelTable.GetNextLabel( i ) )
 		{
@@ -133,9 +134,17 @@ int main(int argc, const char* argv[])
 				CFunctionCompiler compiler;
 				compiler.Compile( function );
 				std::cout << "{END:" << LabelTable.GetLabelText( i ) << "}\n";
+				COperationNode* operation = program.GetLast();
+				compiler.Export( program );
+				operation = operation == 0 ? program.GetFirst() : operation->Next();
+				function->SetCompiled( operation );
 			}
 		}
 
+		std::cout << "\n\n----------------------------------\n\n";
+
+		COperationsExecuter executer;
+		executer.Run( LabelTable.GetFirstLabel() );
 	} catch(bool) {
 		return 1;
 	}

@@ -77,6 +77,7 @@ public:
 		CNodeType** fromNodeCopy, CNodeType** toNodeCopy );
 	
 	CNodeType* Append( const T& value );
+	void Append( CNodeList* list );
 
 private:
 	CNodeList(const CNodeList&);
@@ -284,6 +285,22 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::Append( const T& value )
 		last = first;
 	}
 	return last;
+}
+
+template<class T>
+void CNodeList<T>::Append( CNodeList* list )
+{
+	if( !list->IsEmpty() ) {
+		CNodeType* first = list->GetFirst();
+		CNodeType* last = list->GetLast();
+		list->Detach( first, last );
+		assert( list->IsEmpty() );
+		if( IsEmpty() ) {
+			Assign( first, last );
+		} else {
+			InsertAfter( GetLast(), first, last );
+		}
+	}
 }
 
 template<class T>

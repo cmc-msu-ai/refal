@@ -41,7 +41,7 @@ struct CHolesTuple {
 	explicit CHolesTuple(int _stackDepth): stackDepth(_stackDepth) {}
 };
 
-class CFunctionCompilerBase : protected COperationsBuilder {
+class CFunctionCompilerBase : public COperationsBuilder {
 protected:
 	CVariables variables;
 };
