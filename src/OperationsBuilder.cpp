@@ -528,7 +528,10 @@ void COperationsBuilder::addStackDecrementOperation(
 
 TQualifierIndex COperationsBuilder::registerQualifier( CQualifier* qualifier )
 {
-	return 0;
+	CQualifier* newQualifier = new CQualifier;
+	qualifier->Move( newQualifier );
+	return newQualifier;
+
 }
 
 COperation* COperationsBuilder::addOperation( const TOperationType type )

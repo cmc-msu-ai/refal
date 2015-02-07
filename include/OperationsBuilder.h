@@ -6,7 +6,7 @@ namespace Refal2 {
 
 typedef int TUint32;
 typedef COperation* TOperationAddress;
-typedef int TQualifierIndex;
+typedef CQualifier* TQualifierIndex;
 
 enum TOperationType {
 	OT_Goto, /* TOperationAddress */
