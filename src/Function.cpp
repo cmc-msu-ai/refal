@@ -12,7 +12,7 @@ void PrintRule(const CFunctionRule& rule)
 	printf(" ");
 	PrintUnitList( rule.leftPart, &rule.variables );
 	printf("= ");
-	PrintUnitList( rule.rightPart, &rule.variables );
+	PrintUnitList( rule.rightPart );
 }
 
 void PrintFunction(const CFunction& function)
