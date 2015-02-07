@@ -17,33 +17,31 @@ void CVariables::Reset()
 	variablesValuesSize = 0;
 }
 
-void CVariables::Import(CVariablesBuilder* variablesBuiler)
+void CVariables::Import( CVariablesBuilder* variablesBuiler )
 {
 	Reset();
-
 	if( variablesBuiler->countOfVariables > 0 ) {
 		variablesSize = variablesBuiler->countOfVariables;
 		variables = static_cast<CVariable*>(
-			::operator new( variablesSize * sizeof(CVariable) ) );
+			::operator new( variablesSize * sizeof( CVariable ) ) );
 
 		variablesValuesSize = 0;
-		for( int i = 0, j = 0; i < CVariablesBuilder::variablesInfoSize; i++ ) {
+		for( int i = 0; i < CVariablesBuilder::variablesInfoSize; i++ ) {
 			CVariablesBuilder::CVariableInfo& variableInfo =
 				variablesBuiler->variables[i];
 
 			if( variableInfo.type != InvalidVariableType ) {
 				int countOfValues =
 					std::min( variableInfo.countLeft, variableInfo.countRight );
-				new( variables + j )CVariable( variableInfo.type,
-					variablesValuesSize, countOfValues );
+				new( variables + variableInfo.name )CVariable(
+					variableInfo.type, variablesValuesSize, countOfValues );
 				variablesValuesSize += countOfValues;
 
-				variableInfo.qualifier.Move( &variables[j].qualifier );
-				j++;
+				variableInfo.qualifier.Move(
+					&variables[variableInfo.name].qualifier );
 			}
 		}
 	}
-
 	variablesBuiler->Reset();
 }
 
