@@ -61,6 +61,7 @@ void CParser::ProcessLexem()
 			if( lexem == L_NewLine || lexem == L_EndOfFile ) {
 				state = PS_Begin;
 				addEndOfFunction(); // action
+				addDeclarationOfFunction( storedName ); // action
 			} else if( lexem == L_Blank ) {
 				state = PS_BeginIdentBlank;
 			} else {
