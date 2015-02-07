@@ -314,29 +314,29 @@ bool COperationsExecuter::doOperation()
 			break;
 		/* matching V-variables by qualifier */
 		case OT_MacthLeftMaxByQualifier_V: /* TQualifierIndex */
-			assert( false );
+			macthLeftMaxByQualifier_V( operation->qualifier );
 			break;
 		case OT_MacthLeftMaxByQualifierSaveToTable_V: /* TQualifierIndex */
-			assert( false );
+			macthLeftMaxByQualifierSaveToTable_V( operation->qualifier );
 			break;
 		case OT_MacthRightMaxByQualifier_V: /* TQualifierIndex */
-			assert( false );
+			macthRightMaxByQualifier_V( operation->qualifier );
 			break;
 		case OT_MacthRightMaxByQualifierSaveToTable_V: /* TQualifierIndex */
-			assert( false );
+			macthRightMaxByQualifierSaveToTable_V( operation->qualifier );
 			break;
 		/* matching E-variables by qualifier */
 		case OT_MacthLeftMaxByQualifier_E: /* TQualifierIndex */
-			assert( false );
+			macthLeftMaxByQualifier_E( operation->qualifier );
 			break;
 		case OT_MacthLeftMaxByQualifierSaveToTable_E: /* TQualifierIndex */
-			assert( false );
+			macthLeftMaxByQualifierSaveToTable_E( operation->qualifier );
 			break;
 		case OT_MacthRightMaxByQualifier_E: /* TQualifierIndex */
-			assert( false );
+			macthRightMaxByQualifier_E( operation->qualifier );
 			break;
 		case OT_MacthRightMaxByQualifierSaveToTable_E: /* TQualifierIndex */
-			assert( false );
+			macthRightMaxByQualifierSaveToTable_E( operation->qualifier );
 			break;
 		/* match left VE-variable */
 		case OT_MatchLeftBegin_E:
