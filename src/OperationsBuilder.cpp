@@ -27,9 +27,9 @@ void COperationsBuilder::AddReturn()
 {
 	std::cout << "COperationsBuilder::AddReturn\n";
 	addNoArgumensOperation( OT_Return );
-	if( savedOperation = 0 ) {
+	if( savedOperation != 0 ) {
 		operations.InsertBefore( operations.GetFirst(),
-			COperation( OT_InsertJump ) )->operation = savedOperation->Next();
+			COperation( OT_InsertJump ) )->operation = savedOperation;
 	}
 	savedOperation = operations.GetLast();
 }

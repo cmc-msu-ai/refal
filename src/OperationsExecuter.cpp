@@ -586,36 +586,166 @@ void CExecuter::Run(COperation* operation, CUnitNode* first, CUnitNode* last)
 
 // ---------------------------------------------------------------------------
 
-COperationsExecuter::COperationsExecuter()
+COperationsExecuter::COperationsExecuter():
+	left( 0 ),
+	right( 0 ),
+	tableTop( 0 ),
+	operation( 0 ),
+	stackTop( 0 ),
+	lastAddedLeftParen( 0 ),
+	lastAddedLeftBracket( 0 ),
+	initialLeftBracket( CUnit( UT_LeftBracket ) )
 {
 }
+
+static const char* operationNames[] = {
+	"OT_Goto",
+	"OT_InsertJump",
+	"OT_MatchingComplete",
+	"OT_Return",
+	"OT_SetLeftBorder",
+	"OT_SetRightBorder",
+	"OT_DecrementStackDepth",
+	"OT_MatchEmptyExpression",
+	"OT_MatchLeftChar",
+	"OT_MatchLeftLabel",
+	"OT_MatchLeftNumber",
+	"OT_MatchRightChar",
+	"OT_MatchRightLabel",
+	"OT_MatchRightNumber",
+	"OT_MatchLeftParens",
+	"OT_MatchRightParens",
+	"OT_MatchLeft_S",
+	"OT_MatchLeftSaveToTable_S",
+	"OT_MatchLeftWithQualifier_S",
+	"OT_MatchLeftWithQualifierSaveToTable_S",
+	"OT_MatchRight_S",
+	"OT_MatchRightSaveToTable_S",
+	"OT_MatchRightWithQualifier_S",
+	"OT_MatchRightWithQualifierSaveToTable_S",
+	"OT_MatchLeftDuplicate_S",
+	"OT_MatchLeftDuplicateSaveToTable_S",
+	"OT_MatchRightDuplicate_S",
+	"OT_MatchRightDuplicateSaveToTable_S",
+	"OT_MatchLeft_W",
+	"OT_MatchLeftSaveToTable_W",
+	"OT_MatchLeftWithQualifier_W",
+	"OT_MatchLeftWithQualifierSaveToTable_W",
+	"OT_MatchRight_W",
+	"OT_MatchRightSaveToTable_W",
+	"OT_MatchRightWithQualifier_W",
+	"OT_MatchRightWithQualifierSaveToTable_W",
+	"OT_MatchLeftDuplicate_WV",
+	"OT_MatchLeftDuplicateSaveToTable_WV",
+	"OT_MatchRightDuplicate_WV",
+	"OT_MatchRightDuplicateSaveToTable_WV",
+	"OT_MatchLeftDuplicate_E",
+	"OT_MatchLeftDuplicateSaveToTable_E",
+	"OT_MatchRightDuplicate_E",
+	"OT_MatchRightDuplicateSaveToTable_E",
+	"OT_MatchClosed_V",
+	"OT_MatchClosedSaveToTable_V",
+	"OT_MatchClosedWithQualifier_V",
+	"OT_MatchClosedWithQualifierSaveToTable_V",
+	"OT_MatchClosed_E",
+	"OT_MatchClosedSaveToTable_E",
+	"OT_MatchClosedWithQualifier_E",
+	"OT_MatchClosedWithQualifierSaveToTable_E",
+	"OT_MacthLeftMaxByQualifier_V",
+	"OT_MacthLeftMaxByQualifierSaveToTable_V",
+	"OT_MacthRightMaxByQualifier_V",
+	"OT_MacthRightMaxByQualifierSaveToTable_V",
+	"OT_MacthLeftMaxByQualifier_E",
+	"OT_MacthLeftMaxByQualifierSaveToTable_E",
+	"OT_MacthRightMaxByQualifier_E",
+	"OT_MacthRightMaxByQualifierSaveToTable_E",
+	"OT_MatchLeftBegin_E",
+	"OT_MatchLeftBeginSaveToTable_E",
+	"OT_MatchLeftBegin_V",
+	"OT_MatchLeftBeginSaveToTable_V",
+	"OT_MatchLeftWithQulifierBegin_V",
+	"OT_MatchLeftWithQulifierBeginSaveToTable_V",
+	"OT_MatchLeft_E",
+	"OT_MatchLeftSaveToTable_E",
+	"OT_MatchLeftWithQulifier_E",
+	"OT_MatchLeftWithQulifierSaveToTable_E",
+	"OT_MatchRightBegin_E",
+	"OT_MatchRightBeginSaveToTable_E",
+	"OT_MatchRightBegin_V",
+	"OT_MatchRightBeginSaveToTable_V",
+	"OT_MatchRightWithQulifierBegin_V",
+	"OT_MatchRightWithQulifierBeginSaveToTable_V",
+	"OT_MatchRight_E",
+	"OT_MatchRightSaveToTable_E",
+	"OT_MatchRightWithQulifier_E",
+	"OT_MatchRightWithQulifierSaveToTable_E",
+	"OT_InsertChar",
+	"OT_InsertLabel",
+	"OT_InsertNumber",
+	"OT_InsertLeftParen",
+	"OT_InsertRightParen",
+	"OT_InsertRightBracket",
+	"OT_Move_S",
+	"OT_Copy_S",
+	"OT_Move_E",
+	"OT_Copy_E",
+	"OT_Move_WV",
+	"OT_Copy_WV"
+};
 
 void COperationsExecuter::Run( const TLabel entry )
 {
-	operation = static_cast<COperationNode*>(
-		LabelTable.GetLabelFunction( entry )->firstOperation );
+	fieldOfView.Empty();
+	left = fieldOfView.Append( CUnit( UT_LeftBracket ) );
+	left->PairedParen() = 0;
+	fieldOfView.Append( CUnit( UT_Label ) )->Label() = entry;
+	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
+	right->PairedParen() = left;
+	initialLeftBracket.PairedParen() = right;
+
+	while( initialLeftBracket.PairedParen() != 0 ) {
+		right = initialLeftBracket.PairedParen();
+		left = right->PairedParen()->Next();
+		operation = static_cast<COperationNode*>(
+			LabelTable.GetLabelFunction( left->Label() )->firstOperation );
+		tableTop = 0;
+		stackTop = 0;
+		lastAddedLeftParen = 0;
+		lastAddedLeftBracket = &initialLeftBracket;
+		initialLeftBracket.PairedParen() = 0;
+		saveToTable( left, right );
+		while( !doOperation() ) {
+			nextOperation();
+		}
+	}
+
+	std::cout << "\n\n\n-----------------------------------------\n\n";
+	PrintUnitList( fieldOfView );
+	std::cout << "\n\n\n-----------------------------------------\n\n";
 }
 
-void COperationsExecuter::doOperation()
+bool COperationsExecuter::doOperation()
 {
+	std::cout << operationNames[operation->type] << "\n";
 	switch( operation->type ) {
 		case OT_Goto: /* TOperationAddress */
 			assert( false );
 			break;
 		case OT_InsertJump: /* TOperationAddress */
-			assert( false );
+			insertJump( operation->operation );
 			break;
 		case OT_MatchingComplete:
-			assert( false );
+			matchingComplete();
 			break;
 		case OT_Return:
-			assert( false );
+			doReturn();
+			return true;
 			break;
 		case OT_SetLeftBorder: /* TTableIndex */
-			assert( false );
+			setLeftBorder( operation->tableIndex );
 			break;
 		case OT_SetRightBorder: /* TTableIndex */
-			assert( false );
+			setRightBorder( operation->tableIndex );
 			break;
 		case OT_DecrementStackDepth: /* TUint32 */
 			assert( false );
@@ -894,6 +1024,7 @@ void COperationsExecuter::doOperation()
 			assert( false );
 			break;
 	}
+	return false;
 }
 
 } // end of namespace refal2

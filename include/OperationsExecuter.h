@@ -117,7 +117,7 @@ private:
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
 	
-	void doOperation();
+	bool doOperation();
 	inline void nextOperation();
 	
 	inline bool checkQualifier( CUnitNode* const node,
@@ -131,13 +131,17 @@ private:
 	inline bool shiftLeft();
 	inline bool shiftRight();
 
-	inline void saveState();
+	inline void saveState( COperationNode* operation );
+	void saveState() { saveState( operation ); }
 	inline void fail();
+	
+	inline void matchingComplete();
+	inline void doReturn();
+	inline void insertJump( const TOperationAddress operationAddress );
 	
 	inline void setLeftBorder( const TTableIndex tableIndex );
 	inline void setRightBorder( const TTableIndex tableIndex );
 	
-	inline void checkNotEmpty();
 	/* matching empty expression */
 	inline void matchEmptyExpression();
 	/* matching symbols */
@@ -243,7 +247,7 @@ private:
 	/* making operations */
 	inline void insertChar( const TChar c );
 	inline void insertLabel( const TLabel label );
-	inline void insertNumber( const TChar c );
+	inline void insertNumber( const TNumber number );
 	inline void insertLeftParen();
 	inline void insertRightParen();
 	inline void insertRightBracket();
@@ -258,10 +262,23 @@ private:
 	CUnitNode* left;
 	CUnitNode* right;
 	
-	CUnitNode** table;
+	CUnitNode* table[4096];
 	TTableIndex tableTop;
 
 	COperationNode* operation;
+
+	struct CStackData {
+		CUnitNode* left;
+		CUnitNode* right;
+		TTableIndex tableTop;
+		COperationNode* operation;
+	};
+	CStackData stack[128];
+	int stackTop;
+	
+	CUnitNode* lastAddedLeftParen;
+	CUnitNode* lastAddedLeftBracket;
+	CUnitNode initialLeftBracket;
 };
 
 inline void COperationsExecuter::nextOperation()
@@ -282,6 +299,9 @@ inline void COperationsExecuter::saveToTable(CUnitNode* const node)
 {
 	table[tableTop] = node;
 	tableTop++;
+	if( node != 0 ) {
+		PrintUnit( *node );
+	}
 }
 
 inline void COperationsExecuter::saveToTable(CUnitNode* const nodeA,
@@ -289,6 +309,9 @@ inline void COperationsExecuter::saveToTable(CUnitNode* const nodeA,
 {
 	saveToTable( nodeA );
 	saveToTable( nodeB );
+	if( nodeA != 0 && nodeB != 0 ) {
+		PrintUnitList( nodeA, nodeB, 0 );
+	}
 }
 
 inline bool COperationsExecuter::isEmpty() const
@@ -308,14 +331,42 @@ inline bool COperationsExecuter::shiftRight()
 	return ( left != right );
 }
 
-inline void COperationsExecuter::saveState()
+inline void COperationsExecuter::saveState( COperationNode* operation )
 {
-	// TODO: save state
+	stack[stackTop].left = left;
+	stack[stackTop].right = right;
+	stack[stackTop].tableTop = tableTop;
+	stack[stackTop].operation = operation;
+	stackTop++;
 }
 
 inline void COperationsExecuter::fail()
 {
-	// TODO: fail
+	if( stackTop == 0 ) {
+		assert( false );
+	} else {
+		stackTop--;
+		left = stack[stackTop].left;
+		right = stack[stackTop].right;
+		tableTop = stack[stackTop].tableTop;
+		operation = stack[stackTop].operation;
+	}
+}
+
+inline void COperationsExecuter::matchingComplete()
+{
+	left = table[1];
+}
+
+inline void COperationsExecuter::doReturn()
+{
+	fieldOfView.Remove( table[0]->Prev(), table[1] );
+}
+
+inline void COperationsExecuter::insertJump(
+	const TOperationAddress operationAddress )
+{
+	saveState( static_cast<COperationNode*>( operationAddress ) );
 }
 
 inline void COperationsExecuter::setLeftBorder(const TTableIndex tableIndex)
@@ -331,13 +382,6 @@ inline void COperationsExecuter::setRightBorder(const TTableIndex tableIndex)
 inline void COperationsExecuter::matchEmptyExpression()
 {
 	if( !isEmpty() ) {
-		fail();
-	}
-}
-
-inline void COperationsExecuter::checkNotEmpty()
-{
-	if( isEmpty() ) {
 		fail();
 	}
 }
@@ -508,18 +552,26 @@ inline void COperationsExecuter::matchRightDuplicateSaveToTable_S(
 
 inline void COperationsExecuter::matchLeft_W()
 {
-	if( shiftLeft() && left->IsParen() ) {
+	if( !shiftLeft() ) {
+		fail();
+		return;
+	}
+	if( left->IsParen() ) {
 		left = left->PairedParen();
 	}
 }
 
 inline void COperationsExecuter::matchLeftSaveToTable_W()
 {
-	if( shiftLeft() && left->IsParen() ) {
-		saveToTable( left );
-		left = left->PairedParen();
-		saveToTable( left );
+	if( !shiftLeft() ) {
+		fail();
+		return;
 	}
+	saveToTable( left );
+	if( left->IsParen() ) {
+		left = left->PairedParen();
+	}
+	saveToTable( left );
 }
 
 inline void COperationsExecuter::matchLeftWithQualifier_W(
@@ -544,24 +596,32 @@ inline void COperationsExecuter::matchLeftWithQualifierSaveToTable_W(
 	saveToTable( left );
 	if( left->IsParen() ) {
 		left = left->PairedParen();
-		saveToTable( left );
 	}
+	saveToTable( left );
 }
 
 inline void COperationsExecuter::matchRight_W()
 {
-	if( shiftRight() && left->IsParen() ) {
-		left = left->PairedParen();
+	if( !shiftRight() ) {
+		fail();
+		return;
+	}
+	if( right->IsParen() ) {
+		right = right->PairedParen();
 	}
 }
 
 inline void COperationsExecuter::matchRightSaveToTable_W()
 {
-	if( shiftRight() && right->IsParen() ) {
-		saveToTable( right );
-		right = right->PairedParen();
-		saveToTable( right );
+	if( !shiftRight() ) {
+		fail();
+		return;
 	}
+	saveToTable( right );
+	if( right->IsParen() ) {
+		right = right->PairedParen();
+	}
+	saveToTable( right );
 }
 
 inline void COperationsExecuter::matchRightWithQualifier_W(
@@ -586,8 +646,8 @@ inline void COperationsExecuter::matchRightWithQualifierSaveToTable_W(
 	saveToTable( right );
 	if( right->IsParen() ) {
 		right = right->PairedParen();
-		saveToTable( right );
 	}
+	saveToTable( right );
 }
 
 inline void COperationsExecuter::matchLeftDuplicate_WV(
@@ -1056,50 +1116,82 @@ inline void COperationsExecuter::matchRightWithQulifierSaveToTable_E(
 
 inline void COperationsExecuter::insertChar( const TChar c )
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_Char ) );
+	left->Char() = c;
 }
 
 inline void COperationsExecuter::insertLabel( const TLabel label )
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_Label ) );
+	left->Label() = label;
 }
 
-inline void COperationsExecuter::insertNumber( const TChar c )
+inline void COperationsExecuter::insertNumber( const TNumber number )
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_Number ) );
+	left->Number() = number;
 }
 
 inline void COperationsExecuter::insertLeftParen()
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_LeftParen ) );
+	left->PairedParen() = lastAddedLeftParen;
+	lastAddedLeftParen = left;
 }
 
 inline void COperationsExecuter::insertRightParen()
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_RightParen ) );
+	CUnitNode* leftParen = lastAddedLeftParen;
+	lastAddedLeftParen = lastAddedLeftParen->PairedParen();
+	left->PairedParen() = leftParen;
+	leftParen->PairedParen() = left;
 }
 
 inline void COperationsExecuter::insertRightBracket()
 {
+	left = fieldOfView.InsertAfter( left, CUnit( UT_RightBracket ) );
+	CUnitNode* leftBracket = lastAddedLeftParen;
+	lastAddedLeftParen = lastAddedLeftParen->PairedParen();
+	left->PairedParen() = leftBracket;
+	lastAddedLeftBracket->PairedParen() = left;
+	lastAddedLeftBracket = leftBracket;
 }
 
 inline void COperationsExecuter::move_S( const TTableIndex tableIndex )
 {
+	left = fieldOfView.Move( left, table[tableIndex] );
 }
 
 inline void COperationsExecuter::copy_S( const TTableIndex tableIndex )
 {
+	left = fieldOfView.Copy( left, table[tableIndex] );
 }
 
 inline void COperationsExecuter::move_E( const TTableIndex tableIndex )
 {
+	if( table[tableIndex] != 0 ) {
+		left = fieldOfView.Move( left, table[tableIndex],
+			table[tableIndex + 1] );
+	}
 }
 
 inline void COperationsExecuter::copy_E( const TTableIndex tableIndex )
 {
+	if( table[tableIndex] != 0 ) {
+		left = fieldOfView.Move( left, table[tableIndex],
+			table[tableIndex + 1] );
+	}
 }
 
 inline void COperationsExecuter::move_WV( const TTableIndex tableIndex )
 {
+	left = fieldOfView.Move( left, table[tableIndex], table[tableIndex + 1] );
 }
 
 inline void COperationsExecuter::copy_WV( const TTableIndex tableIndex )
 {
+	left = fieldOfView.Move( left, table[tableIndex], table[tableIndex + 1] );
 }
 
 } // end of namespace refal2
