@@ -58,7 +58,8 @@ public:
 	
 	CNodeType* InsertAfter( CNodeType* nodeAfter, const T& value );
 	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeType* node );
-	void InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
+	// return last inserted node
+	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
 		CNodeType* toNode );
 	
 	void Detach( CNodeType* node ) { Detach( node, node ); }
@@ -67,11 +68,15 @@ public:
 	void Remove( CNodeType* node) { Detach( node ); free( node ); }
 	void Remove( CNodeType* fromNode, CNodeType* toNode );
 	
-	void Move( CNodeType* nodeAfter, CNodeType* node );
-	void Move( CNodeType* nodeAfter, CNodeType* fromNode, CNodeType* toNode );
+	CNodeType* Move( CNodeType* nodeAfter, CNodeType* node );
+	// return last moved node
+	CNodeType* Move( CNodeType* nodeAfter, CNodeType* fromNode,
+		CNodeType* toNode );
 	
-	void Copy( CNodeType* nodeAfter, CNodeType* node );
-	void Copy( CNodeType* nodeAfter, CNodeType* fromNode, CNodeType* toNode );
+	CNodeType* Copy( CNodeType* nodeAfter, CNodeType* node );
+	// return last copy node
+	CNodeType* Copy( CNodeType* nodeAfter, CNodeType* fromNode,
+		CNodeType* toNode );
 	
 	static void Duplicate( const CNodeType* fromNode, const CNodeType* toNode,
 		CNodeType** fromNodeCopy, CNodeType** toNodeCopy );
@@ -80,8 +85,8 @@ public:
 	void Append( CNodeList* list );
 
 private:
-	CNodeList(const CNodeList&);
-	CNodeList& operator=(const CNodeList&);
+	CNodeList( const CNodeList& );
+	CNodeList& operator=( const CNodeList& );
 
 	static CNodeType* alloc( const T& value );
 	static void free( CNodeType* node );
@@ -176,12 +181,12 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	CNodeType* nodeAfter, CNodeType* node )
 {
-	InsertAfter( nodeAfter, node, node ); return node;
+	return InsertAfter( nodeAfter, node, node );
 }
 
 template<class T>
-void CNodeList<T>::InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
-	CNodeType* toNode )
+typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
+	CNodeType* nodeAfter, CNodeType* fromNode, CNodeType* toNode )
 {
 	Detach( fromNode, toNode );
 
@@ -193,6 +198,7 @@ void CNodeList<T>::InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
 		nodeAfter->next->prev = toNode;
 	}
 	nodeAfter->next = fromNode;
+	return toNode;
 }
 
 template<class T>
@@ -228,32 +234,34 @@ void CNodeList<T>::Remove( CNodeType* fromNode, CNodeType* toNode )
 }
 
 template<class T>
-void CNodeList<T>::Move( CNodeType* nodeAfter, CNodeType* node )
+typename CNodeList<T>::CNodeType* CNodeList<T>::Move( CNodeType* nodeAfter,
+	CNodeType* node )
 {
-	InsertAfter( nodeAfter, node );
+	return InsertAfter( nodeAfter, node );
 }
 
 template<class T>
-void CNodeList<T>::Move( CNodeType* nodeAfter, CNodeType* fromNode,
-	CNodeType* toNode )
+typename CNodeList<T>::CNodeType* CNodeList<T>::Move( CNodeType* nodeAfter,
+	CNodeType* fromNode, CNodeType* toNode )
 {
-	InsertAfter( nodeAfter, fromNode, toNode );
+	return InsertAfter( nodeAfter, fromNode, toNode );
 }
 
 template<class T>
-void CNodeList<T>::Copy( CNodeType* nodeAfter, CNodeType* node )
+typename CNodeList<T>::CNodeType* CNodeList<T>::Copy( CNodeType* nodeAfter,
+	CNodeType* node )
 {
-	Copy( nodeAfter, node, node );
+	return Copy( nodeAfter, node, node );
 }
 
 template<class T>
-void CNodeList<T>::Copy( CNodeType* nodeAfter, CNodeType* fromNode,
-	CNodeType* toNode )
+typename CNodeList<T>::CNodeType* CNodeList<T>::Copy( CNodeType* nodeAfter,
+	CNodeType* fromNode, CNodeType* toNode )
 {
 	CNodeType* fromNodeCopy = 0;
 	CNodeType* toNodeCopy = 0;
 	Duplicate( fromNode, toNode, &fromNodeCopy, &toNodeCopy );
-	InsertAfter( nodeAfter, fromNodeCopy, toNodeCopy );
+	return InsertAfter( nodeAfter, fromNodeCopy, toNodeCopy );
 }
 
 template<class T>
