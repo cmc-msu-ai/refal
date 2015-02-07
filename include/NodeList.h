@@ -79,7 +79,7 @@ public:
 		CNodeType* toNode );
 	
 	static void Duplicate( const CNodeType* fromNode, const CNodeType* toNode,
-		CNodeType** fromNodeCopy, CNodeType** toNodeCopy );
+		CNodeType*& fromNodeCopy, CNodeType*& toNodeCopy );
 	
 	CNodeType* Append( const T& value );
 	void Append( CNodeList* list );
@@ -115,6 +115,7 @@ template<class T>
 inline typename CNodeList<T>::CNodeType* CNodeList<T>::DetachFirst()
 {
 	CNodeType* detachedNode = GetFirst();
+	assert( detachedNode != 0 );
 	Detach( detachedNode );
 	return detachedNode;
 }
@@ -123,6 +124,7 @@ template<class T>
 inline typename CNodeList<T>::CNodeType* CNodeList<T>::DetachLast()
 {
 	CNodeType* detachedNode = GetLast();
+	assert( detachedNode != 0 );
 	Detach( detachedNode );
 	return detachedNode;
 }
@@ -131,13 +133,14 @@ template<class T>
 CNodeList<T>::CNodeList( CNodeType* _first, CNodeType* _last ):
 	first( _first ), last( _last )
 {
-	assert( _first != 0 && _last != 0 );
+	assert( first != 0 && last != 0 );
 }
 
 template<class T>
 void CNodeList<T>::Assign( CNodeType* _first, CNodeType* _last )
 {
 	Empty();
+	assert( _first != 0 && _last != 0 );
 	first = _first;
 	last = _last;
 }
@@ -156,8 +159,8 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertBefore(
 	CNodeType* nodeBefore, const T& value )
 {
+	assert( nodeBefore != 0 );
 	CNodeType* newNode = alloc( value );
-	
 	newNode->next = nodeBefore;
 	newNode->prev = nodeBefore->prev;
 	if( nodeBefore == first ) {
@@ -188,6 +191,7 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	CNodeType* nodeAfter, CNodeType* fromNode, CNodeType* toNode )
 {
+	assert( nodeAfter != 0 );
 	Detach( fromNode, toNode );
 
 	toNode->next = nodeAfter->next;
@@ -204,6 +208,7 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 template<class T>
 void CNodeList<T>::Detach( CNodeType* fromNode, CNodeType* toNode )
 {
+	assert( fromNode != 0 && toNode != 0 );
 	if( fromNode->prev != 0 ) {
 		fromNode->prev->next = toNode->next;
 	}
@@ -260,27 +265,23 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::Copy( CNodeType* nodeAfter,
 {
 	CNodeType* fromNodeCopy = 0;
 	CNodeType* toNodeCopy = 0;
-	Duplicate( fromNode, toNode, &fromNodeCopy, &toNodeCopy );
+	Duplicate( fromNode, toNode, fromNodeCopy, toNodeCopy );
 	return InsertAfter( nodeAfter, fromNodeCopy, toNodeCopy );
 }
 
 template<class T>
 void CNodeList<T>::Duplicate( const CNodeType* fromNode,
-	const CNodeType* toNode, CNodeType** fromNodeCopy, CNodeType** toNodeCopy )
+	const CNodeType* toNode, CNodeType*& fromNodeCopy, CNodeType*& toNodeCopy )
 {
-	CNodeType* tmpFirst = alloc( *fromNode );
-	CNodeType* tmpLast = tmpFirst;
-	
+	assert( fromNode != 0 && toNode != 0 );
+	fromNodeCopy = alloc( *fromNode );
+	toNodeCopy = fromNodeCopy;
 	while( fromNode != toNode ) {
 		fromNode = fromNode->next;
-		
-		tmpLast->next = alloc( *fromNode );
-		tmpLast->next->prev = tmpLast;
-		tmpLast = tmpLast->next;
+		toNodeCopy->next = alloc( *fromNode );
+		toNodeCopy->next->prev = toNodeCopy;
+		toNodeCopy = toNodeCopy->next;
 	}
-	
-	*fromNodeCopy = tmpFirst;
-	*toNodeCopy = tmpLast;
 }
 
 template<class T>
@@ -314,7 +315,9 @@ void CNodeList<T>::Append( CNodeList* list )
 template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::alloc( const T& value )
 {
-	return new CNodeType( value );
+	CNodeType* newNode = new CNodeType( value );
+	assert( newNode != 0 );
+	return newNode;
 }
 
 template<class T>
