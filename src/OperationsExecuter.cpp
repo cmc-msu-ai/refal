@@ -117,14 +117,13 @@ void COperationsExecuter::Run( const TLabel entry )
 	fieldOfView.Append( CUnit( UT_Label ) )->Label() = entry;
 	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
 	right->PairedParen() = left;
-
-	CUnitNode* initialLeftBracketPtr = new CUnitNode( CUnit( UT_LeftParen ) );
-	CUnitNode& initialLeftBracket = *initialLeftBracketPtr;
+	
+	CUnitNode initialLeftBracket = CUnitNode( CUnit( UT_LeftBracket ) );
 	initialLeftBracket.PairedParen() = right;
 	while( initialLeftBracket.PairedParen() != 0 ) {
 		doFunction( initialLeftBracket );
 	}
-
+	
 	std::cout << "\n\n\n-----------------------------------------\n\n";
 	PrintUnitList( fieldOfView );
 	std::cout << "\n\n-----------------------------------------\n\n";
@@ -136,16 +135,23 @@ void COperationsExecuter::doFunction( CUnitNode& initialLeftBracket )
 	left = right->PairedParen();
 	CUnitNode* savedNextRightBracket = left->PairedParen();
 	left = left->Next();
-
 	const CFunction& function = LabelTable.GetLabelFunction( left->Label() );
-	operation = static_cast<COperationNode*>( function.firstOperation );
-	tableTop = 0;
-	stackTop = 0;
-	lastAddedLeftParen = 0;
-	lastAddedLeftBracket = &initialLeftBracket;
-	initialLeftBracket.PairedParen() = 0;
-	saveToTable( left, right );
-	doFunctionBody();
+	if( function.IsCompiled() ) {
+		operation = static_cast<COperationNode*>( function.firstOperation );
+		tableTop = 0;
+		stackTop = 0;
+		lastAddedLeftParen = 0;
+		lastAddedLeftBracket = &initialLeftBracket;
+		initialLeftBracket.PairedParen() = 0;
+		saveToTable( left, right );
+		doFunctionBody();
+	} else if( function.IsExtern() ) {
+		// TODO: execute extern
+	} else if( function.IsEmpty() ) {
+		// TODO: error, can't execute empty function
+	} else {
+		assert( false );
+	}
 	lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
 }
 
