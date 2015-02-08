@@ -122,22 +122,7 @@ void COperationsExecuter::Run( const TLabel entry )
 	CUnitNode& initialLeftBracket = *initialLeftBracketPtr;
 	initialLeftBracket.PairedParen() = right;
 	while( initialLeftBracket.PairedParen() != 0 ) {
-		right = initialLeftBracket.PairedParen();
-		left = right->PairedParen();
-		CUnitNode* savedNextRightBracket = left->PairedParen();
-		left = left->Next();
-		operation = static_cast<COperationNode*>(
-			LabelTable.GetLabelFunction( left->Label() )->firstOperation );
-		tableTop = 0;
-		stackTop = 0;
-		lastAddedLeftParen = 0;
-		lastAddedLeftBracket = &initialLeftBracket;
-		initialLeftBracket.PairedParen() = 0;
-		saveToTable( left, right );
-		while( !doOperation() ) {
-			nextOperation();
-		}
-		lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
+		doFunction( initialLeftBracket );
 	}
 
 	std::cout << "\n\n\n-----------------------------------------\n\n";
@@ -145,306 +130,353 @@ void COperationsExecuter::Run( const TLabel entry )
 	std::cout << "\n\n-----------------------------------------\n\n";
 }
 
-bool COperationsExecuter::doOperation()
+void COperationsExecuter::doFunction( CUnitNode& initialLeftBracket )
 {
-	std::cout << operationNames[operation->type] << "\n";
-	switch( operation->type ) {
-		case OT_Goto: /* TOperationAddress */
-			assert( false );
-			break;
-		case OT_InsertJump: /* TOperationAddress */
-			insertJump( operation->operation );
-			break;
-		case OT_MatchingComplete:
-			matchingComplete();
-			break;
-		case OT_Return:
-			doReturn();
-			return true;
-			break;
-		case OT_SetLeftBorder: /* TTableIndex */
-			setLeftBorder( operation->tableIndex );
-			break;
-		case OT_SetRightBorder: /* TTableIndex */
-			setRightBorder( operation->tableIndex );
-			break;
-		case OT_DecrementStackDepth: /* TUint32 */
-			assert( false );
-			break;
-		/* matching empty expression */
-		case OT_MatchEmptyExpression:
-			matchEmptyExpression();
-			break;
-		/* matching symbols */
-		case OT_MatchLeftChar: /* TChar */
-			matchLeftChar( operation->c );
-			break;
-		case OT_MatchLeftLabel: /* TLabel */
-			matchLeftLabel( operation->label );
-			break;
-		case OT_MatchLeftNumber: /* TNumber */
-			matchLeftNumber( operation->number );
-			break;
-		case OT_MatchRightChar: /* TChar */
-			matchRightChar( operation->c );
-			break;
-		case OT_MatchRightLabel: /* TLabel */
-			matchRightLabel( operation->label );
-			break;
-		case OT_MatchRightNumber: /* TNumber */
-			matchRightNumber( operation->number );
-			break;
-		/* matching parens */
-		case OT_MatchLeftParens:
-			matchLeftParens();
-			break;
-		case OT_MatchRightParens:
-			matchRightParens();
-			break;
-		/* matching S-variables */
-		case OT_MatchLeft_S:
-			matchLeft_S();
-			break;
-		case OT_MatchLeftSaveToTable_S:
-			matchLeftSaveToTable_S();
-			break;
-		case OT_MatchLeftWithQualifier_S: /* TQualifierIndex */
-			matchLeftWithQualifier_S( operation->qualifier );
-			break;
-		case OT_MatchLeftWithQualifierSaveToTable_S: /* TQualifierIndex */
-			matchLeftWithQualifierSaveToTable_S( operation->qualifier );
-			break;
-		case OT_MatchRight_S:
-			matchRight_S();
-			break;
-		case OT_MatchRightSaveToTable_S:
-			matchRightSaveToTable_S();
-			break;
-		case OT_MatchRightWithQualifier_S: /* TQualifierIndex */
-			matchRightWithQualifier_S( operation->qualifier );
-			break;
-		case OT_MatchRightWithQualifierSaveToTable_S: /* TQualifierIndex */
-			matchRightWithQualifierSaveToTable_S( operation->qualifier );
-			break;
-		/* matching duplicate of S-variables */
-		case OT_MatchLeftDuplicate_S: /* TTableIndex */
-			matchLeftDuplicate_S( operation->tableIndex );
-			break;
-		case OT_MatchLeftDuplicateSaveToTable_S: /* TTableIndex */
-			matchLeftDuplicateSaveToTable_S( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicate_S: /* TTableIndex */
-			matchRightDuplicate_S( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicateSaveToTable_S: /* TTableIndex */
-			matchRightDuplicateSaveToTable_S( operation->tableIndex );
-			break;
-		/* matching W-variables */
-		case OT_MatchLeft_W:
-			matchLeft_W();
-			break;
-		case OT_MatchLeftSaveToTable_W:
-			matchLeftSaveToTable_W();
-			break;
-		case OT_MatchLeftWithQualifier_W: /* TQualifierIndex */
-			matchLeftWithQualifier_W( operation->qualifier );
-			break;
-		case OT_MatchLeftWithQualifierSaveToTable_W: /* TQualifierIndex */
-			matchLeftWithQualifierSaveToTable_W( operation->qualifier );
-			break;
-		case OT_MatchRight_W:
-			matchRight_W();
-			break;
-		case OT_MatchRightSaveToTable_W:
-			matchRightSaveToTable_W();
-			break;
-		case OT_MatchRightWithQualifier_W: /* TQualifierIndex */
-			matchRightWithQualifier_W( operation->qualifier );
-			break;
-		case OT_MatchRightWithQualifierSaveToTable_W: /* TQualifierIndex */
-			matchRightWithQualifierSaveToTable_W( operation->qualifier );
-			break;
-		/* matching duplicate of WV-variables */
-		case OT_MatchLeftDuplicate_WV: /* TTableIndex */
-			matchLeftDuplicate_WV( operation->tableIndex );
-			break;
-		case OT_MatchLeftDuplicateSaveToTable_WV: /* TTableIndex */
-			matchLeftDuplicateSaveToTable_WV( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicate_WV: /* TTableIndex */
-			matchRightDuplicate_WV( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicateSaveToTable_WV: /* TTableIndex */
-			matchRightDuplicateSaveToTable_WV( operation->tableIndex );
-			break;
-		/* matching duplicate of E-variables */
-		case OT_MatchLeftDuplicate_E: /* TTableIndex */
-			matchLeftDuplicate_E( operation->tableIndex );
-			break;
-		case OT_MatchLeftDuplicateSaveToTable_E: /* TTableIndex */
-			matchLeftDuplicateSaveToTable_E( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicate_E: /* TTableIndex */
-			matchRightDuplicate_E( operation->tableIndex );
-			break;
-		case OT_MatchRightDuplicateSaveToTable_E: /* TTableIndex */
-			matchRightDuplicateSaveToTable_E( operation->tableIndex );
-			break;
-		/* matching closed V-variables */
-		case OT_MatchClosed_V:
-			matchClosed_V();
-			break;
-		case OT_MatchClosedSaveToTable_V:
-			matchClosedSaveToTable_V();
-			break;
-		case OT_MatchClosedWithQualifier_V: /* TQualifierIndex */
-			matchClosedWithQualifier_V( operation->qualifier );
-			break;
-		case OT_MatchClosedWithQualifierSaveToTable_V: /* TQualifierIndex */
-			matchClosedWithQualifierSaveToTable_V( operation->qualifier );
-			break;
-		/* matching closed E-variables */
-		case OT_MatchClosed_E:
-			matchClosed_E();
-			break;
-		case OT_MatchClosedSaveToTable_E:
-			matchClosedSaveToTable_E();
-			break;
-		case OT_MatchClosedWithQualifier_E: /* TQualifierIndex */
-			matchClosedWithQualifier_E( operation->qualifier );
-			break;
-		case OT_MatchClosedWithQualifierSaveToTable_E: /* TQualifierIndex */
-			matchClosedWithQualifierSaveToTable_E( operation->qualifier );
-			break;
-		/* matching V-variables by qualifier */
-		case OT_MacthLeftMaxByQualifier_V: /* TQualifierIndex */
-			macthLeftMaxByQualifier_V( operation->qualifier );
-			break;
-		case OT_MacthLeftMaxByQualifierSaveToTable_V: /* TQualifierIndex */
-			macthLeftMaxByQualifierSaveToTable_V( operation->qualifier );
-			break;
-		case OT_MacthRightMaxByQualifier_V: /* TQualifierIndex */
-			macthRightMaxByQualifier_V( operation->qualifier );
-			break;
-		case OT_MacthRightMaxByQualifierSaveToTable_V: /* TQualifierIndex */
-			macthRightMaxByQualifierSaveToTable_V( operation->qualifier );
-			break;
-		/* matching E-variables by qualifier */
-		case OT_MacthLeftMaxByQualifier_E: /* TQualifierIndex */
-			macthLeftMaxByQualifier_E( operation->qualifier );
-			break;
-		case OT_MacthLeftMaxByQualifierSaveToTable_E: /* TQualifierIndex */
-			macthLeftMaxByQualifierSaveToTable_E( operation->qualifier );
-			break;
-		case OT_MacthRightMaxByQualifier_E: /* TQualifierIndex */
-			macthRightMaxByQualifier_E( operation->qualifier );
-			break;
-		case OT_MacthRightMaxByQualifierSaveToTable_E: /* TQualifierIndex */
-			macthRightMaxByQualifierSaveToTable_E( operation->qualifier );
-			break;
-		/* match left VE-variable */
-		case OT_MatchLeftBegin_E:
-			matchLeftBegin_E();
-			break;
-		case OT_MatchLeftBeginSaveToTable_E:
-			matchLeftBeginSaveToTable_E();
-			break;
-		case OT_MatchLeftBegin_V:
-			matchLeftBegin_V();
-			break;
-		case OT_MatchLeftBeginSaveToTable_V:
-			matchLeftBeginSaveToTable_V();
-			break;
-		case OT_MatchLeftWithQulifierBegin_V: /* TQualifierIndex */
-			matchLeftWithQulifierBegin_V( operation->qualifier );
-			break;
-		case OT_MatchLeftWithQulifierBeginSaveToTable_V: /* TQualifierIndex */
-			matchLeftWithQulifierBeginSaveToTable_V( operation->qualifier );
-			break;
-		case OT_MatchLeft_E:
-			matchLeft_E();
-			break;
-		case OT_MatchLeftSaveToTable_E:
-			matchLeftSaveToTable_E();
-			break;
-		case OT_MatchLeftWithQulifier_E: /* TQualifierIndex */
-			matchLeftWithQulifier_E( operation->qualifier );
-			break;
-		case OT_MatchLeftWithQulifierSaveToTable_E: /* TQualifierIndex */
-			matchLeftWithQulifierSaveToTable_E( operation->qualifier );
-			break;
-		/* match right VE-variable */
-		case OT_MatchRightBegin_E:
-			matchRightBegin_E();
-			break;
-		case OT_MatchRightBeginSaveToTable_E:
-			matchRightBeginSaveToTable_E();
-			break;
-		case OT_MatchRightBegin_V:
-			matchRightBegin_V();
-			break;
-		case OT_MatchRightBeginSaveToTable_V:
-			matchRightBeginSaveToTable_V();
-			break;
-		case OT_MatchRightWithQulifierBegin_V: /* TQualifierIndex */
-			matchRightWithQulifierBegin_V( operation->qualifier );
-			break;
-		case OT_MatchRightWithQulifierBeginSaveToTable_V: /* TQualifierIndex */
-			matchRightWithQulifierBeginSaveToTable_V( operation->qualifier );
-			break;
-		case OT_MatchRight_E:
-			matchRight_E();
-			break;
-		case OT_MatchRightSaveToTable_E:
-			matchRightSaveToTable_E();
-			break;
-		case OT_MatchRightWithQulifier_E: /* TQualifierIndex */
-			matchRightWithQulifier_E( operation->qualifier );
-			break;
-		case OT_MatchRightWithQulifierSaveToTable_E: /* TQualifierIndex */
-			matchRightWithQulifierSaveToTable_E( operation->qualifier );
-			break;
-		/* making operations */
-		case OT_InsertChar: /* TChar */
-			insertChar( operation->c );
-			break;
-		case OT_InsertLabel: /* TLabel */
-			insertLabel( operation->label );
-			break;
-		case OT_InsertNumber: /* TNumber */
-			insertNumber( operation->number );
-			break;
-		case OT_InsertLeftParen:
-			insertLeftParen();
-			break;
-		case OT_InsertRightParen:
-			insertRightParen();
-			break;
-		case OT_InsertRightBracket:
-			insertRightBracket();
-			break;
-		case OT_Move_S: /* TTableIndex */
-			move_S( operation->tableIndex );
-			break;
-		case OT_Copy_S: /* TTableIndex */
-			copy_S( operation->tableIndex );
-			break;
-		case OT_Move_E: /* TTableIndex */
-			move_E( operation->tableIndex );
-			break;
-		case OT_Copy_E: /* TTableIndex */
-			copy_E( operation->tableIndex );
-			break;
-		case OT_Move_WV: /* TTableIndex */
-			move_WV( operation->tableIndex );
-			break;
-		case OT_Copy_WV: /* TTableIndex */
-			copy_WV( operation->tableIndex );
-			break;
-		default:
-			assert( false );
-			break;
+	right = initialLeftBracket.PairedParen();
+	left = right->PairedParen();
+	CUnitNode* savedNextRightBracket = left->PairedParen();
+	left = left->Next();
+	operation = static_cast<COperationNode*>(
+		LabelTable.GetLabelFunction( left->Label() )->firstOperation );
+	tableTop = 0;
+	stackTop = 0;
+	lastAddedLeftParen = 0;
+	lastAddedLeftBracket = &initialLeftBracket;
+	initialLeftBracket.PairedParen() = 0;
+	saveToTable( left, right );
+	doFunctionBody();
+	lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
+}
+
+bool COperationsExecuter::doFunctionBody()
+{
+	while( true ) {
+		std::cout << operationNames[operation->type] << "\n";
+		bool success = true;
+		switch( operation->type ) {
+			case OT_Goto: // TOperationAddress
+				assert( false );
+				break;
+			case OT_InsertJump: // TOperationAddress
+				insertJump( operation->operation );
+				break;
+			case OT_MatchingComplete:
+				matchingComplete();
+				break;
+			case OT_Return:
+				doReturn();
+				return true;
+				break;
+			case OT_SetLeftBorder: // TTableIndex
+				setLeftBorder( operation->tableIndex );
+				break;
+			case OT_SetRightBorder: // TTableIndex
+				setRightBorder( operation->tableIndex );
+				break;
+			case OT_DecrementStackDepth: // TUint32
+				assert( false );
+				break;
+			// matching empty expression
+			case OT_MatchEmptyExpression:
+				success = matchEmptyExpression();
+				break;
+			// matching symbols
+			case OT_MatchLeftChar: // TChar
+				success = matchLeftChar( operation->c );
+				break;
+			case OT_MatchLeftLabel: // TLabel
+				success = matchLeftLabel( operation->label );
+				break;
+			case OT_MatchLeftNumber: // TNumber
+				success = matchLeftNumber( operation->number );
+				break;
+			case OT_MatchRightChar: // TChar
+				success = matchRightChar( operation->c );
+				break;
+			case OT_MatchRightLabel: // TLabel
+				success = matchRightLabel( operation->label );
+				break;
+			case OT_MatchRightNumber: // TNumber
+				success = matchRightNumber( operation->number );
+				break;
+			// matching parens
+			case OT_MatchLeftParens:
+				success = matchLeftParens();
+				break;
+			case OT_MatchRightParens:
+				success = matchRightParens();
+				break;
+			// matching S-variables
+			case OT_MatchLeft_S:
+				success = matchLeft_S();
+				break;
+			case OT_MatchLeftSaveToTable_S:
+				success = matchLeftSaveToTable_S();
+				break;
+			case OT_MatchLeftWithQualifier_S: // TQualifierIndex
+				success = matchLeftWithQualifier_S( operation->qualifier );
+				break;
+			case OT_MatchLeftWithQualifierSaveToTable_S: // TQualifierIndex
+				success = matchLeftWithQualifierSaveToTable_S(
+					operation->qualifier );
+				break;
+			case OT_MatchRight_S:
+				success = matchRight_S();
+				break;
+			case OT_MatchRightSaveToTable_S:
+				success = matchRightSaveToTable_S();
+				break;
+			case OT_MatchRightWithQualifier_S: // TQualifierIndex
+				success = matchRightWithQualifier_S( operation->qualifier );
+				break;
+			case OT_MatchRightWithQualifierSaveToTable_S: // TQualifierIndex
+				success = matchRightWithQualifierSaveToTable_S(
+					operation->qualifier );
+				break;
+			// matching duplicate of S-variables
+			case OT_MatchLeftDuplicate_S: // TTableIndex
+				success = matchLeftDuplicate_S( operation->tableIndex );
+				break;
+			case OT_MatchLeftDuplicateSaveToTable_S: // TTableIndex
+				success = matchLeftDuplicateSaveToTable_S(
+					operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicate_S: // TTableIndex
+				success = matchRightDuplicate_S( operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicateSaveToTable_S: // TTableIndex
+				success = matchRightDuplicateSaveToTable_S(
+					operation->tableIndex );
+				break;
+			// matching W-variables
+			case OT_MatchLeft_W:
+				success = matchLeft_W();
+				break;
+			case OT_MatchLeftSaveToTable_W:
+				success = matchLeftSaveToTable_W();
+				break;
+			case OT_MatchLeftWithQualifier_W: // TQualifierIndex
+				success = matchLeftWithQualifier_W( operation->qualifier );
+				break;
+			case OT_MatchLeftWithQualifierSaveToTable_W: // TQualifierIndex
+				success = matchLeftWithQualifierSaveToTable_W(
+					operation->qualifier );
+				break;
+			case OT_MatchRight_W:
+				success = matchRight_W();
+				break;
+			case OT_MatchRightSaveToTable_W:
+				success = matchRightSaveToTable_W();
+				break;
+			case OT_MatchRightWithQualifier_W: // TQualifierIndex
+				success = matchRightWithQualifier_W( operation->qualifier );
+				break;
+			case OT_MatchRightWithQualifierSaveToTable_W: // TQualifierIndex
+				success = matchRightWithQualifierSaveToTable_W(
+					operation->qualifier );
+				break;
+			// matching duplicate of WV-variables
+			case OT_MatchLeftDuplicate_WV: // TTableIndex
+				success = matchLeftDuplicate_WV( operation->tableIndex );
+				break;
+			case OT_MatchLeftDuplicateSaveToTable_WV: // TTableIndex
+				success = matchLeftDuplicateSaveToTable_WV(
+					operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicate_WV: // TTableIndex
+				matchRightDuplicate_WV( operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicateSaveToTable_WV: // TTableIndex
+				success = matchRightDuplicateSaveToTable_WV(
+					operation->tableIndex );
+				break;
+			// matching duplicate of E-variables
+			case OT_MatchLeftDuplicate_E: // TTableIndex
+				success = matchLeftDuplicate_E( operation->tableIndex );
+				break;
+			case OT_MatchLeftDuplicateSaveToTable_E: // TTableIndex
+				success = matchLeftDuplicateSaveToTable_E(
+					operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicate_E: // TTableIndex
+				success = matchRightDuplicate_E( operation->tableIndex );
+				break;
+			case OT_MatchRightDuplicateSaveToTable_E: // TTableIndex
+				success = matchRightDuplicateSaveToTable_E(
+					operation->tableIndex );
+				break;
+			// matching closed V-variables
+			case OT_MatchClosed_V:
+				success = matchClosed_V();
+				break;
+			case OT_MatchClosedSaveToTable_V:
+				success = matchClosedSaveToTable_V();
+				break;
+			case OT_MatchClosedWithQualifier_V: // TQualifierIndex
+				success = matchClosedWithQualifier_V( operation->qualifier );
+				break;
+			case OT_MatchClosedWithQualifierSaveToTable_V: // TQualifierIndex
+				success = matchClosedWithQualifierSaveToTable_V(
+					operation->qualifier );
+				break;
+			// matching closed E-variables
+			case OT_MatchClosed_E:
+				matchClosed_E();
+				break;
+			case OT_MatchClosedSaveToTable_E:
+				matchClosedSaveToTable_E();
+				break;
+			case OT_MatchClosedWithQualifier_E: // TQualifierIndex
+				success = matchClosedWithQualifier_E( operation->qualifier );
+				break;
+			case OT_MatchClosedWithQualifierSaveToTable_E: // TQualifierIndex
+				success = matchClosedWithQualifierSaveToTable_E(
+					operation->qualifier );
+				break;
+			// matching V-variables by qualifier
+			case OT_MacthLeftMaxByQualifier_V: // TQualifierIndex
+				success = macthLeftMaxByQualifier_V( operation->qualifier );
+				break;
+			case OT_MacthLeftMaxByQualifierSaveToTable_V: // TQualifierIndex
+				success = macthLeftMaxByQualifierSaveToTable_V(
+					operation->qualifier );
+				break;
+			case OT_MacthRightMaxByQualifier_V: // TQualifierIndex
+				success = macthRightMaxByQualifier_V( operation->qualifier );
+				break;
+			case OT_MacthRightMaxByQualifierSaveToTable_V: // TQualifierIndex
+				success = macthRightMaxByQualifierSaveToTable_V(
+					operation->qualifier );
+				break;
+			// matching E-variables by qualifier
+			case OT_MacthLeftMaxByQualifier_E: // TQualifierIndex
+				macthLeftMaxByQualifier_E( operation->qualifier );
+				break;
+			case OT_MacthLeftMaxByQualifierSaveToTable_E: // TQualifierIndex
+				macthLeftMaxByQualifierSaveToTable_E( operation->qualifier );
+				break;
+			case OT_MacthRightMaxByQualifier_E: // TQualifierIndex
+				macthRightMaxByQualifier_E( operation->qualifier );
+				break;
+			case OT_MacthRightMaxByQualifierSaveToTable_E: // TQualifierIndex
+				macthRightMaxByQualifierSaveToTable_E( operation->qualifier );
+				break;
+			// match left VE-variable
+			case OT_MatchLeftBegin_E:
+				matchLeftBegin_E();
+				break;
+			case OT_MatchLeftBeginSaveToTable_E:
+				matchLeftBeginSaveToTable_E();
+				break;
+			case OT_MatchLeftBegin_V:
+				success = matchLeftBegin_V();
+				break;
+			case OT_MatchLeftBeginSaveToTable_V:
+				success = matchLeftBeginSaveToTable_V();
+				break;
+			case OT_MatchLeftWithQulifierBegin_V: // TQualifierIndex
+				success = matchLeftWithQulifierBegin_V( operation->qualifier );
+				break;
+			case OT_MatchLeftWithQulifierBeginSaveToTable_V: // TQualifierIndex
+				success = matchLeftWithQulifierBeginSaveToTable_V(
+					operation->qualifier );
+				break;
+			case OT_MatchLeft_E:
+				success = matchLeft_E();
+				break;
+			case OT_MatchLeftSaveToTable_E:
+				success = matchLeftSaveToTable_E();
+				break;
+			case OT_MatchLeftWithQulifier_E: // TQualifierIndex
+				success = matchLeftWithQulifier_E( operation->qualifier );
+				break;
+			case OT_MatchLeftWithQulifierSaveToTable_E: // TQualifierIndex
+				success = matchLeftWithQulifierSaveToTable_E(
+					operation->qualifier );
+				break;
+			// match right VE-variable
+			case OT_MatchRightBegin_E:
+				matchRightBegin_E();
+				break;
+			case OT_MatchRightBeginSaveToTable_E:
+				matchRightBeginSaveToTable_E();
+				break;
+			case OT_MatchRightBegin_V:
+				success = matchRightBegin_V();
+				break;
+			case OT_MatchRightBeginSaveToTable_V:
+				success = matchRightBeginSaveToTable_V();
+				break;
+			case OT_MatchRightWithQulifierBegin_V: // TQualifierIndex
+				success = matchRightWithQulifierBegin_V( operation->qualifier );
+				break;
+			case OT_MatchRightWithQulifierBeginSaveToTable_V: // TQualifierIndex
+				success = matchRightWithQulifierBeginSaveToTable_V(
+					operation->qualifier );
+				break;
+			case OT_MatchRight_E:
+				success = matchRight_E();
+				break;
+			case OT_MatchRightSaveToTable_E:
+				success = matchRightSaveToTable_E();
+				break;
+			case OT_MatchRightWithQulifier_E: // TQualifierIndex
+				success = matchRightWithQulifier_E( operation->qualifier );
+				break;
+			case OT_MatchRightWithQulifierSaveToTable_E: // TQualifierIndex
+				success = matchRightWithQulifierSaveToTable_E(
+					operation->qualifier );
+				break;
+			// making operations
+			case OT_InsertChar: // TChar
+				insertChar( operation->c );
+				break;
+			case OT_InsertLabel: // TLabel
+				insertLabel( operation->label );
+				break;
+			case OT_InsertNumber: // TNumber
+				insertNumber( operation->number );
+				break;
+			case OT_InsertLeftParen:
+				insertLeftParen();
+				break;
+			case OT_InsertRightParen:
+				insertRightParen();
+				break;
+			case OT_InsertRightBracket:
+				insertRightBracket();
+				break;
+			case OT_Move_S: // TTableIndex
+				move_S( operation->tableIndex );
+				break;
+			case OT_Copy_S: // TTableIndex
+				copy_S( operation->tableIndex );
+				break;
+			case OT_Move_E: // TTableIndex
+				move_E( operation->tableIndex );
+				break;
+			case OT_Copy_E: // TTableIndex
+				copy_E( operation->tableIndex );
+				break;
+			case OT_Move_WV: // TTableIndex
+				move_WV( operation->tableIndex );
+				break;
+			case OT_Copy_WV: // TTableIndex
+				copy_WV( operation->tableIndex );
+				break;
+			default:
+				assert( false );
+				break;
+		}
+		if( success ) {
+			nextOperation();
+		} else {
+			if( !fail() ) {
+				return false;
+			}
+		}
 	}
+	assert( false );
 	return false;
 }
 
