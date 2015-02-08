@@ -12,21 +12,22 @@ const int DefaultInitialLabelTableSize = 1024;
 
 class CLabelTable {
 public:
-	CLabelTable(int initialTableSize = DefaultInitialLabelTableSize);
+	CLabelTable( const int initialTableSize = DefaultInitialLabelTableSize );
 	~CLabelTable();
 
-	TLabel AddLabel(const std::string& labelText);
-	const std::string& GetLabelText(TLabel label);
-	CFunction* GetLabelFunction(TLabel label);
+	TLabel AddLabel( const std::string& labelText );
+	const std::string& GetLabelText( const TLabel label );
+	CFunction& GetLabelFunction( const TLabel label );
+	const CFunction& GetLabelFunction( const TLabel label ) const;
 
 	int GetNumberOfLabels() const { return tableFirstFree; }
 
 	TLabel GetFirstLabel() const;
-	TLabel GetNextLabel(TLabel afterLabel) const;
+	TLabel GetNextLabel( const TLabel afterLabel ) const;
 
 private:
-	CLabelTable(const CLabelTable&);
-	CLabelTable& operator=(const CLabelTable&);
+	CLabelTable( const CLabelTable& );
+	CLabelTable& operator=( const CLabelTable& );
 
 	typedef std::map<std::string, TLabel> CLabelMap;
 
@@ -34,12 +35,12 @@ private:
 		CFunction function;
 		CLabelMap::const_iterator labelPtr;
 
-		CLabelInfo(const CLabelMap::const_iterator& _labelPtr):
-			labelPtr(_labelPtr) {}
+		CLabelInfo( const CLabelMap::const_iterator& _labelPtr ):
+			labelPtr( _labelPtr ) {}
 	};
 
 	void alloc();
-	void grow(const CLabelMap::const_iterator& labelPtr);
+	void grow( const CLabelMap::const_iterator& labelPtr );
 
 	CLabelMap labelMap;
 	int tableSize;

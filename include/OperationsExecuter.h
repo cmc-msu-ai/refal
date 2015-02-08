@@ -36,10 +36,9 @@ private:
 	inline void matchingComplete();
 	inline void doReturn();
 	inline void insertJump( const TOperationAddress operationAddress );
-	
+	inline void decrementStackDepth( const TUint32 count );
 	inline void setLeftBorder( const TTableIndex tableIndex );
 	inline void setRightBorder( const TTableIndex tableIndex );
-	
 	// matching empty expression
 	inline bool matchEmptyExpression();
 	// matching symbols
@@ -265,6 +264,12 @@ inline void COperationsExecuter::insertJump(
 	const TOperationAddress operationAddress )
 {
 	saveState( static_cast<COperationNode*>( operationAddress ) );
+}
+
+inline void COperationsExecuter::decrementStackDepth( const TUint32 count )
+{
+	stackTop -= count;
+	assert( stackTop >= 0 );
 }
 
 inline void COperationsExecuter::setLeftBorder(const TTableIndex tableIndex)

@@ -835,12 +835,12 @@ void CParser::addDeclarationOfFunction(const std::string& name)
 	addEndOfFunction();
 
 	currentFunction = LabelTable.AddLabel( name );
-	CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
+	CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
 
-	if( !tmpFunction->IsDeclared() ) {
+	if( !tmpFunction.IsDeclared() ) {
 		// TODO: error, ignore
 	} else {
-		tmpFunction->SetDefined();
+		tmpFunction.SetDefined();
 
 		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
 	}
@@ -849,12 +849,12 @@ void CParser::addDeclarationOfFunction(const std::string& name)
 void CParser::addEndOfFunction()
 {
 	if( currentFunction != InvalidLabel ) {
-		CFunction* tmpFunction = LabelTable.GetLabelFunction( currentFunction );
+		CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
 		
-		if( !tmpFunction->IsDeclared() ) {
-			CFunctionBuilder::Export( tmpFunction );
+		if( !tmpFunction.IsDeclared() ) {
+			CFunctionBuilder::Export( &tmpFunction );
 			
-			PrintFunction( *tmpFunction );
+			PrintFunction( tmpFunction );
 			std::cout << "addEndOfFunction: {" <<
 				LabelTable.GetLabelText( currentFunction ) << "}\n";
 		}

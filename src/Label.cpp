@@ -4,8 +4,8 @@
 
 namespace Refal2 {
 
-CLabelTable::CLabelTable(int initialTableSize):
-	tableSize(initialTableSize), tableFirstFree(0), table(0)
+CLabelTable::CLabelTable( const int initialTableSize ):
+	tableSize( initialTableSize ), tableFirstFree( 0 ), table( 0 )
 {
 	alloc();
 }
@@ -15,35 +15,35 @@ CLabelTable::~CLabelTable()
 	for( int i = 0; i < tableFirstFree; i++ ) {
 		table[i].~CLabelInfo();
 	}
-
-	::operator delete(table);
+	::operator delete( table );
 }
 
-TLabel CLabelTable::AddLabel(const std::string& labelText)
+TLabel CLabelTable::AddLabel( const std::string& labelText )
 {
 	typedef std::pair<CLabelMap::iterator, bool> CPair;
-
 	CPair pair = labelMap.insert( std::make_pair( labelText, tableFirstFree ) );
-
 	if( pair.second ) {
 		grow( pair.first );
 	}
-
 	return pair.first->second;
 }
 
-const std::string& CLabelTable::GetLabelText(TLabel label)
+const std::string& CLabelTable::GetLabelText( const TLabel label )
 {
 	assert( label >= 0 && label < tableFirstFree );
-
 	return table[label].labelPtr->first;
 }
 
-CFunction* CLabelTable::GetLabelFunction(TLabel label)
+CFunction& CLabelTable::GetLabelFunction( const TLabel label )
 {
 	assert( label >= 0 && label < tableFirstFree );
+	return table[label].function;
+}
 
-	return &table[label].function;
+const CFunction& CLabelTable::GetLabelFunction( const TLabel label ) const
+{
+	assert( label >= 0 && label < tableFirstFree );
+	return table[label].function;
 }
 
 TLabel CLabelTable::GetFirstLabel() const
@@ -55,10 +55,9 @@ TLabel CLabelTable::GetFirstLabel() const
 	}
 }
 
-TLabel CLabelTable::GetNextLabel(TLabel afterLabel) const
+TLabel CLabelTable::GetNextLabel( const TLabel afterLabel ) const
 {
 	assert( afterLabel >= 0 );
-
 	if( afterLabel < tableFirstFree - 1 ) {
 		return ( afterLabel + 1 );
 	} else {
@@ -69,21 +68,20 @@ TLabel CLabelTable::GetNextLabel(TLabel afterLabel) const
 void CLabelTable::alloc()
 {
 	table = static_cast<CLabelInfo*>(
-		::operator new( tableSize * sizeof(CLabelInfo) ) );
+		::operator new( tableSize * sizeof( CLabelInfo ) ) );
 }
 
-void CLabelTable::grow(const CLabelMap::const_iterator& labelPtr)
+void CLabelTable::grow( const CLabelMap::const_iterator& labelPtr )
 {
 	if( tableFirstFree == tableSize ) {
 		CLabelInfo* tmp = table;
 		tableSize *= 2;
 		alloc();
-		memcpy( table, tmp, tableFirstFree * sizeof(CLabelInfo) );
+		memcpy( table, tmp, tableFirstFree * sizeof( CLabelInfo ) );
 		delete tmp;
 	}
-	
-	new(table + tableFirstFree)CLabelInfo(labelPtr);
-	++tableFirstFree;
+	new( table + tableFirstFree )CLabelInfo( labelPtr );
+	tableFirstFree++;
 }
 
 } // end of namespace Refal2

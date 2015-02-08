@@ -136,8 +136,9 @@ void COperationsExecuter::doFunction( CUnitNode& initialLeftBracket )
 	left = right->PairedParen();
 	CUnitNode* savedNextRightBracket = left->PairedParen();
 	left = left->Next();
-	operation = static_cast<COperationNode*>(
-		LabelTable.GetLabelFunction( left->Label() )->firstOperation );
+
+	const CFunction& function = LabelTable.GetLabelFunction( left->Label() );
+	operation = static_cast<COperationNode*>( function.firstOperation );
 	tableTop = 0;
 	stackTop = 0;
 	lastAddedLeftParen = 0;
@@ -174,7 +175,7 @@ bool COperationsExecuter::doFunctionBody()
 				setRightBorder( operation->tableIndex );
 				break;
 			case OT_DecrementStackDepth: // TUint32
-				assert( false );
+				decrementStackDepth( operation->stackDecrement );
 				break;
 			// matching empty expression
 			case OT_MatchEmptyExpression:

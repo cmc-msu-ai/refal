@@ -127,17 +127,17 @@ int main(int argc, const char* argv[])
 		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
 			i = LabelTable.GetNextLabel( i ) )
 		{
-			CFunction* function = LabelTable.GetLabelFunction( i );
-			if( function->IsParsed() ) {
+			CFunction& function = LabelTable.GetLabelFunction( i );
+			if( function.IsParsed() ) {
 				std::cout << "{START:" << LabelTable.GetLabelText( i ) << "}\n";
-				PrintFunction( *function );
+				PrintFunction( function );
 				CFunctionCompiler compiler;
-				compiler.Compile( function );
+				compiler.Compile( &function );
 				std::cout << "{END:" << LabelTable.GetLabelText( i ) << "}\n";
 				COperationNode* operation = program.GetLast();
 				compiler.Export( program );
 				operation = operation == 0 ? program.GetFirst() : operation->Next();
-				function->SetCompiled( operation );
+				function.SetCompiled( operation );
 			}
 		}
 

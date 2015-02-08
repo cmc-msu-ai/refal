@@ -29,7 +29,9 @@ enum TFunctionState {
 	FS_Declared,
 	FS_Defined,
 	FS_Parsed,
-	FS_Compiled
+	FS_Compiled,
+	FS_Extern,
+	FS_Empty
 };
 
 class CFunction {
@@ -46,6 +48,8 @@ public:
 	bool IsDefined() const { return ( functionState == FS_Declared ); }
 	bool IsParsed() const { return ( functionState == FS_Parsed ); }
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
+	bool IsExtern() const { return ( functionState == FS_Extern ); }
+	bool IsEmpty() const { return ( functionState == FS_Empty ); }
 	
 	inline void SetDefined();
 	inline void SetParsed( CFunctionRule** firstRule );
