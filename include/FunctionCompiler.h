@@ -74,7 +74,7 @@ private:
 	//void splitIntoClasses(CHole* const holes);
 	
 	void matchVE(const bool isRightDirection);
-	
+	void checkBorders();
 	void matchElement();
 	bool tryMatchLeftVariable(CUnitNode* left);
 	bool tryMatchRightVariable(CUnitNode* right);

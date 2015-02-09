@@ -166,8 +166,21 @@ void CLeftPartCompiler::matchDuplicateVariable(
 		setVariable( variableIndex ) );
 }
 
+void CLeftPartCompiler::checkBorders()
+{
+	if( left != hole->GetLeft() ) {
+		left = hole->GetLeft();
+		COperationsBuilder::AddSetLeftBorder( left );
+	}
+	if( right != hole->GetRight() ) {
+		right = hole->GetRight();
+		COperationsBuilder::AddSetRightBorder( right );
+	}
+}
+
 void CLeftPartCompiler::matchVE(const bool isRightDirection)
 {
+	checkBorders();
 	if( isRightDirection ) {
 		TVariableIndex variableIndex = hole->GetLast()->Variable();
 
@@ -197,15 +210,7 @@ void CLeftPartCompiler::matchVE(const bool isRightDirection)
 
 void CLeftPartCompiler::matchElement()
 {
-	if( left != hole->GetLeft() ) {
-		left = hole->GetLeft();
-		COperationsBuilder::AddSetLeftBorder( left );
-	}
-	if( right != hole->GetRight() ) {
-		right = hole->GetRight();
-		COperationsBuilder::AddSetRightBorder( right );
-	}
-	
+	checkBorders();
 	if( hole->IsEmpty() ) {
 		matchEmptyExpression();
 	} else {
