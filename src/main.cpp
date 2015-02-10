@@ -143,8 +143,14 @@ int main(int argc, const char* argv[])
 
 		std::cout << "\n\n----------------------------------\n\n";
 
+		TLabel entryLabel = parser.GetEntryLabel();
+		if( entryLabel == InvalidLabel ) {
+			entryLabel = LabelTable.AddLabel( "go" );
+		}
+		assert( LabelTable.GetLabelFunction( entryLabel ).IsCompiled() );
+
 		COperationsExecuter executer;
-		executer.Run( LabelTable.GetFirstLabel() );
+		executer.Run( entryLabel );
 	} catch(bool) {
 		return 1;
 	}

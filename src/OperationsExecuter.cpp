@@ -145,7 +145,7 @@ void COperationsExecuter::doFunction( CUnitNode& initialLeftBracket )
 		initialLeftBracket.PairedParen() = 0;
 		saveToTable( left, right );
 		doFunctionBody();
-	} else if( function.IsExtern() ) {
+	} else if( function.IsExternal() ) {
 		// TODO: execute extern
 	} else if( function.IsEmpty() ) {
 		// TODO: error, can't execute empty function

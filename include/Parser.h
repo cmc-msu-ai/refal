@@ -56,7 +56,7 @@ enum TParserErrorCodes {
 
 class IParserListener {
 public:
-	virtual void OnParserError(const TParserErrorCodes errorCode) = 0;
+	virtual void OnParserError( const TParserErrorCodes errorCode ) = 0;
 };
 
 class CParser :
@@ -64,36 +64,39 @@ class CParser :
 	public CListener<IParserListener>
 {
 public:
-	CParser(IParserListener* listener = 0);
-	
+	CParser( IParserListener* listener = 0 );
 	void Reset();
 
-	TLabel GetCurrentFunction() const { return currentFunction; }
+	TLabel GetCurrentLabel() const { return currentFunction; }
+	TLabel GetEntryLabel() const { return entryLabel; }
 	
 private:
 	virtual void ProcessLexem();
 	
-	inline void error(const TParserErrorCodes errorCode);
+	inline void error( const TParserErrorCodes errorCode );
 	
-	void processNamedQualifier(const bool afterRightParen = false);
+	void processNamedQualifier( const bool afterRightParen = false );
 	void processNamedQualifierAfterError();
 	
 	void addNamedQualifier();
 	
-	void processVariableQualifier(const bool afterRightParen = false);
+	void processVariableQualifier( const bool afterRightParen = false );
 	void processVariableQualifierAfterError();
 	
-	void addDeclarationOfFunction(const std::string& name);
+	void addDeclarationOfFunction( const std::string& name );
 	void addEndOfFunction();
 	
-	void addEmptyFunction(const std::string& name);
-	void addEntryFunction(const std::string& name);
-	void addExtrnFunction(const std::string& name, const std::string& oldName);
+	void addEmptyFunction( const std::string& name );
+	void addEntryFunction( const std::string& name );
+	void addExtrnFunction( const std::string& name,
+		const std::string& standartName );
 	
 	TParserState state;
 	int storedOffset;
 	std::string storedName;
 	
+	TLabel entryLabel;
+
 	TLabel currentFunction;
 	TVariableType variableType;
 	
@@ -104,7 +107,7 @@ private:
 	CQualifierBuilder qualifierBuilder;
 };
 
-inline void CParser::error(const TParserErrorCodes errorCode)
+inline void CParser::error( const TParserErrorCodes errorCode )
 {
 	SetErrors();
 	if( CListener<IParserListener>::HasListener() ) {

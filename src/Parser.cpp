@@ -15,6 +15,7 @@ void CParser::Reset()
 	CScanner::Reset();
 	state = PS_Begin;
 	storedName.clear();
+	entryLabel = InvalidLabel;
 	currentFunction = InvalidLabel;
 	namedQualifiers.clear();
 	qualifierBuilder.Reset();
@@ -876,20 +877,57 @@ void CParser::addNamedQualifier()
 	}
 }
 
-void CParser::addEmptyFunction(const std::string& name)
+void CParser::addEmptyFunction( const std::string& name )
 {
 	std::cout << "Empty: " << name << "\n";
+	TLabel emptyLabel = LabelTable.AddLabel( name );
+	CFunction& emptyFunction = LabelTable.GetLabelFunction( emptyLabel );
+	if( emptyFunction.IsDeclared() ) {
+		emptyFunction.SetEmpty();
+	} else if( emptyFunction.IsEmpty() ) {
+		// TODO: warning, such empty function %function% already defined
+	} else if( emptyFunction.IsDefined() || emptyFunction.IsParsed() ) {
+		// TODO: error, %function% already defined in program
+	} else if( emptyFunction.IsExternal() ) {
+		// TODO: error, %function% already defined as external function
+	} else {
+		assert( false );
+	}
 }
 
-void CParser::addEntryFunction(const std::string& name)
+void CParser::addEntryFunction( const std::string& name )
 {
 	std::cout << "Entry: " << name << "\n";
+	if( entryLabel == InvalidLabel ) {
+		entryLabel = LabelTable.AddLabel( name );
+		CFunction& entryFunction = LabelTable.GetLabelFunction( entryLabel );
+		if( entryFunction.IsEmpty() ) {
+			// TODO: error, entry %function% cannot be empty function
+		} else if( entryFunction.IsExternal() ) {
+			// TODO: error, entry %function% cannot be external function
+		}
+	} else {
+		// TODO: error, redeclaration of entry
+	}
 }
 
-void CParser::addExtrnFunction(const std::string& name,
-	const std::string& oldName)
+void CParser::addExtrnFunction( const std::string& name,
+	const std::string& standartName )
 {
-	std::cout << "Extrn: " << name << "(" << oldName << ")\n";
+	std::cout << "Extrn: " << name << "(" << standartName << ")\n";
+	TLabel externalLabel = LabelTable.AddLabel( name );
+	CFunction& externalFunction = LabelTable.GetLabelFunction( externalLabel );
+	if( externalFunction.IsDeclared() ) {
+		// TODO: add external
+	} else if( externalFunction.IsEmpty() ) {
+		// TODO: error, %function% already defined as empty function
+	} else if( externalFunction.IsDefined() || externalFunction.IsParsed() ) {
+		// TODO: error, %function% already defined in program
+	} else if( externalFunction.IsExternal() ) {
+		// TODO: error, %function% already defined as external function
+	} else {
+		assert( false );
+	}
 }
 
 } // end of namespace Refal2

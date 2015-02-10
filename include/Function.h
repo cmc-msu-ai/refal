@@ -30,7 +30,7 @@ enum TFunctionState {
 	FS_Defined,
 	FS_Parsed,
 	FS_Compiled,
-	FS_Extern,
+	FS_External,
 	FS_Empty
 };
 
@@ -48,10 +48,11 @@ public:
 	bool IsDefined() const { return ( functionState == FS_Declared ); }
 	bool IsParsed() const { return ( functionState == FS_Parsed ); }
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
-	bool IsExtern() const { return ( functionState == FS_Extern ); }
+	bool IsExternal() const { return ( functionState == FS_External ); }
 	bool IsEmpty() const { return ( functionState == FS_Empty ); }
 	
 	inline void SetDefined();
+	inline void SetEmpty();
 	inline void SetParsed( CFunctionRule** firstRule );
 	inline void SetCompiled( COperation* operation );
 	
@@ -66,26 +67,27 @@ private:
 inline void CFunction::SetDefined()
 {
 	assert( functionState == FS_Declared );
-	
 	functionState = FS_Defined;
+}
+
+inline void CFunction::SetEmpty()
+{
+	assert( functionState == FS_Declared );
+	functionState = FS_Empty;
 }
 
 inline void CFunction::SetParsed( CFunctionRule** _firstRule )
 {
 	assert( functionState == FS_Defined );
-	
 	firstRule = *_firstRule;
 	*_firstRule = 0;
-
 	functionState = FS_Parsed;
 }
 
 inline void CFunction::SetCompiled( COperation* operation )
 {
 	assert( functionState == FS_Parsed );
-
 	firstOperation = operation;
-
 	functionState = FS_Compiled;
 }
 
