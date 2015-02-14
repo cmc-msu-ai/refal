@@ -3,6 +3,54 @@
 
 namespace Refal2 {
 
+void HandyPrintFieldOfView( const CUnitList& fieldOfView )
+{
+	bool lastWasChar = false;
+	for( const CUnitNode* i = fieldOfView.GetFirst(); i != 0; i = i->Next() ) {
+		if( i->GetType() == UT_Char ) {
+			if( !lastWasChar ) {
+				std::cout << "'";
+				lastWasChar = true;
+			}
+		} else {
+			if( lastWasChar ) {
+				std::cout << "'";
+				lastWasChar = false;
+			}
+		}
+		switch( i->GetType() ) {
+			case UT_Char:
+				std::cout << i->Char();
+				break;
+			case UT_Label:
+				std::cout << "/" << LabelTable.GetLabelText( i->Label() ) << "/";
+				break;
+			case UT_Number:
+				std::cout << "/" << i->Number() << "/";
+				break;
+			case UT_LeftParen:
+				std::cout << "(";
+				break;
+			case UT_RightParen:
+				std::cout << ")";
+				break;
+			case UT_LeftBracket:
+				std::cout << "<";
+				break;
+			case UT_RightBracket:
+				std::cout << ">";
+				break;
+			default:
+				assert( false );
+				break;
+		}
+	}
+	if( lastWasChar ) {
+		std::cout << "'";
+	}
+	std::cout << std::endl;
+}
+
 void PrintUnit(const CUnit& unit, const CVariables* variables)
 {
 	switch( unit.GetType() ) {
@@ -39,7 +87,7 @@ void PrintUnit(const CUnit& unit, const CVariables* variables)
 			std::cout << "> ";
 			break;
 		default:
-			/* assert */
+			assert( false );
 			break;
 	}
 }

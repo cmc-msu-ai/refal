@@ -24,6 +24,8 @@ enum TUnitTypeMask {
 	UTM_Bracket = UT_LeftBracket | UT_RightBracket
 };
 
+void HandyPrintFieldOfView( const CUnitList& fieldOfView );
+
 void PrintUnit( const CUnit& unit, const CVariables* variables = 0 );
 bool CompareUnit( const CUnit& unitA, const CUnit& unitB );
 void PrintUnitList( const CUnitNode* fromNode, const CUnitNode* toNode,
