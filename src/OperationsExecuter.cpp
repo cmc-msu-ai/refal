@@ -3,17 +3,6 @@
 
 namespace Refal2 {
 
-COperationsExecuter::COperationsExecuter():
-	left( 0 ),
-	right( 0 ),
-	tableTop( 0 ),
-	operation( 0 ),
-	stackTop( 0 ),
-	lastAddedLeftParen( 0 ),
-	lastAddedLeftBracket( 0 )
-{
-}
-
 static const char* operationNames[] = {
 	"OT_Goto",
 	"OT_InsertJump",
@@ -109,53 +98,89 @@ static const char* operationNames[] = {
 	"OT_Copy_WV"
 };
 
-void COperationsExecuter::Run( const TLabel entry )
+TExecutionResult COperationsExecuter::Run( const TLabel entry,
+	CUnitList& fieldOfView, CUnitNode*& errorCall )
 {
-	fieldOfView.Empty();
+	COperationsExecuter executer( entry );
+	executer.fieldOfView.Move( &fieldOfView );
+	errorCall = executer.initialLeftBracket.PairedParen();
+	return executer.executionResult;
+}
+
+COperationsExecuter::COperationsExecuter( const TLabel entry ):
+	executionResult( ER_OK ),
+	left( 0 ), right( 0 ),
+	tableTop( 0 ),
+	operation( 0 ),
+	stackTop( 0 ),
+	initialLeftBracket( CUnit( UT_LeftBracket ) ),
+	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 )
+{
 	left = fieldOfView.Append( CUnit( UT_LeftBracket ) );
 	left->PairedParen() = 0;
 	fieldOfView.Append( CUnit( UT_Label ) )->Label() = entry;
 	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
 	right->PairedParen() = left;
-	
-	CUnitNode initialLeftBracket = CUnitNode( CUnit( UT_LeftBracket ) );
+
 	initialLeftBracket.PairedParen() = right;
 	while( initialLeftBracket.PairedParen() != 0 ) {
-		doFunction( initialLeftBracket );
+		doFunction();
+		if( executionResult != ER_OK ) {
+			break;
+		}
 	}
-	
-	std::cout << "\n\n\n-----------------------------------------\n\n";
-	HandyPrintFieldOfView( fieldOfView );
-	std::cout << "\n\n-----------------------------------------\n\n";
+	restoreLeftBrackets();
 }
 
-void COperationsExecuter::doFunction( CUnitNode& initialLeftBracket )
+void COperationsExecuter::restoreLeftBrackets()
 {
-	right = initialLeftBracket.PairedParen();
+	CUnitNode* rightBracket = initialLeftBracket.PairedParen();
+	while( rightBracket != 0 ) {
+		rightBracket = rightBracket->PairedParen();
+		rightBracket->SetType( UT_LeftBracket );
+		rightBracket = rightBracket->PairedParen();
+	}
+}
+
+void COperationsExecuter::doFunction()
+{
+	CUnitNode* savedRightBracket = initialLeftBracket.PairedParen();
+	right = savedRightBracket;
 	left = right->PairedParen();
 	CUnitNode* savedNextRightBracket = left->PairedParen();
 	left = left->Next();
-	const CFunction& function = LabelTable.GetLabelFunction( left->Label() );
-	if( function.IsCompiled() ) {
-		operation = static_cast<COperationNode*>( function.firstOperation );
-		tableTop = 0;
-		stackTop = 0;
-		lastAddedLeftParen = 0;
-		lastAddedLeftBracket = &initialLeftBracket;
-		initialLeftBracket.PairedParen() = 0;
-		saveToTable( left, right );
-		doFunctionBody();
-	} else if( function.IsExternal() ) {
-		// TODO: execute extern
-	} else if( function.IsEmpty() ) {
-		// TODO: error, can't execute empty function
+	if( left->IsLabel() ) {
+		const CFunction& function = LabelTable.GetLabelFunction( left->Label() );
+		if( function.IsCompiled() ) {
+			operation = static_cast<COperationNode*>( function.firstOperation );
+			tableTop = 0;
+			stackTop = 0;
+			lastAddedLeftParen = 0;
+			lastAddedLeftBracket = &initialLeftBracket;
+			initialLeftBracket.PairedParen() = 0;
+			saveToTable( left, right );
+			doFunctionBody();
+		} else if( function.IsExternal() ) {
+			// TODO: execute extern
+			executionResult = ER_WrongArgumentOfExternalFunction;
+		} else if( function.IsEmpty() ) {
+			// TODO: error, can't execute empty function
+			executionResult = ER_CallEmptyFunction;
+		} else {
+			assert( false );
+		}
 	} else {
-		assert( false );
+		// TODO: error, lost function label
+		executionResult = ER_LostFunctionLabel;
 	}
-	lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
+	if( executionResult == ER_OK ) {
+		lastAddedLeftBracket->PairedParen() = savedNextRightBracket;
+	} else {
+		initialLeftBracket.PairedParen() = savedRightBracket;
+	}
 }
 
-bool COperationsExecuter::doFunctionBody()
+void COperationsExecuter::doFunctionBody()
 {
 	while( true ) {
 		std::cout << operationNames[operation->type] << "\n";
@@ -172,7 +197,7 @@ bool COperationsExecuter::doFunctionBody()
 				break;
 			case OT_Return:
 				doReturn();
-				return true;
+				return;
 				break;
 			case OT_SetLeftBorder: // TTableIndex
 				setLeftBorder( operation->tableIndex );
@@ -479,12 +504,12 @@ bool COperationsExecuter::doFunctionBody()
 			nextOperation();
 		} else {
 			if( !fail() ) {
-				return false;
+				executionResult = ER_RecognitionImpossible;
+				return;
 			}
 		}
 	}
 	assert( false );
-	return false;
 }
 
 } // end of namespace refal2

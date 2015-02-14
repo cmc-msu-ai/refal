@@ -4,18 +4,27 @@
 
 namespace Refal2 {
 
+enum TExecutionResult {
+	ER_OK = 0,
+	ER_RecognitionImpossible,
+	ER_CallEmptyFunction,
+	ER_LostFunctionLabel,
+	ER_WrongArgumentOfExternalFunction
+};
+
 class COperationsExecuter {
 public:
-	COperationsExecuter();
+	static TExecutionResult Run( const TLabel entry, CUnitList& fieldOfView,
+		CUnitNode*& errorCall );
 	
-	void Run( const TLabel entry );
-
 private:
+	explicit COperationsExecuter( const TLabel entry );
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
 	
-	void doFunction( CUnitNode& initialLeftBracket );
-	bool doFunctionBody();
+	void restoreLeftBrackets();
+	void doFunction();
+	void doFunctionBody();
 	inline void nextOperation();
 	
 	inline bool checkQualifier( CUnitNode* const node,
@@ -155,6 +164,8 @@ private:
 	inline void move_WV( const TTableIndex tableIndex );
 	inline void copy_WV( const TTableIndex tableIndex );
 	
+	TExecutionResult executionResult;
+	
 	CUnitList fieldOfView;
 	CUnitNode* left;
 	CUnitNode* right;
@@ -173,6 +184,7 @@ private:
 	CStackData stack[128];
 	int stackTop;
 	
+	CUnitNode initialLeftBracket;
 	CUnitNode* lastAddedLeftParen;
 	CUnitNode* lastAddedLeftBracket;
 };

@@ -95,7 +95,7 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 int main(int argc, const char* argv[])
 {
 	try {
-		const char* filename = "../tests/simple.ref";
+		const char* filename = "../tests/btest.ref";
 		//const char* filename = "../tests/PROGRAM.REF";
 
 		if( argc == 2 ) {
@@ -125,7 +125,7 @@ int main(int argc, const char* argv[])
 
 		if( parser.HasErrors() ) {
 			std::cout << "Errors!\n\n";
-			throw false;
+			return 0;
 		}
 
 		COperationList program;
@@ -153,9 +153,34 @@ int main(int argc, const char* argv[])
 			entryLabel = LabelTable.AddLabel( "go" );
 		}
 		assert( LabelTable.GetLabelFunction( entryLabel ).IsCompiled() );
+		
+		CUnitList fieldOfView;
+		CUnitNode* errorCall = 0;
+		TExecutionResult executionResult = COperationsExecuter::Run( entryLabel,
+			fieldOfView, errorCall );
 
-		COperationsExecuter executer;
-		executer.Run( entryLabel );
+		std::cout << "\n\n----------------------------------\n\n";
+		switch( executionResult ) {
+			case ER_OK:
+				std::cout << "OK!\nFieldOfView: ";
+				break;
+			case ER_RecognitionImpossible:
+				std::cout << "RecognitionImpossible!\nFieldOfView: ";
+				break;
+			case ER_CallEmptyFunction:
+				std::cout << "CallEmptyFunction!\nFieldOfView: ";
+				break;
+			case ER_LostFunctionLabel:
+				std::cout << "LostFunctionLabel!\nFieldOfView: ";
+				break;
+			case ER_WrongArgumentOfExternalFunction:
+				std::cout << "WrongArgumentOfExternalFunction!\nFieldOfView: ";
+				break;
+			default:
+				assert( false );
+				break;
+		}
+		HandyPrintFieldOfView( fieldOfView );
 	} catch( bool ) {
 		return 1;
 	}
