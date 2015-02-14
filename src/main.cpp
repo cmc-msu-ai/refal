@@ -123,6 +123,11 @@ int main(int argc, const char* argv[])
 		
 		std::cout << "\n--------------------------------------------------\n\n";
 
+		if( parser.HasErrors() ) {
+			std::cout << "Errors!\n\n";
+			throw false;
+		}
+
 		COperationList program;
 		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
 			i = LabelTable.GetNextLabel( i ) )
@@ -151,7 +156,7 @@ int main(int argc, const char* argv[])
 
 		COperationsExecuter executer;
 		executer.Run( entryLabel );
-	} catch(bool) {
+	} catch( bool ) {
 		return 1;
 	}
 
