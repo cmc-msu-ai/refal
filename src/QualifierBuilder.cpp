@@ -4,7 +4,7 @@
 namespace Refal2 {
 
 const char* CQualifierBuilder::Alphabet = "abcdefghijklmnopqrstuvwxyz"
-											"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const char* CQualifierBuilder::Numbers = "0123456789";
 
 const CAnsiSet CQualifierBuilder::AnsiL = MakeFromString( Alphabet );
@@ -22,14 +22,13 @@ CAnsiSet CQualifierBuilder::MakeFromString( const char* ansiString )
 void CQualifierBuilder::Reset()
 {
 	negative = false;
-
+	
 	terms = S_None;
-	chars = S_None;
-
+	
 	charsBuilder.Reset();
 	labelsBuilder.Reset();
 	numbersBuilder.Reset();
-
+	
 	ansichars.reset();
 	ansicharsFixed.reset();
 }
@@ -55,18 +54,17 @@ void CQualifierBuilder::Export( CQualifier& qualifier )
 
 void CQualifierBuilder::AddChar( const TChar c )
 {
-	if( chars == S_None ) {
-		if( c >= 0 && static_cast<int>(c) < AnsiSetSize ) {
-			if( !ansicharsFixed.test( static_cast<unsigned int>( c ) ) ) {
-				ansichars.set( static_cast<unsigned int>( c ), !negative );
-				ansicharsFixed.set( static_cast<unsigned int>( c ) );
-			}
+	std::size_t tmpc = static_cast<std::size_t>( c );
+	if( tmpc >= 0 && tmpc < AnsiSetSize ) {
+		if( !ansicharsFixed.test( tmpc ) ) {
+			ansichars.set( tmpc, !negative );
+			ansicharsFixed.set( tmpc );
+		}
+	} else {
+		if( negative ) {
+			charsBuilder.Exclude( c );
 		} else {
-			if( negative ) {
-				charsBuilder.Exclude( c );
-			} else {
-				charsBuilder.Include( c );
-			}
+			charsBuilder.Include( c );
 		}
 	}
 }
@@ -91,28 +89,16 @@ void CQualifierBuilder::AddNumber( const TNumber number )
 
 void CQualifierBuilder::AddQualifier( const CQualifier& qualifier )
 {
-	if( chars == S_None ) {
-		if( negative ) {
-			/* ansichars */
-			ansichars &= ansicharsFixed | ~qualifier.ansichars;
-			/* chars */
-			if( qualifier.IsIncludeAllChars() ) {
-				charsBuilder.ExcludeAllExcept( qualifier.chars );
-			} else {
-				charsBuilder.Exclude( qualifier.chars );
-			}
-		} else {
-			/* ansichars */
-			ansichars |= ~ansicharsFixed & qualifier.ansichars;
-			/* chars */
-			if( qualifier.IsIncludeAllChars() ) {
-				charsBuilder.IncludeAllExcept( qualifier.chars );
-			} else {
-				charsBuilder.Include( qualifier.chars );
-			}
-		}
-	}
 	if( negative ) {
+		/* ansichars */
+		ansichars &= ansicharsFixed | ~qualifier.ansichars;
+		ansicharsFixed |= qualifier.ansichars;
+		/* chars */
+		if( qualifier.IsIncludeAllChars() ) {
+			charsBuilder.ExcludeAllExcept( qualifier.chars );
+		} else {
+			charsBuilder.Exclude( qualifier.chars );
+		}
 		/* labels */
 		if( qualifier.IsIncludeAllLabels() ) {
 			labelsBuilder.ExcludeAllExcept( qualifier.labels );
@@ -126,6 +112,15 @@ void CQualifierBuilder::AddQualifier( const CQualifier& qualifier )
 			numbersBuilder.Exclude( qualifier.numbers );
 		}
 	} else {
+		/* ansichars */
+		ansichars |= ~ansicharsFixed & qualifier.ansichars;
+		ansicharsFixed |= qualifier.ansichars;
+		/* chars */
+		if( qualifier.IsIncludeAllChars() ) {
+			charsBuilder.IncludeAllExcept( qualifier.chars );
+		} else {
+			charsBuilder.Include( qualifier.chars );
+		}
 		/* labels */
 		if( qualifier.IsIncludeAllLabels() ) {
 			labelsBuilder.IncludeAllExcept( qualifier.labels );
@@ -165,41 +160,35 @@ void CQualifierBuilder::AddN()
 
 void CQualifierBuilder::AddO()
 {
-	if( chars == S_None ) {
-		if( negative ) {
-			chars = S_No;
-			ansichars &= ansicharsFixed;
-			charsBuilder.ExcludeAll();
-		} else {
-			chars = S_Yes;
-			ansichars |= ~ansicharsFixed;
-			charsBuilder.IncludeAll();
-		}
+	if( negative ) {
+		ansichars &= ansicharsFixed;
+		ansicharsFixed.set();
+		charsBuilder.ExcludeAll();
+	} else {
+		ansichars |= ~ansicharsFixed;
+		ansicharsFixed.set();
+		charsBuilder.IncludeAll();
 	}
 }
 
 void CQualifierBuilder::AddL()
 {
-	if( chars == S_None ) {
-		if( negative ) {
-			ansichars &= ~AnsiL | ansicharsFixed;
-		} else {
-			ansichars |= AnsiL & ~ansicharsFixed;
-		}
-		ansicharsFixed |= AnsiL;
+	if( negative ) {
+		ansichars &= ~AnsiL | ansicharsFixed;
+	} else {
+		ansichars |= AnsiL & ~ansicharsFixed;
 	}
+	ansicharsFixed |= AnsiL;
 }
 
 void CQualifierBuilder::AddD()
 {
-	if( chars == S_None ) {
-		if( negative ) {
-			ansichars &= ~AnsiD | ansicharsFixed;
-		} else {
-			ansichars |= AnsiD & ~ansicharsFixed;
-		}
-		ansicharsFixed |= AnsiD;
+	if( negative ) {
+		ansichars &= ~AnsiD | ansicharsFixed;
+	} else {
+		ansichars |= AnsiD & ~ansicharsFixed;
 	}
+	ansicharsFixed |= AnsiD;
 }
 
 void CQualifierBuilder::AddB()

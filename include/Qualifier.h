@@ -6,7 +6,7 @@
 
 namespace Refal2 {
 
-const int AnsiSetSize = 128;
+const std::size_t AnsiSetSize = 128;
 typedef std::bitset<AnsiSetSize> CAnsiSet;
 
 enum TQualifierIncludeFlags {
