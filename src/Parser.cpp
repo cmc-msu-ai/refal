@@ -563,7 +563,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			if( !afterRightParen ) {
 				qualifierBuilder.AddNegative();
 			}
-			qualifierBuilder.Export( &currentQualifier );
+			qualifierBuilder.Export( currentQualifier );
 			addNamedQualifier();
 			state = PS_Begin;
 			break;
@@ -703,7 +703,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 				if( !afterRightParen ) {
 					qualifierBuilder.AddNegative();
 				}
-				qualifierBuilder.Export( &currentQualifier );
+				qualifierBuilder.Export( currentQualifier );
 			}
 			break;
 		case L_LeftBracket:

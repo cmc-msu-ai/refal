@@ -12,62 +12,62 @@ class CSetBuilder {
 public:
 	typedef std::set<T> CSet;
 
-	CSetBuilder()
-	{
-		Reset();
-	}
+	CSetBuilder() { Reset(); }
 
 	void Reset();
-	void Export(CFastSet<T>*, bool* include_all);
+	// return true if includes all elements without contained set
+	bool Export( CFastSet<T>& exportTo );
 
-	void Include(const T&);
-	void Include(const CSet&);
+	void Include( const T& element );
+	void Include( const CSet& elements );
 	void IncludeAll();
-	void IncludeAllExcept(const CSet&);
+	void IncludeAllExcept( const CSet& elements );
 
-	void Exclude(const T&);
-	void Exclude(const CSet&);
+	void Exclude( const T& element );
+	void Exclude( const CSet& elements );
 	void ExcludeAll();
-	void ExcludeAllExcept(const CSet&);
+	void ExcludeAllExcept( const CSet& elements );
 	
 private:
-	CSetBuilder(const CSetBuilder&);
-	CSetBuilder& operator=(const CSetBuilder&);
+	CSetBuilder( const CSetBuilder& );
+	CSetBuilder& operator=( const CSetBuilder& );
 
-	CSet yes, no, thru;
+	CSet yes;
+	CSet no;
+	CSet thru;
+
 	enum TStatus {
-		S_thru = 0,
-		S_no = -1,
-		S_yes = 1
+		S_Thru = 0,
+		S_No = -1,
+		S_Yes = 1
 	};
-	TStatus full_set_status;
+	TStatus fullSetStatus;
 };
 
 template<class T>
 void CSetBuilder<T>::Reset()
 {
-	full_set_status = S_thru;
+	fullSetStatus = S_Thru;
 	yes.clear();
 	no.clear();
 	thru.clear();
 }
 
 template<class T>
-void CSetBuilder<T>::Export(CFastSet<T>* set, bool* include_all)
+bool CSetBuilder<T>::Export( CFastSet<T>& exportTo )
 {
-	assert( full_set_status != S_thru && thru.empty() );
-	
-	if( full_set_status == S_yes ) {
-		*include_all = true;
-		*set = no;
+	assert( fullSetStatus != S_Thru && thru.empty() );
+	if( fullSetStatus == S_Yes ) {
+		exportTo = no;
+		return true;
 	} else {
-		*include_all = false;
-		*set = yes;
+		exportTo = yes;
+		return false;
 	}
 }
 
 template<class T>
-void CSetBuilder<T>::Include(const CSet& elements)
+void CSetBuilder<T>::Include( const CSet& elements )
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -78,40 +78,37 @@ void CSetBuilder<T>::Include(const CSet& elements)
 		YES = YES + (elements * THRU)
 		THRU = THRU \ elements
 	*/
-	if( full_set_status == S_thru ) {
-		::std::set_difference(elements.begin(), elements.end(),
-							  no.begin(), no.end(),
-							  ::std::inserter(yes, yes.end()));
+	if( fullSetStatus == S_Thru ) {
+		std::set_difference( elements.begin(), elements.end(),
+			no.begin(), no.end(), std::inserter( yes, yes.end() ) );
 	} else {
-		if( full_set_status == S_no ) {
-			::std::set_intersection(elements.begin(), elements.end(),
-									thru.begin(), thru.end(),
-									::std::inserter(yes, yes.end()));
+		if( fullSetStatus == S_No ) {
+			std::set_intersection( elements.begin(), elements.end(),
+				thru.begin(), thru.end(), std::inserter( yes, yes.end() ) );
 		}
 		CSet tmp;
-		::std::set_difference(thru.begin(), thru.end(),
-							  elements.begin(), elements.end(),
-							  ::std::inserter(tmp, tmp.end()));
+		std::set_difference( thru.begin(), thru.end(),
+			elements.begin(), elements.end(), std::inserter( tmp, tmp.end() ) );
 		thru = tmp;
 	}
 }
 
 template<class T>
-void CSetBuilder<T>::Include(const T& element)
+void CSetBuilder<T>::Include( const T& element )
 {
 	CSet tmp;
-	tmp.insert(element);
-	Include(tmp);
+	tmp.insert( element );
+	Include( tmp );
 }
 
 template<class T>
 void CSetBuilder<T>::IncludeAll()
 {
-	IncludeAllExcept(CSet());
+	IncludeAllExcept( CSet() );
 }
 
 template<class T>
-void CSetBuilder<T>::IncludeAllExcept(const CSet& elements)
+void CSetBuilder<T>::IncludeAllExcept( const CSet& elements )
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -123,25 +120,23 @@ void CSetBuilder<T>::IncludeAllExcept(const CSet& elements)
 		YES = YES + (THRU \ elements)
 		THRU = THRU * elements
 	*/
-	if( full_set_status == S_thru ) {
-		full_set_status = S_yes;
+	if( fullSetStatus == S_Thru ) {
+		fullSetStatus = S_Yes;
 		thru = elements;
 	} else {
-		if( full_set_status == S_no ) {
-			::std::set_difference(thru.begin(), thru.end(),
-								  elements.begin(), elements.end(),
-								  ::std::inserter(yes, yes.end()));
+		if( fullSetStatus == S_No ) {
+			std::set_difference( thru.begin(), thru.end(), elements.begin(),
+				elements.end(), std::inserter( yes, yes.end() ) );
 		}
 		CSet tmp;
-		::std::set_intersection(thru.begin(), thru.end(),
-								elements.begin(), elements.end(),
-								::std::inserter(tmp, tmp.end()));
+		std::set_intersection( thru.begin(), thru.end(),
+			elements.begin(), elements.end(), std::inserter( tmp, tmp.end() ) );
 		thru = tmp;
 	}
 }
 
 template<class T>
-void CSetBuilder<T>::Exclude(const CSet& elements)
+void CSetBuilder<T>::Exclude( const CSet& elements )
 {
 	/*
 	IF full_set_status == S_thru THEN
@@ -152,36 +147,33 @@ void CSetBuilder<T>::Exclude(const CSet& elements)
 	ELSE IF full_set_status == S_no THEN
 		THRU = THRU \ elements
 	*/
-	if( full_set_status == S_thru ) {
-		::std::set_difference(elements.begin(), elements.end(),
-							  yes.begin(), yes.end(),
-							  ::std::inserter(no, no.end()));
+	if( fullSetStatus == S_Thru ) {
+		std::set_difference( elements.begin(), elements.end(),
+			yes.begin(), yes.end(), std::inserter( no, no.end() ) );
 	} else {
-		if( full_set_status == S_yes ) {
-			::std::set_intersection(elements.begin(), elements.end(),
-									thru.begin(), thru.end(),
-									::std::inserter(no, no.end()));
+		if( fullSetStatus == S_Yes ) {
+			std::set_intersection( elements.begin(), elements.end(),
+				thru.begin(), thru.end(), std::inserter( no, no.end() ) );
 		}
 		CSet tmp;
-		::std::set_difference(thru.begin(), thru.end(),
-							  elements.begin(), elements.end(),
-							  ::std::inserter(tmp, tmp.end()));
+		std::set_difference( thru.begin(), thru.end(),
+			elements.begin(), elements.end(), std::inserter( tmp, tmp.end() ) );
 		thru = tmp;
 	}
 }
 
 template<class T>
-void CSetBuilder<T>::Exclude(const T& element)
+void CSetBuilder<T>::Exclude( const T& element )
 {
 	CSet tmp;
-	tmp.insert(element);
-	Exclude(tmp);
+	tmp.insert( element );
+	Exclude( tmp );
 }
 
 template<class T>
 void CSetBuilder<T>::ExcludeAll()
 {
-	ExcludeAllExcept(CSet());
+	ExcludeAllExcept( CSet() );
 }
 
 template<class T>
@@ -197,19 +189,17 @@ void CSetBuilder<T>::ExcludeAllExcept(const CSet& elements)
 	ELSE IF full_set_status == S_no THEN
 		THRU = THRU * elements
 	*/
-	if( full_set_status == S_thru ) {
-		full_set_status = S_no;
+	if( fullSetStatus == S_Thru ) {
+		fullSetStatus = S_No;
 		thru = elements;
 	} else {
-		if( full_set_status == S_yes ) {
-			::std::set_difference(thru.begin(), thru.end(),
-								  elements.begin(), elements.end(),
-								  ::std::inserter(no, no.end()));
+		if( fullSetStatus == S_Yes ) {
+			std::set_difference( thru.begin(), thru.end(), elements.begin(),
+				elements.end(), std::inserter( no, no.end() ) );
 		}
 		CSet tmp;
-		::std::set_intersection(thru.begin(), thru.end(),
-								elements.begin(), elements.end(),
-								::std::inserter(tmp, tmp.end()));
+		std::set_intersection( thru.begin(), thru.end(), elements.begin(),
+			elements.end(), std::inserter( tmp, tmp.end() ) );
 		thru = tmp;
 	}
 }

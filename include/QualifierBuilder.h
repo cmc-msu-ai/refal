@@ -10,14 +10,14 @@ public:
 	CQualifierBuilder()	{ Reset(); }
 
 	void Reset();
-	void Export(CQualifier* qualifier);
+	void Export( CQualifier& qualifier );
 	
 	bool IsNegative() const { return negative; }
 
-	void AddChar(TChar c);
-	void AddLabel(TLabel label);
-	void AddNumber(TNumber number);
-	void AddQualifier(const CQualifier& qualifier);
+	void AddChar( const TChar c );
+	void AddLabel( const TLabel label );
+	void AddNumber( const TNumber number );
+	void AddQualifier( const CQualifier& qualifier );
 	void AddNegative() { negative = !negative; }
 
 	void AddS() { AddF(); AddN(); AddO(); }
@@ -29,7 +29,7 @@ public:
 	void AddW() { AddS(); AddB(); }
 	void AddB();
 
-	static CAnsiSet MakeFromString(const char* ansiString);
+	static CAnsiSet MakeFromString( const char* ansiString );
 
 	static const char* Alphabet;
 	static const char* Numbers;
@@ -37,15 +37,15 @@ public:
 	static const CAnsiSet AnsiD;
 
 private:
-	CQualifierBuilder(const CQualifierBuilder&);
-	CQualifierBuilder& operator=(const CQualifierBuilder&);
+	CQualifierBuilder( const CQualifierBuilder& );
+	CQualifierBuilder& operator=( const CQualifierBuilder& );
 
 	bool negative;
 
 	enum TStatus {
-		S_none,
-		S_yes,
-		S_no
+		S_None,
+		S_Yes,
+		S_No
 	};
 	
 	TStatus terms;
