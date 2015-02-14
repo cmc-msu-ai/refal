@@ -39,7 +39,7 @@ public:
 	void Assign( CNodeType* first, CNodeType* last );
 	
 	void Empty();
-	bool IsEmpty() { return ( first == 0 ); }
+	bool IsEmpty() const { return ( first == 0 ); }
 	
 	inline void Swap( CNodeList* swapWith );
 	inline void Move( CNodeList* moveTo );
