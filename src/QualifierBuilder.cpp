@@ -55,7 +55,7 @@ void CQualifierBuilder::Export( CQualifier& qualifier )
 void CQualifierBuilder::AddChar( const TChar c )
 {
 	std::size_t tmpc = static_cast<std::size_t>( c );
-	if( tmpc >= 0 && tmpc < AnsiSetSize ) {
+	if( tmpc < AnsiSetSize ) {
 		if( !ansicharsFixed.test( tmpc ) ) {
 			ansichars.set( tmpc, !negative );
 			ansicharsFixed.set( tmpc );
