@@ -125,7 +125,7 @@ void COperationsExecuter::Run( const TLabel entry )
 	}
 	
 	std::cout << "\n\n\n-----------------------------------------\n\n";
-	PrintUnitList( fieldOfView );
+	HandyPrintFieldOfView( fieldOfView );
 	std::cout << "\n\n-----------------------------------------\n\n";
 }
 
