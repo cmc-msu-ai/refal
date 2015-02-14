@@ -37,9 +37,10 @@ class CUnit {
 	friend bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
 
 public:
-	explicit CUnit(TUnitType _type): type(_type) {}
+	explicit CUnit( TUnitType _type ): type( _type ) {}
 	
 	TUnitType GetType() const { return type; }
+	void SetType( TUnitType newType ) { type = newType; }
 	
 	bool IsVariable() const { return ( (type & UT_Variable) != 0 ); }
 	TVariableIndex& Variable() { return variable; }
