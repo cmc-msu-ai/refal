@@ -4,20 +4,23 @@
 
 using namespace Refal2;
 
-class CMyClass :
+class CErrorProcessor :
 	public IVariablesBuilderListener,
 	public IFunctionBuilderListener,
 	public IScannerListener,
 	public IParserListener
 {
 public:
-	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c);
-	virtual void OnParserError(const TParserErrorCodes errorCode);
-	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes errorCode);
-	virtual void OnVariablesBuilderError(const TVariablesBuilderErrorCodes errorCode);
+	virtual void OnScannerError( const TScannerErrorCodes errorCode, char c );
+	virtual void OnParserError( const TParserErrorCodes errorCode );
+	virtual void OnFunctionBuilderError(
+		const TFunctionBuilderErrorCodes errorCode );
+	virtual void OnVariablesBuilderError(
+		const TVariablesBuilderErrorCodes errorCode );
 };
 
-void CMyClass::OnScannerError(const TScannerErrorCodes errorCode, char c)
+void CErrorProcessor::OnScannerError( const TScannerErrorCodes errorCode,
+	char c )
 {
 	static const char* errorText[] = {
 		"SEC_UnexpectedControlSequence",
@@ -44,15 +47,14 @@ void CMyClass::OnScannerError(const TScannerErrorCodes errorCode, char c)
 		"SEC_UnclosedQualifier",
 		"SEC_UnexpectedEndOfFil"
 	};
-	
-	std::cout << "ScannerError: " /*<< line << ": " << localOffset << ": "*/;
-	/*if( c != '\0' ) {
+	/*std::cout << "ScannerError: " << line << ": " << localOffset << ": ";
+	if( c != '\0' ) {
 		std::cout << c << ": ";
 	}*/
-	std::cout << errorText[errorCode] << "\n";
+	std::cout << errorText[errorCode] << std::endl;
 }
 
-void CMyClass::OnParserError(const TParserErrorCodes errorCode)
+void CErrorProcessor::OnParserError( const TParserErrorCodes errorCode )
 {
 	static const char* errorText[] = {
 		"PEC_LineShouldBeginWithIdentifierOrSpace",
@@ -60,11 +62,11 @@ void CMyClass::OnParserError(const TParserErrorCodes errorCode)
 		"PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine",
 		"PEC_STUB"
 	};
-	
-	std::cout << errorText[errorCode] << "\n";
+	std::cout << errorText[errorCode] << std::endl;
 }
 
-void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes errorCode)
+void CErrorProcessor::OnFunctionBuilderError(
+	const Refal2::TFunctionBuilderErrorCodes errorCode )
 {
 	static const char* errorText[] = {
 		"FBEC_ThereAreNoRulesInFunction",
@@ -77,11 +79,11 @@ void CMyClass::OnFunctionBuilderError(const Refal2::TFunctionBuilderErrorCodes e
 		"FBEC_UnclosedLeftBracketInRightPart",
 		"FBEC_IllegalQualifierInRightPart"
 	};
-	
-	printf("CFunctionBuilder error: %s\n", errorText[errorCode]);
+	std::cout << errorText[errorCode] << std::endl;
 }
 
-void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes errorCode)
+void CErrorProcessor::OnVariablesBuilderError(
+	const Refal2::TVariablesBuilderErrorCodes errorCode )
 {
 	static const char* errorText[] = {
 		"VBEC_InvalidVatiableName",
@@ -89,22 +91,20 @@ void CMyClass::OnVariablesBuilderError(const Refal2::TVariablesBuilderErrorCodes
 		"VBEC_TypeOfVariableDoesNotMatch",
 		"VBEC_NoSuchVariableInLeftPart"
 	};
-	
-	printf("CVariablesBuilder error: %s\n", errorText[errorCode]);
+	std::cout << errorText[errorCode] << std::endl;
 }
 
-int main(int argc, const char* argv[])
+int main( int argc, const char* argv[] )
 {
 	try {
 		const char* filename = "../tests/btest.ref";
-		//const char* filename = "../tests/PROGRAM.REF";
 
 		if( argc == 2 ) {
 			filename = argv[1];
 		}
 
-		CMyClass ca;
-		CParser parser( &ca );
+		CErrorProcessor errorProcessor;
+		CParser parser( &errorProcessor );
 
 		std::ifstream f( filename );
 		if( !f.good() ) {
