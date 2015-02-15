@@ -1,0 +1,17 @@
+program START
+
+go = <test ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
+	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
+	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
+	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
+	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')+
+	'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'+
+	'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'+
+	'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'+
+	'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'+
+	'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'>
+
+test (e1'x'e2'x'e3)e4'y'e5'z'e6 =+
+	'{'e1'}{'e2'}{'e3'}{'e4'}{'e5'}{'e6'}'
+
+	END
