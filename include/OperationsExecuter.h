@@ -207,9 +207,11 @@ inline void COperationsExecuter::saveToTable( CUnitNode* const node )
 {
 	table[tableTop] = node;
 	tableTop++;
+#ifdef _DEBUG
 	if( node != 0 ) {
 		PrintUnit( *node );
 	}
+#endif
 }
 
 inline void COperationsExecuter::saveToTable( CUnitNode* const nodeA,
@@ -217,9 +219,11 @@ inline void COperationsExecuter::saveToTable( CUnitNode* const nodeA,
 {
 	saveToTable( nodeA );
 	saveToTable( nodeB );
+#ifdef _DEBUG
 	if( nodeA != 0 && nodeB != 0 ) {
 		PrintUnitList( nodeA, nodeB, 0 );
 	}
+#endif
 }
 
 inline bool COperationsExecuter::isEmpty() const
