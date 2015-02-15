@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 
-#ifdef _MSC_VER
+#if defined( _MSC_VER ) && defined( _DEBUG )
 #define assert(expr) if( !(expr) ) { __debugbreak(); }
 #else
-#define assert(expr) if( !(expr) ) { printf("%s %d\n", __FILE__, __LINE__); throw false; }
+#define assert(expr) if( !(expr) ) { printf("Internal program error: %s %d\n", __FILE__, __LINE__); throw false; }
 #endif
