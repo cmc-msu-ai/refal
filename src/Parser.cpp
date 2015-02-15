@@ -77,7 +77,7 @@ void CParser::ProcessLexem()
 				state = PS_BeginIdentBlankS;
 				storedOffset = offset;
 			} else if( lexem == L_EndOfFile ) {
-				/* TODO: error */
+				/* TODO: error */ error( PEC_STUB );
 			} else {
 				addDeclarationOfFunction( storedName ); // action
 				state = PS_ProcessRuleDirection;
@@ -133,7 +133,7 @@ void CParser::ProcessLexem()
 				state = PS_BeginEntryBlank;
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginEntryBlank:
@@ -142,7 +142,7 @@ void CParser::ProcessLexem()
 				addEntryFunction(ToLower(lexemString) ); // action
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		/* end of entry */
@@ -152,7 +152,7 @@ void CParser::ProcessLexem()
 				state = PS_BeginEmptyComma;
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginEmptyComma:
@@ -162,7 +162,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginEmptyIdent:
@@ -173,7 +173,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		/* end of empty */
@@ -183,7 +183,7 @@ void CParser::ProcessLexem()
 				state = PS_BeginExtrnComma;
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginExtrnComma:
@@ -193,7 +193,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginExtrnIdent:
@@ -208,7 +208,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginExtrnLeftParen:
@@ -218,7 +218,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginExtrnInnerIdent:
@@ -227,7 +227,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		case PS_BeginExtrnOnlyComma:
@@ -238,7 +238,7 @@ void CParser::ProcessLexem()
 			} else if( lexem == L_Blank ) {
 			} else {
 				state = PS_WaitNewline;
-				/* TODO: ERROR */
+				/* TODO: ERROR */ error( PEC_STUB );
 			}
 			break;
 		/* end of extrn */
@@ -307,6 +307,7 @@ void CParser::ProcessLexem()
 					break;
 				case L_Comma:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_Label:
 					CFunctionBuilder::AddLabel( lexemLabel );
@@ -321,6 +322,7 @@ void CParser::ProcessLexem()
 					break;
 				case L_Qualifier:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_LeftParen:
 					CFunctionBuilder::AddLeftParen();
@@ -330,9 +332,11 @@ void CParser::ProcessLexem()
 					break;
 				case L_LeftBracket:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_RightBracket:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_Identificator:
 					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
@@ -353,6 +357,7 @@ void CParser::ProcessLexem()
 					CFunctionBuilder::AddEndOfLeft();
 					CFunctionBuilder::AddEndOfRight();
 					// TODO: error
+					error( PEC_STUB );
 					break;
 				case L_EndOfFile:
 					lexem = L_NewLine;
@@ -376,10 +381,12 @@ void CParser::ProcessLexem()
 					currentQualifier = qualifier->second;
 				} else {
 					// TODO: error, ignore
+					error( PEC_STUB );
 				}
 			} else {
 				state = PS_ProcessLeftPartOfRule;
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		case PS_ProcessLeftPartOfRuleAfterVariableQualifier:
@@ -396,6 +403,7 @@ void CParser::ProcessLexem()
 				}
 			} else {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		case PS_ProcessRightPartOfRule:
@@ -407,6 +415,7 @@ void CParser::ProcessLexem()
 					break;
 				case L_Comma:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_Label:
 					CFunctionBuilder::AddLabel( lexemLabel );
@@ -421,6 +430,7 @@ void CParser::ProcessLexem()
 					break;
 				case L_Qualifier:
 					// TODO: error, ignore
+					error( PEC_STUB );
 					break;
 				case L_LeftParen:
 					CFunctionBuilder::AddLeftParen();
@@ -445,6 +455,7 @@ void CParser::ProcessLexem()
 							offset += 2;
 						} else {
 							// TODO: error, ignore
+							error( PEC_STUB );
 						}
 					}
 					break;
@@ -486,10 +497,12 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 		case L_Equal:
 			state = PS_ProcessNamedQualifierAfterError;
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Comma:
 			state = PS_ProcessNamedQualifierAfterError;
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Label:
 			qualifierBuilder.AddLabel( lexemLabel );
@@ -510,6 +523,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 				qualifierBuilder.AddQualifier( qualifier->second );
 			} else {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		}
@@ -517,6 +531,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			if( qualifierBuilder.IsNegative() ) {
 				state = PS_ProcessNamedQualifierAfterError;
 				// TODO: error, ignore
+				error( PEC_STUB );
 			} else {
 				qualifierBuilder.AddNegative();
 			}
@@ -528,15 +543,18 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 			} else {
 				state = PS_ProcessNamedQualifierAfterError;
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		case L_LeftBracket:
 			state = PS_ProcessNamedQualifierAfterError;
 			// TODO: error, ignore
+			error( PEC_STUB );
 			break;
 		case L_RightBracket:
 			state = PS_ProcessNamedQualifierAfterError;
 			// TODO: error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Identificator:
 		{
@@ -554,6 +572,7 @@ void CParser::processNamedQualifier(const bool afterRightParen)
 					default:
 						state = PS_ProcessNamedQualifierAfterError;
 						// TODO: error, ignore
+						error( PEC_STUB );
 						break;
 				}
 			}
@@ -586,9 +605,11 @@ void CParser::processNamedQualifierAfterError()
 			break;
 		case L_Equal:
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Comma:
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Label:
 		case L_Number:
@@ -600,12 +621,14 @@ void CParser::processNamedQualifierAfterError()
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier == namedQualifiers.end() ) {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		}
 		case L_LeftParen:
 			if( qualifierBuilder.IsNegative() ) {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			} else {
 				qualifierBuilder.AddNegative();
 			}
@@ -615,13 +638,16 @@ void CParser::processNamedQualifierAfterError()
 				qualifierBuilder.AddNegative();
 			} else {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		case L_LeftBracket:
 			// TODO: error, ignore
+			error( PEC_STUB );
 			break;
 		case L_RightBracket:
 			// TODO: error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Identificator:
 		{
@@ -633,6 +659,7 @@ void CParser::processNamedQualifierAfterError()
 						break;
 					default:
 						// TODO: error, ignore
+						error( PEC_STUB );
 						break;
 				}
 			}
@@ -659,11 +686,13 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 		case L_Equal:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_Comma:
 			state = PS_ProcessVariableQualifierAfterError;
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Label:
 			qualifierBuilder.AddLabel( lexemLabel );
@@ -684,6 +713,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 				qualifierBuilder.AddQualifier( qualifier->second );
 			} else {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		}
@@ -709,11 +739,13 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 		case L_LeftBracket:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_RightBracket:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_Identificator:
@@ -732,6 +764,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 					default:
 						state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 						// TODO: error
+						error( PEC_STUB );
 						ProcessLexem();
 						return;
 						break;
@@ -743,6 +776,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 		case L_EndOfFile:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		default:
@@ -759,10 +793,12 @@ void CParser::processVariableQualifierAfterError()
 		case L_Equal:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_Comma:
 			// TODO: Error, ignore
+			error( PEC_STUB );
 			break;
 		case L_Label:
 		case L_Number:
@@ -774,12 +810,14 @@ void CParser::processVariableQualifierAfterError()
 			qualifier = namedQualifiers.find( ToLower( lexemString ) );
 			if( qualifier == namedQualifiers.end() ) {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			}
 			break;
 		}
 		case L_LeftParen:
 			if( qualifierBuilder.IsNegative() ) {
 				// TODO: error, ignore
+				error( PEC_STUB );
 			} else {
 				qualifierBuilder.AddNegative();
 			}
@@ -794,11 +832,13 @@ void CParser::processVariableQualifierAfterError()
 		case L_LeftBracket:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_RightBracket:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_Identificator:
@@ -812,6 +852,7 @@ void CParser::processVariableQualifierAfterError()
 					default:
 						state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 						// TODO: error
+						error( PEC_STUB );
 						ProcessLexem();
 						return;
 						break;
@@ -823,6 +864,7 @@ void CParser::processVariableQualifierAfterError()
 		case L_EndOfFile:
 			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
 			// TODO: error
+			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		default:
@@ -840,6 +882,7 @@ void CParser::addDeclarationOfFunction(const std::string& name)
 
 	if( !tmpFunction.IsDeclared() ) {
 		// TODO: error, ignore
+		error( PEC_STUB );
 	} else {
 		tmpFunction.SetDefined();
 
@@ -872,8 +915,9 @@ void CParser::addNamedQualifier()
 	CPair pair = namedQualifiers.insert(
 		std::make_pair( storedName, currentQualifier ) );
 	
-	if( pair.second ) {
+	if( !pair.second ) {
 		// TODO: error, redeclaration of qualifier
+		error( PEC_STUB );
 	}
 }
 
@@ -888,8 +932,10 @@ void CParser::addEmptyFunction( const std::string& name )
 		// TODO: warning, such empty function %function% already defined
 	} else if( emptyFunction.IsDefined() || emptyFunction.IsParsed() ) {
 		// TODO: error, %function% already defined in program
+		error( PEC_STUB );
 	} else if( emptyFunction.IsExternal() ) {
 		// TODO: error, %function% already defined as external function
+		error( PEC_STUB );
 	} else {
 		assert( false );
 	}
@@ -903,11 +949,14 @@ void CParser::addEntryFunction( const std::string& name )
 		CFunction& entryFunction = LabelTable.GetLabelFunction( entryLabel );
 		if( entryFunction.IsEmpty() ) {
 			// TODO: error, entry %function% cannot be empty function
+			error( PEC_STUB );
 		} else if( entryFunction.IsExternal() ) {
 			// TODO: error, entry %function% cannot be external function
+			error( PEC_STUB );
 		}
 	} else {
 		// TODO: error, redeclaration of entry
+		error( PEC_STUB );
 	}
 }
 
@@ -921,10 +970,13 @@ void CParser::addExtrnFunction( const std::string& name,
 		// TODO: add external
 	} else if( externalFunction.IsEmpty() ) {
 		// TODO: error, %function% already defined as empty function
+		error( PEC_STUB );
 	} else if( externalFunction.IsDefined() || externalFunction.IsParsed() ) {
 		// TODO: error, %function% already defined in program
+		error( PEC_STUB );
 	} else if( externalFunction.IsExternal() ) {
 		// TODO: error, %function% already defined as external function
+		error( PEC_STUB );
 	} else {
 		assert( false );
 	}

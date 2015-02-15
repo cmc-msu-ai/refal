@@ -51,7 +51,8 @@ enum TParserState {
 enum TParserErrorCodes {
 	PEC_LineShouldBeginWithIdentifierOrSpace,
 	PEC_NewLineExpected,
-	PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine
+	PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
+	PEC_STUB
 };
 
 class IParserListener {

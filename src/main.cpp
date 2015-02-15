@@ -44,7 +44,7 @@ void CMyClass::OnScannerError(const TScannerErrorCodes errorCode, char c)
 		"SEC_UnclosedQualifier",
 		"SEC_UnexpectedEndOfFil"
 	};
-
+	
 	std::cout << "ScannerError: " /*<< line << ": " << localOffset << ": "*/;
 	/*if( c != '\0' ) {
 		std::cout << c << ": ";
@@ -57,9 +57,10 @@ void CMyClass::OnParserError(const TParserErrorCodes errorCode)
 	static const char* errorText[] = {
 		"PEC_LineShouldBeginWithIdentifierOrSpace",
 		"PEC_NewLineExpected",
-		"PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine"
+		"PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine",
+		"PEC_STUB"
 	};
-
+	
 	std::cout << errorText[errorCode] << "\n";
 }
 
@@ -122,12 +123,12 @@ int main(int argc, const char* argv[])
 		}
 		
 		std::cout << "\n--------------------------------------------------\n\n";
-
+		
 		if( parser.HasErrors() ) {
 			std::cout << "Errors!\n\n";
 			return 0;
 		}
-
+		
 		COperationList program;
 		for( int i = LabelTable.GetFirstLabel(); i != InvalidLabel;
 			i = LabelTable.GetNextLabel( i ) )
@@ -145,9 +146,9 @@ int main(int argc, const char* argv[])
 				function.SetCompiled( operation );
 			}
 		}
-
-		std::cout << "\n\n----------------------------------\n\n";
-
+		
+		std::cout << "\n--------------------------------------------------\n\n";
+		
 		TLabel entryLabel = parser.GetEntryLabel();
 		if( entryLabel == InvalidLabel ) {
 			entryLabel = LabelTable.AddLabel( "go" );
@@ -158,8 +159,9 @@ int main(int argc, const char* argv[])
 		CUnitNode* errorCall = 0;
 		TExecutionResult executionResult = COperationsExecuter::Run( entryLabel,
 			fieldOfView, errorCall );
-
-		std::cout << "\n\n----------------------------------\n\n";
+		
+		std::cout << "\n--------------------------------------------------\n\n";
+		
 		switch( executionResult ) {
 			case ER_OK:
 				std::cout << "OK!\nFieldOfView: ";
