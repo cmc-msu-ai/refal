@@ -84,18 +84,18 @@ class CScanner :
 	public CListener<IScannerListener>
 {
 public:
-	inline CScanner(IScannerListener* listener = 0);
+	CScanner(IScannerListener* listener = 0);
 
 	void Reset();
 
-	int GetCharOffset() { return localOffset; }
-	int GetLexemOffset() { return offset; }
-	int GetLine() { return line; }
+	int GetCharOffset() const { return localOffset; }
+	int GetLexemOffset() const { return offset; }
+	int GetLineNumber() const { return line; }
 
-	void AddChar(char c);
+	void AddChar( char c );
 	void AddEndOfFile() { processEndOfFile(); }
 
-	static std::string ToLower(const std::string& data);
+	static std::string ToLower( const std::string& data );
 
 protected:
 	virtual void ProcessLexem();
@@ -109,12 +109,12 @@ protected:
 	std::string lexemString;
 
 	// insensitive to case
-	inline bool identificatorIs(const std::string& toCompare) const;
+	bool identificatorIs( const std::string& toCompare ) const;
 
 private:
-	void processChar(char c);
+	void processChar( char c );
 	void processEndOfFile();
-	inline void error(const TScannerErrorCodes errorCode, const char c = '\0');
+	void error( const TScannerErrorCodes errorCode, const char c = '\0' );
 
 	TScannerState state;
 	int localOffset;
@@ -128,12 +128,12 @@ inline CScanner::CScanner(IScannerListener* listener):
 	Reset();
 }
 
-inline bool CScanner::identificatorIs(const std::string& toCompare) const
+inline bool CScanner::identificatorIs( const std::string& toCompare ) const
 {
 	return ( lexem == L_Identificator && toCompare == ToLower( lexemString ) );
 }
 
-inline void CScanner::error(const TScannerErrorCodes errorCode, const char c)
+inline void CScanner::error( const TScannerErrorCodes errorCode, const char c )
 {
 	SetErrors();
 	if( CListener<IScannerListener>::HasListener() ) {
