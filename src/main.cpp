@@ -4,6 +4,69 @@
 
 using namespace Refal2;
 
+namespace Refal2 {
+
+class CStandartFunctionTable : std::map<std::string, void*> {
+public:
+	bool FindByName( const std::string& name,
+		void*& standartFunction ) const;
+};
+
+static void strangePrint( const CUnitList& expression )
+{
+	for( const CUnitNode* i = expression.GetFirst(); i != 0; i = i->Next() ) {
+		switch( i->GetType() ) {
+			case UT_Char:
+				std::cout << i->Char();
+				break;
+			case UT_Label:
+				std::cout << "'" << LabelTable.GetLabelText( i->Label() ) << "'";
+				break;
+			case UT_Number:
+				std::cout << "'" << i->Number() << "'";
+				break;
+			case UT_LeftParen:
+				std::cout << "(";
+				break;
+			case UT_RightParen:
+				std::cout << ")";
+				break;
+			default:
+				assert( false );
+				break;
+		}
+	}
+	std::cout << std::endl;
+}
+
+bool ExtrnPrint( CUnitList& argument, std::string& errorText )
+{
+	strangePrint( argument );
+	return true;
+}
+
+bool ExtrnPrintm( CUnitList& argument, std::string& errorText )
+{
+	HandyPrintFieldOfView( argument );
+	return true;
+}
+
+bool ExtrnProut( CUnitList& argument, std::string& errorText )
+{
+	strangePrint( argument );
+	argument.Empty();
+	return true;
+}
+
+bool ExtrnProutm( CUnitList& argument, std::string& errorText )
+{
+	HandyPrintFieldOfView( argument );
+	argument.Empty();
+	return true;
+}
+
+}
+
 class CErrorProcessor :
 	public IVariablesBuilderListener,
 	public IFunctionBuilderListener,
@@ -11,17 +74,24 @@ class CErrorProcessor :
 	public IParserListener
 {
 public:
-	virtual void OnScannerError( const TScannerErrorCodes errorCode, char c );
-	virtual void OnParserError( const TParserErrorCodes errorCode );
-	virtual void OnFunctionBuilderError(
-		const TFunctionBuilderErrorCodes errorCode );
+	CErrorProcessor(): parser( 0 ) {}
+
+	virtual void OnScannerError( TScannerErrorCode errorCode, char c );
+	virtual void OnParserError( TParserErrorCode errorCode );
+	virtual void OnFunctionBuilderError( TFunctionBuilderErrorCode errorCode );
 	virtual void OnVariablesBuilderError(
-		const TVariablesBuilderErrorCodes errorCode );
+		TVariablesBuilderErrorCode errorCode );
+
+	void SetParser( const CParser* _parser ) { parser = _parser; }
+	const CParser* GetParser() const { return parser; }
+
+private:
+	const CParser* parser;
 };
 
-void CErrorProcessor::OnScannerError( const TScannerErrorCodes errorCode,
-	char c )
+void CErrorProcessor::OnScannerError( TScannerErrorCode errorCode, char c )
 {
+	assert( parser != 0 );
 	static const char* errorText[] = {
 		"SEC_UnexpectedControlSequence",
 		"SEC_SymbolAfterPlus",
@@ -47,27 +117,31 @@ void CErrorProcessor::OnScannerError( const TScannerErrorCodes errorCode,
 		"SEC_UnclosedQualifier",
 		"SEC_UnexpectedEndOfFil"
 	};
-	/*std::cout << "ScannerError: " << line << ": " << localOffset << ": ";
+	std::cout << parser->GetLineNumber() << ":"
+		<< parser->GetCharOffset() << ": " << errorText[errorCode];
 	if( c != '\0' ) {
-		std::cout << c << ": ";
-	}*/
-	std::cout << errorText[errorCode] << std::endl;
+		std::cout << ": " << c;
+	}
+	std::cout << std::endl;
 }
 
-void CErrorProcessor::OnParserError( const TParserErrorCodes errorCode )
+void CErrorProcessor::OnParserError( TParserErrorCode errorCode )
 {
+	assert( parser != 0 );
 	static const char* errorText[] = {
 		"PEC_LineShouldBeginWithIdentifierOrSpace",
 		"PEC_NewLineExpected",
 		"PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine",
 		"PEC_STUB"
 	};
-	std::cout << errorText[errorCode] << std::endl;
+	std::cout << parser->GetLineNumber() << ":" << parser->GetCharOffset()
+		<< ": " << errorText[errorCode] << std::endl;
 }
 
 void CErrorProcessor::OnFunctionBuilderError(
-	const Refal2::TFunctionBuilderErrorCodes errorCode )
+	TFunctionBuilderErrorCode errorCode )
 {
+	assert( parser != 0 );
 	static const char* errorText[] = {
 		"FBEC_ThereAreNoRulesInFunction",
 		"FBEC_IllegalLeftBracketInLeftPart",
@@ -77,34 +151,40 @@ void CErrorProcessor::OnFunctionBuilderError(
 		"FBEC_UnclosedLeftParenInLeftPart",
 		"FBEC_UnclosedLeftParenInRightPart",
 		"FBEC_UnclosedLeftBracketInRightPart",
-		"FBEC_IllegalQualifierInRightPart"
+		"FBEC_ThereAreMultiplePartsSeparatorInRules",
+		"FBEC_ThereAreNoPartsSeparatorInRules"
 	};
-	std::cout << errorText[errorCode] << std::endl;
+	std::cout << parser->GetLineNumber() << ":" << parser->GetCharOffset()
+		<< ": " << errorText[errorCode] << std::endl;
 }
 
 void CErrorProcessor::OnVariablesBuilderError(
-	const Refal2::TVariablesBuilderErrorCodes errorCode )
+	TVariablesBuilderErrorCode errorCode )
 {
+	assert( parser != 0 );
 	static const char* errorText[] = {
 		"VBEC_InvalidVatiableName",
 		"VBEC_NoSuchTypeOfVariable",
 		"VBEC_TypeOfVariableDoesNotMatch",
 		"VBEC_NoSuchVariableInLeftPart"
 	};
-	std::cout << errorText[errorCode] << std::endl;
+	std::cout << parser->GetLineNumber() << ":" << parser->GetCharOffset()
+		<< ": " << errorText[errorCode] << std::endl;
 }
 
 int main( int argc, const char* argv[] )
 {
 	try {
-		const char* filename = "../tests/btest.ref";
+		const char* filename = "../tests/print_test.ref";
 
 		if( argc == 2 ) {
 			filename = argv[1];
 		}
 
+
 		CErrorProcessor errorProcessor;
 		CParser parser( &errorProcessor );
+		errorProcessor.SetParser( &parser );
 
 		std::ifstream f( filename );
 		if( !f.good() ) {

@@ -30,9 +30,11 @@ enum TFunctionState {
 	FS_Defined,
 	FS_Parsed,
 	FS_Compiled,
-	FS_External,
-	FS_Empty
+	FS_Empty,
+	FS_External
 };
+
+typedef bool (*TExternalFunction)( CUnitList& argument, std::string& errorText );
 
 class CFunction {
 	friend class CFunctionCompiler;
@@ -48,19 +50,21 @@ public:
 	bool IsDefined() const { return ( functionState == FS_Declared ); }
 	bool IsParsed() const { return ( functionState == FS_Parsed ); }
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
-	bool IsExternal() const { return ( functionState == FS_External ); }
 	bool IsEmpty() const { return ( functionState == FS_Empty ); }
+	bool IsExternal() const { return ( functionState == FS_External ); }
 	
-	inline void SetDefined();
-	inline void SetEmpty();
-	inline void SetParsed( CFunctionRule** firstRule );
-	inline void SetCompiled( COperation* operation );
+	void SetDefined();
+	void SetParsed( CFunctionRule** firstRule );
+	void SetCompiled( COperation* operation );
+	void SetEmpty();
+	void SetExternal( TExternalFunction externalFunction );
 	
 private:
 	TFunctionState functionState;
 	union {
 		CFunctionRule* firstRule;
 		COperation* firstOperation;
+		TExternalFunction externalFunction;
 	};
 };
 
@@ -68,12 +72,6 @@ inline void CFunction::SetDefined()
 {
 	assert( functionState == FS_Declared );
 	functionState = FS_Defined;
-}
-
-inline void CFunction::SetEmpty()
-{
-	assert( functionState == FS_Declared );
-	functionState = FS_Empty;
 }
 
 inline void CFunction::SetParsed( CFunctionRule** _firstRule )
@@ -91,13 +89,20 @@ inline void CFunction::SetCompiled( COperation* operation )
 	functionState = FS_Compiled;
 }
 
-enum TFunctionBuilderState {
-	FBS_Direction,
-	FBS_Left,
-	FBS_Right
-};
+inline void CFunction::SetEmpty()
+{
+	assert( functionState == FS_Declared );
+	functionState = FS_Empty;
+}
 
-enum TFunctionBuilderErrorCodes {
+inline void CFunction::SetExternal( TExternalFunction _externalFunction )
+{
+	assert( functionState == FS_Declared );
+	functionState = FS_External;
+	externalFunction = _externalFunction;
+}
+
+enum TFunctionBuilderErrorCode {
 	FBEC_ThereAreNoRulesInFunction,
 	FBEC_IllegalLeftBracketInLeftPart,
 	FBEC_IllegalRightBracketInLeftPart,
@@ -106,12 +111,13 @@ enum TFunctionBuilderErrorCodes {
 	FBEC_UnclosedLeftParenInLeftPart,
 	FBEC_UnclosedLeftParenInRightPart,
 	FBEC_UnclosedLeftBracketInRightPart,
-	FBEC_IllegalQualifierInRightPart
+	FBEC_ThereAreMultiplePartsSeparatorInRules,
+	FBEC_ThereAreNoPartsSeparatorInRules
 };
 
 class IFunctionBuilderListener {
 public:
-	virtual void OnFunctionBuilderError(const TFunctionBuilderErrorCodes) = 0;
+	virtual void OnFunctionBuilderError( TFunctionBuilderErrorCode ) = 0;
 };
 
 class CFunctionBuilder :
@@ -119,45 +125,39 @@ class CFunctionBuilder :
 	public CListener<IFunctionBuilderListener>
 {
 public:
-	explicit CFunctionBuilder(IFunctionBuilderListener* listener = 0);
+	explicit CFunctionBuilder( IFunctionBuilderListener* listener = 0 );
 	~CFunctionBuilder() { Reset(); }
-	
-	TFunctionBuilderState GetState() const { return state; }
-	bool IsDirectionState() const { return ( state == FBS_Direction ); }
-	bool IsLeftState() const { return ( state == FBS_Left ); }
-	bool IsRightState() const { return ( state == FBS_Right ); }
-	
-	const CUnitNode* GetLastAddedUnit() const { return acc.GetLast(); }
-	
+
 	void Reset();
-	void Export(CFunction* function);
+	void Export( CFunction& function );
+
+	bool IsProcessRightPart() const { return isProcessRightPart; }
 	
-	void AddDirection(bool _isRightDirection = false);
+	void SetRightDirection() { isRightDirection = true; }
 	void AddEndOfLeft();
 	void AddEndOfRight();
-	inline void AddChar(TChar c);
-	inline void AddLabel(TLabel label);
-	inline void AddNumber(TNumber number);
-	void AddLeftVariable(TVariableType type, TVariableName name,
-		CQualifier* qualifier = 0);
-	void AddRightVariable(TVariableType type, TVariableName name);
+	void AddChar(TChar c);
+	void AddLabel(TLabel label);
+	void AddNumber(TNumber number);
+	void AddVariable( TVariableType type, TVariableName name,
+		CQualifier* qualifier = 0 );
 	void AddLeftParen();
 	void AddRightParen();
 	void AddLeftBracket();
 	void AddRightBracket();
 
 private:
-	CFunctionBuilder(const CFunctionBuilder&);
-	CFunctionBuilder& operator=(const CFunctionBuilder&);
+	CFunctionBuilder( const CFunctionBuilder& );
+	CFunctionBuilder& operator=( const CFunctionBuilder& );
 
 	virtual void OnErrors();
 	
-	inline void emptyStack();	
-	inline void error(const TFunctionBuilderErrorCodes errorCode);
+	void emptyStack();
+	void error( TFunctionBuilderErrorCode errorCode );
 	void emptyRules();
 	void addRule();
 	
-	TFunctionBuilderState state;
+	bool isProcessRightPart;
 	bool isRightDirection;
 	CUnitList acc;
 	CUnitList leftPart;
@@ -173,7 +173,7 @@ inline void CFunctionBuilder::emptyStack()
 	}
 }
 	
-inline void CFunctionBuilder::error(const TFunctionBuilderErrorCodes errorCode)
+inline void CFunctionBuilder::error( TFunctionBuilderErrorCode errorCode )
 {
 	SetErrors();
 	if( CListener<IFunctionBuilderListener>::HasListener() ) {
@@ -182,21 +182,21 @@ inline void CFunctionBuilder::error(const TFunctionBuilderErrorCodes errorCode)
 	}
 }
 
-inline void CFunctionBuilder::AddChar(TChar c)
+inline void CFunctionBuilder::AddChar( TChar c )
 {
 	if( !HasErrors() ) {
 		acc.AppendChar( c );
 	}
 }
 
-inline void CFunctionBuilder::AddLabel(TLabel label)
+inline void CFunctionBuilder::AddLabel( TLabel label )
 {
 	if( !HasErrors() ) {
 		acc.AppendLabel( label );
 	}
 }
 
-inline void CFunctionBuilder::AddNumber(TNumber number)
+inline void CFunctionBuilder::AddNumber( TNumber number )
 {
 	if( !HasErrors() ) {
 		acc.AppendNumber( number );

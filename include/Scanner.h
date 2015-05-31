@@ -48,7 +48,7 @@ enum TScannerState {
 	SS_StringOctalCode
 };
 
-enum TScannerErrorCodes {
+enum TScannerErrorCode {
 	SEC_UnexpectedControlSequence,
 	SEC_SymbolAfterPlus,
 	SEC_UnexpectedCharacter,
@@ -76,7 +76,7 @@ enum TScannerErrorCodes {
 
 class IScannerListener {
 public:
-	virtual void OnScannerError(const TScannerErrorCodes errorCode, char c) = 0;
+	virtual void OnScannerError( TScannerErrorCode errorCode, char c) = 0;
 };
 
 class CScanner :
@@ -114,7 +114,7 @@ protected:
 private:
 	void processChar( char c );
 	void processEndOfFile();
-	void error( const TScannerErrorCodes errorCode, const char c = '\0' );
+	void error( TScannerErrorCode errorCode, char c = '\0' );
 
 	TScannerState state;
 	int localOffset;
@@ -133,7 +133,7 @@ inline bool CScanner::identificatorIs( const std::string& toCompare ) const
 	return ( lexem == L_Identificator && toCompare == ToLower( lexemString ) );
 }
 
-inline void CScanner::error( const TScannerErrorCodes errorCode, const char c )
+inline void CScanner::error( TScannerErrorCode errorCode, char c )
 {
 	SetErrors();
 	if( CListener<IScannerListener>::HasListener() ) {

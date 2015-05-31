@@ -10,16 +10,16 @@ const TTableIndex InvalideTableIndex = -1;
 
 class CHole : public CUnitList {
 public:
-	CHole(CUnitList* hole, const TTableIndex left, const TTableIndex right);
-	CHole(CUnitNode* const first, CUnitNode* const last,
-		const TTableIndex left, const TTableIndex right);
+	CHole( CUnitList* hole, TTableIndex left, TTableIndex right );
+	CHole( CUnitNode* first, CUnitNode* last,
+		TTableIndex left, TTableIndex right );
 	
-	CHole(const CHole&);
-	CHole& operator=(const CHole&);
+	CHole( const CHole& );
+	CHole& operator=( const CHole& );
 	
-	void SetLeft(const TTableIndex _left) { left = _left; }
+	void SetLeft( TTableIndex _left ) { left = _left; }
 	TTableIndex GetLeft() const { return left; }
-	void SetRight(const TTableIndex _right) { right = _right; }
+	void SetRight( TTableIndex _right ) { right = _right; }
 	TTableIndex GetRight() const { return right; }
 	
 private:
@@ -38,7 +38,7 @@ struct CHolesTuple {
 	CHoleList holes;
 	int stackDepth;
 	
-	explicit CHolesTuple(int _stackDepth): stackDepth(_stackDepth) {}
+	explicit CHolesTuple( int _stackDepth ): stackDepth( _stackDepth ) {}
 };
 
 class CFunctionCompilerBase : public COperationsBuilder {
@@ -50,34 +50,33 @@ class CLeftPartCompiler : public CFunctionCompilerBase {
 protected:
 	CLeftPartCompiler();
 	
-	void CompileLeftPart(CUnitList* leftPart, const bool isRightDirection);
+	void CompileLeftPart( CUnitList* leftPart, bool isRightDirection );
 	
 private:
 	void removeHole();
 	
 	typedef void (COperationsBuilder::*TMatchDuplicateFunction)
-		(const TVariableIndex variableIndex, const bool saveInTable);
+		( TVariableIndex variableIndex, bool saveInTable );
 	typedef void (COperationsBuilder::*TMatchFunction)
-		(CQualifier*, const bool addValueToTable);
+		( CQualifier&, bool addValueToTable );
 	
-	bool setVariable(const TVariableIndex variableIndex);
-	void matchVariable(const TVariableIndex variableIndex,
-		const TMatchFunction function);
-	void matchDuplicateVariable(const TVariableIndex variableIndex,
-		const TMatchDuplicateFunction function);
+	bool setVariable( TVariableIndex variableIndex);
+	void matchVariable( TVariableIndex variableIndex, TMatchFunction function);
+	void matchDuplicateVariable( TVariableIndex variableIndex,
+		TMatchDuplicateFunction function);
 	
 	//inline bool isMarkedVariable(CUnitNode* unit);
-	inline bool isVE(CUnitNode* unit) const;
-	inline bool isFreeVE(CUnitNode* unit) const;
+	bool isVE( CUnitNode* unit ) const;
+	bool isFreeVE( CUnitNode* unit ) const;
 	
 	//CVariablesMask makeVariablesMask(const CHole& hole) const;
 	//void splitIntoClasses(CHole* const holes);
 	
-	void matchVE(const bool isRightDirection);
+	void matchVE( bool isRightDirection );
 	void checkBorders();
 	void matchElement();
-	bool tryMatchLeftVariable(CUnitNode* left);
-	bool tryMatchRightVariable(CUnitNode* right);
+	bool tryMatchLeftVariable( CUnitNode* left );
+	bool tryMatchRightVariable( CUnitNode* right );
 	
 	void matchEmptyExpression();
 	void matchClosedE();
@@ -115,13 +114,13 @@ inline bool CLeftPartCompiler::isMarkedVariable(CUnitNode* unit)
 }
 #endif
 
-inline bool CLeftPartCompiler::isVE(CUnitNode* unit) const
+inline bool CLeftPartCompiler::isVE( CUnitNode* unit ) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
-		variables.GetVariable( unit->Variable() )->TypeIs( 'v', 'e' ) );
+		variables.GetVariable( unit->Variable() ).TypeIs( 'v', 'e' ) );
 }
 
-inline bool CLeftPartCompiler::isFreeVE(CUnitNode* unit) const
+inline bool CLeftPartCompiler::isFreeVE( CUnitNode* unit ) const
 {
 	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
 }
@@ -130,15 +129,15 @@ inline bool CLeftPartCompiler::isFreeVE(CUnitNode* unit) const
 
 class CRightPartCompiler : public CLeftPartCompiler {
 protected:
-	void CompileRightPart(CUnitList* rightPart);
+	void CompileRightPart( CUnitList* rightPart );
 };
 
 class CFunctionCompiler : public CRightPartCompiler {
 public:
-	void Compile(CFunction* function);
+	void Compile( CFunction* function );
 
 private:
-	void compileRule(CFunctionRule* rule);
+	void compileRule( CFunctionRule* rule );
 };
 
 } // end of namespace refal2

@@ -41,14 +41,13 @@ enum TParserState {
 	PS_ProcessVariableQualifierAfterError,
 	
 	PS_ProcessRuleDirection,
-	PS_ProcessLeftPartOfRule,
-	PS_ProcessLeftPartOfRuleAfterVariableType,
-	PS_ProcessLeftPartOfRuleAfterVariableQualifier,
-	PS_ProcessRightPartOfRule,
-	PS_ProcessRightPartOfRuleAfterLeftBracket
+	PS_ProcessRule,
+	PS_ProcessRuleAfterVariableType,
+	PS_ProcessRuleAfterVariableQualifier,
+	PS_ProcessRuleAfterLeftBracket
 };
 
-enum TParserErrorCodes {
+enum TParserErrorCode {
 	PEC_LineShouldBeginWithIdentifierOrSpace,
 	PEC_NewLineExpected,
 	PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
@@ -57,7 +56,7 @@ enum TParserErrorCodes {
 
 class IParserListener {
 public:
-	virtual void OnParserError( const TParserErrorCodes errorCode ) = 0;
+	virtual void OnParserError( TParserErrorCode errorCode ) = 0;
 };
 
 class CParser :
@@ -74,7 +73,7 @@ public:
 private:
 	virtual void ProcessLexem();
 	
-	inline void error( const TParserErrorCodes errorCode );
+	inline void error( TParserErrorCode errorCode );
 	
 	void processNamedQualifier( const bool afterRightParen = false );
 	void processNamedQualifierAfterError();
@@ -108,7 +107,7 @@ private:
 	CQualifierBuilder qualifierBuilder;
 };
 
-inline void CParser::error( const TParserErrorCodes errorCode )
+inline void CParser::error( TParserErrorCode errorCode )
 {
 	SetErrors();
 	if( CListener<IParserListener>::HasListener() ) {

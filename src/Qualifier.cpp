@@ -5,8 +5,8 @@
 
 namespace Refal2 {
 
-static void printAnsiSet(const CAnsiSet& ansichars, const std::string& chars,
-	const std::string& mark)
+static void printAnsiSet( const CAnsiSet& ansichars, const std::string& chars,
+	const std::string& mark )
 {
 	bool isInclude = false;
 	if( ansichars.count() > chars.length() / 2 ) {
@@ -32,8 +32,8 @@ static void printAnsiSet(const CAnsiSet& ansichars, const std::string& chars,
 	}
 }
 
-static void printChars(const CFastSet<TChar>& chars, const CAnsiSet& ansichars,
-	bool isIncludeAll)
+static void printChars( const CFastSet<TChar>& chars, const CAnsiSet& ansichars,
+	bool isIncludeAll )
 {
 	CAnsiSet L = ansichars & CQualifierBuilder::AnsiL;
 	CAnsiSet D = ansichars & CQualifierBuilder::AnsiD;
@@ -83,7 +83,7 @@ static void printChars(const CFastSet<TChar>& chars, const CAnsiSet& ansichars,
 	} 
 }
 
-static void printLabels(const CFastSet<TLabel>& labels, bool isIncludeAll)
+static void printLabels( const CFastSet<TLabel>& labels, bool isIncludeAll )
 {
 	if( isIncludeAll && !labels.IsEmpty() ) {
 		std::cout << "(";
@@ -106,7 +106,7 @@ static void printLabels(const CFastSet<TLabel>& labels, bool isIncludeAll)
 	}
 }
 
-static void printNumbers(const CFastSet<TNumber>& numbers, bool isIncludeAll)
+static void printNumbers( const CFastSet<TNumber>& numbers, bool isIncludeAll )
 {
 	if( isIncludeAll && !numbers.IsEmpty() ) {
 		std::cout << "(";
@@ -129,7 +129,7 @@ static void printNumbers(const CFastSet<TNumber>& numbers, bool isIncludeAll)
 	}
 }
 
-void PrintQualifier(const CQualifier& qualifier)
+void PrintQualifier( const CQualifier& qualifier )
 {
 	if( !qualifier.IsEmpty() ) {
 		std::cout << "( ";
@@ -144,7 +144,6 @@ void PrintQualifier(const CQualifier& qualifier)
 		} else {
 			std::cout << "(B) ";
 		}
-
 		std::cout << ")";
 	}
 }
@@ -161,25 +160,25 @@ void CQualifier::Empty()
 bool CQualifier::IsEmpty() const
 {
 	// !(~ansichars).any() equal to ansichars.all() from std++11
-	return ( ( ( flags & QIF_All ) == QIF_All ) && !(~ansichars).any() &&
-		chars.IsEmpty() && labels.IsEmpty() && numbers.IsEmpty() );
+	return ( ( ( flags & QIF_All ) == QIF_All ) && !(~ansichars).any()
+		&& chars.IsEmpty() && labels.IsEmpty() && numbers.IsEmpty() );
 }
 
-void CQualifier::Swap(CQualifier* swapWith)
+void CQualifier::Swap( CQualifier& swapWith )
 {
-	std::swap( flags, swapWith->flags );
-	std::swap( ansichars, swapWith->ansichars );
-	swapWith->chars.Swap( &chars );
-	swapWith->labels.Swap( &labels );
-	swapWith->numbers.Swap( &numbers );
+	std::swap( flags, swapWith.flags );
+	std::swap( ansichars, swapWith.ansichars );
+	swapWith.chars.Swap( &chars );
+	swapWith.labels.Swap( &labels );
+	swapWith.numbers.Swap( &numbers );
 }
 
-bool CQualifier::Check(const CUnit* unit) const
+bool CQualifier::Check( const CUnit& unit ) const
 {
-	switch( unit->GetType() ) {
+	switch( unit.GetType() ) {
 		case UT_Char:
 		{
-			TChar c = unit->Char();
+			TChar c = unit.Char();
 			if( c >= 0 && static_cast<int>(c) < AnsiSetSize ) {
 				return ansichars.test(c);
 			} else {
@@ -188,10 +187,10 @@ bool CQualifier::Check(const CUnit* unit) const
 			break;
 		}
 		case UT_Label:
-			return ( labels.Has( unit->Label() ) != IsIncludeAllLabels() );
+			return ( labels.Has( unit.Label() ) != IsIncludeAllLabels() );
 			break;
 		case UT_Number:
-			return ( numbers.Has( unit->Number() ) != IsIncludeAllNumbers() );
+			return ( numbers.Has( unit.Number() ) != IsIncludeAllNumbers() );
 			break;
 		case UT_LeftParen:
 		case UT_RightParen:
@@ -204,32 +203,32 @@ bool CQualifier::Check(const CUnit* unit) const
 	return false;
 }
 
-void CQualifier::DestructiveIntersection(CQualifier* withQualifier)
+void CQualifier::DestructiveIntersection( CQualifier& withQualifier )
 {
 	if( IsEmpty() ) {
 		Swap( withQualifier );
 	} else {
 
-		ansichars &= withQualifier->ansichars;
+		ansichars &= withQualifier.ansichars;
 
-		if( !withQualifier->IsIncludeTerms() ) {
+		if( !withQualifier.IsIncludeTerms() ) {
 			flags &= ~QIF_Terms;
 		}
 	
 #define INTERSECT(FLAG, SET)\
 		if( ( flags & FLAG ) != 0 ) {\
-			if( ( withQualifier->flags & FLAG ) != 0 ) {\
-				SET += withQualifier->SET;\
+			if( ( withQualifier.flags & FLAG ) != 0 ) {\
+				SET += withQualifier.SET;\
 			} else {\
 				flags &= ~FLAG;\
-				withQualifier->SET.Swap( &SET );\
-				SET -= withQualifier->SET;\
+				withQualifier.SET.Swap( &SET );\
+				SET -= withQualifier.SET;\
 			}\
 		} else {\
-			if( ( withQualifier->flags & FLAG ) != 0 ) {\
-				SET -= withQualifier->SET;\
+			if( ( withQualifier.flags & FLAG ) != 0 ) {\
+				SET -= withQualifier.SET;\
 			} else {\
-				SET *= withQualifier->SET;\
+				SET *= withQualifier.SET;\
 			}\
 		}
 
@@ -238,7 +237,7 @@ void CQualifier::DestructiveIntersection(CQualifier* withQualifier)
 		INTERSECT( QIF_AllNumbers, numbers );
 #undef INTERSECT
 
-		withQualifier->Empty();
+		withQualifier.Empty();
 	}
 }
 

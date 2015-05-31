@@ -62,10 +62,11 @@ public:
 	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
 		CNodeType* toNode );
 	
+	void Detach() { Detach( GetFirst(), GetLast() ); }
 	void Detach( CNodeType* node ) { Detach( node, node ); }
 	void Detach( CNodeType* fromNode, CNodeType* toNode );
 	
-	void Remove( CNodeType* node) { Detach( node ); free( node ); }
+	void Remove( CNodeType* node ) { Detach( node ); free( node ); }
 	void Remove( CNodeType* fromNode, CNodeType* toNode );
 	
 	CNodeType* Move( CNodeType* nodeAfter, CNodeType* node );

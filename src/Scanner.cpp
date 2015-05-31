@@ -95,7 +95,7 @@ void CScanner::processChar(char c)
 {
 	if( c == '\r' ) {
 	} else if( c == '\x7f' || ( c <= '\x1f' && c != '\n' && c != '\t' ) ) {
-		error( SEC_UnexpectedControlSequence, c );
+		//error( SEC_UnexpectedControlSequence, c );
 	} else {
 		switch( state ) {
 			case SS_BeginOfLine:

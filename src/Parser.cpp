@@ -113,6 +113,10 @@ void CParser::ProcessLexem()
 				state = PS_OnlyNewline;
 				addEndOfFunction(); // action
 				/* TODO: WARNING */
+			} else if( identificatorIs( "start" ) ) {
+				state = PS_OnlyNewline;
+				addEndOfFunction(); // action
+				/* TODO: WARNING */
 			} else if( identificatorIs( "extrn" ) ) {
 				state = PS_BeginExtrn;
 				addEndOfFunction(); // action
@@ -286,23 +290,20 @@ void CParser::ProcessLexem()
 		case PS_ProcessRuleDirection:
 			if( lexem == L_Blank ) {
 			} else if( identificatorIs("l") ) {
-				state = PS_ProcessLeftPartOfRule;
-				CFunctionBuilder::AddDirection();
+				state = PS_ProcessRule;
 			} else if( identificatorIs("r") ) {
-				state = PS_ProcessLeftPartOfRule;
-				CFunctionBuilder::AddDirection( true /* isRightDirection */ );
+				state = PS_ProcessRule;
+				CFunctionBuilder::SetRightDirection();
 			} else {
-				state = PS_ProcessLeftPartOfRule;
-				CFunctionBuilder::AddDirection();
+				state = PS_ProcessRule;
 				ProcessLexem();
 			}
 			break;
-		case PS_ProcessLeftPartOfRule:
+		case PS_ProcessRule:
 			switch( lexem ) {
 				case L_Blank:
 					break;
 				case L_Equal:
-					state = PS_ProcessRightPartOfRule;
 					CFunctionBuilder::AddEndOfLeft();
 					break;
 				case L_Comma:
@@ -331,33 +332,28 @@ void CParser::ProcessLexem()
 					CFunctionBuilder::AddRightParen();
 					break;
 				case L_LeftBracket:
-					// TODO: error, ignore
-					error( PEC_STUB );
+					state = PS_ProcessRuleAfterLeftBracket;
+					CFunctionBuilder::AddLeftBracket();
 					break;
 				case L_RightBracket:
-					// TODO: error, ignore
-					error( PEC_STUB );
+					CFunctionBuilder::AddRightBracket();
 					break;
 				case L_Identificator:
 					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
 						TVariableType type = ::tolower( lexemString[i] );
-						
 						if( i < lexemString.size() - 1 ) {
 							TVariableName name = lexemString[i + 1];
-							CFunctionBuilder::AddLeftVariable( type, name );
+							CFunctionBuilder::AddVariable( type, name );
 							offset += 2;
 						} else {
-							state = PS_ProcessLeftPartOfRuleAfterVariableType;
+							state = PS_ProcessRuleAfterVariableType;
 							variableType = type;
 						}
 					}
 					break;
 				case L_NewLine:
 					state = PS_Begin;
-					CFunctionBuilder::AddEndOfLeft();
 					CFunctionBuilder::AddEndOfRight();
-					// TODO: error
-					error( PEC_STUB );
 					break;
 				case L_EndOfFile:
 					lexem = L_NewLine;
@@ -370,11 +366,11 @@ void CParser::ProcessLexem()
 					break;
 			}
 			break;
-		case PS_ProcessLeftPartOfRuleAfterVariableType:
+		case PS_ProcessRuleAfterVariableType:
 			if( lexem == L_LeftParen ) {
 				state = PS_BeginProcessVariableQualifier;
 			} else if( lexem == L_Qualifier ) {
-				state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+				state = PS_ProcessRuleAfterVariableQualifier;
 				CQualifierMap::const_iterator qualifier = namedQualifiers.end();
 				qualifier = namedQualifiers.find( ToLower( lexemString ) );
 				if( qualifier != namedQualifiers.end() ) {
@@ -384,19 +380,19 @@ void CParser::ProcessLexem()
 					error( PEC_STUB );
 				}
 			} else {
-				state = PS_ProcessLeftPartOfRule;
+				state = PS_ProcessRule;
 				// TODO: error, ignore
 				error( PEC_STUB );
 			}
 			break;
-		case PS_ProcessLeftPartOfRuleAfterVariableQualifier:
-			state = PS_ProcessLeftPartOfRule;
+		case PS_ProcessRuleAfterVariableQualifier:
+			state = PS_ProcessRule;
 			if( lexem == L_Identificator ) {
 				TVariableName name = lexemString[0];
 				lexemString.erase(0, 1);
-				CFunctionBuilder::AddLeftVariable( variableType, name,
+				CFunctionBuilder::AddVariable( variableType, name,
 					&currentQualifier );
-				
+
 				if( !lexemString.empty() ) {
 					offset++;
 					ProcessLexem();
@@ -406,76 +402,8 @@ void CParser::ProcessLexem()
 				error( PEC_STUB );
 			}
 			break;
-		case PS_ProcessRightPartOfRule:
-			switch( lexem ) {
-				case L_Blank:
-					break;
-				case L_Equal:
-					CFunctionBuilder::AddEndOfLeft();
-					break;
-				case L_Comma:
-					// TODO: error, ignore
-					error( PEC_STUB );
-					break;
-				case L_Label:
-					CFunctionBuilder::AddLabel( lexemLabel );
-					break;
-				case L_Number:
-					CFunctionBuilder::AddNumber( lexemNumber );
-					break;
-				case L_String:
-					for( std::size_t i = 0; i < lexemString.size(); i++ ) {
-						CFunctionBuilder::AddChar( lexemString[i] );
-					}
-					break;
-				case L_Qualifier:
-					// TODO: error, ignore
-					error( PEC_STUB );
-					break;
-				case L_LeftParen:
-					CFunctionBuilder::AddLeftParen();
-					break;
-				case L_RightParen:
-					CFunctionBuilder::AddRightParen();
-					break;
-				case L_LeftBracket:
-					state = PS_ProcessRightPartOfRuleAfterLeftBracket;
-					CFunctionBuilder::AddLeftBracket();
-					break;
-				case L_RightBracket:
-					CFunctionBuilder::AddRightBracket();
-					break;
-				case L_Identificator:
-					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
-						TVariableType type = ::tolower( lexemString[i] );
-						
-						if( i < lexemString.size() - 1 ) {
-							TVariableName name = lexemString[i + 1];
-							CFunctionBuilder::AddRightVariable( type, name );
-							offset += 2;
-						} else {
-							// TODO: error, ignore
-							error( PEC_STUB );
-						}
-					}
-					break;
-				case L_NewLine:
-					CFunctionBuilder::AddEndOfRight();
-					state = PS_Begin;
-					break;
-				case L_EndOfFile:
-					lexem = L_NewLine;
-					ProcessLexem();
-					lexem = L_EndOfFile;
-					ProcessLexem();
-					break;
-				default:
-					assert( false );
-					break;
-			}
-			break;
-		case PS_ProcessRightPartOfRuleAfterLeftBracket:
-			state = PS_ProcessRightPartOfRule;
+		case PS_ProcessRuleAfterLeftBracket:
+			state = PS_ProcessRule;
 			if( lexem == L_Identificator ) {
 				TLabel label = LabelTable.AddLabel( ToLower( lexemString ) );
 				CFunctionBuilder::AddLabel( label );
@@ -684,7 +612,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 		case L_Blank:
 			break;
 		case L_Equal:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -729,7 +657,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 				qualifierBuilder.AddNegative();
 				state = PS_ProcessVariableQualifierAfterRightParen;
 			} else {
-				state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+				state = PS_ProcessRuleAfterVariableQualifier;
 				if( !afterRightParen ) {
 					qualifierBuilder.AddNegative();
 				}
@@ -737,13 +665,13 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 			}
 			break;
 		case L_LeftBracket:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_RightBracket:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -762,7 +690,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 					case 'w': qualifierBuilder.AddW(); break;
 					case 'b': qualifierBuilder.AddB(); break;
 					default:
-						state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+						state = PS_ProcessRuleAfterVariableQualifier;
 						// TODO: error
 						error( PEC_STUB );
 						ProcessLexem();
@@ -774,7 +702,7 @@ void CParser::processVariableQualifier(const bool afterRightParen)
 		}
 		case L_NewLine:
 		case L_EndOfFile:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -791,7 +719,7 @@ void CParser::processVariableQualifierAfterError()
 		case L_Blank:
 			break;
 		case L_Equal:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -826,17 +754,17 @@ void CParser::processVariableQualifierAfterError()
 			if( qualifierBuilder.IsNegative() ) {
 				qualifierBuilder.AddNegative();
 			} else {
-				state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+				state = PS_ProcessRuleAfterVariableQualifier;
 			}
 			break;
 		case L_LeftBracket:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
 			break;
 		case L_RightBracket:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -850,7 +778,7 @@ void CParser::processVariableQualifierAfterError()
 					case 'l': case 'd': case 'w': case 'b':
 						break;
 					default:
-						state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+						state = PS_ProcessRuleAfterVariableQualifier;
 						// TODO: error
 						error( PEC_STUB );
 						ProcessLexem();
@@ -862,7 +790,7 @@ void CParser::processVariableQualifierAfterError()
 		}
 		case L_NewLine:
 		case L_EndOfFile:
-			state = PS_ProcessLeftPartOfRuleAfterVariableQualifier;
+			state = PS_ProcessRuleAfterVariableQualifier;
 			// TODO: error
 			error( PEC_STUB );
 			ProcessLexem();
@@ -896,7 +824,7 @@ void CParser::addEndOfFunction()
 		CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
 		
 		if( !tmpFunction.IsDeclared() ) {
-			CFunctionBuilder::Export( &tmpFunction );
+			CFunctionBuilder::Export( tmpFunction );
 			
 			PrintFunction( tmpFunction );
 			std::cout << "addEndOfFunction: {" <<
@@ -960,6 +888,11 @@ void CParser::addEntryFunction( const std::string& name )
 	}
 }
 
+bool ExtrnPrint( CUnitList& argument, std::string& errorText );
+bool ExtrnPrintm( CUnitList& argument, std::string& errorText );
+bool ExtrnProut( CUnitList& argument, std::string& errorText );
+bool ExtrnProutm( CUnitList& argument, std::string& errorText );
+
 void CParser::addExtrnFunction( const std::string& name,
 	const std::string& standartName )
 {
@@ -968,6 +901,17 @@ void CParser::addExtrnFunction( const std::string& name,
 	CFunction& externalFunction = LabelTable.GetLabelFunction( externalLabel );
 	if( externalFunction.IsDeclared() ) {
 		// TODO: add external
+		if( standartName == "print" ) {
+			externalFunction.SetExternal( ExtrnPrint );
+		} else if( standartName == "printm" ) {
+			externalFunction.SetExternal( ExtrnPrintm );
+		} else if( standartName == "prout" ) {
+			externalFunction.SetExternal( ExtrnProut );
+		} else if( standartName == "proutm" ) {
+			externalFunction.SetExternal( ExtrnProutm );
+		} else {
+			//error( PEC_STUB );
+		}
 	} else if( externalFunction.IsEmpty() ) {
 		// TODO: error, %function% already defined as empty function
 		error( PEC_STUB );

@@ -152,93 +152,90 @@ typedef COperationList::CNodeType COperationNode;
 class COperationsBuilder {
 public:
 	COperationsBuilder() { Reset(); }
+
 	void Reset();
 	void Export( COperationList& saveTo );
-	
+
 	void AddMatchingComplete();
 	void AddReturn();
-	void AddDecrementStackDepth( const int count );
-	void AddSetLeftBorder( const TTableIndex );
-	void AddSetRightBorder( const TTableIndex );
+	void AddDecrementStackDepth( int count );
+	void AddSetLeftBorder( TTableIndex );
+	void AddSetRightBorder( TTableIndex );
 	// matching empty expression
 	void AddMatchEmptyExpression();
 	// matching symbols
-	void AddMatchLeftChar( const TChar c );
-	void AddMatchLeftLabel( const TLabel label );
-	void AddMatchLeftNumber( const TNumber number );
-	void AddMatchRightChar( const TChar c );
-	void AddMatchRightLabel( const TLabel label );
-	void AddMatchRightNumber( const TNumber number );
+	void AddMatchLeftChar( TChar c );
+	void AddMatchLeftLabel( TLabel label );
+	void AddMatchLeftNumber( TNumber number );
+	void AddMatchRightChar( TChar c );
+	void AddMatchRightLabel( TLabel label );
+	void AddMatchRightNumber( TNumber number );
 	// matching parens
 	void AddMatchLeftParens();
 	void AddMatchRightParens();
 	// matching S-variables
-	void AddMatchLeft_S( CQualifier* qualifier, const bool saveInTable );
-	void AddMatchRight_S( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchLeft_S( CQualifier& qualifier, bool saveInTable );
+	void AddMatchRight_S( CQualifier& qualifier, bool saveInTable );
 	// matching duplicate of S-variables
-	void AddMatchLeftDuplicate_S( const TTableIndex, const bool saveInTable );
-	void AddMatchRightDuplicate_S( const TTableIndex, const bool saveInTable );
+	void AddMatchLeftDuplicate_S( TTableIndex, bool saveInTable );
+	void AddMatchRightDuplicate_S( TTableIndex, bool saveInTable );
 	// matching W-variables
-	void AddMatchLeft_W( CQualifier* qualifier, const bool saveInTable );
-	void AddMatchRight_W( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchLeft_W( CQualifier& qualifier, bool saveInTable );
+	void AddMatchRight_W( CQualifier& qualifier, bool saveInTable );
 	// matching duplicate of WV-variables
-	void AddMatchLeftDuplicate_WV( const TTableIndex, const bool saveInTable );
-	void AddMatchRightDuplicate_WV( const TTableIndex, const bool saveInTable );
+	void AddMatchLeftDuplicate_WV( TTableIndex, bool saveInTable );
+	void AddMatchRightDuplicate_WV( TTableIndex, bool saveInTable );
 	// matching duplicate of E-variables
-	void AddMatchLeftDuplicate_E( const TTableIndex, const bool saveInTable );
-	void AddMatchRightDuplicate_E( const TTableIndex, const bool saveInTable );
+	void AddMatchLeftDuplicate_E( TTableIndex, bool saveInTable );
+	void AddMatchRightDuplicate_E( TTableIndex, bool saveInTable );
 	// matching closed V-variables
-	void AddMatchClosed_V( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchClosed_V( CQualifier& qualifier, bool saveInTable );
 	// matching closed E-variables
-	void AddMatchClosed_E( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchClosed_E( CQualifier& qualifier, bool saveInTable );
 	// matching V-variables by qualifier
-	void AddMacthLeftMaxByQualifier_V( CQualifier* qualifier,
-		const bool saveInTable );
-	void AddMacthRightMaxByQualifier_V( CQualifier* qualifier,
-		const bool saveInTable );
+	void AddMacthLeftMaxByQualifier_V( CQualifier& qualifier,
+		bool saveInTable );
+	void AddMacthRightMaxByQualifier_V( CQualifier& qualifier,
+		bool saveInTable );
 	// matching E-variables by qualifier
-	void AddMacthLeftMaxByQualifier_E( CQualifier* qualifier,
-		const bool saveInTable );
-	void AddMacthRightMaxByQualifier_E( CQualifier* qualifier,
-		const bool saveInTable );
+	void AddMacthLeftMaxByQualifier_E( CQualifier& qualifier,
+		bool saveInTable );
+	void AddMacthRightMaxByQualifier_E( CQualifier& qualifier,
+		bool saveInTable );
 	// matching V-variable
-	void AddMatchLeft_V( CQualifier* qualifier, const bool saveInTable );
-	void AddMatchRight_V( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchLeft_V( CQualifier& qualifier, bool saveInTable );
+	void AddMatchRight_V( CQualifier& qualifier, bool saveInTable );
 	// matching E-variable
-	void AddMatchLeft_E( CQualifier* qualifier, const bool saveInTable );
-	void AddMatchRight_E( CQualifier* qualifier, const bool saveInTable );
+	void AddMatchLeft_E( CQualifier& qualifier, bool saveInTable );
+	void AddMatchRight_E( CQualifier& qualifier, bool saveInTable );
 	// making operations
-	void AddInsertChar( const TChar c );
-	void AddInsertLabel( const TLabel label );
-	void AddInsertNumber( const TNumber number );
+	void AddInsertChar( TChar c );
+	void AddInsertLabel( TLabel label );
+	void AddInsertNumber( TNumber number );
 	void AddInsertLeftParen();
 	void AddInsertRightParen();
 	void AddInsertRightBracket();
-	void AddMove_S( const TTableIndex );
-	void AddCopy_S( const TTableIndex );
-	void AddMove_E( const TTableIndex );
-	void AddCopy_E( const TTableIndex );
-	void AddMove_WV( const TTableIndex );
-	void AddCopy_WV( const TTableIndex );
+	void AddMove_S( TTableIndex );
+	void AddCopy_S( TTableIndex );
+	void AddMove_E( TTableIndex );
+	void AddCopy_E( TTableIndex );
+	void AddMove_WV( TTableIndex );
+	void AddCopy_WV( TTableIndex );
 
 private:
-	void addNoArgumensOperation( const TOperationType type );
-	void addCharOperation( const TOperationType type, const TChar c );
-	void addLabelOperation( const TOperationType type,
-		const TLabel label );
-	void addNumberOperation( const TOperationType type,
-		const TNumber number );
-	void addTableIndexOperation( const TOperationType type,
-		const TTableIndex tableIndex );
-	void addQualifierIndexOperation( const TOperationType type,
-		CQualifier* qualifier );
-	void addOperation_VE( const TOperationType type );
-	void addOperation_VE( const TOperationType type,
-		CQualifier* qualifier );
-	void addStackDecrementOperation( const TUint32 stackDecrement );
+	void addNoArgumensOperation( TOperationType type );
+	void addCharOperation( TOperationType type, TChar c );
+	void addLabelOperation( TOperationType type, TLabel label );
+	void addNumberOperation( TOperationType type, TNumber number );
+	void addTableIndexOperation( TOperationType type, TTableIndex tableIndex );
+	void addQualifierIndexOperation( TOperationType type,
+		CQualifier& qualifier );
+	void addOperation_VE( TOperationType type );
+	void addOperation_VE( TOperationType type, CQualifier& qualifier );
+	void addStackDecrementOperation( TUint32 stackDecrement );
 	
-	TQualifierIndex registerQualifier( CQualifier* qualifier );
-	COperation* addOperation( const TOperationType type );
+	TQualifierIndex registerQualifier( CQualifier& qualifier );
+	COperation* addOperation( TOperationType type );
 	void addOperation( const COperation& operation );
 	
 	COperationList operations;

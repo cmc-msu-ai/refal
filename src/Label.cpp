@@ -18,6 +18,15 @@ CLabelTable::~CLabelTable()
 	::operator delete( table );
 }
 
+void CLabelTable::Empty()
+{
+	for( int i = 0; i < tableFirstFree; i++ ) {
+		table[i].~CLabelInfo();
+	}
+	tableFirstFree = 0;
+	labelMap.clear();
+}
+
 TLabel CLabelTable::AddLabel( const std::string& labelText )
 {
 	typedef std::pair<CLabelMap::iterator, bool> CPair;

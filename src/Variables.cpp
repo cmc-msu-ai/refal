@@ -17,101 +17,90 @@ void CVariables::Reset()
 	variablesValuesSize = 0;
 }
 
-void CVariables::Import( CVariablesBuilder* variablesBuiler )
+void CVariables::Import( CVariablesBuilder& variablesBuiler )
 {
 	Reset();
-	if( variablesBuiler->countOfVariables > 0 ) {
-		variablesSize = variablesBuiler->countOfVariables;
+	if( variablesBuiler.countOfVariables > 0 ) {
+		variablesSize = variablesBuiler.countOfVariables;
 		variables = static_cast<CVariable*>(
 			::operator new( variablesSize * sizeof( CVariable ) ) );
 
 		variablesValuesSize = 0;
-		for( int i = 0; i < CVariablesBuilder::variablesInfoSize; i++ ) {
+		for( int i = 0; i < VariablesInfoSize; i++ ) {
 			CVariablesBuilder::CVariableInfo& variableInfo =
-				variablesBuiler->variables[i];
+				variablesBuiler.variables[i];
 
 			if( variableInfo.type != InvalidVariableType ) {
-				int countOfValues =
-					std::min( variableInfo.countLeft, variableInfo.countRight );
+				int countOfValues = std::min( variableInfo.countLeft,
+					variableInfo.countRight );
 				new( variables + variableInfo.name )CVariable(
 					variableInfo.type, variablesValuesSize, countOfValues );
 				variablesValuesSize += countOfValues;
 
 				variableInfo.qualifier.Move(
-					&variables[variableInfo.name].qualifier );
+					variables[variableInfo.name].qualifier );
 			}
 		}
 	}
-	variablesBuiler->Reset();
+	variablesBuiler.Reset();
 }
 
-void CVariables::Swap(CVariables* swapWith)
+void CVariables::Swap( CVariables& swapWith )
 {
-	std::swap( swapWith->variables, variables );
-	std::swap( swapWith->variablesSize, variablesSize );
-	std::swap( swapWith->variablesValues, variablesValues );
-	std::swap( swapWith->variablesValuesSize, variablesValuesSize );
+	std::swap( swapWith.variables, variables );
+	std::swap( swapWith.variablesSize, variablesSize );
+	std::swap( swapWith.variablesValues, variablesValues );
+	std::swap( swapWith.variablesValuesSize, variablesValuesSize );
 }
 
-bool CVariables::IsFull(const TVariableIndex variableIndex) const
+bool CVariables::IsFull( TVariableIndex variableIndex ) const
 {
 	assert( IsValidVariableIndex( variableIndex ) );
-
 	CVariable& variable = variables[variableIndex];
-
 	return ( variable.position == variable.topPosition );
 }
 
-bool CVariables::IsSet(const TVariableIndex variableIndex) const
+bool CVariables::IsSet( TVariableIndex variableIndex ) const
 {
 	assert( IsValidVariableIndex( variableIndex ) );
-
 	CVariable& variable = variables[variableIndex];
-
 	return ( variable.position > variable.originPosition );
 }
 
-void CVariables::Set(const TVariableIndex variableIndex,
-	const TTableIndex tableIndex)
+void CVariables::Set( TVariableIndex variableIndex, TTableIndex tableIndex )
 {
 	assert( IsValidVariableIndex( variableIndex ) );
-
 	CVariable& variable = variables[variableIndex];
-
 	if( variable.position < variable.topPosition ) {
 		allocVariablesValues();
-
 		variablesValues[variable.position] = tableIndex;
 		variable.position++;
 	}
 }
 
-TTableIndex CVariables::GetMainValue(const TVariableIndex variableIndex) const
+TTableIndex CVariables::GetMainValue( TVariableIndex variableIndex ) const
 {
 	assert( IsSet( variableIndex ) );
 	return variablesValues[variables[variableIndex].originPosition];
 }
 
-bool CVariables::Get(const TVariableIndex variableIndex,
-	TTableIndex* tableIndex)
+bool CVariables::Get( TVariableIndex variableIndex, TTableIndex& tableIndex)
 {
 	assert( IsValidVariableIndex( variableIndex ) );
 	assert( variablesValues != 0 );
-
 	CVariable& variable = variables[variableIndex];
-
 	if( variable.position > variable.originPosition ) {
 		variable.position--;
-		*tableIndex = variablesValues[variable.position];
+		tableIndex = variablesValues[variable.position];
 		return true;
 	} else /* var.position == var.originPosition */ {
-		*tableIndex = variablesValues[variable.position];
+		tableIndex = variablesValues[variable.position];
 		return false;
 	}
 }
 
-CVariablesBuilder::CVariablesBuilder(IVariablesBuilderListener* listener):
-	CListener(listener)
+CVariablesBuilder::CVariablesBuilder( IVariablesBuilderListener* listener ):
+	CListener( listener )
 {
 	Reset();
 }
@@ -119,22 +108,19 @@ CVariablesBuilder::CVariablesBuilder(IVariablesBuilderListener* listener):
 void CVariablesBuilder::Reset()
 {
 	countOfVariables = 0;
-	
-	for( int i = 0; i < variablesInfoSize; ++i ) {
+	for( int i = 0; i < VariablesInfoSize; ++i ) {
 		variables[i].type = InvalidVariableType;
 		variables[i].qualifier.Empty();
 	}
 }
 
-TVariableIndex CVariablesBuilder::AddLeft(TVariableName name,
-	TVariableType type, CQualifier* qualifier)
+TVariableIndex CVariablesBuilder::AddLeft( TVariableName name,
+	TVariableType type, CQualifier* qualifier )
 {
 	if( !checkName( name ) ) {
 		return InvalidVariableIndex;
 	}
-
 	CVariableInfo& var = variables[name];
-
 	if( var.type == InvalidVariableType ) {
 		if( checkType( type ) ) {
 			var.name = countOfVariables;
@@ -142,7 +128,7 @@ TVariableIndex CVariablesBuilder::AddLeft(TVariableName name,
 			var.countLeft = 1;
 			var.countRight = 0;
 			if( qualifier != 0 ) {
-				qualifier->Move( &var.qualifier );
+				qualifier->Move( var.qualifier );
 			}
 			++countOfVariables;
 			return var.name;
@@ -150,31 +136,34 @@ TVariableIndex CVariablesBuilder::AddLeft(TVariableName name,
 	} else if( var.type == type ) {
 		var.countLeft++;
 		if( qualifier != 0 ) {
-			var.qualifier.DestructiveIntersection( qualifier );
+			var.qualifier.DestructiveIntersection( *qualifier );
 		}
 		return var.name;
 	} else {
 		error( VBEC_TypeOfVariableDoesNotMatch );
 	}
-	
 	return InvalidVariableIndex;
 }
 
-TVariableIndex CVariablesBuilder::AddRight(TVariableName name,
-	TVariableType type)
+TVariableIndex CVariablesBuilder::AddRight( TVariableName name,
+	TVariableType type,	CQualifier* qualifier )
 {
 	if( !checkName( name ) ) {
 		return InvalidVariableIndex;
 	}
-
 	CVariableInfo& var = variables[name];
-	
 	if( var.type == type ) {
 		var.countRight++;
+		if( qualifier != 0 ) {
+			var.qualifier.DestructiveIntersection( *qualifier );
+		}
 		return var.name;
 	} else {
-		error( ( var.type == InvalidVariableType ) ?
-			VBEC_NoSuchVariableInLeftPart : VBEC_TypeOfVariableDoesNotMatch );
+		if( var.type == InvalidVariableType ) {
+			error( VBEC_NoSuchVariableInLeftPart );
+		} else {
+			error( VBEC_TypeOfVariableDoesNotMatch );
+		}
 		return InvalidVariableIndex;
 	}
 }

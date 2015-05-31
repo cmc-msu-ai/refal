@@ -17,29 +17,29 @@ enum TQualifierIncludeFlags {
 	QIF_All = QIF_Terms | QIF_AllChars | QIF_AllLabels | QIF_AllNumbers
 };
 
-void PrintQualifier(const CQualifier& qualifier);
+void PrintQualifier( const CQualifier& qualifier );
 
 class CQualifier {
 	friend class CQualifierBuilder;
-	friend void PrintQualifier(const CQualifier& qualifier);
+	friend void PrintQualifier( const CQualifier& qualifier );
 
 public:
-	CQualifier(): flags(0) {}
+	CQualifier(): flags( 0 ) {}
 
 	void Empty();
 	bool IsEmpty() const;
 
-	void Swap(CQualifier* swapWith);
-	inline void Move(CQualifier* moveTo);
+	void Swap( CQualifier& swapWith );
+	void Move( CQualifier& moveTo );
 
-	void DestructiveIntersection(CQualifier* withQualifier);
-	bool Check(const CUnit* unit) const;
+	void DestructiveIntersection( CQualifier& withQualifier );
+	bool Check( const CUnit& unit ) const;
 
 	int GetIncludeFlags() const { return flags; }
-	inline bool IsIncludeAllChars() const;
-	inline bool IsIncludeAllLabels() const;
-	inline bool IsIncludeAllNumbers() const;
-	inline bool IsIncludeTerms() const;
+	bool IsIncludeAllChars() const;
+	bool IsIncludeAllLabels() const;
+	bool IsIncludeAllNumbers() const;
+	bool IsIncludeTerms() const;
 
 private:
 	int flags;
@@ -49,32 +49,32 @@ private:
 	CFastSet<TNumber> numbers;
 };
 
-inline void CQualifier::Move(CQualifier* moveTo)
+inline void CQualifier::Move( CQualifier& moveTo )
 {
-	if( this != moveTo ) {
-		moveTo->Empty();
+	if( this != &moveTo ) {
 		Swap( moveTo );
+		Empty();
 	}
 }
 
 inline bool CQualifier::IsIncludeAllChars() const
 {
-	return ( (flags & QIF_AllChars) != 0 );
+	return ( ( flags & QIF_AllChars ) != 0 );
 }
 
 inline bool CQualifier::IsIncludeAllLabels() const
 {
-	return ( (flags & QIF_AllLabels) != 0 );
+	return ( ( flags & QIF_AllLabels ) != 0 );
 }
 
 inline bool CQualifier::IsIncludeAllNumbers() const
 {
-	return ( (flags & QIF_AllNumbers) != 0 );
+	return ( ( flags & QIF_AllNumbers ) != 0 );
 }
 
 inline bool CQualifier::IsIncludeTerms() const
 {
-	return ( (flags & QIF_Terms) != 0 );
+	return ( ( flags & QIF_Terms ) != 0 );
 }
 
 } // end of namespace refal2

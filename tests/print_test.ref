@@ -1,0 +1,12 @@
+print_test START
+	ENTRY main
+	EMPTY abc, def
+	EXTRN print, printm, prout, proutm
+
+*expr = /abc/':='/25/';'/def/':=-'/9/
+expr = /abc/(':=()'/25/';'/def/)':=-'/9/
+	
+main = <print <expr> > '|' <printm <expr> >+
+	'|' <prout <expr> > '|' <proutm <expr> >
+
+	END

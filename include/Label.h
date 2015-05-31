@@ -15,6 +15,8 @@ public:
 	CLabelTable( const int initialTableSize = DefaultInitialLabelTableSize );
 	~CLabelTable();
 
+	void Empty();
+
 	TLabel AddLabel( const std::string& labelText );
 	const std::string& GetLabelText( const TLabel label );
 	CFunction& GetLabelFunction( const TLabel label );

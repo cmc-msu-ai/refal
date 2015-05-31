@@ -162,7 +162,28 @@ void COperationsExecuter::doFunction()
 			doFunctionBody();
 		} else if( function.IsExternal() ) {
 			// TODO: execute extern
-			executionResult = ER_WrongArgumentOfExternalFunction;
+			CUnitList argument;
+			if( left->Next() != right ) {
+				CUnitNode* argumentBegin = left->Next();
+				CUnitNode* argumentEnd = right->Prev();
+				fieldOfView.Detach( argumentBegin, argumentEnd );
+				argument.Assign( argumentBegin, argumentEnd );
+			}
+			std::string errorText;
+			if( function.externalFunction( argument, errorText ) ) {
+				if( !argument.IsEmpty() ) {
+					CUnitNode* argumentBegin = argument.GetFirst();
+					CUnitNode* argumentEnd = argument.GetLast();
+					argument.Detach();
+					fieldOfView.InsertAfter( right, argumentBegin, argumentEnd );
+				}
+				fieldOfView.Remove( left->Prev(), right );
+				lastAddedLeftParen = 0;
+				lastAddedLeftBracket = &initialLeftBracket;
+				initialLeftBracket.PairedParen() = 0;
+			} else {
+				executionResult = ER_WrongArgumentOfExternalFunction;
+			}
 		} else if( function.IsEmpty() ) {
 			// TODO: error, can't execute empty function
 			executionResult = ER_CallEmptyFunction;

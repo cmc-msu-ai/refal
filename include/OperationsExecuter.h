@@ -200,7 +200,7 @@ inline void COperationsExecuter::nextOperation()
 inline bool COperationsExecuter::checkQualifier( CUnitNode* const node,
 	const TQualifierIndex qualifier ) const
 {
-	return qualifier->Check( node );
+	return qualifier->Check( *node );
 }
 
 inline void COperationsExecuter::saveToTable( CUnitNode* const node )
