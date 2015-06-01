@@ -47,7 +47,7 @@ public:
 
 	TFunctionState GetFunctionState() const { return functionState; }
 	bool IsDeclared() const { return ( functionState == FS_Declared ); }
-	bool IsDefined() const { return ( functionState == FS_Declared ); }
+	bool IsDefined() const { return ( functionState == FS_Defined ); }
 	bool IsParsed() const { return ( functionState == FS_Parsed ); }
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
 	bool IsEmpty() const { return ( functionState == FS_Empty ); }
