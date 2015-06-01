@@ -17,6 +17,7 @@ void PrintRule( const CFunctionRule& rule )
 
 void PrintFunction( const CFunction& function )
 {
+	assert( function.IsParsed() );
 	for( const CFunctionRule* rule = function.firstRule; rule != 0;
 		rule = rule->nextRule )
 	{
