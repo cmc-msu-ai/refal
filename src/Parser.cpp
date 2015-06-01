@@ -801,7 +801,7 @@ void CParser::processVariableQualifierAfterError()
 	}
 }
 
-void CParser::addDeclarationOfFunction(const std::string& name)
+void CParser::addDeclarationOfFunction( const std::string& name )
 {
 	addEndOfFunction();
 
@@ -813,7 +813,6 @@ void CParser::addDeclarationOfFunction(const std::string& name)
 		error( PEC_STUB );
 	} else {
 		tmpFunction.SetDefined();
-
 		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
 	}
 }
@@ -822,15 +821,14 @@ void CParser::addEndOfFunction()
 {
 	if( currentFunction != InvalidLabel ) {
 		CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-		
-		if( !tmpFunction.IsDeclared() ) {
+		if( tmpFunction.IsDefined() ) {
 			CFunctionBuilder::Export( tmpFunction );
-			
-			PrintFunction( tmpFunction );
+			if( tmpFunction.IsParsed() ) {
+				PrintFunction( tmpFunction );
+			}
 			std::cout << "addEndOfFunction: {" <<
 				LabelTable.GetLabelText( currentFunction ) << "}\n";
 		}
-		
 		currentFunction = InvalidLabel;
 		CFunctionBuilder::Reset();
 	}
