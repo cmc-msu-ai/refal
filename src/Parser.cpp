@@ -61,12 +61,13 @@ void CParser::ProcessLexem()
 		case PS_BeginIdent:
 			if( lexem == L_NewLine || lexem == L_EndOfFile ) {
 				state = PS_Begin;
-				addEndOfFunction(); // action
 				addDeclarationOfFunction( storedName ); // action
 			} else if( lexem == L_Blank ) {
 				state = PS_BeginIdentBlank;
 			} else {
-				error( PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine );
+				state = PS_ProcessRule;
+				addDeclarationOfFunction( storedName ); // action
+				ProcessLexem();
 			}
 			break;
 		case PS_BeginIdentBlank:
@@ -289,9 +290,9 @@ void CParser::ProcessLexem()
 		/* process rule */
 		case PS_ProcessRuleDirection:
 			if( lexem == L_Blank ) {
-			} else if( identificatorIs("l") ) {
+			} else if( identificatorIs( "l" ) ) {
 				state = PS_ProcessRule;
-			} else if( identificatorIs("r") ) {
+			} else if( identificatorIs( "r" ) ) {
 				state = PS_ProcessRule;
 				CFunctionBuilder::SetRightDirection();
 			} else {
@@ -339,7 +340,7 @@ void CParser::ProcessLexem()
 					CFunctionBuilder::AddRightBracket();
 					break;
 				case L_Identificator:
-					if( lexemString == "k" || lexemString == "K" ) {
+					if( identificatorIs( "k" ) ) {
 						// TODO: warning: old style
 						state = PS_ProcessRuleAfterLeftBracket;
 						CFunctionBuilder::AddLeftBracket();
