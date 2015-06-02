@@ -248,10 +248,10 @@ void CParser::ProcessLexem()
 		/* end of extrn */
 		/* process named qualifier */
 		case PS_BeginProcessNamedQualifier:
+			qualifierBuilder.Reset();
 			if( HasErrors() ) {
 				state = PS_ProcessNamedQualifierAfterError;
 			} else {
-				qualifierBuilder.Reset();
 				state = PS_ProcessNamedQualifier;
 			}
 			ProcessLexem();
@@ -268,10 +268,10 @@ void CParser::ProcessLexem()
 			break;
 		/* process variable qualifer */
 		case PS_BeginProcessVariableQualifier:
+			qualifierBuilder.Reset();
 			if( HasErrors() ) {
 				state = PS_ProcessVariableQualifierAfterError;
 			} else {
-				qualifierBuilder.Reset();
 				state = PS_ProcessVariableQualifier;
 			}
 			ProcessLexem();
