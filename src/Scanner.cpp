@@ -101,7 +101,8 @@ void CScanner::processChar(char c)
 			case SS_BeginOfLine:
 				if( c == ' ' || c == '\t' ) {
 					state = SS_BeginBlank;
-				} else if( c == '\n' ) {
+				} else if( c == '\n' || c == ';' ) {
+					// TODO: warning if c == ';': old style
 				} else if( c == '+' ) {
 					state = SS_BeginPlus;
 				} else if( c == '*' ) {
@@ -117,7 +118,8 @@ void CScanner::processChar(char c)
 					state = SS_BeginComment;
 				} else if( c == '+' ) {
 					state = SS_BeginPlus;
-				} else if( c == '\n' ) {
+				} else if( c == '\n' || c == ';' ) {
+					// TODO: warning if c == ';': old style
 					state = SS_BeginOfLine;
 				} else {
 					state = SS_NotBeginOfLine;
@@ -154,7 +156,8 @@ void CScanner::processChar(char c)
 					state = SS_NotBeginComment;
 				} else if( c == ' ' || c == '\t' ) {
 					state = SS_NotBeginBlank;
-				} else if( c == '\n' ) {
+				} else if( c == '\n' || c == ';' ) {
+					// TODO: warning if c == ';': old style
 					state = SS_BeginOfLine;
 					offset = localOffset;
 					lexem = L_NewLine;
@@ -207,7 +210,8 @@ void CScanner::processChar(char c)
 					state = SS_NotBeginComment;
 				} else if( c == '+' ) {
 					state = SS_NotBeginPlus;
-				} else if( c == '\n' ) {
+				} else if( c == '\n' || c == ';' ) {
+					// TODO: warning if c == ';': old style
 					state = SS_BeginOfLine;
 					offset = localOffset;
 					lexem = L_NewLine;
