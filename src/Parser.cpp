@@ -339,9 +339,15 @@ void CParser::ProcessLexem()
 					CFunctionBuilder::AddRightBracket();
 					break;
 				case L_Identificator:
-					for( std::size_t i = 0; i < lexemString.size(); i += 2 ) {
+					if( lexemString == "k" || lexemString == "K" ) {
+						// TODO: warning: old style
+						state = PS_ProcessRuleAfterLeftBracket;
+						CFunctionBuilder::AddLeftBracket();
+						break;
+					}
+					for( std::size_t i = 0; i < lexemString.length(); i += 2 ) {
 						TVariableType type = ::tolower( lexemString[i] );
-						if( i < lexemString.size() - 1 ) {
+						if( i < lexemString.length() - 1 ) {
 							TVariableName name = lexemString[i + 1];
 							CFunctionBuilder::AddVariable( type, name );
 							offset += 2;

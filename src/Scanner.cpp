@@ -22,19 +22,19 @@ void CScanner::ProcessLexem()
 			std::cout << " ";
 			break;
 		case L_Equal:
-			std::cout << "= ";
+			std::cout << "=";
 			break;
 		case L_Comma:
-			std::cout << ", ";
+			std::cout << ",";
 			break;
 		case L_Label:
-			std::cout << "/" << lexemString << "/ ";
+			std::cout << "/" << lexemString << "/";
 			break;
 		case L_Number:
-			std::cout << "/" << lexemNumber << "/ ";
+			std::cout << "/" << lexemNumber << "/";
 			break;
 		case L_String:
-			std::cout << "'" << lexemString << "' ";
+			std::cout << "'" << lexemString << "'";
 			break;
 		case L_NewLine:
 			std::cout << "\n";
@@ -43,22 +43,22 @@ void CScanner::ProcessLexem()
 			std::cout << "\nEndOfFile!\n";
 			break;
 		case L_Qualifier:
-			std::cout << ":" << lexemString << ": ";
+			std::cout << ":" << lexemString << ":";
 			break;
 		case L_LeftParen:
-			std::cout << "( ";
+			std::cout << "(";
 			break;
 		case L_RightParen:
-			std::cout << ") ";
+			std::cout << ")";
 			break;
 		case L_LeftBracket:
-			std::cout << "< ";
+			std::cout << "<";
 			break;
 		case L_RightBracket:
-			std::cout << "> ";
+			std::cout << ">";
 			break;
 		case L_Identificator:
-			std::cout << lexemString << " ";
+			std::cout << lexemString;
 			break;
 		default:
 			assert( false );
@@ -180,7 +180,8 @@ void CScanner::processChar(char c)
 					offset = localOffset;
 					lexem = L_LeftBracket;
 					ProcessLexem();
-				} else if( c == '>' ) {
+				} else if( c == '>' || c == '.' ) {
+					// TODO: warning if c == '.': old style
 					offset = localOffset;
 					lexem = L_RightBracket;
 					ProcessLexem();
