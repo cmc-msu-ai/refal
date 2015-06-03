@@ -91,11 +91,13 @@ std::string CScanner::ToLower(const std::string& data)
 	return result;
 }
 
-void CScanner::processChar(char c)
+void CScanner::processChar( char c )
 {
 	if( c == '\r' ) {
-	} else if( c == '\x7f' || ( c <= '\x1f' && c != '\n' && c != '\t' ) ) {
-		//error( SEC_UnexpectedControlSequence, c );
+	} else if( c == '\x7f' /* ASCII DEL - 127 */
+		|| ( c != '\n' && c != '\t' && c >= '\0' && c <= '\x1f' ) )
+	{
+		error( SEC_UnexpectedControlSequence, c );
 	} else {
 		switch( state ) {
 			case SS_BeginOfLine:
@@ -109,7 +111,7 @@ void CScanner::processChar(char c)
 					state = SS_BeginComment;
 				} else {
 					state = SS_NotBeginOfLine;
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_BeginBlank:
@@ -126,7 +128,7 @@ void CScanner::processChar(char c)
 					offset = localOffset;
 					lexem = L_Blank;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_BeginComment:
@@ -196,7 +198,9 @@ void CScanner::processChar(char c)
 					offset = localOffset;
 					lexem = L_Comma;
 					ProcessLexem();
-				} else if( isalnum(c) || c == '_' ) {
+				} else if( isalnum( static_cast<unsigned char>( c ) )
+					|| c == '_' )
+				{
 					state = SS_Identificator;
 					lexemString = c;
 					offset = localOffset;
@@ -221,7 +225,7 @@ void CScanner::processChar(char c)
 					offset = localOffset;
 					lexem = L_Blank;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_NotBeginComment:
@@ -248,10 +252,10 @@ void CScanner::processChar(char c)
 				}
 				break;
 			case SS_BeginLabelOrNumber:
-				if( isalpha(c) || c == '_' ) {
+				if( isalpha( static_cast<unsigned char>( c ) ) || c == '_' ) {
 					state = SS_NotBeginLabel;
 					lexemString = c;
-				} else if( isdigit(c) ) {
+				} else if( isdigit( static_cast<unsigned char>( c ) ) ) {
 					state = SS_NotBeginNumber;
 					lexemNumber = c - '0';
 				} else if( c == '\n' ) {
@@ -260,11 +264,13 @@ void CScanner::processChar(char c)
 				} else {
 					error( SEC_IllegalCharacterInLabelOrNumberBegin, c );
 					state = SS_NotBeginOfLine;
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_NotBeginLabel:
-				if( isalnum(c) || c == '_' || c == '-' ) {
+				if( isalnum( static_cast<unsigned char>( c ) )
+					|| c == '_' || c == '-' )
+				{
 					lexemString += c;
 				} else if( c == '/' ) {
 					state = SS_NotBeginOfLine;
@@ -283,11 +289,11 @@ void CScanner::processChar(char c)
 					lexemLabel = LabelTable.AddLabel( ToLower( lexemString ) );
 					lexem = L_Label;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_NotBeginNumber:
-				if( isdigit(c) ) {
+				if( isdigit( static_cast<unsigned char>( c ) ) ) {
 					lexemNumber *= 10;
 					lexemNumber += c - '0';
 				} else if( c == '/' ) {
@@ -304,21 +310,23 @@ void CScanner::processChar(char c)
 					state = SS_NotBeginOfLine;
 					lexem = L_Number;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_Identificator:
-				if( isalnum(c) || c == '_' || c == '-' ) {
+				if( isalnum( static_cast<unsigned char>( c ) )
+					|| c == '_' || c == '-' )
+				{
 					lexemString += c;
 				} else {
 					state = SS_NotBeginOfLine;
 					lexem = L_Identificator;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_BeginQualifier:
-				if( isalpha(c) || c == '_' ) {
+				if( isalpha( static_cast<unsigned char>( c ) ) || c == '_' ) {
 					state = SS_NotBeginQualifier;
 					lexemString = c;
 				} else if( c == '\n' ) {
@@ -327,11 +335,11 @@ void CScanner::processChar(char c)
 				} else {
 					error( SEC_IllegalCharacterInQualifierNameBegin, c );
 					state = SS_NotBeginOfLine;
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_NotBeginQualifier:
-				if( isalnum(c) || c == '_' ) {
+				if( isalnum( static_cast<unsigned char>( c ) ) || c == '_' ) {
 					lexemString += c;
 				} else if( c == ':' ) {
 					state = SS_NotBeginOfLine;
@@ -347,7 +355,7 @@ void CScanner::processChar(char c)
 					state = SS_NotBeginOfLine;
 					lexem = L_Qualifier;
 					ProcessLexem();
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_String:
@@ -372,107 +380,62 @@ void CScanner::processChar(char c)
 					lexem = L_String;
 					ProcessLexem();
 					state = SS_NotBeginOfLine;
-					processChar(c);
+					processChar( c );
 				}
 				break;
 			case SS_StringAfterBackslash:
-				if( c == 'a' ) {
-					state = SS_String;
-					lexemString += '\a';
-				} else if( c == 'b' ) {
-					state = SS_String;
-					lexemString += '\b';
-				} else if( c == 'f' ) {
-					state = SS_String;
-					lexemString += '\f';
-				} else if( c == 'n' ) {
+				if( c == 'n' ) {
 					state = SS_String;
 					lexemString += '\n';
-				} else if( c == 'r' ) {
-					state = SS_String;
-					lexemString += '\r';
 				} else if( c == 't' ) {
 					state = SS_String;
 					lexemString += '\t';
 				} else if( c == 'v' ) {
 					state = SS_String;
 					lexemString += '\v';
+				} else if( c == 'b' ) {
+					state = SS_String;
+					lexemString += '\b';
+				} else if( c == 'r' ) {
+					state = SS_String;
+					lexemString += '\r';
+				} else if( c == 'f' ) {
+					state = SS_String;
+					lexemString += '\f';
 				} else if( c == '\\' ) {
 					state = SS_String;
 					lexemString += '\\';
-				} else if( c == '\'' ) {
-					state = SS_String;
-					lexemString += '\'';
-				} else if( c == 'x' ) {
-					state = SS_StringWaitHexadecimalCode;
-				} else if( c == '0' ) {
-					state = SS_StringWaitOctalCode;
+				} else if( c >= '0' && c <= '7' ) {
+					state = SS_StringMayOctalCode;
+					octalCode = c;
 				} else {
-					error( SEC_IllegalCharacterInStringAfterBackslash, c );
 					state = SS_String;
-					processChar(c);
+					lexemString += '\\';
+					processChar( c );
 				}
 				break;
-			case SS_StringWaitHexadecimalCode:
-				if( isdigit(c) ) {
-					state = SS_StringHexadecimalCode;
-					stringCharCodeAcc = c - '0';
-				} else if( c >= 'a' && c <= 'f' ) {
-					state = SS_StringHexadecimalCode;
-					stringCharCodeAcc = c - 'a' + 10;
-				} else if( c >= 'A' && c <= 'F' ) {
-					state = SS_StringHexadecimalCode;
-					stringCharCodeAcc = c - 'A' + 10;
-				} else {
-					error( SEC_IllegalCharacterInStringInHexadecimal, c );
+			case SS_StringMayOctalCode:
+				if( octalCode.length() == 3 ) {
 					state = SS_String;
-					processChar(c);
-				}
-				break;
-			case SS_StringHexadecimalCode:
-				if( isdigit(c) ) {
-					stringCharCodeAcc *= 16;
-					stringCharCodeAcc += c - '0';
-				} else if( c >= 'a' && c <= 'f' ) {
-					stringCharCodeAcc *= 16;
-					stringCharCodeAcc += c - 'a' + 10;
-				} else if( c >= 'A' && c <= 'F' ) {
-					stringCharCodeAcc *= 16;
-					stringCharCodeAcc += c - 'A' + 10;
+					int charCode = ( ( octalCode[0] - '0' ) * 8 +
+						( octalCode[1] - '0' ) ) * 8 + octalCode[2] - '0';
+					assert( charCode % 256 != 0 );
+					lexemString += static_cast<char>( charCode % 256 );
+					processChar( c );
 				} else {
-					char newChar = static_cast<char>( stringCharCodeAcc % 256 );
-					if( newChar != '\0' ) {
-						lexemString += newChar;
+					assert( octalCode.length() < 3 );
+					if( c >= '0' && c <= '7' ) {
+						octalCode += c;
 					} else {
-						error( SEC_TryingAppendNullByteToString );
+						state = SS_String;
+						if( octalCode == "0" ) {
+							assert( false );
+							lexemString += '\0';
+						} else {
+							lexemString += '\\' + octalCode;
+						}
+						processChar( c );
 					}
-					state = SS_String;
-					processChar(c);
-				}
-				break;
-			case SS_StringWaitOctalCode:
-				if( c >= '0' && c <= '7' ) {
-					state = SS_StringOctalCode;
-					stringCharCodeAcc = c - '0';
-				} else {
-					error( SEC_IllegalCharacterInStringInOctal, c );
-					state = SS_String;
-					processChar(c);
-				}
-				break;
-			case SS_StringOctalCode:
-				if( c >= '0' && c <= '7' ) {
-					stringCharCodeAcc *= 8;
-					stringCharCodeAcc += c - '0';
-				} else {
-					char newChar = static_cast<char>( stringCharCodeAcc % 256 );
-					if( newChar != '\0' ) {
-						lexemString += newChar;
-					} else {
-						error( SEC_TryingAppendNullByteToString );
-					}
-					state = SS_String;
-					processChar(c);
 				}
 				break;
 			default:
@@ -513,13 +476,10 @@ void CScanner::processEndOfFile()
 			processEndOfFile();
 			return;
 			break;
-		
+
 		case SS_String:
 		case SS_StringAfterBackslash:
-		case SS_StringWaitHexadecimalCode:
-		case SS_StringHexadecimalCode:
-		case SS_StringWaitOctalCode:
-		case SS_StringOctalCode:
+		case SS_StringMayOctalCode:
 			error( SEC_UnclosedStringConstantAtTheEndOfFile );
 			break;
 

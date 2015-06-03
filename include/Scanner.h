@@ -42,10 +42,7 @@ enum TScannerState {
 	SS_String,
 	SS_StringAfterQuote,
 	SS_StringAfterBackslash,
-	SS_StringWaitHexadecimalCode,
-	SS_StringHexadecimalCode,
-	SS_StringWaitOctalCode,
-	SS_StringOctalCode
+	SS_StringMayOctalCode,
 };
 
 enum TScannerErrorCode {
@@ -118,7 +115,7 @@ private:
 
 	TScannerState state;
 	int localOffset;
-	unsigned int stringCharCodeAcc;
+	std::string octalCode;
 };
 
 inline CScanner::CScanner(IScannerListener* listener):
