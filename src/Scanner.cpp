@@ -264,7 +264,7 @@ void CScanner::processChar(char c)
 				}
 				break;
 			case SS_NotBeginLabel:
-				if( isalnum(c) || c == '_' ) {
+				if( isalnum(c) || c == '_' || c == '-' ) {
 					lexemString += c;
 				} else if( c == '/' ) {
 					state = SS_NotBeginOfLine;
@@ -308,7 +308,7 @@ void CScanner::processChar(char c)
 				}
 				break;
 			case SS_Identificator:
-				if( isalnum(c) || c == '_' ) {
+				if( isalnum(c) || c == '_' || c == '-' ) {
 					lexemString += c;
 				} else {
 					state = SS_NotBeginOfLine;
