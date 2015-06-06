@@ -38,12 +38,9 @@ private:
 	int position;
 };
 
-inline CVariable::CVariable( TVariableType _type, int _originPosition,
-		int countOfValues ):
-	type( _type ),
-	originPosition( _originPosition ),
-	topPosition( originPosition + countOfValues ),
-	position( originPosition )
+inline CVariable::CVariable( TVariableType t, int op, int countOfValues ):
+	type( t ), originPosition( op ),
+	topPosition( originPosition + countOfValues ), position( originPosition )
 {
 }
 
@@ -70,13 +67,12 @@ inline bool CVariable::IsValidName( TVariableName name )
 
 class CVariables {
 	friend class CVariablesBuilder;
-	
-public:
-	inline CVariables();
-	~CVariables() { Reset(); }
 
-	void Reset();	
-	void Import( CVariablesBuilder& variablesBuiler );
+public:
+	CVariables();
+	~CVariables();
+
+	void Reset();
 
 	void Swap( CVariables& swapWith );
 	void Move( CVariables& moveTo );
@@ -85,7 +81,7 @@ public:
 	const CVariable& GetVariable( TVariableIndex variableIndex ) const;
 
 	bool IsValidVariableIndex( TVariableIndex variableIndex ) const;
-	
+
 	bool IsFull( TVariableIndex variableIndex ) const;
 	// true if variable have one or more value
 	bool IsSet( TVariableIndex variableIndex ) const;
@@ -93,11 +89,11 @@ public:
 	TTableIndex GetMainValue( TVariableIndex variableIndex ) const;
 	// true if tableIndex is fresh
 	bool Get( TVariableIndex variableIndex, TTableIndex& tableIndex );
-	
+
 private:
 	CVariables( const CVariables& );
 	CVariables& operator=( const CVariables& );
-	
+
 	void allocVariablesValues();
 
 	CVariable* variables;
@@ -109,6 +105,11 @@ private:
 inline CVariables::CVariables():
 	variables(0), variablesSize(0), variablesValues(0), variablesValuesSize(0)
 {
+}
+
+inline CVariables::~CVariables()
+{
+	Reset();
 }
 
 inline void CVariables::Move( CVariables& moveTo )
@@ -164,8 +165,6 @@ class CVariablesBuilder :
 	public CErrors,
 	public CListener<IVariablesBuilderListener>
 {
-	friend class CVariables;
-
 public:
 	explicit CVariablesBuilder( IVariablesBuilderListener* listener = 0 );
 	
@@ -197,12 +196,6 @@ private:
 	int countOfVariables;
 };
 
-inline void CVariablesBuilder::Export( CVariables& variables )
-{
-	variables.Import( *this );
-	Reset();
-}
-
 inline bool CVariablesBuilder::checkName( TVariableName name )
 {
 	if( CVariable::IsValidName( name ) ) {
@@ -222,7 +215,6 @@ inline bool CVariablesBuilder::checkType( TVariableType type )
 		return false;
 	}
 }
-
 
 inline void CVariablesBuilder::error( TVariablesBuilderErrorCode errorCode )
 {

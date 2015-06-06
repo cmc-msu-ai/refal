@@ -17,34 +17,6 @@ void CVariables::Reset()
 	variablesValuesSize = 0;
 }
 
-void CVariables::Import( CVariablesBuilder& variablesBuiler )
-{
-	Reset();
-	if( variablesBuiler.countOfVariables > 0 ) {
-		variablesSize = variablesBuiler.countOfVariables;
-		variables = static_cast<CVariable*>(
-			::operator new( variablesSize * sizeof( CVariable ) ) );
-
-		variablesValuesSize = 0;
-		for( int i = 0; i < VariablesInfoSize; i++ ) {
-			CVariablesBuilder::CVariableInfo& variableInfo =
-				variablesBuiler.variables[i];
-
-			if( variableInfo.type != InvalidVariableType ) {
-				int countOfValues = std::min( variableInfo.countLeft,
-					variableInfo.countRight );
-				new( variables + variableInfo.name )CVariable(
-					variableInfo.type, variablesValuesSize, countOfValues );
-				variablesValuesSize += countOfValues;
-
-				variableInfo.qualifier.Move(
-					variables[variableInfo.name].qualifier );
-			}
-		}
-	}
-	variablesBuiler.Reset();
-}
-
 void CVariables::Swap( CVariables& swapWith )
 {
 	std::swap( swapWith.variables, variables );
@@ -112,6 +84,28 @@ void CVariablesBuilder::Reset()
 		variables[i].type = InvalidVariableType;
 		variables[i].qualifier.Empty();
 	}
+}
+
+void CVariablesBuilder::Export( CVariables& v )
+{
+	v.Reset();
+	if( countOfVariables > 0 ) {
+		v.variablesSize = countOfVariables;
+		v.variables = static_cast<CVariable*>(
+			::operator new( v.variablesSize * sizeof( CVariable ) ) );
+		v.variablesValuesSize = 0;
+		for( int i = 0; i < VariablesInfoSize; i++ ) {
+			CVariableInfo& vi = variables[i];
+			if( vi.type != InvalidVariableType ) {
+				int countOfValues = std::min( vi.countLeft, vi.countRight );
+				new( v.variables + vi.name )CVariable( vi.type,
+					v.variablesValuesSize, countOfValues );
+				v.variablesValuesSize += countOfValues;
+				vi.qualifier.Move( v.variables[vi.name].qualifier );
+			}
+		}
+	}
+	Reset();
 }
 
 TVariableIndex CVariablesBuilder::AddLeft( TVariableName name,
