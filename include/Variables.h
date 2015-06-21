@@ -4,6 +4,8 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
 const int InvalidVariableIndex = -1;
 
 const TVariableType InvalidVariableType = '\0';
@@ -167,15 +169,15 @@ class CVariablesBuilder :
 {
 public:
 	explicit CVariablesBuilder( IVariablesBuilderListener* listener = 0 );
-	
+
 	void Reset();
 	void Export( CVariables& variables );
-	
+
 	TVariableIndex AddLeft( TVariableName name, TVariableType type,
 		CQualifier* qualifier = 0 );
 	TVariableIndex AddRight( TVariableName name, TVariableType type,
 		CQualifier* qualifier = 0 );
-	
+
 private:
 	CVariablesBuilder( const CVariablesBuilder& );
 	CVariablesBuilder& operator=( const CVariablesBuilder& );
@@ -223,5 +225,7 @@ inline void CVariablesBuilder::error( TVariablesBuilderErrorCode errorCode )
 		GetListener()->OnVariablesBuilderError( errorCode );
 	}
 }
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

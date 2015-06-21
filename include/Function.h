@@ -126,7 +126,7 @@ class CFunctionBuilder :
 {
 public:
 	explicit CFunctionBuilder( IFunctionBuilderListener* listener = 0 );
-	~CFunctionBuilder() { Reset(); }
+	~CFunctionBuilder();
 
 	void Reset();
 	void Export( CFunction& function );
@@ -136,9 +136,9 @@ public:
 	void SetRightDirection() { isRightDirection = true; }
 	void AddEndOfLeft();
 	void AddEndOfRight();
-	void AddChar(TChar c);
-	void AddLabel(TLabel label);
-	void AddNumber(TNumber number);
+	void AddChar( TChar c );
+	void AddLabel( TLabel label );
+	void AddNumber( TNumber number );
 	void AddVariable( TVariableType type, TVariableName name,
 		CQualifier* qualifier = 0 );
 	void AddLeftParen();
@@ -165,6 +165,11 @@ private:
 	CFunctionRule* lastRule;
 	std::stack<CUnitNode*> balanceStack;
 };
+
+inline CFunctionBuilder::~CFunctionBuilder()
+{
+	Reset();
+}
 
 inline void CFunctionBuilder::emptyStack()
 {
