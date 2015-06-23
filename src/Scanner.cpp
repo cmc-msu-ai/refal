@@ -452,8 +452,6 @@ void CScanner::preprocessingStringOctalCodeTwo( char c )
 
 void CScanner::processing( char c )
 {
-	//printf( "%c", c );
-	//printf( "%4d:%3d:%c\n", line, position, c );
 	switch( state )	{
 		case S_Initial:
 			processingInitial( c );

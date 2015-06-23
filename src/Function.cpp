@@ -1,5 +1,6 @@
-#include <stack>
 #include <Refal2.h>
+#include <stack>
+#include <iostream>
 
 namespace Refal2 {
 
@@ -7,13 +8,13 @@ namespace Refal2 {
 
 void PrintRule( const CFunctionRule& rule )
 {
-	printf( "\t" );
+	std::cout << "\t";
 	if( rule.isRightDirection ) {
-		printf( "R" );
+		std::cout << "R";
 	}
-	printf( " " );
+	std::cout << " ";
 	PrintUnitList( rule.leftPart, &rule.variables );
-	printf( "= " );
+	std::cout << "= ";
 	PrintUnitList( rule.rightPart );
 }
 
@@ -24,7 +25,7 @@ void PrintFunction( const CFunction& function )
 		rule = rule->nextRule )
 	{
 		PrintRule( *rule );
-		printf( "\n" );
+		std::cout << std::endl;
 	}
 }
 
