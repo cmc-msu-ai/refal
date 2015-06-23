@@ -1,7 +1,9 @@
 #include <Refal2.h>
 
 namespace Refal2 {
-	
+
+//-----------------------------------------------------------------------------
+
 void CVariables::Reset()
 {
 	if( variables != 0 ) {
@@ -71,8 +73,10 @@ bool CVariables::Get( TVariableIndex variableIndex, TTableIndex& tableIndex)
 	}
 }
 
-CVariablesBuilder::CVariablesBuilder( IVariablesBuilderListener* listener ):
-	CListener( listener )
+//-----------------------------------------------------------------------------
+
+CVariablesBuilder::CVariablesBuilder( IErrorHandler* errorProcessor ):
+	CErrorsHelper( errorProcessor )
 {
 	Reset();
 }
@@ -134,7 +138,7 @@ TVariableIndex CVariablesBuilder::AddLeft( TVariableName name,
 		}
 		return var.name;
 	} else {
-		error( VBEC_TypeOfVariableDoesNotMatch );
+		error( EC_TypeOfVariableDoesNotMatch );
 	}
 	return InvalidVariableIndex;
 }
@@ -154,12 +158,57 @@ TVariableIndex CVariablesBuilder::AddRight( TVariableName name,
 		return var.name;
 	} else {
 		if( var.type == InvalidVariableType ) {
-			error( VBEC_NoSuchVariableInLeftPart );
+			error( EC_NoSuchVariableInLeftPart );
 		} else {
-			error( VBEC_TypeOfVariableDoesNotMatch );
+			error( EC_TypeOfVariableDoesNotMatch );
 		}
 		return InvalidVariableIndex;
 	}
 }
+
+
+bool CVariablesBuilder::checkName( TVariableName name )
+{
+	if( CVariable::IsValidName( name ) ) {
+		return true;
+	} else {
+		error( EC_InvalidVariableName );
+		return false;
+	}
+}
+
+bool CVariablesBuilder::checkType( TVariableType type )
+{
+	if( CVariable::IsValidType( type ) ) {
+		return true;
+	} else {
+		error( EC_NoSuchTypeOfVariable );
+		return false;
+	}
+}
+
+
+void CVariablesBuilder::error( TErrorCode errorCode )
+{
+	switch( errorCode ) {
+		case EC_InvalidVariableName:
+			CErrorsHelper::Error( "invalid variable name" );
+			break;
+		case EC_NoSuchTypeOfVariable:
+			CErrorsHelper::Error( "no such type of variable" );
+			break;
+		case EC_TypeOfVariableDoesNotMatch:
+			CErrorsHelper::Error( "type of variable does not match" );
+			break;
+		case EC_NoSuchVariableInLeftPart:
+			CErrorsHelper::Error( "no such variable in left part" );
+			break;
+		default:
+			assert( false );
+			break;
+	}
+}
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

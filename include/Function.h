@@ -1,9 +1,11 @@
 #pragma once
 
-#include <stack>
 #include <Refal2.h>
+#include <stack>
 
 namespace Refal2 {
+
+//-----------------------------------------------------------------------------
 
 void PrintRule(const CFunctionRule& rule);
 void PrintFunction(const CFunction& function);
@@ -24,6 +26,8 @@ private:
 	CFunctionRule(bool _isRightDirection):
 		isRightDirection(_isRightDirection), nextRule(0) {}
 };
+
+//-----------------------------------------------------------------------------
 
 enum TFunctionState {
 	FS_Declared,
@@ -102,37 +106,18 @@ inline void CFunction::SetExternal( TExternalFunction _externalFunction )
 	externalFunction = _externalFunction;
 }
 
-enum TFunctionBuilderErrorCode {
-	FBEC_ThereAreNoRulesInFunction,
-	FBEC_IllegalLeftBracketInLeftPart,
-	FBEC_IllegalRightBracketInLeftPart,
-	FBEC_RightParenDoesNotMatchLeftParen,
-	FBEC_RightBracketDoesNotMatchLeftBracket,
-	FBEC_UnclosedLeftParenInLeftPart,
-	FBEC_UnclosedLeftParenInRightPart,
-	FBEC_UnclosedLeftBracketInRightPart,
-	FBEC_ThereAreMultiplePartsSeparatorInRules,
-	FBEC_ThereAreNoPartsSeparatorInRules
-};
+//-----------------------------------------------------------------------------
 
-class IFunctionBuilderListener {
+class CFunctionBuilder : public CVariablesBuilder {
 public:
-	virtual void OnFunctionBuilderError( TFunctionBuilderErrorCode ) = 0;
-};
-
-class CFunctionBuilder :
-	public CVariablesBuilder,
-	public CListener<IFunctionBuilderListener>
-{
-public:
-	explicit CFunctionBuilder( IFunctionBuilderListener* listener = 0 );
+	explicit CFunctionBuilder( IErrorHandler* errorProcessor = 0 );
 	~CFunctionBuilder();
 
 	void Reset();
 	void Export( CFunction& function );
 
 	bool IsProcessRightPart() const { return isProcessRightPart; }
-	
+
 	void SetRightDirection() { isRightDirection = true; }
 	void AddEndOfLeft();
 	void AddEndOfRight();
@@ -147,16 +132,6 @@ public:
 	void AddRightBracket();
 
 private:
-	CFunctionBuilder( const CFunctionBuilder& );
-	CFunctionBuilder& operator=( const CFunctionBuilder& );
-
-	virtual void OnErrors();
-	
-	void emptyStack();
-	void error( TFunctionBuilderErrorCode errorCode );
-	void emptyRules();
-	void addRule();
-	
 	bool isProcessRightPart;
 	bool isRightDirection;
 	CUnitList acc;
@@ -164,48 +139,29 @@ private:
 	CFunctionRule* firstRule;
 	CFunctionRule* lastRule;
 	std::stack<CUnitNode*> balanceStack;
+	// processing errors
+	enum TErrorCode {
+		EC_ThereAreNoRulesInFunction,
+		EC_IllegalLeftBracketInLeftPart,
+		EC_IllegalRightBracketInLeftPart,
+		EC_RightParenDoesNotMatchLeftParen,
+		EC_RightBracketDoesNotMatchLeftBracket,
+		EC_UnclosedLeftParenInLeftPart,
+		EC_UnclosedLeftParenInRightPart,
+		EC_UnclosedLeftBracketInRightPart,
+		EC_ThereAreMultiplePartsSeparatorInRules,
+		EC_ThereAreNoPartsSeparatorInRules
+	};
+	void error( TErrorCode errorCode );
+	// auxiliary functions
+	void emptyStack();
+	void emptyRules();
+	void addRule();
+
+	CFunctionBuilder( const CFunctionBuilder& );
+	CFunctionBuilder& operator=( const CFunctionBuilder& );
 };
 
-inline CFunctionBuilder::~CFunctionBuilder()
-{
-	Reset();
-}
-
-inline void CFunctionBuilder::emptyStack()
-{
-	while( !balanceStack.empty() ) {
-		balanceStack.pop();
-	}
-}
-	
-inline void CFunctionBuilder::error( TFunctionBuilderErrorCode errorCode )
-{
-	SetErrors();
-	if( CListener<IFunctionBuilderListener>::HasListener() ) {
-		CListener<IFunctionBuilderListener>::GetListener()->
-			OnFunctionBuilderError( errorCode );
-	}
-}
-
-inline void CFunctionBuilder::AddChar( TChar c )
-{
-	if( !HasErrors() ) {
-		acc.AppendChar( c );
-	}
-}
-
-inline void CFunctionBuilder::AddLabel( TLabel label )
-{
-	if( !HasErrors() ) {
-		acc.AppendLabel( label );
-	}
-}
-
-inline void CFunctionBuilder::AddNumber( TNumber number )
-{
-	if( !HasErrors() ) {
-		acc.AppendNumber( number );
-	}
-}
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

@@ -67,6 +67,8 @@ inline bool CVariable::IsValidName( TVariableName name )
 	return ( ::isalnum( name ) != 0 );
 }
 
+//-----------------------------------------------------------------------------
+
 class CVariables {
 	friend class CVariablesBuilder;
 
@@ -149,26 +151,13 @@ inline void CVariables::allocVariablesValues()
 	}
 }
 
-enum TVariablesBuilderErrorCode {
-	VBEC_InvalidVatiableName,
-	VBEC_NoSuchTypeOfVariable,
-	VBEC_TypeOfVariableDoesNotMatch,
-	VBEC_NoSuchVariableInLeftPart
-};
-
-class IVariablesBuilderListener {
-public:
-	virtual void OnVariablesBuilderError( TVariablesBuilderErrorCode ) = 0;
-};
+//-----------------------------------------------------------------------------
 
 const int VariablesInfoSize = 128;
 
-class CVariablesBuilder :
-	public CErrors,
-	public CListener<IVariablesBuilderListener>
-{
+class CVariablesBuilder : public CErrorsHelper {
 public:
-	explicit CVariablesBuilder( IVariablesBuilderListener* listener = 0 );
+	explicit CVariablesBuilder( IErrorHandler* errorProcessor = 0 );
 
 	void Reset();
 	void Export( CVariables& variables );
@@ -179,12 +168,16 @@ public:
 		CQualifier* qualifier = 0 );
 
 private:
-	CVariablesBuilder( const CVariablesBuilder& );
-	CVariablesBuilder& operator=( const CVariablesBuilder& );
-
 	bool checkName( TVariableName name );
 	bool checkType( TVariableType type );
-	void error( TVariablesBuilderErrorCode errorCode );
+	// processing errors
+	enum TErrorCode {
+		EC_InvalidVariableName,
+		EC_NoSuchTypeOfVariable,
+		EC_TypeOfVariableDoesNotMatch,
+		EC_NoSuchVariableInLeftPart
+	};
+	void error( TErrorCode errorCode );
 
 	struct CVariableInfo {
 		TVariableIndex name;
@@ -196,35 +189,10 @@ private:
 
 	CVariableInfo variables[VariablesInfoSize];
 	int countOfVariables;
+
+	CVariablesBuilder( const CVariablesBuilder& );
+	CVariablesBuilder& operator=( const CVariablesBuilder& );
 };
-
-inline bool CVariablesBuilder::checkName( TVariableName name )
-{
-	if( CVariable::IsValidName( name ) ) {
-		return true;
-	} else {
-		error( VBEC_InvalidVatiableName );
-		return false;
-	}
-}
-
-inline bool CVariablesBuilder::checkType( TVariableType type )
-{
-	if( CVariable::IsValidType( type ) ) {
-		return true;
-	} else {
-		error( VBEC_NoSuchTypeOfVariable );
-		return false;
-	}
-}
-
-inline void CVariablesBuilder::error( TVariablesBuilderErrorCode errorCode )
-{
-	SetErrors();
-	if( HasListener() ) {
-		GetListener()->OnVariablesBuilderError( errorCode );
-	}
-}
 
 //-----------------------------------------------------------------------------
 

@@ -3,6 +3,8 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
 void PrintRule( const CFunctionRule& rule )
 {
 	printf( "\t" );
@@ -26,14 +28,20 @@ void PrintFunction( const CFunction& function )
 	}
 }
 
-CFunctionBuilder::CFunctionBuilder(IFunctionBuilderListener* listener):
-	CVariablesBuilder( dynamic_cast<IVariablesBuilderListener*>( listener ) ),
-	CListener<IFunctionBuilderListener>( listener ),
+//-----------------------------------------------------------------------------
+
+CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorProcessor ):
+	CVariablesBuilder( errorProcessor ),
 	isProcessRightPart( false ),
 	isRightDirection( false ),
 	firstRule( 0 ),
 	lastRule( 0 )
 {
+}
+
+CFunctionBuilder::~CFunctionBuilder()
+{
+	Reset();
 }
 
 void CFunctionBuilder::Reset()
@@ -47,19 +55,6 @@ void CFunctionBuilder::Reset()
 	emptyStack();
 }
 
-void CFunctionBuilder::emptyRules()
-{
-	if( firstRule != 0 ) {
-		while( firstRule != 0 ) {
-			CFunctionRule* tmp = firstRule;
-			firstRule = firstRule->nextRule;
-			delete tmp;
-		}
-	}
-	firstRule = 0;
-	lastRule = 0;
-}
-
 void CFunctionBuilder::Export( CFunction& function )
 {
 	// todo: check rule
@@ -67,26 +62,20 @@ void CFunctionBuilder::Export( CFunction& function )
 		if( firstRule != 0 ) {
 			function.SetParsed( &firstRule );
 		} else {
-			error( FBEC_ThereAreNoRulesInFunction );
+			error( EC_ThereAreNoRulesInFunction );
 		}
 	}
 	Reset();
 }
 
-void CFunctionBuilder::OnErrors()
-{
-	emptyRules();
-	CVariablesBuilder::OnErrors();
-}
-
 void CFunctionBuilder::AddEndOfLeft()
 {
 	if( isProcessRightPart ) {
-		error( FBEC_ThereAreMultiplePartsSeparatorInRules );
+		error( EC_ThereAreMultiplePartsSeparatorInRules );
 	} else {
 		while( !balanceStack.empty() ) {
 			balanceStack.pop();
-			error( FBEC_UnclosedLeftParenInLeftPart );
+			error( EC_UnclosedLeftParenInLeftPart );
 		}
 		if( HasErrors() ) {
 			acc.Empty();
@@ -102,11 +91,11 @@ void CFunctionBuilder::AddEndOfRight()
 	while( !balanceStack.empty() ) {
 		CUnitNode* unit = balanceStack.top();
 		balanceStack.pop();
-		error( unit->IsLeftParen() ? FBEC_UnclosedLeftParenInRightPart :
-			FBEC_UnclosedLeftBracketInRightPart );
+		error( unit->IsLeftParen() ? EC_UnclosedLeftParenInRightPart :
+			EC_UnclosedLeftBracketInRightPart );
 	}
 	if( !isProcessRightPart ) {
-		error( FBEC_ThereAreNoPartsSeparatorInRules );
+		error( EC_ThereAreNoPartsSeparatorInRules );
 	}
 	if( HasErrors() ) {
 		acc.Empty();
@@ -115,6 +104,27 @@ void CFunctionBuilder::AddEndOfRight()
 		addRule();
 	}
 	isProcessRightPart = false;
+}
+
+void CFunctionBuilder::AddChar( TChar c )
+{
+	if( !HasErrors() ) {
+		acc.AppendChar( c );
+	}
+}
+
+void CFunctionBuilder::AddLabel( TLabel label )
+{
+	if( !HasErrors() ) {
+		acc.AppendLabel( label );
+	}
+}
+
+void CFunctionBuilder::AddNumber( TNumber number )
+{
+	if( !HasErrors() ) {
+		acc.AppendNumber( number );
+	}
 }
 
 void CFunctionBuilder::AddVariable( TVariableType type, TVariableName name,
@@ -128,7 +138,7 @@ void CFunctionBuilder::AddVariable( TVariableType type, TVariableName name,
 	}
 	if( !HasErrors() ) {
 		if( index == InvalidVariableIndex ) {
-			SetErrors();
+			//SetErrors();
 		} else {
 			acc.AppendVariable( index );
 		}
@@ -150,7 +160,7 @@ void CFunctionBuilder::AddRightParen()
 		leftParen->PairedParen() = acc.AppendRightParen(leftParen);
 		balanceStack.pop();
 	} else {
-		error( FBEC_RightParenDoesNotMatchLeftParen );
+		error( EC_RightParenDoesNotMatchLeftParen );
 	}
 }
 
@@ -159,7 +169,7 @@ void CFunctionBuilder::AddLeftBracket()
 	if( isProcessRightPart ) {
 		balanceStack.push( acc.AppendLeftBracket() );
 	} else {
-		error( FBEC_IllegalLeftBracketInLeftPart );
+		error( EC_IllegalLeftBracketInLeftPart );
 	}
 }
 
@@ -174,11 +184,69 @@ void CFunctionBuilder::AddRightBracket()
 			leftBracket->PairedParen() = acc.AppendRightBracket(leftBracket);
 			balanceStack.pop();
 		} else {
-			error( FBEC_RightBracketDoesNotMatchLeftBracket );
+			error( EC_RightBracketDoesNotMatchLeftBracket );
 		}
 	} else {
-		error( FBEC_IllegalRightBracketInLeftPart );
+		error( EC_IllegalRightBracketInLeftPart );
 	}
+}
+
+void CFunctionBuilder::error( TErrorCode errorCode )
+{
+	switch( errorCode ) {
+		case EC_ThereAreNoRulesInFunction:
+			CErrorsHelper::Error( "there are no rules in function" );
+			break;
+		case EC_IllegalLeftBracketInLeftPart:
+			CErrorsHelper::Error( "illegal left bracket in left part" );
+			break;
+		case EC_IllegalRightBracketInLeftPart:
+			CErrorsHelper::Error( "illegal right bracket in left part" );
+			break;
+		case EC_RightParenDoesNotMatchLeftParen:
+			CErrorsHelper::Error( "right paren does not match left paren" );
+			break;
+		case EC_RightBracketDoesNotMatchLeftBracket:
+			CErrorsHelper::Error( "right bracket does not match left bracket" );
+			break;
+		case EC_UnclosedLeftParenInLeftPart:
+			CErrorsHelper::Error( "unclosed left paren in left part" );
+			break;
+		case EC_UnclosedLeftParenInRightPart:
+			CErrorsHelper::Error( "unclosed left paren in right part" );
+			break;
+		case EC_UnclosedLeftBracketInRightPart:
+			CErrorsHelper::Error( "unclosed left bracket in right part" );
+			break;
+		case EC_ThereAreMultiplePartsSeparatorInRules:
+			CErrorsHelper::Error( "there are multiple parts separator in rules" );
+			break;
+		case EC_ThereAreNoPartsSeparatorInRules:
+			CErrorsHelper::Error( "there are no parts separator in rules" );
+			break;
+		default:
+			assert( false );
+			break;
+	}
+}
+
+void CFunctionBuilder::emptyStack()
+{
+	std::stack<CUnitNode*> emptyStack;
+	std::swap( balanceStack, emptyStack );
+}
+
+void CFunctionBuilder::emptyRules()
+{
+	if( firstRule != 0 ) {
+		while( firstRule != 0 ) {
+			CFunctionRule* tmp = firstRule;
+			firstRule = firstRule->nextRule;
+			delete tmp;
+		}
+	}
+	firstRule = 0;
+	lastRule = 0;
 }
 
 void CFunctionBuilder::addRule()
@@ -195,5 +263,7 @@ void CFunctionBuilder::addRule()
 		lastRule = firstRule;
 	}
 }
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

@@ -17,7 +17,6 @@ class CExecuter;
 class CFunction;
 struct CFunctionRule;
 class CFunctionCompiler;
-class IFunctionBuilderListener;
 class CFunctionBuilder;
 
 class CLabelTable;
@@ -26,13 +25,11 @@ class COperation;
 class COperationsBuilder;
 class COperationsExecuter;
 
-class IParserListener;
 class CParser;
 
 class CQualifier;
 class CQualifierBuilder;
 
-class IScannerListener;
 class CScanner;
 
 class CUnit;
@@ -47,10 +44,9 @@ extern CLabelTable LabelTable;
 
 } // end of namespace Refal2
 
-#include <Assert.h>
-#include <NodeList.h>
+#include <assert.h>
 #include <Errors.h>
-#include <Listener.h>
+#include <NodeList.h>
 #include <FastSet.h>
 #include <SetBuilder.h>
 #include <Unit.h>
@@ -61,6 +57,9 @@ extern CLabelTable LabelTable;
 #include <Function.h>
 #include <FunctionCompiler.h>
 #include <Label.h>
-#include <Scanner.h>
+#include <Token.h>
+#include <QualifierParser.h>
+#include <RuleParser.h>
 #include <Parser.h>
+#include <Scanner.h>
 #include <OperationsExecuter.h>

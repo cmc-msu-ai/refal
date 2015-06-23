@@ -1,519 +1,631 @@
-#include <string>
-#include <algorithm>
-#include <iostream>
 #include <Refal2.h>
+#include <sstream>
+#include <iostream>
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
+const char Dot = '.';
+const char Plus = '+';
+const char Zero = '0';
+const char Blank = ' ';
+const char Comma = ',';
+const char Equal = '=';
+const char Quote = '\'';
+const char Hyphen = '-';
+const char LineFeed = '\n';
+const char NullByte = '\0';
+const char Backslash = '\\';
+const char Underline = '_';
+const char LeftParen = '(';
+const char RightParen = ')';
+const char LeftBracket = '<';
+const char RightBracket = '>';
+const char CarriageReturn = '\r';
+const char LimiterOfSymbol = '/';
+const char LimiterOfQualifier = ':';
+const char MultilineCommentEnd = '}';
+const char HorizontalTabulation = '\t';
+const char MultilineCommentBegin = '{';
+const char SingleLineCommentBegin = '*';
+// strings replacement in processing
+const char UniversalSeparatorOfTokens = NullByte;
+
+const int HorizontalTabulationSize = 8;
+const int FirstLineNumber = 1;
+const int FirstCharacterNumber = 1;
+
+static bool IsSpace( char c )
+{
+	return ( c == Blank || c == HorizontalTabulation );
+}
+
+static bool IsOctal( char c )
+{
+	return ( c >= '0' && c <= '7' );
+}
+
+static bool IsDigit( char c )
+{
+	return ( c >= '0' && c <= '9' );
+}
+
+static bool IsAlpha( char c )
+{
+	return ( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) );
+}
+
+static bool IsFirstWordLetter( char c )
+{
+	return ( c == Underline || IsAlpha( c ) );
+}
+
+static bool IsWordLetter( char c )
+{
+	return ( IsFirstWordLetter( c ) || IsDigit( c ) || c == Hyphen );
+}
+
+static bool IsControl( char c )
+{
+	return ( c == '\x7f' /* DEL */
+		|| ( c >= '\0' && c < '\x20' && c != HorizontalTabulation
+			&& c != CarriageReturn && c != LineFeed ) );
+}
+
+CScanner::CScanner( IErrorHandler* errorProcessor ):
+	CParser( errorProcessor )
+{
+	Reset();
+}
+
 void CScanner::Reset()
 {
-	CFunctionBuilder::Reset();
-	line = 1;
-	offset = 0;
-	lexemString.clear();
-	state = SS_BeginOfLine;
-	localOffset = 0;
+	CParser::Reset();
+	line = FirstLineNumber;
+	position = FirstCharacterNumber;
+	afterCarriageReturn = false;
+	preprocessingState = PS_Initial;
+	state = S_Initial;
 }
 
-void CScanner::ProcessLexem()
+void CScanner::AddChar( char c )
 {
-	switch( lexem ) {
-		case L_Blank:
-			std::cout << " ";
+	normalizeLineFeed( c );
+}
+
+void CScanner::AddEndOfFile()
+{
+	preprocessingEndOfFile();
+	Reset();
+}
+
+void CScanner::error( TErrorCode errorCode, char c )
+{
+	std::ostringstream errorStream;
+	errorStream << line << ":" << position << ": error: ";
+	switch( errorCode ) {
+		case E_InvalidCharacter:
+			errorStream << "invalid character `" << c << "`";
 			break;
-		case L_Equal:
-			std::cout << "=";
+		case E_InvalidControlCharacter:
+			errorStream << "invalid control character with ASCII code "
+				<< "`" << static_cast<int>( c ) << "`";
 			break;
-		case L_Comma:
-			std::cout << ",";
+		case E_UnexpectedCharacter:
+			errorStream << "unexpected character `" << c << "`";
 			break;
-		case L_Label:
-			std::cout << "/" << lexemString << "/";
+		case E_UnclosedMultilineCommentAtTheEndOfFile:
+			errorStream << "unclosed multiline comment at the end of file";
 			break;
-		case L_Number:
-			std::cout << "/" << lexemNumber << "/";
+		case E_UnclosedString:
+			errorStream << "unclosed string";
 			break;
-		case L_String:
-			std::cout << "'" << lexemString << "'";
+		case E_UnclosedLabel:
+			errorStream << "unclosed label";
 			break;
-		case L_NewLine:
-			std::cout << "\n";
+		case E_UnexpectedCharacterInLabel:
+			errorStream << "unexpected character in label";
 			break;
-		case L_EndOfFile:
-			std::cout << "\nEndOfFile!\n";
+		case E_UnclosedNumber:
+			errorStream << "unclosed number";
 			break;
-		case L_Qualifier:
-			std::cout << ":" << lexemString << ":";
+		case E_UnclosedQualifier:
+			errorStream << "unclosed qualifier";
 			break;
-		case L_LeftParen:
-			std::cout << "(";
-			break;
-		case L_RightParen:
-			std::cout << ")";
-			break;
-		case L_LeftBracket:
-			std::cout << "<";
-			break;
-		case L_RightBracket:
-			std::cout << ">";
-			break;
-		case L_Identificator:
-			std::cout << lexemString;
+		case E_UnexpectedCharacterInQualifier:
+			errorStream << "unexpected character in qualifier";
 			break;
 		default:
 			assert( false );
 			break;
 	}
+	errorStream << ".";
+	CErrorsHelper::Error( errorStream.str() );
 }
 
-void CScanner::AddChar(char c)
+void CScanner::setLineAndPositionOfToken()
 {
-	static const int TabSize = 8;
+	token.line = line;
+	token.position = position;
+}
 
-	processChar(c);
-	
-	if( c == '\n' ) {
+void CScanner::addToken( TTokenType tokenType )
+{
+	token.type = tokenType;
+	CParser::AddToken();
+}
+
+void CScanner::addTokenWithCurrentLineAndPosition( TTokenType tokenType )
+{
+	setLineAndPositionOfToken();
+	addToken( tokenType );	
+}
+
+void CScanner::normalizeLineFeed( char c )
+{
+	if( c == CarriageReturn ) {
+		preprocessing( LineFeed );
 		line++;
-		localOffset = 1;
-	} else if( c == '\t' ) {
-		while( localOffset % TabSize ) {
-			localOffset++;
+		position = FirstCharacterNumber;
+	} else if( c == LineFeed ) {
+		if( !afterCarriageReturn ) {
+			preprocessing( LineFeed );
+			line++;
+			position = FirstCharacterNumber;
 		}
+	} else if( IsControl( c ) ) {
+		error( E_InvalidControlCharacter, c );
+		position++;
 	} else {
-		localOffset++;
-	}
-}
-
-std::string CScanner::ToLower(const std::string& data)
-{
-	std::string result( data );
-	std::transform( result.begin(), result.end(), result.begin(), ::tolower );
-	return result;
-}
-
-void CScanner::processChar( char c )
-{
-	if( c == '\r' ) {
-	} else if( c == '\x7f' /* ASCII DEL - 127 */
-		|| ( c != '\n' && c != '\t' && c >= '\0' && c <= '\x1f' ) )
-	{
-		error( SEC_UnexpectedControlSequence, c );
-	} else {
-		switch( state ) {
-			case SS_BeginOfLine:
-				if( c == ' ' || c == '\t' ) {
-					state = SS_BeginBlank;
-				} else if( c == '\n' || c == ';' ) {
-					// TODO: warning if c == ';': old style
-				} else if( c == '+' ) {
-					state = SS_BeginPlus;
-				} else if( c == '*' ) {
-					state = SS_BeginComment;
-				} else {
-					state = SS_NotBeginOfLine;
-					processChar( c );
-				}
-				break;
-			case SS_BeginBlank:
-				if( c == ' ' || c == '\t' ) {
-				} else if( c == '*' ) {
-					state = SS_BeginComment;
-				} else if( c == '+' ) {
-					state = SS_BeginPlus;
-				} else if( c == '\n' || c == ';' ) {
-					// TODO: warning if c == ';': old style
-					state = SS_BeginOfLine;
-				} else {
-					state = SS_NotBeginOfLine;
-					offset = localOffset;
-					lexem = L_Blank;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_BeginComment:
-				if( c == '\n' ) {
-					state = SS_BeginOfLine;
-				}
-				break;
-			case SS_BeginPlus :
-				if( c == ' ' || c == '\t' ) {
-				} else if( c == '*' ) {
-					state = SS_BeginCommentAfterPlus;
-				} else if( c == '\n' ) {
-					state = SS_BeginOfLine;
-				} else {
-					error( SEC_SymbolAfterPlus, c );
-				}
-				break;
-			case SS_BeginCommentAfterPlus:
-				if( c == '\n' ) {
-					state = SS_BeginOfLine;
-				}
-				break;
-			case SS_NotBeginOfLine:
-				if( c == '+' ) {
-					state = SS_NotBeginPlus;
-				} else if( c == '*' ) {
-					state = SS_NotBeginComment;
-				} else if( c == ' ' || c == '\t' ) {
-					state = SS_NotBeginBlank;
-				} else if( c == '\n' || c == ';' ) {
-					// TODO: warning if c == ';': old style
-					state = SS_BeginOfLine;
-					offset = localOffset;
-					lexem = L_NewLine;
-					ProcessLexem();
-				} else if( c == '\'' ) {
-					state = SS_String;
-					lexemString.clear();
-					offset = localOffset;
-				} else if( c == '/' ) {
-					state = SS_BeginLabelOrNumber;
-					offset = localOffset;
-				} else if( c == ':' ) {
-					state = SS_BeginQualifier;
-				} else if( c == '(' ) {
-					offset = localOffset;
-					lexem = L_LeftParen;
-					ProcessLexem();
-				} else if( c == ')' ) {
-					offset = localOffset;
-					lexem = L_RightParen;
-					ProcessLexem();
-				} else if( c == '<' ) {
-					offset = localOffset;
-					lexem = L_LeftBracket;
-					ProcessLexem();
-				} else if( c == '>' || c == '.' ) {
-					// TODO: warning if c == '.': old style
-					offset = localOffset;
-					lexem = L_RightBracket;
-					ProcessLexem();
-				} else if( c == '=' ) {
-					offset = localOffset;
-					lexem = L_Equal;
-					ProcessLexem();
-				} else if( c == ',' ) {
-					offset = localOffset;
-					lexem = L_Comma;
-					ProcessLexem();
-				} else if( isalnum( static_cast<unsigned char>( c ) )
-					|| c == '_' )
-				{
-					state = SS_Identificator;
-					lexemString = c;
-					offset = localOffset;
-				} else {
-					error( SEC_UnexpectedCharacter, c );
-				}
-				break;
-			case SS_NotBeginBlank:
-				if( c == ' ' || c == '\t' ) {
-				} else if( c == '*' ) {
-					state = SS_NotBeginComment;
-				} else if( c == '+' ) {
-					state = SS_NotBeginPlus;
-				} else if( c == '\n' || c == ';' ) {
-					// TODO: warning if c == ';': old style
-					state = SS_BeginOfLine;
-					offset = localOffset;
-					lexem = L_NewLine;
-					ProcessLexem();
-				} else {
-					state = SS_NotBeginOfLine;
-					offset = localOffset;
-					lexem = L_Blank;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_NotBeginComment:
-				if( c == '\n' ) {
-					state = SS_BeginOfLine;
-					offset = localOffset;
-					lexem = L_NewLine;
-					ProcessLexem();
-				}
-				break;
-			case SS_NotBeginPlus:
-				if( c == ' ' || c == '\t' ) {
-				} else if( c == '*' ) {
-					state = SS_NotBeginCommentAfterPlus;
-				} else if( c == '\n' ) {
-					state = SS_NotBeginBlank;
-				} else {
-					error( SEC_SymbolAfterPlus, c );
-				}
-				break;
-			case SS_NotBeginCommentAfterPlus:
-				if( c == '\n' ) {
-					state = SS_NotBeginBlank;
-				}
-				break;
-			case SS_BeginLabelOrNumber:
-				if( isalpha( static_cast<unsigned char>( c ) ) || c == '_' ) {
-					state = SS_NotBeginLabel;
-					lexemString = c;
-				} else if( isdigit( static_cast<unsigned char>( c ) ) ) {
-					state = SS_NotBeginNumber;
-					lexemNumber = c - '0';
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedLabelOrNumber );
-					state = SS_BeginOfLine;
-				} else {
-					error( SEC_IllegalCharacterInLabelOrNumberBegin, c );
-					state = SS_NotBeginOfLine;
-					processChar( c );
-				}
-				break;
-			case SS_NotBeginLabel:
-				if( isalnum( static_cast<unsigned char>( c ) )
-					|| c == '_' || c == '-' )
-				{
-					lexemString += c;
-				} else if( c == '/' ) {
-					state = SS_NotBeginOfLine;
-					lexem = L_Label;
-					lexemLabel = LabelTable.AddLabel( ToLower( lexemString ) );
-					ProcessLexem();
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedLabel );
-					state = SS_BeginOfLine;
-					lexemLabel = LabelTable.AddLabel( ToLower( lexemString ) );
-					lexem = L_Label;
-					ProcessLexem();
-				} else {
-					error( SEC_IllegalCharacterInLabel, c );
-					state = SS_NotBeginOfLine;
-					lexemLabel = LabelTable.AddLabel( ToLower( lexemString ) );
-					lexem = L_Label;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_NotBeginNumber:
-				if( isdigit( static_cast<unsigned char>( c ) ) ) {
-					lexemNumber *= 10;
-					lexemNumber += c - '0';
-				} else if( c == '/' ) {
-					state = SS_NotBeginOfLine;
-					lexem = L_Number;
-					ProcessLexem();
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedNumber );
-					state = SS_BeginOfLine;
-					lexem = L_Number;
-					ProcessLexem();
-				} else {
-					error( SEC_IllegalCharacterInNumber, c );
-					state = SS_NotBeginOfLine;
-					lexem = L_Number;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_Identificator:
-				if( isalnum( static_cast<unsigned char>( c ) )
-					|| c == '_' || c == '-' )
-				{
-					lexemString += c;
-				} else {
-					state = SS_NotBeginOfLine;
-					lexem = L_Identificator;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_BeginQualifier:
-				if( isalpha( static_cast<unsigned char>( c ) ) || c == '_' ) {
-					state = SS_NotBeginQualifier;
-					lexemString = c;
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedQualifier );
-					state = SS_BeginOfLine;
-				} else {
-					error( SEC_IllegalCharacterInQualifierNameBegin, c );
-					state = SS_NotBeginOfLine;
-					processChar( c );
-				}
-				break;
-			case SS_NotBeginQualifier:
-				if( isalnum( static_cast<unsigned char>( c ) ) || c == '_' ) {
-					lexemString += c;
-				} else if( c == ':' ) {
-					state = SS_NotBeginOfLine;
-					lexem = L_Qualifier;
-					ProcessLexem();
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedQualifier );
-					state = SS_BeginOfLine;
-					lexem = L_Qualifier;
-					ProcessLexem();
-				} else {
-					error( SEC_IllegalCharacterInQualifierName, c );
-					state = SS_NotBeginOfLine;
-					lexem = L_Qualifier;
-					ProcessLexem();
-					processChar( c );
-				}
-				break;
-			case SS_String:
-				if( c == '\'' ) {
-					state = SS_StringAfterQuote;
-				} else if( c == '\\' ) {
-					state = SS_StringAfterBackslash;
-				} else if( c == '\n' ) {
-					error( SEC_UnclosedStringConstant );
-					state = SS_BeginOfLine;
-					lexem = L_String;
-					ProcessLexem();
-				} else {
-					lexemString += c;
-				}
-				break;
-			case SS_StringAfterQuote:
-				if( c == '\'' ) {
-					state = SS_String;
-					lexemString += '\'';
-				} else {
-					lexem = L_String;
-					ProcessLexem();
-					state = SS_NotBeginOfLine;
-					processChar( c );
-				}
-				break;
-			case SS_StringAfterBackslash:
-				if( c == 'n' ) {
-					state = SS_String;
-					lexemString += '\n';
-				} else if( c == 't' ) {
-					state = SS_String;
-					lexemString += '\t';
-				} else if( c == 'v' ) {
-					state = SS_String;
-					lexemString += '\v';
-				} else if( c == 'b' ) {
-					state = SS_String;
-					lexemString += '\b';
-				} else if( c == 'r' ) {
-					state = SS_String;
-					lexemString += '\r';
-				} else if( c == 'f' ) {
-					state = SS_String;
-					lexemString += '\f';
-				} else if( c == '\\' ) {
-					state = SS_String;
-					lexemString += '\\';
-				} else if( c >= '0' && c <= '7' ) {
-					state = SS_StringMayOctalCode;
-					octalCode = c;
-				} else {
-					state = SS_String;
-					lexemString += '\\';
-					processChar( c );
-				}
-				break;
-			case SS_StringMayOctalCode:
-				if( octalCode.length() == 3 ) {
-					state = SS_String;
-					int charCode = ( ( octalCode[0] - '0' ) * 8 +
-						( octalCode[1] - '0' ) ) * 8 + octalCode[2] - '0';
-					assert( charCode % 256 != 0 );
-					lexemString += static_cast<char>( charCode % 256 );
-					processChar( c );
-				} else {
-					assert( octalCode.length() < 3 );
-					if( c >= '0' && c <= '7' ) {
-						octalCode += c;
-					} else {
-						state = SS_String;
-						if( octalCode == "0" ) {
-							assert( false );
-							lexemString += '\0';
-						} else {
-							lexemString += '\\' + octalCode;
-						}
-						processChar( c );
-					}
-				}
-				break;
-			default:
-				assert( false );
-				break;
+		preprocessing( c );
+		position++;
+		if( c == HorizontalTabulation ) {
+			while( ( position - FirstCharacterNumber )
+				% HorizontalTabulationSize != 0 )
+			{
+				position++;
+			}
 		}
 	}
+	afterCarriageReturn = ( c == CarriageReturn );
 }
 
-void CScanner::processEndOfFile()
+void CScanner::preprocessing( char c )
 {
-	switch( state ) {
-		case SS_BeginOfLine:
-		case SS_BeginBlank:
-		case SS_BeginComment:
+	switch( preprocessingState ) {
+		case PS_Initial:
+			preprocessingInitital( c );
 			break;
-
-		case SS_NotBeginOfLine:
-		case SS_NotBeginBlank:
-		case SS_NotBeginComment:
-			offset = localOffset;
-			lexem = L_NewLine;
-			ProcessLexem();
+		case PS_Plus:
+			preprocessingPlus( c );
 			break;
-
-		case SS_Identificator:
-			state = SS_NotBeginOfLine;
-			lexem = L_Identificator;
-			ProcessLexem();
-			processEndOfFile();
-			return;
+		case PS_PlusAfterLineFeed:
+			preprocessingPlusAfterLineFeed( c );
 			break;
-
-		case SS_StringAfterQuote:
-			state = SS_NotBeginOfLine;
-			lexem = L_String;
-			ProcessLexem();
-			processEndOfFile();
-			return;
+		case PS_PlusAfterMultilineComment:
+			preprocessingPlusAfterMultilineComment( c );
 			break;
-
-		case SS_String:
-		case SS_StringAfterBackslash:
-		case SS_StringMayOctalCode:
-			error( SEC_UnclosedStringConstantAtTheEndOfFile );
+		case PS_PlusAfterMultilineCommentAndLineFeed:
+			preprocessingPlusAfterMultilineCommentAndLineFeed( c );
 			break;
-
-		case SS_BeginPlus:
-		case SS_NotBeginPlus:
-		case SS_BeginCommentAfterPlus:
-		case SS_NotBeginCommentAfterPlus:
-			error( SEC_UnexpectedEndOfFile );
+		case PS_SingleLineComment:
+			preprocessingSingleLineComment( c );
 			break;
-
-		case SS_BeginLabelOrNumber:
-			error( SEC_UnclosedLabelOrNumberAtTheEndOfFile );
+		case PS_MultilineComment:
+			preprocessingMultilineComment( c );
 			break;
-
-		case SS_NotBeginLabel:
-			error( SEC_UnclosedLabelAtTheEndOfFile );
+		case PS_String:
+			preprocessingString( c );
 			break;
-
-		case SS_NotBeginNumber:
-			error( SEC_UnclosedNumberAtTheEndOfFile );
+		case PS_StringAfterQuote:
+			preprocessingStringAfterQuote( c );
 			break;
-
-		case SS_BeginQualifier:
-		case SS_NotBeginQualifier:
-			error( SEC_UnclosedQualifierAtTheEndOfFile );
+		case PS_StringAfterBackslash:
+			preprocessingStringAfterBackslash( c );
 			break;
-
+		case PS_StringOctalCodeOne:
+			preprocessingStringOctalCodeOne( c );
+			break;
+		case PS_StringOctalCodeTwo:
+			preprocessingStringOctalCodeTwo( c );
+			break;
 		default:
 			assert( false );
 			break;
 	}
-
-	lexem = L_EndOfFile;
-	ProcessLexem();
 }
+
+void CScanner::preprocessingEndOfFile()
+{
+	switch( preprocessingState ) {
+		case PS_MultilineComment:
+		case PS_PlusAfterMultilineComment:
+		case PS_PlusAfterMultilineCommentAndLineFeed:
+			error( E_UnclosedMultilineCommentAtTheEndOfFile );
+			preprocessingState = PS_Initial;
+			break;
+		case PS_Plus:
+		case PS_PlusAfterLineFeed:
+			preprocessingState = PS_Initial;
+			break;
+		case PS_Initial:
+		case PS_SingleLineComment:
+		case PS_String:
+		case PS_StringAfterQuote:
+		case PS_StringAfterBackslash:
+		case PS_StringOctalCodeOne:
+		case PS_StringOctalCodeTwo:
+			break;
+		default:
+			assert( false );
+			break;
+	}
+	preprocessing( LineFeed );
+}
+
+void CScanner::preprocessingInitital( char c )
+{
+	switch( c ) {
+		case Plus:
+			preprocessingState = PS_Plus;
+			break;
+		case Quote:
+			processing( UniversalSeparatorOfTokens );
+			setLineAndPositionOfToken();
+			token.value.string.clear();
+			preprocessingState = PS_String;
+			break;
+		case SingleLineCommentBegin:
+			preprocessingState = PS_SingleLineComment;
+			break;
+		case MultilineCommentBegin:
+			preprocessingState = PS_MultilineComment;
+			break;
+		default:
+			processing( c );
+			break;
+	}
+}
+
+void CScanner::preprocessingPlus( char c )
+{
+	if( c == LineFeed ) {
+		preprocessingState = PS_PlusAfterLineFeed;
+	} else if( c == MultilineCommentBegin ) {
+		preprocessingState = PS_PlusAfterMultilineComment;
+	}
+}
+
+void CScanner::preprocessingPlusAfterLineFeed( char c )
+{
+	if( !IsSpace( c ) && c != LineFeed ) {
+		preprocessingState = PS_Initial;
+		preprocessing( c );
+	}
+}
+
+void CScanner::preprocessingPlusAfterMultilineComment( char c )
+{
+	if( c == MultilineCommentEnd ) {
+		preprocessingState = PS_Plus;
+	} else if( c == LineFeed ) {
+		preprocessingState = PS_PlusAfterMultilineCommentAndLineFeed;
+	}
+}
+
+void CScanner::preprocessingPlusAfterMultilineCommentAndLineFeed( char c )
+{
+	if( c == MultilineCommentEnd ) {
+		preprocessingState = PS_PlusAfterLineFeed;
+	}
+}
+
+void CScanner::preprocessingSingleLineComment( char c )
+{
+	if( c == LineFeed ) {
+		processing( LineFeed );
+		preprocessingState = PS_Initial;
+	}
+}
+void CScanner::preprocessingMultilineComment( char c )
+{
+	if( c == LineFeed ) {
+		processing( LineFeed );
+	} else if( c == MultilineCommentEnd ) {
+		preprocessingState = PS_Initial;
+	}
+}
+
+void CScanner::preprocessingString( char c )
+{
+	switch( c ) {
+		case Quote:
+			if( token.value.string.empty() ) {
+				token.value.string.push_back( Quote );
+				addToken( TT_String );
+				preprocessingState = PS_Initial;
+			} else {
+				preprocessingState = PS_StringAfterQuote;
+			}
+			break;
+		case Backslash:
+			preprocessingState = PS_StringAfterBackslash;
+			break;
+		case LineFeed:
+			if( token.value.string.empty() ) {
+				error( E_UnexpectedCharacter );
+			} else {
+				error( E_UnclosedString );
+				addToken( TT_String );
+			}
+			preprocessingState = PS_Initial;
+			preprocessing( LineFeed );
+			break;
+		default:
+			token.value.string.push_back( c );
+			break;
+	}
+}
+
+void CScanner::preprocessingStringAfterQuote( char c )
+{
+	if( c == Quote ) {
+		token.value.string.push_back( Quote );
+		preprocessingState = PS_String;
+	} else {
+		assert( !token.value.string.empty() );
+		addToken( TT_String );
+		preprocessingState = PS_Initial;
+		preprocessing( c );
+	}
+}
+
+void CScanner::preprocessingStringAfterBackslash( char c )
+{
+	preprocessingState = PS_String;
+	switch( c ) {
+		case 'n':
+			token.value.string.push_back( LineFeed );
+			break;
+		case 't':
+			token.value.string.push_back( HorizontalTabulation );
+			break;
+		case 'v':
+			token.value.string.push_back( '\v' );
+			break;
+		case 'b':
+			token.value.string.push_back( '\b' );
+			break;
+		case 'r':
+			token.value.string.push_back( CarriageReturn );
+			break;
+		case 'f':
+			token.value.string.push_back( '\f' );
+			break;
+		case Backslash:
+			token.value.string.push_back( Backslash );
+			break;
+		default:
+			if( IsOctal( c ) ) {
+				octalCodeOne = c;
+				preprocessingState = PS_StringOctalCodeOne;
+			} else {
+				token.value.string.push_back( Backslash );
+				preprocessing( c );
+			}
+			break;
+	}
+}
+
+void CScanner::preprocessingStringOctalCodeOne( char c )
+{
+	if( IsOctal( c ) ) {
+		octalCodeTwo = c;
+		preprocessingState = PS_StringOctalCodeTwo;
+	} else {
+		if( octalCodeOne == Zero ) {
+			token.value.string.push_back( NullByte );
+		} else {
+			token.value.string.push_back( Backslash );
+			token.value.string.push_back( octalCodeOne );
+		}
+		token.value.string.push_back( c );
+		preprocessingState = PS_String;
+	}
+}
+
+void CScanner::preprocessingStringOctalCodeTwo( char c )
+{
+	if( IsOctal( c ) ) {
+		int code = ( ( octalCodeOne - Zero ) * 8 +
+			( octalCodeTwo - Zero ) ) * 8 + ( c - Zero );
+		token.value.string.push_back( static_cast<char>( code ) );
+	} else {
+		token.value.string.push_back( Backslash );
+		token.value.string.push_back( octalCodeOne );
+		token.value.string.push_back( octalCodeTwo );
+		token.value.string.push_back( c );
+	}
+	preprocessingState = PS_String;
+}
+
+void CScanner::processing( char c )
+{
+	//printf( "%c", c );
+	//printf( "%4d:%3d:%c\n", line, position, c );
+	switch( state )	{
+		case S_Initial:
+			processingInitial( c );
+			break;
+		case S_Blank:
+			processingBlank( c );
+			break;
+		case S_Symbol:
+			processingSymbol( c );
+			break;
+		case S_Label:
+			processingLabel( c );
+			break;
+		case S_Number:
+			processingNumber( c );
+			break;
+		case S_Word:
+			processingWord( c );
+			break;
+		case S_BeginOfQualifier:
+			processingBeginOfQualifier( c );
+			break;
+		case S_Qualifier:
+			processingQualifier( c );
+			break;
+		default:
+			assert( false );
+			break;
+	}
+}
+
+void CScanner::processingInitial( char c )
+{
+	switch( c ) {
+		case Comma:
+			addTokenWithCurrentLineAndPosition( TT_Comma );
+			break;
+		case Equal:
+			addTokenWithCurrentLineAndPosition( TT_Equal );
+			break;
+		case LineFeed:
+			addTokenWithCurrentLineAndPosition( TT_LineFeed );
+			break;
+		case LeftParen:
+			addTokenWithCurrentLineAndPosition( TT_LeftParen );
+			break;
+		case RightParen:
+			addTokenWithCurrentLineAndPosition( TT_RightParen );
+			break;
+		case LeftBracket:
+			addTokenWithCurrentLineAndPosition( TT_LeftBracket );
+			break;
+		case Dot:
+		case RightBracket:
+			token.value.word = c;
+			addTokenWithCurrentLineAndPosition( TT_RightBracket );
+			break;
+		case LimiterOfSymbol:
+			setLineAndPositionOfToken();
+			state = S_Symbol;
+			break;
+		case LimiterOfQualifier:
+			setLineAndPositionOfToken();
+			state = S_BeginOfQualifier;
+			break;
+		case UniversalSeparatorOfTokens:
+			break;
+		default:
+			if( IsSpace( c ) ) {
+				setLineAndPositionOfToken();
+				state = S_Blank;
+			} else if( c == Hyphen ) {
+				error( E_UnexpectedCharacter, c );
+			} else if( IsWordLetter( c ) ) {
+				token.value.word = c;
+				setLineAndPositionOfToken();
+				state = S_Word;
+			} else {
+				error( E_InvalidCharacter, c );
+			}
+			break;
+	}
+}
+
+void CScanner::processingBlank( char c )
+{
+	if( !IsSpace( c ) ) {
+		if( c != LineFeed ) {
+			addToken( TT_Blank );
+		}
+		state = S_Initial;
+		processing( c );
+	}
+}
+
+void CScanner::processingSymbol( char c )
+{
+	if( IsFirstWordLetter( c ) ) {
+		token.value.word = c;
+		state = S_Label;
+	} else if( IsDigit( c ) ) {
+		token.value.number = ( c - Zero );
+		state = S_Number;
+	} else {
+		error( E_UnexpectedCharacterInLabel );
+		state = S_Initial;
+		processing( c );
+	}
+}
+void CScanner::processingLabel( char c )
+{
+	if( IsWordLetter( c ) ) {
+		token.value.word += c;
+	} else if( c == LimiterOfSymbol ) {
+		addToken( TT_Label );
+		state = S_Initial;
+	} else {
+		error( E_UnclosedLabel );
+		state = S_Initial;
+		processing( c );
+	}
+}
+void CScanner::processingNumber( char c )
+{
+	if( IsDigit( c ) ) {
+		token.value.number = token.value.number * 10 + ( c - Zero );
+		// TODO: check overflow
+	} else if( c == LimiterOfSymbol ) {
+		addToken( TT_Number );
+		state = S_Initial;
+	} else {
+		error( E_UnclosedNumber );
+		state = S_Initial;
+		processing( c );
+	}
+}
+void CScanner::processingWord( char c )
+{
+	if( IsWordLetter( c ) ) {
+		token.value.word += c;
+	} else {
+		addToken( TT_Word );
+		state = S_Initial;
+		processing( c );
+	}
+}
+
+void CScanner::processingBeginOfQualifier( char c )
+{
+	if( IsFirstWordLetter( c ) ) {
+		token.value.word = c;
+		state = S_Qualifier;
+	} else {
+		error( E_UnexpectedCharacterInQualifier );
+		state = S_Initial;
+		processing( c );
+	}
+}
+void CScanner::processingQualifier( char c )
+{
+	if( IsWordLetter( c ) ) {
+		token.value.word += c;
+	} else if( c == LimiterOfQualifier ) {
+		addToken( TT_Qualifier );
+		state = S_Initial;
+	} else {
+		error( E_UnclosedQualifier );
+		state = S_Initial;
+		processing( c );
+	}
+}
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

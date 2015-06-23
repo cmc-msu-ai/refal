@@ -1,7 +1,7 @@
 #pragma once
 
-#include <bitset>
 #include <Refal2.h>
+#include <bitset>
 
 namespace Refal2 {
 

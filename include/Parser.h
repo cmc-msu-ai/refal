@@ -1,88 +1,67 @@
 #pragma once
 
+#include <Refal2.h>
 #include <map>
 #include <string>
-#include <Refal2.h>
 
 namespace Refal2 {
 
-enum TParserState {
-	PS_Begin,
-	PS_BeginIdent,
-	PS_BeginBlank,
-	PS_OnlyNewline,
-	PS_WaitNewline,
-	PS_BeginIdentBlank,
-	PS_BeginIdentBlankS,
-	
-	PS_BeginEntry,
-	PS_BeginEntryBlank,
-	
-	PS_BeginEmpty,
-	PS_BeginEmptyComma,
-	PS_BeginEmptyIdent,
-	
-	PS_BeginExtrn,
-	PS_BeginExtrnComma,
-	PS_BeginExtrnIdent,
-	PS_BeginExtrnLeftParen,
-	PS_BeginExtrnInnerIdent,
-	PS_BeginExtrnRightParen,
-	PS_BeginExtrnOnlyComma,
-	
-	PS_BeginProcessNamedQualifier,
-	PS_ProcessNamedQualifier,
-	PS_ProcessNamedQualifierAfterRightParen,
-	PS_ProcessNamedQualifierAfterError,
-	
-	PS_BeginProcessVariableQualifier,
-	PS_ProcessVariableQualifier,
-	PS_ProcessVariableQualifierAfterRightParen,
-	PS_ProcessVariableQualifierAfterError,
-	
-	PS_ProcessRuleDirection,
-	PS_ProcessRule,
-	PS_ProcessRuleAfterVariableType,
-	PS_ProcessRuleAfterVariableQualifier,
-	PS_ProcessRuleAfterLeftBracket
-};
+//-----------------------------------------------------------------------------
 
-enum TParserErrorCode {
-	PEC_LineShouldBeginWithIdentifierOrSpace,
-	PEC_NewLineExpected,
-	PEC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
-	PEC_STUB
-};
-
-class IParserListener {
+class CParser :	public CErrorsHelper {
 public:
-	virtual void OnParserError( TParserErrorCode errorCode ) = 0;
-};
-
-class CParser :
-	public CScanner,
-	public CListener<IParserListener>
-{
-public:
-	CParser( IParserListener* listener = 0 );
+	CParser( IErrorHandler* errorProcessor = 0 );
 	void Reset();
 
 	TLabel GetCurrentLabel() const { return currentFunction; }
 	TLabel GetEntryLabel() const { return entryLabel; }
-	
+
+protected:
+	CToken token;
+
+	void AddToken();
+
 private:
-	virtual void ProcessLexem();
-	
-	inline void error( TParserErrorCode errorCode );
-	
-	void processNamedQualifier( const bool afterRightParen = false );
-	void processNamedQualifierAfterError();
-	
+	CRuleParser ruleParser;
+	CQualifierParser qualifierParser;
+	CFunctionBuilder functionBuilder;
+	// processing errors
+	enum TErrorCode {
+		EC_LineShouldBeginWithIdentifierOrSpace,
+		EC_NewLineExpected,
+		EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
+		EC_STUB
+	};
+	void error( TErrorCode errorCode );	
+	// parsing
+	enum TState {
+		S_Initial,
+		S_IgnoreLine,
+		S_Word,
+		S_WordBlank,
+		S_WordBlankS,
+		S_Blank,
+		S_Directive,
+		S_Qualifier,
+		S_RuleDirection,
+		S_Rule
+	};
+	TState state;
+	void parsingInitial();
+	void parsingIgnoreLine();
+	void parsingWord();
+	void parsingWordBlank();
+	void parsingWordBlankS();
+	void parsingBlank();
+	void parsingDirective();
+	void parsingQualifier();
+	void parsingRuleDirection();
+	void parsingRule();
+
+	bool wordIs( const std::string& word ) const;
+
 	void addNamedQualifier();
-	
-	void processVariableQualifier( const bool afterRightParen = false );
-	void processVariableQualifierAfterError();
-	
+
 	void addDeclarationOfFunction( const std::string& name );
 	void addEndOfFunction();
 	
@@ -90,8 +69,7 @@ private:
 	void addEntryFunction( const std::string& name );
 	void addExtrnFunction( const std::string& name,
 		const std::string& standartName );
-	
-	TParserState state;
+
 	int storedOffset;
 	std::string storedName;
 	
@@ -107,12 +85,6 @@ private:
 	CQualifierBuilder qualifierBuilder;
 };
 
-inline void CParser::error( TParserErrorCode errorCode )
-{
-	SetErrors();
-	if( CListener<IParserListener>::HasListener() ) {
-		CListener<IParserListener>::GetListener()->OnParserError( errorCode );
-	}
-}
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

@@ -1,142 +1,104 @@
 #pragma once
 
-#include <string>
 #include <Refal2.h>
+#include <queue>
+#include <string>
+#include <vector>
 
 namespace Refal2 {
 
-enum TLexem {
-	L_Blank,
-	L_Comma,
-	L_Equal,
-	L_Label,
-	L_Number,
-	L_String,
-	L_NewLine,
-	L_EndOfFile,
-	L_Qualifier,
-	L_LeftParen,
-	L_RightParen,
-	L_LeftBracket,
-	L_RightBracket,
-	L_Identificator
-};
+//-----------------------------------------------------------------------------
 
-enum TScannerState {
-	SS_BeginOfLine,
-	SS_BeginBlank,
-	SS_BeginComment,
-	SS_BeginPlus,
-	SS_BeginCommentAfterPlus,
-	SS_NotBeginOfLine,
-	SS_NotBeginBlank,
-	SS_NotBeginComment,
-	SS_NotBeginPlus,
-	SS_NotBeginCommentAfterPlus,
-	SS_BeginLabelOrNumber,
-	SS_NotBeginLabel,
-	SS_NotBeginNumber,
-	SS_Identificator,
-	SS_BeginQualifier,
-	SS_NotBeginQualifier,
-	SS_String,
-	SS_StringAfterQuote,
-	SS_StringAfterBackslash,
-	SS_StringMayOctalCode,
-};
-
-enum TScannerErrorCode {
-	SEC_UnexpectedControlSequence,
-	SEC_SymbolAfterPlus,
-	SEC_UnexpectedCharacter,
-	SEC_IllegalCharacterInLabelOrNumberBegin,
-	SEC_IllegalCharacterInLabel,
-	SEC_IllegalCharacterInNumber,
-	SEC_IllegalCharacterInQualifierNameBegin,
-	SEC_IllegalCharacterInQualifierName,
-	SEC_IllegalCharacterInStringAfterBackslash,
-	SEC_IllegalCharacterInStringInHexadecimal,
-	SEC_TryingAppendNullByteToString,
-	SEC_IllegalCharacterInStringInOctal,
-	SEC_UnclosedStringConstantAtTheEndOfFile,
-	SEC_UnclosedStringConstant,
-	SEC_UnclosedLabelOrNumberAtTheEndOfFile,
-	SEC_UnclosedLabelOrNumber,
-	SEC_UnclosedLabelAtTheEndOfFile,
-	SEC_UnclosedLabel,
-	SEC_UnclosedNumberAtTheEndOfFile,
-	SEC_UnclosedNumber,
-	SEC_UnclosedQualifierAtTheEndOfFile,
-	SEC_UnclosedQualifier,
-	SEC_UnexpectedEndOfFile
-};
-
-class IScannerListener {
+class CScanner : public CParser {
 public:
-	virtual void OnScannerError( TScannerErrorCode errorCode, char c) = 0;
-};
-
-class CScanner :
-	public CFunctionBuilder,
-	public CListener<IScannerListener>
-{
-public:
-	CScanner(IScannerListener* listener = 0);
-
+	CScanner( IErrorHandler* errorProcessor );
 	void Reset();
 
-	int GetCharOffset() const { return localOffset; }
-	int GetLexemOffset() const { return offset; }
-	int GetLineNumber() const { return line; }
-
 	void AddChar( char c );
-	void AddEndOfFile() { processEndOfFile(); }
-
-	static std::string ToLower( const std::string& data );
-
-protected:
-	virtual void ProcessLexem();
-
-	int line;
-	int offset;
-	
-	TLexem lexem;
-	TLabel lexemLabel;
-	TNumber lexemNumber;
-	std::string lexemString;
-
-	// insensitive to case
-	bool identificatorIs( const std::string& toCompare ) const;
+	void AddEndOfFile();
 
 private:
-	void processChar( char c );
-	void processEndOfFile();
-	void error( TScannerErrorCode errorCode, char c = '\0' );
-
-	TScannerState state;
-	int localOffset;
-	std::string octalCode;
+	int line;
+	int position;
+	// for line feed normalize
+	bool afterCarriageReturn;
+	// preprocessing: cut comments and pluses and extract strings
+	enum TPreprocessingState {
+		PS_Initial,
+		PS_Plus,
+		PS_PlusAfterLineFeed,
+		PS_PlusAfterMultilineComment,
+		PS_PlusAfterMultilineCommentAndLineFeed,
+		PS_SingleLineComment,
+		PS_MultilineComment,
+		PS_String,
+		PS_StringAfterQuote,
+		PS_StringAfterBackslash,
+		PS_StringOctalCodeOne,
+		PS_StringOctalCodeTwo
+	};
+	TPreprocessingState preprocessingState;
+	// for read octal code in string
+	char octalCodeOne;
+	char octalCodeTwo;
+	// processing: extract all other tokens
+	enum TState {
+		S_Initial,
+		S_Blank,
+		S_Symbol,
+		S_Label,
+		S_Number,
+		S_Word,
+		S_BeginOfQualifier,
+		S_Qualifier
+	};
+	TState state;
+	// processing errors
+	enum TErrorCode {
+		E_InvalidCharacter,
+		E_InvalidControlCharacter,
+		E_UnexpectedCharacter,
+		E_UnclosedMultilineCommentAtTheEndOfFile,
+		E_UnclosedString,
+		E_UnclosedLabel,
+		E_UnexpectedCharacterInLabel,
+		E_UnclosedNumber,
+		E_UnclosedQualifier,
+		E_UnexpectedCharacterInQualifier
+	};
+	void error( TErrorCode errorCode, char c = '\0' );
+	// auxiliary functions
+	void setLineAndPositionOfToken();
+	void addToken( TTokenType tokenType );
+	void addTokenWithCurrentLineAndPosition( TTokenType tokenType );
+	void normalizeLineFeed( char c );
+	// preprocessing functions
+	void preprocessing( char c );
+	void preprocessingEndOfFile();
+	void preprocessingInitital( char c );
+	void preprocessingPlus( char c );
+	void preprocessingPlusAfterLineFeed( char c );
+	void preprocessingPlusAfterMultilineComment( char c );
+	void preprocessingPlusAfterMultilineCommentAndLineFeed( char c );
+	void preprocessingSingleLineComment( char c );
+	void preprocessingMultilineComment( char c );
+	void preprocessingString( char c );
+	void preprocessingStringAfterQuote( char c );
+	void preprocessingStringAfterBackslash( char c );
+	void preprocessingStringOctalCodeOne( char c );
+	void preprocessingStringOctalCodeTwo( char c );
+	// processing functions
+	void processing( char c );
+	void processingInitial( char c );
+	void processingBlank( char c );
+	void processingSymbol( char c );
+	void processingLabel( char c );
+	void processingNumber( char c );
+	void processingWord( char c );
+	void processingBeginOfQualifier( char c );
+	void processingQualifier( char c );
 };
 
-inline CScanner::CScanner(IScannerListener* listener):
-	CFunctionBuilder( dynamic_cast<IFunctionBuilderListener*>( listener ) ),
-	CListener<IScannerListener>(listener)
-{
-	Reset();
-}
-
-inline bool CScanner::identificatorIs( const std::string& toCompare ) const
-{
-	return ( lexem == L_Identificator && toCompare == ToLower( lexemString ) );
-}
-
-inline void CScanner::error( TScannerErrorCode errorCode, char c )
-{
-	SetErrors();
-	if( CListener<IScannerListener>::HasListener() ) {
-		CListener<IScannerListener>::GetListener()->
-			OnScannerError( errorCode, c );
-	}
-}
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

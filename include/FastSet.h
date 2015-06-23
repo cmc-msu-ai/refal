@@ -1,10 +1,9 @@
 #pragma once
 
+#include <assert.h>
 #include <string.h>
 #include <set>
 #include <algorithm>
-#include <Refal2.h>
-
 
 template<class T>
 class CFastSet {

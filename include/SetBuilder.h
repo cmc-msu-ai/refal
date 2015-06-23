@@ -1,9 +1,9 @@
 #pragma once
 
+#include <assert.h>
 #include <set>
 #include <iterator>
 #include <algorithm>
-#include <Refal2.h>
 
 namespace Refal2 {
 

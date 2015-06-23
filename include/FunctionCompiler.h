@@ -1,8 +1,8 @@
 #pragma once
 
+#include <Refal2.h>
 #include <bitset>
 #include <vector>
-#include <Refal2.h>
 
 namespace Refal2 {
 

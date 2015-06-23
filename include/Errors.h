@@ -1,31 +1,42 @@
 #pragma once
 
+#include <string>
+
 namespace Refal2 {
 
-class CErrors {
-public:
-	CErrors(): errors( false ) {}
+//-----------------------------------------------------------------------------
 
-	inline void SetErrors();
-	void ResetErrors() { errors = false; }
-	bool HasErrors() const { return errors; }
-	
-protected:
-	virtual void OnErrors() {};
-	
-private:
-	CErrors(const CErrors&);
-	CErrors& operator=(const CErrors&);
-
-	bool errors;
+struct IErrorHandler {
+	virtual void Error( const std::string& errorText ) = 0;
+	virtual void Warning( const std::string& warningText ) = 0;
 };
 
-inline void CErrors::SetErrors()
-{
-	if( !errors ) {
-		errors = true;
-		OnErrors();
-	}
-}
+//-----------------------------------------------------------------------------
+
+class CErrorsHelper {
+public:
+	explicit CErrorsHelper( IErrorHandler* errorProcessor = 0 );
+	void Reset();
+
+	void SetErrorProcessor( IErrorHandler* errorProcessor );
+	const IErrorHandler* GetErrorProcessor() const;
+
+	bool HasErrors() const { return hasErrors; }
+	bool HasWarnings() const { return hasWarnings; }
+
+protected:
+	void Error(  const std::string& errorText );
+	void Warning(  const std::string& warningText );
+
+private:
+	IErrorHandler* errorProcessor;
+	bool hasErrors;
+	bool hasWarnings;
+
+	CErrorsHelper( const CErrorsHelper& );
+	CErrorsHelper& operator=( const CErrorsHelper& );
+};
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2
