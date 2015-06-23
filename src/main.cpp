@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <Refal2.h>
-#include <Windows.h>
 
 using namespace Refal2;
 
