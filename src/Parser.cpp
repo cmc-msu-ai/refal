@@ -24,7 +24,7 @@ void CParser::Reset()
 bool CParser::wordIs( const std::string& value ) const
 {
 	if( token.type == TT_Word ) {
-		std::string lowerWord( token.value.word );
+		std::string lowerWord( token.value.text );
 		MakeLower( lowerWord );
 		return ( lowerWord == value );
 	}
@@ -72,7 +72,7 @@ void CParser::parsingInitial()
 	if( token.type == TT_Word ) {
 		addEndOfFunction(); // action
 		ruleParser.EndFunction(); // action
-		storedName = token.value.word; // action
+		storedName = token.value.text; // action
 		state = S_Word;
 	} else if( token.type == TT_Blank ) {
 		state = S_Blank;
@@ -133,7 +133,7 @@ void CParser::parsingWordBlankS()
 		CToken savedToken = token;
 		token.type = TT_Word;
 		token.position = storedOffset;
-		token.value.word = "s";
+		token.value.text = "s";
 		ruleParser.BeginFunction( storedName ); // action
 		state = S_Rule;
 		AddToken();

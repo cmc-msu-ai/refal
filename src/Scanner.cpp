@@ -271,7 +271,7 @@ void CScanner::preprocessingInitital( char c )
 		case Quote:
 			processing( UniversalSeparatorOfTokens );
 			setLineAndPositionOfToken();
-			token.value.string.clear();
+			token.value.text.clear();
 			preprocessingState = PS_String;
 			break;
 		case SingleLineCommentBegin:
@@ -339,8 +339,8 @@ void CScanner::preprocessingString( char c )
 {
 	switch( c ) {
 		case Quote:
-			if( token.value.string.empty() ) {
-				token.value.string.push_back( Quote );
+			if( token.value.text.empty() ) {
+				token.value.text.push_back( Quote );
 				addToken( TT_String );
 				preprocessingState = PS_Initial;
 			} else {
@@ -351,7 +351,7 @@ void CScanner::preprocessingString( char c )
 			preprocessingState = PS_StringAfterBackslash;
 			break;
 		case LineFeed:
-			if( token.value.string.empty() ) {
+			if( token.value.text.empty() ) {
 				error( E_UnexpectedCharacter );
 			} else {
 				error( E_UnclosedString );
@@ -361,7 +361,7 @@ void CScanner::preprocessingString( char c )
 			preprocessing( LineFeed );
 			break;
 		default:
-			token.value.string.push_back( c );
+			token.value.text.push_back( c );
 			break;
 	}
 }
@@ -369,10 +369,10 @@ void CScanner::preprocessingString( char c )
 void CScanner::preprocessingStringAfterQuote( char c )
 {
 	if( c == Quote ) {
-		token.value.string.push_back( Quote );
+		token.value.text.push_back( Quote );
 		preprocessingState = PS_String;
 	} else {
-		assert( !token.value.string.empty() );
+		assert( !token.value.text.empty() );
 		addToken( TT_String );
 		preprocessingState = PS_Initial;
 		preprocessing( c );
@@ -384,32 +384,32 @@ void CScanner::preprocessingStringAfterBackslash( char c )
 	preprocessingState = PS_String;
 	switch( c ) {
 		case 'n':
-			token.value.string.push_back( LineFeed );
+			token.value.text.push_back( LineFeed );
 			break;
 		case 't':
-			token.value.string.push_back( HorizontalTabulation );
+			token.value.text.push_back( HorizontalTabulation );
 			break;
 		case 'v':
-			token.value.string.push_back( '\v' );
+			token.value.text.push_back( '\v' );
 			break;
 		case 'b':
-			token.value.string.push_back( '\b' );
+			token.value.text.push_back( '\b' );
 			break;
 		case 'r':
-			token.value.string.push_back( CarriageReturn );
+			token.value.text.push_back( CarriageReturn );
 			break;
 		case 'f':
-			token.value.string.push_back( '\f' );
+			token.value.text.push_back( '\f' );
 			break;
 		case Backslash:
-			token.value.string.push_back( Backslash );
+			token.value.text.push_back( Backslash );
 			break;
 		default:
 			if( IsOctal( c ) ) {
 				octalCodeOne = c;
 				preprocessingState = PS_StringOctalCodeOne;
 			} else {
-				token.value.string.push_back( Backslash );
+				token.value.text.push_back( Backslash );
 				preprocessing( c );
 			}
 			break;
@@ -423,12 +423,12 @@ void CScanner::preprocessingStringOctalCodeOne( char c )
 		preprocessingState = PS_StringOctalCodeTwo;
 	} else {
 		if( octalCodeOne == Zero ) {
-			token.value.string.push_back( NullByte );
+			token.value.text.push_back( NullByte );
 		} else {
-			token.value.string.push_back( Backslash );
-			token.value.string.push_back( octalCodeOne );
+			token.value.text.push_back( Backslash );
+			token.value.text.push_back( octalCodeOne );
 		}
-		token.value.string.push_back( c );
+		token.value.text.push_back( c );
 		preprocessingState = PS_String;
 	}
 }
@@ -438,12 +438,12 @@ void CScanner::preprocessingStringOctalCodeTwo( char c )
 	if( IsOctal( c ) ) {
 		int code = ( ( octalCodeOne - Zero ) * 8 +
 			( octalCodeTwo - Zero ) ) * 8 + ( c - Zero );
-		token.value.string.push_back( static_cast<char>( code ) );
+		token.value.text.push_back( static_cast<char>( code ) );
 	} else {
-		token.value.string.push_back( Backslash );
-		token.value.string.push_back( octalCodeOne );
-		token.value.string.push_back( octalCodeTwo );
-		token.value.string.push_back( c );
+		token.value.text.push_back( Backslash );
+		token.value.text.push_back( octalCodeOne );
+		token.value.text.push_back( octalCodeTwo );
+		token.value.text.push_back( c );
 	}
 	preprocessingState = PS_String;
 }
@@ -504,7 +504,7 @@ void CScanner::processingInitial( char c )
 			break;
 		case Dot:
 		case RightBracket:
-			token.value.word = c;
+			token.value.text = c;
 			addTokenWithCurrentLineAndPosition( TT_RightBracket );
 			break;
 		case LimiterOfSymbol:
@@ -524,7 +524,7 @@ void CScanner::processingInitial( char c )
 			} else if( c == Hyphen ) {
 				error( E_UnexpectedCharacter, c );
 			} else if( IsWordLetter( c ) ) {
-				token.value.word = c;
+				token.value.text = c;
 				setLineAndPositionOfToken();
 				state = S_Word;
 			} else {
@@ -548,7 +548,7 @@ void CScanner::processingBlank( char c )
 void CScanner::processingSymbol( char c )
 {
 	if( IsFirstWordLetter( c ) ) {
-		token.value.word = c;
+		token.value.text = c;
 		state = S_Label;
 	} else if( IsDigit( c ) ) {
 		token.value.number = ( c - Zero );
@@ -562,7 +562,7 @@ void CScanner::processingSymbol( char c )
 void CScanner::processingLabel( char c )
 {
 	if( IsWordLetter( c ) ) {
-		token.value.word += c;
+		token.value.text += c;
 	} else if( c == LimiterOfSymbol ) {
 		addToken( TT_Label );
 		state = S_Initial;
@@ -589,7 +589,7 @@ void CScanner::processingNumber( char c )
 void CScanner::processingWord( char c )
 {
 	if( IsWordLetter( c ) ) {
-		token.value.word += c;
+		token.value.text += c;
 	} else {
 		addToken( TT_Word );
 		state = S_Initial;
@@ -600,7 +600,7 @@ void CScanner::processingWord( char c )
 void CScanner::processingBeginOfQualifier( char c )
 {
 	if( IsFirstWordLetter( c ) ) {
-		token.value.word = c;
+		token.value.text = c;
 		state = S_Qualifier;
 	} else {
 		error( E_UnexpectedCharacterInQualifier );
@@ -611,7 +611,7 @@ void CScanner::processingBeginOfQualifier( char c )
 void CScanner::processingQualifier( char c )
 {
 	if( IsWordLetter( c ) ) {
-		token.value.word += c;
+		token.value.text += c;
 	} else if( c == LimiterOfQualifier ) {
 		addToken( TT_Qualifier );
 		state = S_Initial;

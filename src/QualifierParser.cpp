@@ -108,7 +108,7 @@ void CQualifierParser::error( const CToken& token, const std::string& message )
 
 void CQualifierParser::addWord( CToken& token )
 {
-	const std::string& word = token.value.word;
+	const std::string& word = token.value.text;
 	for( std::string::size_type i = 0; i < word.length(); i++ ) {
 		switch( word[i] ) {
 			case 's': case 'S':
@@ -147,7 +147,7 @@ void CQualifierParser::addWord( CToken& token )
 
 void CQualifierParser::addLabel( const CToken& token )
 {
-	builder.AddLabel( LabelTable.AddLabel( token.value.word ) );
+	builder.AddLabel( LabelTable.AddLabel( token.value.text ) );
 	afterRightParen = false;
 }
 
@@ -159,11 +159,9 @@ void CQualifierParser::addNumber( const CToken& token )
 
 void CQualifierParser::addString( const CToken& token )
 {
-	const std::vector<char>& string = token.value.string;
-	for( std::vector<char>::const_iterator i = string.begin();
-		i != string.end(); ++i )
-	{
-		builder.AddChar( *i );
+	const std::string& text = token.value.text;
+	for( std::string::size_type i = 0; i < text.size(); i++ ) {
+		builder.AddChar( i );
 	}
 	afterRightParen = false;
 }

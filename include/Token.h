@@ -24,8 +24,7 @@ enum TTokenType {
 
 struct CTokenValue {
 	TNumber number;
-	std::string word;
-	std::vector<char> string;
+	std::string text;
 };
 
 struct CToken {
