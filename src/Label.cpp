@@ -1,5 +1,3 @@
-#include <map>
-#include <string>
 #include <Refal2.h>
 
 namespace Refal2 {

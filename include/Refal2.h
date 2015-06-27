@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Common.h>
+
 namespace Refal2 {
 
 // typedefs
@@ -42,9 +44,11 @@ class CVariablesBuilder;
 // declaration of global variables
 extern CLabelTable LabelTable;
 
+// tools functions
+void MakeLower( std::string& data );
+
 } // end of namespace Refal2
 
-#include <assert.h>
 #include <Errors.h>
 #include <NodeList.h>
 #include <FastSet.h>

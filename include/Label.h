@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Refal2.h>
-#include <map>
-#include <string>
 
 namespace Refal2 {
 

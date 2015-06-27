@@ -1,6 +1,4 @@
 #include <Refal2.h>
-#include <iostream>
-#include <sstream>
 
 namespace Refal2 {
 
@@ -15,23 +13,22 @@ CParser::CParser( IErrorHandler* errorProcessor ):
 
 void CParser::Reset()
 {
+	ruleParser.Reset();
+	qualifierParser.Reset();
 	state = S_Initial;
 	storedName.clear();
 	entryLabel = InvalidLabel;
 	currentFunction = InvalidLabel;
-	namedQualifiers.clear();
-}
-
-static std::string ToLower(const std::string& data)
-{
-	std::string result( data );
-	std::transform( result.begin(), result.end(), result.begin(), ::tolower );
-	return result;
 }
 
 bool CParser::wordIs( const std::string& value ) const
 {
-	return ( token.type == TT_Word && ToLower( token.value.word ) == value );
+	if( token.type == TT_Word ) {
+		std::string lowerWord( token.value.word );
+		MakeLower( lowerWord );
+		return ( lowerWord == value );
+	}
+	return false;
 }
 
 void CParser::AddToken()
@@ -61,9 +58,6 @@ void CParser::AddToken()
 		case S_Qualifier:
 			parsingQualifier();
 			break;
-		case S_RuleDirection:
-			parsingRuleDirection();
-			break;
 		case S_Rule:
 			parsingRule();
 			break;
@@ -76,15 +70,17 @@ void CParser::AddToken()
 void CParser::parsingInitial()
 {
 	if( token.type == TT_Word ) {
-		state = S_Word;
-		storedName = ToLower( token.value.word ); // action
 		addEndOfFunction(); // action
+		ruleParser.EndFunction(); // action
+		storedName = token.value.word; // action
+		state = S_Word;
 	} else if( token.type == TT_Blank ) {
 		state = S_Blank;
 	} else if( token.type != TT_LineFeed ) {
-		state = S_IgnoreLine;
 		addEndOfFunction(); // action
+		ruleParser.EndFunction(); // action
 		error( EC_LineShouldBeginWithIdentifierOrSpace );
+		state = S_IgnoreLine;
 	}
 }
 
@@ -98,13 +94,15 @@ void CParser::parsingIgnoreLine()
 void CParser::parsingWord()
 {
 	if( token.type == TT_LineFeed ) {
-		state = S_Initial;
+		ruleParser.BeginFunction( storedName ); // action
 		addDeclarationOfFunction( storedName ); // action
+		state = S_Initial;
 	} else if( token.type == TT_Blank ) {
 		state = S_WordBlank;
 	} else {
-		state = S_RuleDirection;
 		addDeclarationOfFunction( storedName ); // action
+		ruleParser.BeginFunction( storedName ); // action
+		state = S_Rule;
 		AddToken();
 	}
 }
@@ -119,7 +117,8 @@ void CParser::parsingWordBlank()
 		storedOffset = token.position;
 	} else {
 		addDeclarationOfFunction( storedName ); // action
-		state = S_RuleDirection;
+		ruleParser.BeginFunction( storedName ); // action
+		state = S_Rule;
 		AddToken();
 	}
 }
@@ -127,7 +126,7 @@ void CParser::parsingWordBlank()
 void CParser::parsingWordBlankS()
 {
 	if( token.type == TT_Blank ) {
-		qualifierParser.Reset( true /* isNamed */ );
+		qualifierParser.BeginNamedQualifier( storedName );
 		state = S_Qualifier;
 	} else {
 		addDeclarationOfFunction( storedName ); // action
@@ -135,7 +134,8 @@ void CParser::parsingWordBlankS()
 		token.type = TT_Word;
 		token.position = storedOffset;
 		token.value.word = "s";
-		state = S_RuleDirection;
+		ruleParser.BeginFunction( storedName ); // action
+		state = S_Rule;
 		AddToken();
 		token = savedToken;
 		AddToken();
@@ -145,20 +145,20 @@ void CParser::parsingWordBlankS()
 void CParser::parsingBlank()
 {
 	if( token.type == TT_Word ) {
-		std::string directiveName = ToLower( token.value.word );
-		if( directiveName == "start"
-			|| directiveName == "end"
-			|| directiveName == "entry"
-			|| directiveName == "empty"
-			|| directiveName == "swap"
-			|| directiveName == "extrn" )
+		if( wordIs( "start" )
+			|| wordIs( "end" )
+			|| wordIs( "entry" )
+			|| wordIs( "empty" )
+			|| wordIs( "swap" )
+			|| wordIs( "extrn" ) )
 		{
 			addEndOfFunction(); // action
 			state = S_Directive;
 			return;
 		}
 	}
-	state = S_RuleDirection;
+	ruleParser.BeginRule();
+	state = S_Rule;
 	AddToken();
 }
 
@@ -178,29 +178,8 @@ void CParser::parsingQualifier()
 			state = S_IgnoreLine;
 			AddToken();
 		} else {
-			// TODO: save qualifier
-			if( qualifierParser.IsNamed() ) {
-				state = S_Initial;
-			} else {
-				state = S_Rule;
-			}
+			state = S_Initial;
 		}
-	}
-}
-
-void CParser::parsingRuleDirection()
-{
-	if( wordIs( "l" ) ) {
-		ruleParser.Reset();
-		state = S_Rule;
-	} else if( wordIs( "r" ) ) {
-		ruleParser.Reset();
-		state = S_Rule;
-		functionBuilder.SetRightDirection();
-	} else if( token.type != TT_Blank ) {
-		ruleParser.Reset();
-		state = S_Rule;
-		AddToken();
 	}
 }
 
@@ -214,125 +193,6 @@ void CParser::parsingRule()
 			state = S_Initial;
 		}
 	}
-#if 0
-				switch( token.type ) {
-				case TT_Blank:
-					break;
-				case TT_Equal:
-					functionBuilder.AddEndOfLeft();
-					break;
-				case TT_Comma:
-					// TODO: error, ignore
-					error( EC_STUB );
-					break;
-				case TT_Label:
-					functionBuilder.AddLabel( LabelTable.AddLabel( ToLower( token.value.word ) ) );
-					break;
-				case TT_Number:
-					functionBuilder.AddNumber( token.value.number );
-					break;
-				case TT_String:
-					for( std::size_t i = 0; i < token.value.string.size(); i++ ) {
-						functionBuilder.AddChar( token.value.string[i] );
-					}
-					break;
-				case TT_Qualifier:
-					// TODO: error, ignore
-					error( EC_STUB );
-					break;
-				case TT_LeftParen:
-					functionBuilder.AddLeftParen();
-					break;
-				case TT_RightParen:
-					functionBuilder.AddRightParen();
-					break;
-				case TT_LeftBracket:
-					state = PS_ProcessRuleAfterLeftBracket;
-					functionBuilder.AddLeftBracket();
-					break;
-				case TT_RightBracket:
-					functionBuilder.AddRightBracket();
-					break;
-				case TT_Word:
-					if( IdentificatorIs( token, "k" ) ) {
-						// TODO: warning: old style
-						state = PS_ProcessRuleAfterLeftBracket;
-						functionBuilder.AddLeftBracket();
-						break;
-					}
-					for( std::size_t i = 0; i < token.value.word.length(); i += 2 ) {
-						TVariableType type = ::tolower( token.value.word[i] );
-						if( i < token.value.word.length() - 1 ) {
-							TVariableName name = token.value.word[i + 1];
-							functionBuilder.AddVariable( type, name );
-							token.position += 2;
-						} else {
-							state = PS_ProcessRuleAfterVariableType;
-							variableType = type;
-						}
-					}
-					break;
-				case TT_LineFeed:
-					state = PS_Begin;
-					functionBuilder.AddEndOfRight();
-					break;
-				/*case L_EndOfFile:
-					token.type = TT_LineFeed;
-					ProcessLexem();
-					token.type = L_EndOfFile;
-					ProcessLexem();
-					break;*/
-				default:
-					assert( false );
-					break;
-			}
-			break;
-		case PS_ProcessRuleAfterVariableType:
-			if( token.type == TT_LeftParen ) {
-				state = PS_BeginProcessVariableQualifier;
-			} else if( token.type == TT_Qualifier ) {
-				state = PS_ProcessRuleAfterVariableQualifier;
-				CQualifierMap::const_iterator qualifier = namedQualifiers.end();
-				qualifier = namedQualifiers.find( ToLower( token.value.word ) );
-				if( qualifier != namedQualifiers.end() ) {
-					currentQualifier = qualifier->second;
-				} else {
-					// TODO: error, ignore
-					error( EC_STUB );
-				}
-			} else {
-				state = PS_ProcessRule;
-				// TODO: error, ignore
-				error( EC_STUB );
-			}
-			break;
-		case PS_ProcessRuleAfterVariableQualifier:
-			state = PS_ProcessRule;
-			if( token.type == TT_Word ) {
-				TVariableName name = token.value.word[0];
-				token.value.word.erase(0, 1);
-				functionBuilder.AddVariable( variableType, name,
-					&currentQualifier );
-
-				if( !token.value.word.empty() ) {
-					token.position++;
-					AddToken();
-				}
-			} else {
-				// TODO: error, ignore
-				error( EC_STUB );
-			}
-			break;
-		case PS_ProcessRuleAfterLeftBracket:
-			state = PS_ProcessRule;
-			if( token.type == TT_Word ) {
-				TLabel label = LabelTable.AddLabel( ToLower( token.value.word ) );
-				functionBuilder.AddLabel( label );
-			} else {
-				AddToken();
-			}
-			break;
-#endif
 }
 
 void CParser::error( TErrorCode errorCode )
@@ -390,19 +250,6 @@ void CParser::addEndOfFunction()
 		}
 		currentFunction = InvalidLabel;
 		functionBuilder.Reset();
-	}
-}
-
-void CParser::addNamedQualifier()
-{
-	typedef std::pair<CQualifierMap::iterator, bool> CPair;
-	
-	CPair pair = namedQualifiers.insert(
-		std::make_pair( storedName, currentQualifier ) );
-	
-	if( !pair.second ) {
-		// TODO: error, redeclaration of qualifier
-		error( EC_STUB );
 	}
 }
 

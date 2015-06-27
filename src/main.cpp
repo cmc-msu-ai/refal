@@ -1,5 +1,3 @@
-#include <fstream>
-#include <iostream>
 #include <Refal2.h>
 
 using namespace Refal2;

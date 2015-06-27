@@ -1,6 +1,4 @@
 #include <Refal2.h>
-#include <stack>
-#include <iostream>
 
 namespace Refal2 {
 

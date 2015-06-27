@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Refal2.h>
-#include <stack>
 
 namespace Refal2 {
 

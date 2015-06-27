@@ -1,5 +1,4 @@
 #include <Refal2.h>
-#include <sstream>
 
 namespace Refal2 {
 
@@ -11,16 +10,26 @@ CQualifierParser::CQualifierParser( IErrorHandler* errorHandler ):
 	Reset();
 }
 
-void CQualifierParser::Reset( bool _named )
+void CQualifierParser::Reset()
 {
-	CErrorsHelper::Reset();
-	parsed = false;
-	named = _named;
-	afterRightParen = false;
-	builder.Reset();
+	resetParser();
+	namedQualifiers.clear();
 }
 
-bool CQualifierParser::AddToken( const CToken& token )
+void CQualifierParser::BeginQualifer()
+{
+	resetParser();
+}
+
+void CQualifierParser::BeginNamedQualifier( const std::string& _name )
+{
+	assert( !_name.empty() );
+	resetParser();
+	name = _name;
+	MakeLower( name );
+}
+
+bool CQualifierParser::AddToken( CToken& token )
 {
 	assert( !parsed );
 	switch( token.type ) {
@@ -62,10 +71,30 @@ bool CQualifierParser::AddToken( const CToken& token )
 	return parsed;
 }
 
-void CQualifierParser::Qualifier( CQualifier& qualifier )
+void CQualifierParser::GetQualifier( CQualifier& qualifier )
 {
 	assert( parsed && !HasErrors() );
 	builder.Export( qualifier );
+}
+
+void CQualifierParser::resetParser()
+{
+	CErrorsHelper::Reset();
+	parsed = false;
+	name.empty();
+	afterRightParen = false;
+	builder.Reset();
+}
+
+void CQualifierParser::addNamedQualifier( const CToken& token )
+{
+	typedef std::pair<CNamedQualifiers::iterator, bool> CPair;
+	CPair pair = namedQualifiers.insert( std::make_pair( name, CQualifier() ) );
+	if( !pair.second ) {
+		error( token, "qualifier `" + name + "` already defined." );
+	} else {
+		builder.Export( pair.first->second );
+	}
 }
 
 void CQualifierParser::error( const CToken& token, const std::string& message )
@@ -77,7 +106,7 @@ void CQualifierParser::error( const CToken& token, const std::string& message )
 	CErrorsHelper::Error( errorStream.str() );
 }
 
-void CQualifierParser::addWord( const CToken& token )
+void CQualifierParser::addWord( CToken& token )
 {
 	const std::string& word = token.value.word;
 	for( std::string::size_type i = 0; i < word.length(); i++ ) {
@@ -107,14 +136,10 @@ void CQualifierParser::addWord( const CToken& token )
 				builder.AddB();
 				break;
 			default:
-			{
-				CToken tmpToken( token );
-				tmpToken.position += i;
-				error( tmpToken,
-					"primary qualifier `" + std::string( 1, word[i] )
+				token.position += i;
+				error( token, "primary qualifier `" + std::string( 1, word[i] )
 					+ "` does not exist" );
 				return;
-			}
 		}
 	}
 	afterRightParen = false;
@@ -151,17 +176,16 @@ void CQualifierParser::addQualifier( const CToken& token )
 
 void CQualifierParser::addLineFeed( const CToken& token )
 {
-	if( named ) {
-		if( builder.IsNegative() ) {
-			error( token, "no parenthesis balance in qualifier" );
-		} else {
-			if( !afterRightParen ) {
-				builder.IsNegative();
-			}
-			parsed = true;
-		}
-	} else {
+	if( name.empty() ) {
 		error( token, "unexpected line feed in variable qualifier" );
+	} else if( builder.IsNegative() ) {
+		error( token, "no parenthesis balance in qualifier" );
+	} else {
+		if( !afterRightParen ) {
+			builder.IsNegative();
+		}
+		addNamedQualifier( token );
+		parsed = true;
 	}
 }
 
@@ -180,13 +204,13 @@ void CQualifierParser::addRightParen( const CToken& token )
 	if( builder.IsNegative() ) {
 		builder.AddNegative();
 		afterRightParen = true;
-	} else if( named ) {
-		error( token, "unexpected right paren in named qualifier" );
-	} else {
+	} else if( name.empty() ) {
 		if( !afterRightParen ) {
 			builder.IsNegative();
 		}
 		parsed = true;
+	} else {
+		error( token, "unexpected right paren in named qualifier" );
 	}
 }
 

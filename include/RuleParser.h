@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Refal2.h>
-#include <string>
-#include <vector>
 
 namespace Refal2 {
 
@@ -13,7 +11,10 @@ public:
 	CRuleParser( IErrorHandler* errorHandler );
 
 	void Reset();
-	bool AddToken( const CToken& token );
+	void BeginFunction( const std::string& name );
+	void EndFunction();
+	void BeginRule();
+	bool AddToken( CToken& token );
 	bool IsParsed() { return parsed; }
 
 private:

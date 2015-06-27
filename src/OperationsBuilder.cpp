@@ -1,7 +1,5 @@
 #include <Refal2.h>
 
-#include <iostream>
-
 namespace Refal2 {
 
 void COperationsBuilder::Reset()

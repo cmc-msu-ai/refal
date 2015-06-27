@@ -1,8 +1,6 @@
 #pragma once
 
 #include <Refal2.h>
-#include <map>
-#include <string>
 
 namespace Refal2 {
 
@@ -43,7 +41,6 @@ private:
 		S_Blank,
 		S_Directive,
 		S_Qualifier,
-		S_RuleDirection,
 		S_Rule
 	};
 	TState state;
@@ -60,11 +57,9 @@ private:
 
 	bool wordIs( const std::string& word ) const;
 
-	void addNamedQualifier();
-
 	void addDeclarationOfFunction( const std::string& name );
 	void addEndOfFunction();
-	
+
 	void addEmptyFunction( const std::string& name );
 	void addEntryFunction( const std::string& name );
 	void addExtrnFunction( const std::string& name,
@@ -72,17 +67,11 @@ private:
 
 	int storedOffset;
 	std::string storedName;
-	
+
 	TLabel entryLabel;
 
 	TLabel currentFunction;
 	TVariableType variableType;
-	
-	typedef std::map<std::string, CQualifier> CQualifierMap;
-	
-	CQualifier currentQualifier;
-	CQualifierMap namedQualifiers;
-	CQualifierBuilder qualifierBuilder;
 };
 
 //-----------------------------------------------------------------------------

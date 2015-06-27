@@ -1,9 +1,6 @@
 #pragma once
 
 #include <Refal2.h>
-#include <queue>
-#include <string>
-#include <vector>
 
 namespace Refal2 {
 

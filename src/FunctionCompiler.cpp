@@ -1,5 +1,3 @@
-#include <bitset>
-#include <vector>
 #include <Refal2.h>
 
 namespace Refal2 {
