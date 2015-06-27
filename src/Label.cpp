@@ -84,7 +84,9 @@ void CLabelTable::grow( const CLabelMap::const_iterator& labelPtr )
 		CLabelInfo* tmp = table;
 		tableSize *= 2;
 		alloc();
-		memcpy( table, tmp, tableFirstFree * sizeof( CLabelInfo ) );
+		for( int i = 0; i < tableFirstFree; i++ ) {
+			table[i] = tmp[i];
+		}
 		delete tmp;
 	}
 	new( table + tableFirstFree )CLabelInfo( labelPtr );

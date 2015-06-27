@@ -48,23 +48,26 @@ CFastSet<T>::CFastSet(const CSet& set):
 }
 
 template<class T>
-CFastSet<T>::CFastSet(const CFastSet& set):
-	elementsSize( set.elementsSize ),
-	elements(new T[elementsSize])
+CFastSet<T>::CFastSet( const CFastSet& set ):
+	elementsSize( 0 ),
+	elements( 0 )
 {
-	::memcpy( elements, set.elements, elementsSize * sizeof(T) );
+	*this = set;
 }
 
 template<class T>
-CFastSet<T>& CFastSet<T>::operator=(const CFastSet& set)
+CFastSet<T>& CFastSet<T>::operator=( const CFastSet& set )
 {
 	if( this != &set ) {
-		delete[] elements;
-		elementsSize = set.elementsSize;
-		elements = new T[elementsSize];
-		::memcpy( elements, set.elements, elementsSize * sizeof(T) );
+		if( elementsSize != set.elementsSize ) {
+			delete[] elements;
+			elementsSize = set.elementsSize;
+			elements = new T[elementsSize];
+		}
+		for( int i = 0; i < elementsSize; i++ ) {
+			elements[i] = set.elements[i];
+		}
 	}
-
 	return *this;
 }
 
