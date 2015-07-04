@@ -109,7 +109,7 @@ inline void CFunction::SetExternal( TExternalFunction _externalFunction )
 
 class CFunctionBuilder : public CVariablesBuilder {
 public:
-	explicit CFunctionBuilder( IErrorHandler* errorProcessor = 0 );
+	explicit CFunctionBuilder( IErrorHandler* errorHandler = 0 );
 	~CFunctionBuilder();
 
 	void Reset();

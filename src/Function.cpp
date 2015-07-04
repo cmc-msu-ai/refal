@@ -29,8 +29,8 @@ void PrintFunction( const CFunction& function )
 
 //-----------------------------------------------------------------------------
 
-CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorProcessor ):
-	CVariablesBuilder( errorProcessor ),
+CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorHandler ):
+	CVariablesBuilder( errorHandler ),
 	isProcessRightPart( false ),
 	isRightDirection( false ),
 	firstRule( 0 ),

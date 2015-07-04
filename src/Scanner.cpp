@@ -71,8 +71,8 @@ static bool IsControl( char c )
 			&& c != CarriageReturn && c != LineFeed ) );
 }
 
-CScanner::CScanner( IErrorHandler* errorProcessor ):
-	CParser( errorProcessor )
+CScanner::CScanner( IErrorHandler* errorHandler ):
+	CParser( errorHandler )
 {
 	Reset();
 }

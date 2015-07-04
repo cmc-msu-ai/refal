@@ -2,11 +2,11 @@
 
 namespace Refal2 {
 
-CParser::CParser( IErrorHandler* errorProcessor ):
-	CErrorsHelper( errorProcessor ),
-	ruleParser( errorProcessor ),
-	qualifierParser( errorProcessor ),
-	functionBuilder( errorProcessor )
+CParser::CParser( IErrorHandler* errorHandler ):
+	CErrorsHelper( errorHandler ),
+	ruleParser( errorHandler ),
+	qualifierParser( errorHandler ),
+	functionBuilder( errorHandler )
 {
 	Reset();
 }

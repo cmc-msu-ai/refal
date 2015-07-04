@@ -75,8 +75,8 @@ bool CVariables::Get( TVariableIndex variableIndex, TTableIndex& tableIndex)
 
 //-----------------------------------------------------------------------------
 
-CVariablesBuilder::CVariablesBuilder( IErrorHandler* errorProcessor ):
-	CErrorsHelper( errorProcessor )
+CVariablesBuilder::CVariablesBuilder( IErrorHandler* errorHandler ):
+	CErrorsHelper( errorHandler )
 {
 	Reset();
 }

@@ -4,10 +4,10 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-CErrorsHelper::CErrorsHelper( IErrorHandler* errorProcessor )
+CErrorsHelper::CErrorsHelper( IErrorHandler* errorHandler )
 {
 	Reset();
-	SetErrorProcessor( errorProcessor );
+	SetErrorProcessor( errorHandler );
 }
 
 void CErrorsHelper::Reset()
@@ -18,24 +18,24 @@ void CErrorsHelper::Reset()
 
 void CErrorsHelper::SetErrorProcessor( IErrorHandler* _errorProcessor )
 {
-	errorProcessor = _errorProcessor;
+	errorHandler = _errorProcessor;
 }
 
 const IErrorHandler* CErrorsHelper::GetErrorProcessor() const
 {
-	return errorProcessor;
+	return errorHandler;
 }
 
 void CErrorsHelper::Error( const std::string& errorText )
 {
-	assert( errorProcessor != 0 );
-	errorProcessor->Error( errorText );
+	assert( errorHandler != 0 );
+	errorHandler->Error( errorText );
 	hasErrors = true;
 }
 void CErrorsHelper::Warning( const std::string& warningText )
 {
-	assert( errorProcessor != 0 );
-	errorProcessor->Warning( warningText );
+	assert( errorHandler != 0 );
+	errorHandler->Warning( warningText );
 	hasWarnings = true;
 }
 

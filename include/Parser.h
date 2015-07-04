@@ -8,7 +8,7 @@ namespace Refal2 {
 
 class CParser :	public CErrorsHelper {
 public:
-	CParser( IErrorHandler* errorProcessor = 0 );
+	CParser( IErrorHandler* errorHandler = 0 );
 	void Reset();
 
 	TLabel GetCurrentLabel() const { return currentFunction; }

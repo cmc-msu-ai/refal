@@ -83,8 +83,8 @@ void CErrorHandler::Warning( const std::string& warningText )
 bool ParseFile( std::istream& fileStream )
 {
 	LabelTable.Empty();
-	CErrorHandler errorProcessor;
-	CScanner scanner( &errorProcessor );
+	CErrorHandler errorHandler;
+	CScanner scanner( &errorHandler );
 
 	for( char c; fileStream.get( c ); ) {
 		scanner.AddChar( c );

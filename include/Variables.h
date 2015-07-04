@@ -157,7 +157,7 @@ const int VariablesInfoSize = 128;
 
 class CVariablesBuilder : public CErrorsHelper {
 public:
-	explicit CVariablesBuilder( IErrorHandler* errorProcessor = 0 );
+	explicit CVariablesBuilder( IErrorHandler* errorHandler = 0 );
 
 	void Reset();
 	void Export( CVariables& variables );

@@ -15,10 +15,10 @@ struct IErrorHandler {
 
 class CErrorsHelper {
 public:
-	explicit CErrorsHelper( IErrorHandler* errorProcessor = 0 );
+	explicit CErrorsHelper( IErrorHandler* errorHandler = 0 );
 	void Reset();
 
-	void SetErrorProcessor( IErrorHandler* errorProcessor );
+	void SetErrorProcessor( IErrorHandler* errorHandler );
 	const IErrorHandler* GetErrorProcessor() const;
 
 	bool HasErrors() const { return hasErrors; }
@@ -29,7 +29,7 @@ protected:
 	void Warning(  const std::string& warningText );
 
 private:
-	IErrorHandler* errorProcessor;
+	IErrorHandler* errorHandler;
 	bool hasErrors;
 	bool hasWarnings;
 
