@@ -49,6 +49,7 @@ void MakeLower( std::string& data );
 
 } // end of namespace Refal2
 
+#include <SmartPointers.h>
 #include <Errors.h>
 #include <NodeList.h>
 #include <FastSet.h>
