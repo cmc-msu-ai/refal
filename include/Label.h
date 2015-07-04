@@ -4,6 +4,8 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
 const int InvalidLabel = -1;
 
 const int DefaultInitialLabelTableSize = 1024;
@@ -16,7 +18,7 @@ public:
 	void Empty();
 
 	TLabel AddLabel( const std::string& labelText );
-	const std::string& GetLabelText( const TLabel label );
+	const std::string& GetLabelText( const TLabel label ) const;
 	CFunction& GetLabelFunction( const TLabel label );
 	const CFunction& GetLabelFunction( const TLabel label ) const;
 
@@ -26,11 +28,7 @@ public:
 	TLabel GetNextLabel( const TLabel afterLabel ) const;
 
 private:
-	CLabelTable( const CLabelTable& );
-	CLabelTable& operator=( const CLabelTable& );
-
 	typedef std::map<std::string, TLabel> CLabelMap;
-
 	struct CLabelInfo {
 		CFunction function;
 		CLabelMap::const_iterator labelPtr;
@@ -39,13 +37,19 @@ private:
 			labelPtr( _labelPtr ) {}
 	};
 
-	void alloc();
-	void grow( const CLabelMap::const_iterator& labelPtr );
-
 	CLabelMap labelMap;
 	int tableSize;
 	int tableFirstFree;
 	CLabelInfo* table;
+
+	// auxiliary functions
+	void alloc();
+	void grow( const CLabelMap::const_iterator& labelPtr );
+
+	CLabelTable( const CLabelTable& );
+	CLabelTable& operator=( const CLabelTable& );
 };
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

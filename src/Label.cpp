@@ -35,7 +35,7 @@ TLabel CLabelTable::AddLabel( const std::string& labelText )
 	return pair.first->second;
 }
 
-const std::string& CLabelTable::GetLabelText( const TLabel label )
+const std::string& CLabelTable::GetLabelText( const TLabel label ) const
 {
 	assert( label >= 0 && label < tableFirstFree );
 	return table[label].labelPtr->first;
