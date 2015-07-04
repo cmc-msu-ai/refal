@@ -25,6 +25,9 @@ enum TTokenType {
 struct CTokenValue {
 	TNumber number;
 	std::string text;
+
+	void Swap( CTokenValue& swapWith );
+	void Move( CTokenValue& moveTo );
 };
 
 struct CToken {
@@ -32,7 +35,41 @@ struct CToken {
 	int position;
 	TTokenType type;
 	CTokenValue value;
+
+	void Swap( CToken& swapWith );
+	void Move( CToken& moveTo );
 };
+
+//-----------------------------------------------------------------------------
+
+inline void CTokenValue::Swap( CTokenValue& swapWith )
+{
+	std::swap( number, swapWith.number );
+	std::swap( text, swapWith.text );
+}
+
+inline void CTokenValue::Move( CTokenValue& moveTo )
+{
+	moveTo.number = number;
+	moveTo.text.clear();
+	std::swap( text, moveTo.text );
+}
+
+inline void CToken::Swap( CToken& swapWith )
+{
+	std::swap( line, swapWith.line );
+	std::swap( position, swapWith.position );
+	std::swap( type, swapWith.type );
+	value.Swap( swapWith.value );
+}
+
+inline void CToken::Move( CToken& moveTo )
+{
+	moveTo.line = line;
+	moveTo.position = position;
+	moveTo.type = type;
+	value.Move( moveTo.value );
+}
 
 class CTokenQueue : public std::queue<CToken> {
 public:

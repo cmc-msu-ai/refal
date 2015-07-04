@@ -11,7 +11,7 @@ public:
 	CRuleParser( IErrorHandler* errorHandler );
 
 	void Reset();
-	void BeginFunction( const std::string& name );
+	bool BeginFunction( CToken& nameToken );
 	void EndFunction();
 	void BeginRule();
 	bool AddToken( CToken& token );

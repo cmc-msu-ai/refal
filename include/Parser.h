@@ -65,8 +65,7 @@ private:
 	void addExtrnFunction( const std::string& name,
 		const std::string& standartName );
 
-	int storedOffset;
-	std::string storedName;
+	CToken savedToken;
 
 	TLabel entryLabel;
 

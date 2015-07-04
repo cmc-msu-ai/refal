@@ -11,29 +11,28 @@ public:
 	CQualifierParser( IErrorHandler* errorHandler );
 
 	void Reset();
-	void BeginQualifer();
-	void BeginNamedQualifier( const std::string& name );
+	void StartQualifer();
+	bool StartNamedQualifier( CToken& nameToken );
 	bool AddToken( CToken& token );
 	bool IsParsed() const { return parsed; }
-	void GetQualifier( CQualifier& qualifier );	
+	void GetQualifier( CQualifier& qualifier );
 
 private:
 	bool parsed;
-	std::string name;
 	bool afterRightParen;
 	CQualifierBuilder builder;
 	// named qualifiers
 	typedef std::map<std::string, CQualifier> CNamedQualifiers;
 	CNamedQualifiers namedQualifiers;
+	CNamedQualifiers::iterator currentNamedQualifier;
 	// auxiliary functions
 	void resetParser();
-	void addNamedQualifier( const CToken& token );
 	void error( const CToken& token, const std::string& message );
 	void addWord( CToken& token );
 	void addLabel( const CToken& token );
 	void addNumber( const CToken& token );
 	void addString( const CToken& token );
-	void addQualifier( const CToken& token );
+	void addQualifier( CToken& token );
 	void addLineFeed( const CToken& token );
 	void addLeftParen( const CToken& token );
 	void addRightParen( const CToken& token );

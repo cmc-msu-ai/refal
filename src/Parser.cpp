@@ -16,7 +16,7 @@ void CParser::Reset()
 	ruleParser.Reset();
 	qualifierParser.Reset();
 	state = S_Initial;
-	storedName.clear();
+	//storedName.clear();
 	entryLabel = InvalidLabel;
 	currentFunction = InvalidLabel;
 }
@@ -70,14 +70,12 @@ void CParser::AddToken()
 void CParser::parsingInitial()
 {
 	if( token.type == TT_Word ) {
-		addEndOfFunction(); // action
 		ruleParser.EndFunction(); // action
-		storedName = token.value.text; // action
+		token.Move( savedToken );
 		state = S_Word;
 	} else if( token.type == TT_Blank ) {
 		state = S_Blank;
 	} else if( token.type != TT_LineFeed ) {
-		addEndOfFunction(); // action
 		ruleParser.EndFunction(); // action
 		error( EC_LineShouldBeginWithIdentifierOrSpace );
 		state = S_IgnoreLine;
@@ -94,14 +92,12 @@ void CParser::parsingIgnoreLine()
 void CParser::parsingWord()
 {
 	if( token.type == TT_LineFeed ) {
-		ruleParser.BeginFunction( storedName ); // action
-		addDeclarationOfFunction( storedName ); // action
+		ruleParser.BeginFunction( savedToken ); // action
 		state = S_Initial;
 	} else if( token.type == TT_Blank ) {
 		state = S_WordBlank;
 	} else {
-		addDeclarationOfFunction( storedName ); // action
-		ruleParser.BeginFunction( storedName ); // action
+		ruleParser.BeginFunction( savedToken ); // action
 		state = S_Rule;
 		AddToken();
 	}
@@ -111,13 +107,10 @@ void CParser::parsingWordBlank()
 {
 	if( wordIs( "start" ) ) {
 		state = S_Directive;
-		/* TODO: WARNING */
 	} else if( wordIs( "s" ) ) {
 		state = S_WordBlankS;
-		storedOffset = token.position;
 	} else {
-		addDeclarationOfFunction( storedName ); // action
-		ruleParser.BeginFunction( storedName ); // action
+		ruleParser.BeginFunction( savedToken ); // action
 		state = S_Rule;
 		AddToken();
 	}
@@ -126,18 +119,17 @@ void CParser::parsingWordBlank()
 void CParser::parsingWordBlankS()
 {
 	if( token.type == TT_Blank ) {
-		qualifierParser.BeginNamedQualifier( storedName );
-		state = S_Qualifier;
+		if( qualifierParser.StartNamedQualifier( savedToken ) ) {
+			state = S_Qualifier;
+		} else {
+			state = S_IgnoreLine;
+		}
 	} else {
-		addDeclarationOfFunction( storedName ); // action
-		CToken savedToken = token;
-		token.type = TT_Word;
-		token.position = storedOffset;
-		token.value.text = "s";
-		ruleParser.BeginFunction( storedName ); // action
+		token.Swap( savedToken );
+		ruleParser.BeginFunction( token ); // action
 		state = S_Rule;
 		AddToken();
-		token = savedToken;
+		savedToken.Move( token );
 		AddToken();
 	}
 }
@@ -152,7 +144,7 @@ void CParser::parsingBlank()
 			|| wordIs( "swap" )
 			|| wordIs( "extrn" ) )
 		{
-			addEndOfFunction(); // action
+			ruleParser.EndFunction(); // action
 			state = S_Directive;
 			return;
 		}

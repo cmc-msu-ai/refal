@@ -15,9 +15,10 @@ void CRuleParser::Reset()
 	parsed = false;
 }
 
-void CRuleParser::BeginFunction( const std::string& name )
+bool CRuleParser::BeginFunction( CToken& nameToken )
 {
 	BeginRule();
+	return true;
 }
 
 void CRuleParser::EndFunction()
