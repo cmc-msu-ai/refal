@@ -16,7 +16,6 @@ void CParser::Reset()
 	ruleParser.Reset();
 	qualifierParser.Reset();
 	state = S_Initial;
-	//storedName.clear();
 	entryLabel = InvalidLabel;
 	currentFunction = InvalidLabel;
 }
