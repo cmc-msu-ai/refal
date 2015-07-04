@@ -166,7 +166,6 @@ TVariableIndex CVariablesBuilder::AddRight( TVariableName name,
 	}
 }
 
-
 bool CVariablesBuilder::checkName( TVariableName name )
 {
 	if( CVariable::IsValidName( name ) ) {
@@ -186,7 +185,6 @@ bool CVariablesBuilder::checkType( TVariableType type )
 		return false;
 	}
 }
-
 
 void CVariablesBuilder::error( TErrorCode errorCode )
 {
