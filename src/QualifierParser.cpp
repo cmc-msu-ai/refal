@@ -24,9 +24,9 @@ void CQualifierParser::StartQualifer()
 bool CQualifierParser::StartNamedQualifier( CToken& nameToken )
 {
 	assert( nameToken.type == TT_Word );
-	assert( !nameToken.value.text.empty() );
+	assert( !nameToken.word.empty() );
 	resetParser();
-	std::string& name = nameToken.value.text;
+	std::string& name = nameToken.word;
 	MakeLower( name );
 	typedef std::pair<CNamedQualifiers::iterator, bool> CPair;
 	CPair pair = namedQualifiers.insert( std::make_pair( name, CQualifier() ) );
@@ -106,9 +106,8 @@ void CQualifierParser::error( const CToken& token, const std::string& message )
 
 void CQualifierParser::addWord( CToken& token )
 {
-	const std::string& word = token.value.text;
-	for( std::string::size_type i = 0; i < word.length(); i++ ) {
-		switch( word[i] ) {
+	for( std::string::size_type i = 0; i < token.word.length(); i++ ) {
+		switch( token.word[i] ) {
 			case 's': case 'S':
 				builder.AddS();
 				break;
@@ -135,8 +134,8 @@ void CQualifierParser::addWord( CToken& token )
 				break;
 			default:
 				token.position += i;
-				error( token, "primary qualifier `" + std::string( 1, word[i] )
-					+ "` does not exist" );
+				error( token, "primary qualifier `" +
+					std::string( 1, token.word[i] ) + "` does not exist" );
 				return;
 		}
 	}
@@ -145,29 +144,28 @@ void CQualifierParser::addWord( CToken& token )
 
 void CQualifierParser::addLabel( const CToken& token )
 {
-	builder.AddLabel( LabelTable.AddLabel( token.value.text ) );
+	builder.AddLabel( LabelTable.AddLabel( token.word ) );
 	afterRightParen = false;
 }
 
 void CQualifierParser::addNumber( const CToken& token )
 {
-	builder.AddNumber( token.value.number );
+	builder.AddNumber( token.number );
 	afterRightParen = false;
 }
 
 void CQualifierParser::addString( const CToken& token )
 {
-	const std::string& text = token.value.text;
-	for( std::string::size_type i = 0; i < text.length(); i++ ) {
-		builder.AddChar( text[i] );
+	for( std::string::size_type i = 0; i < token.word.length(); i++ ) {
+		builder.AddChar( token.word[i] );
 	}
 	afterRightParen = false;
 }
 
 void CQualifierParser::addQualifier( CToken& token )
 {
-	assert( !token.value.text.empty() );
-	std::string& name = token.value.text;
+	assert( !token.word.empty() );
+	std::string& name = token.word;
 	MakeLower( name );
 	CNamedQualifiers::iterator namedQualifier = namedQualifiers.find( name );
 	if( namedQualifier == namedQualifiers.end() ) {

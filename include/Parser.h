@@ -55,6 +55,7 @@ private:
 	void parsingRuleDirection();
 	void parsingRule();
 
+	// auxiliary functions
 	bool wordIs( const std::string& word ) const;
 
 	void addDeclarationOfFunction( const std::string& name );
@@ -65,7 +66,8 @@ private:
 	void addExtrnFunction( const std::string& name,
 		const std::string& standartName );
 
-	CToken savedToken;
+	CToken savedToken1;
+	CToken savedToken2;
 
 	TLabel entryLabel;
 

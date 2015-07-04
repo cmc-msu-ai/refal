@@ -23,7 +23,7 @@ void CParser::Reset()
 bool CParser::wordIs( const std::string& value ) const
 {
 	if( token.type == TT_Word ) {
-		std::string lowerWord( token.value.text );
+		std::string lowerWord( token.word );
 		MakeLower( lowerWord );
 		return ( lowerWord == value );
 	}
@@ -70,7 +70,7 @@ void CParser::parsingInitial()
 {
 	if( token.type == TT_Word ) {
 		ruleParser.EndFunction(); // action
-		token.Move( savedToken );
+		token.Move( savedToken1 );
 		state = S_Word;
 	} else if( token.type == TT_Blank ) {
 		state = S_Blank;
@@ -91,12 +91,12 @@ void CParser::parsingIgnoreLine()
 void CParser::parsingWord()
 {
 	if( token.type == TT_LineFeed ) {
-		ruleParser.BeginFunction( savedToken ); // action
+		ruleParser.BeginFunction( savedToken1 ); // action
 		state = S_Initial;
 	} else if( token.type == TT_Blank ) {
 		state = S_WordBlank;
 	} else {
-		ruleParser.BeginFunction( savedToken ); // action
+		ruleParser.BeginFunction( savedToken1 ); // action
 		state = S_Rule;
 		AddToken();
 	}
@@ -108,8 +108,9 @@ void CParser::parsingWordBlank()
 		state = S_Directive;
 	} else if( wordIs( "s" ) ) {
 		state = S_WordBlankS;
+		token.Move( savedToken2 );
 	} else {
-		ruleParser.BeginFunction( savedToken ); // action
+		ruleParser.BeginFunction( savedToken1 ); // action
 		state = S_Rule;
 		AddToken();
 	}
@@ -118,18 +119,18 @@ void CParser::parsingWordBlank()
 void CParser::parsingWordBlankS()
 {
 	if( token.type == TT_Blank ) {
-		if( qualifierParser.StartNamedQualifier( savedToken ) ) {
+		if( qualifierParser.StartNamedQualifier( savedToken1 ) ) {
 			state = S_Qualifier;
 		} else {
 			state = S_IgnoreLine;
 		}
 	} else {
-		token.Swap( savedToken );
-		ruleParser.BeginFunction( token ); // action
+		ruleParser.BeginFunction( savedToken1 ); // action
 		state = S_Rule;
-		AddToken();
-		savedToken.Move( token );
-		AddToken();
+		savedToken2.Swap( token );
+		AddToken(); // "S"
+		savedToken2.Move( token );
+		AddToken(); // current token
 	}
 }
 

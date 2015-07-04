@@ -22,19 +22,12 @@ enum TTokenType {
 	TT_RightBracket
 };
 
-struct CTokenValue {
-	TNumber number;
-	std::string text;
-
-	void Swap( CTokenValue& swapWith );
-	void Move( CTokenValue& moveTo );
-};
-
 struct CToken {
+	TTokenType type;
 	int line;
 	int position;
-	TTokenType type;
-	CTokenValue value;
+	TNumber number;
+	std::string word;
 
 	void Swap( CToken& swapWith );
 	void Move( CToken& moveTo );
@@ -42,34 +35,26 @@ struct CToken {
 
 //-----------------------------------------------------------------------------
 
-inline void CTokenValue::Swap( CTokenValue& swapWith )
-{
-	std::swap( number, swapWith.number );
-	std::swap( text, swapWith.text );
-}
-
-inline void CTokenValue::Move( CTokenValue& moveTo )
-{
-	moveTo.number = number;
-	moveTo.text.clear();
-	std::swap( text, moveTo.text );
-}
-
 inline void CToken::Swap( CToken& swapWith )
 {
+	std::swap( type, swapWith.type );
 	std::swap( line, swapWith.line );
 	std::swap( position, swapWith.position );
-	std::swap( type, swapWith.type );
-	value.Swap( swapWith.value );
+	std::swap( number, swapWith.number );
+	word.swap( swapWith.word );
 }
 
 inline void CToken::Move( CToken& moveTo )
 {
+	moveTo.type = type;
 	moveTo.line = line;
 	moveTo.position = position;
-	moveTo.type = type;
-	value.Move( moveTo.value );
+	moveTo.number = number;
+	moveTo.word.clear();
+	word.swap( moveTo.word );
 }
+
+//-----------------------------------------------------------------------------
 
 class CTokenQueue : public std::queue<CToken> {
 public:
