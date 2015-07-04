@@ -8,21 +8,20 @@ namespace Refal2 {
 
 class CParser :	public CErrorsHelper {
 public:
-	CParser( IErrorHandler* errorHandler = 0 );
-	void Reset();
-
-	TLabel GetCurrentLabel() const { return currentFunction; }
-	TLabel GetEntryLabel() const { return entryLabel; }
 
 protected:
 	CToken token;
 
+	CParser( IErrorHandler* errorHandler = 0 );
+	void Reset();
+
 	void AddToken();
 
 private:
+	CToken savedToken1;
+	CToken savedToken2;
 	CRuleParser ruleParser;
 	CQualifierParser qualifierParser;
-	CFunctionBuilder functionBuilder;
 	// processing errors
 	enum TErrorCode {
 		EC_LineShouldBeginWithIdentifierOrSpace,
@@ -57,22 +56,6 @@ private:
 
 	// auxiliary functions
 	bool wordIs( const std::string& word ) const;
-
-	void addDeclarationOfFunction( const std::string& name );
-	void addEndOfFunction();
-
-	void addEmptyFunction( const std::string& name );
-	void addEntryFunction( const std::string& name );
-	void addExtrnFunction( const std::string& name,
-		const std::string& standartName );
-
-	CToken savedToken1;
-	CToken savedToken2;
-
-	TLabel entryLabel;
-
-	TLabel currentFunction;
-	TVariableType variableType;
 };
 
 //-----------------------------------------------------------------------------

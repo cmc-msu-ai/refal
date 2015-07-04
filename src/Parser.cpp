@@ -5,8 +5,7 @@ namespace Refal2 {
 CParser::CParser( IErrorHandler* errorHandler ):
 	CErrorsHelper( errorHandler ),
 	ruleParser( errorHandler ),
-	qualifierParser( errorHandler ),
-	functionBuilder( errorHandler )
+	qualifierParser( errorHandler )
 {
 	Reset();
 }
@@ -16,8 +15,6 @@ void CParser::Reset()
 	ruleParser.Reset();
 	qualifierParser.Reset();
 	state = S_Initial;
-	entryLabel = InvalidLabel;
-	currentFunction = InvalidLabel;
 }
 
 bool CParser::wordIs( const std::string& value ) const
@@ -209,117 +206,6 @@ void CParser::error( TErrorCode errorCode )
 	}
 	errorStream << ".";
 	CErrorsHelper::Error( errorStream.str() );
-}
-
-
-void CParser::addDeclarationOfFunction( const std::string& name )
-{
-	addEndOfFunction();
-
-	currentFunction = LabelTable.AddLabel( name );
-	CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-
-	if( !tmpFunction.IsDeclared() ) {
-		// TODO: error, ignore
-		error( EC_STUB );
-	} else {
-		tmpFunction.SetDefined();
-		std::cout << "addDeclarationOfFunction: {" << name << "}\n";
-	}
-}
-
-void CParser::addEndOfFunction()
-{
-	if( currentFunction != InvalidLabel ) {
-		CFunction& tmpFunction = LabelTable.GetLabelFunction( currentFunction );
-		if( tmpFunction.IsDefined() ) {
-			functionBuilder.Export( tmpFunction );
-			if( tmpFunction.IsParsed() ) {
-				PrintFunction( tmpFunction );
-			}
-			std::cout << "addEndOfFunction: {" <<
-				LabelTable.GetLabelText( currentFunction ) << "}\n";
-		}
-		currentFunction = InvalidLabel;
-		functionBuilder.Reset();
-	}
-}
-
-void CParser::addEmptyFunction( const std::string& name )
-{
-	std::cout << "Empty: " << name << "\n";
-	TLabel emptyLabel = LabelTable.AddLabel( name );
-	CFunction& emptyFunction = LabelTable.GetLabelFunction( emptyLabel );
-	if( emptyFunction.IsDeclared() ) {
-		emptyFunction.SetEmpty();
-	} else if( emptyFunction.IsEmpty() ) {
-		// TODO: warning, such empty function %function% already defined
-	} else if( emptyFunction.IsDefined() || emptyFunction.IsParsed() ) {
-		// TODO: error, %function% already defined in program
-		error( EC_STUB );
-	} else if( emptyFunction.IsExternal() ) {
-		// TODO: error, %function% already defined as external function
-		error( EC_STUB );
-	} else {
-		assert( false );
-	}
-}
-
-void CParser::addEntryFunction( const std::string& name )
-{
-	std::cout << "Entry: " << name << "\n";
-	if( entryLabel == InvalidLabel ) {
-		entryLabel = LabelTable.AddLabel( name );
-		CFunction& entryFunction = LabelTable.GetLabelFunction( entryLabel );
-		if( entryFunction.IsEmpty() ) {
-			// TODO: error, entry %function% cannot be empty function
-			error( EC_STUB );
-		} else if( entryFunction.IsExternal() ) {
-			// TODO: error, entry %function% cannot be external function
-			error( EC_STUB );
-		}
-	} else {
-		// TODO: error, redeclaration of entry
-		error( EC_STUB );
-	}
-}
-
-bool ExtrnPrint( CUnitList& argument, std::string& errorText );
-bool ExtrnPrintm( CUnitList& argument, std::string& errorText );
-bool ExtrnProut( CUnitList& argument, std::string& errorText );
-bool ExtrnProutm( CUnitList& argument, std::string& errorText );
-
-void CParser::addExtrnFunction( const std::string& name,
-	const std::string& standartName )
-{
-	std::cout << "Extrn: " << name << "(" << standartName << ")\n";
-	TLabel externalLabel = LabelTable.AddLabel( name );
-	CFunction& externalFunction = LabelTable.GetLabelFunction( externalLabel );
-	if( externalFunction.IsDeclared() ) {
-		// TODO: add external
-		if( standartName == "print" ) {
-			externalFunction.SetExternal( ExtrnPrint );
-		} else if( standartName == "printm" ) {
-			externalFunction.SetExternal( ExtrnPrintm );
-		} else if( standartName == "prout" ) {
-			externalFunction.SetExternal( ExtrnProut );
-		} else if( standartName == "proutm" ) {
-			externalFunction.SetExternal( ExtrnProutm );
-		} else {
-			//error( EC_STUB );
-		}
-	} else if( externalFunction.IsEmpty() ) {
-		// TODO: error, %function% already defined as empty function
-		error( EC_STUB );
-	} else if( externalFunction.IsDefined() || externalFunction.IsParsed() ) {
-		// TODO: error, %function% already defined in program
-		error( EC_STUB );
-	} else if( externalFunction.IsExternal() ) {
-		// TODO: error, %function% already defined as external function
-		error( EC_STUB );
-	} else {
-		assert( false );
-	}
 }
 
 } // end of namespace Refal2
