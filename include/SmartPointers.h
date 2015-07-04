@@ -52,7 +52,7 @@ CScopedPtr<ObjectType>& CScopedPtr<ObjectType>::operator=( ObjectType*
 }
 
 template<class ObjectType>
-inline void CScopedPtr<ObjectType>::Reset( ObjectType* newObjectPtr = 0 )
+inline void CScopedPtr<ObjectType>::Reset( ObjectType* newObjectPtr )
 {
 	if( ptr != 0 ) {
 		delete ptr;
