@@ -7,6 +7,7 @@ namespace Refal2 {
 //-----------------------------------------------------------------------------
 
 enum TTokenType {
+	TT_None,
 	TT_Word,
 	TT_Blank,
 	TT_Comma,
@@ -31,6 +32,8 @@ struct CToken {
 
 	void Swap( CToken& swapWith );
 	void Move( CToken& moveTo );
+
+	CToken(): type( TT_None ) {}
 };
 
 //-----------------------------------------------------------------------------
