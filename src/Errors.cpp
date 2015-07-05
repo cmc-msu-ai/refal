@@ -7,23 +7,13 @@ namespace Refal2 {
 CErrorsHelper::CErrorsHelper( IErrorHandler* errorHandler )
 {
 	Reset();
-	SetErrorProcessor( errorHandler );
+	SetErrorHandler( errorHandler );
 }
 
 void CErrorsHelper::Reset()
 {
 	hasErrors = false;
 	hasWarnings = false;
-}
-
-void CErrorsHelper::SetErrorProcessor( IErrorHandler* _errorProcessor )
-{
-	errorHandler = _errorProcessor;
-}
-
-const IErrorHandler* CErrorsHelper::GetErrorProcessor() const
-{
-	return errorHandler;
 }
 
 void CErrorsHelper::Error( const std::string& errorText )

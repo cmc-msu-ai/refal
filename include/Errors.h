@@ -18,8 +18,8 @@ public:
 	explicit CErrorsHelper( IErrorHandler* errorHandler = 0 );
 	void Reset();
 
-	void SetErrorProcessor( IErrorHandler* errorHandler );
-	const IErrorHandler* GetErrorProcessor() const;
+	void SetErrorHandler( IErrorHandler* errorHandler );
+	const IErrorHandler* GetErrorHandler() const { return errorHandler; }
 
 	bool HasErrors() const { return hasErrors; }
 	bool HasWarnings() const { return hasWarnings; }
@@ -36,6 +36,11 @@ private:
 	CErrorsHelper( const CErrorsHelper& );
 	CErrorsHelper& operator=( const CErrorsHelper& );
 };
+
+inline void CErrorsHelper::SetErrorHandler( IErrorHandler* _errorHandler )
+{
+	errorHandler = _errorHandler;
+}
 
 //-----------------------------------------------------------------------------
 
