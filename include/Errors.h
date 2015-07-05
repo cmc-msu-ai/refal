@@ -19,7 +19,7 @@ public:
 	void Reset();
 
 	void SetErrorHandler( IErrorHandler* errorHandler );
-	const IErrorHandler* GetErrorHandler() const { return errorHandler; }
+	IErrorHandler* GetErrorHandler() const { return errorHandler; }
 
 	bool HasErrors() const { return hasErrors; }
 	bool HasWarnings() const { return hasWarnings; }
@@ -43,5 +43,36 @@ inline void CErrorsHelper::SetErrorHandler( IErrorHandler* _errorHandler )
 }
 
 //-----------------------------------------------------------------------------
+
+class CErrorHandlerSwitcher {
+public:
+	CErrorHandlerSwitcher( CErrorsHelper* errorsHelper,
+		IErrorHandler* newErrorHandler );
+	~CErrorHandlerSwitcher() { Revert(); }
+
+	void Revert() const;
+
+private:
+	CErrorsHelper* errorsHelper;
+	IErrorHandler* oldErrorHandler;
+
+	CErrorHandlerSwitcher( const CErrorHandlerSwitcher& );
+	CErrorHandlerSwitcher& operator=( const CErrorHandlerSwitcher& );
+};
+
+//-----------------------------------------------------------------------------
+
+inline CErrorHandlerSwitcher::CErrorHandlerSwitcher(
+		CErrorsHelper* _errorsHelper, IErrorHandler* newErrorHandler ):
+	errorsHelper( _errorsHelper ),
+	oldErrorHandler( errorsHelper->GetErrorHandler() )
+{
+	errorsHelper->SetErrorHandler( newErrorHandler );
+}
+
+inline void CErrorHandlerSwitcher::Revert() const
+{
+	errorsHelper->SetErrorHandler( oldErrorHandler );
+}
 
 } // end of namespace Refal2
