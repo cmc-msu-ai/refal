@@ -278,6 +278,7 @@ void CScanner::preprocessingInitital( char c )
 			preprocessingState = PS_SingleLineComment;
 			break;
 		case MultilineCommentBegin:
+			processing( UniversalSeparatorOfTokens );
 			preprocessingState = PS_MultilineComment;
 			break;
 		default:
