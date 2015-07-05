@@ -118,6 +118,7 @@ TVariableIndex CVariablesBuilder::AddLeft( TVariableName name,
 	if( !checkName( name ) ) {
 		return InvalidVariableIndex;
 	}
+	type = ::tolower( type );
 	CVariableInfo& var = variables[name];
 	if( var.type == InvalidVariableType ) {
 		if( checkType( type ) ) {
@@ -149,6 +150,7 @@ TVariableIndex CVariablesBuilder::AddRight( TVariableName name,
 	if( !checkName( name ) ) {
 		return InvalidVariableIndex;
 	}
+	type = ::tolower( type );
 	CVariableInfo& var = variables[name];
 	if( var.type == type ) {
 		var.countRight++;
