@@ -6,7 +6,7 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-class CParser : public CRuleParser {
+class CParser : public CDirectiveParser {
 protected:
 	CParser( IErrorHandler* errorHandler = 0 );
 	void Reset();
@@ -24,9 +24,9 @@ private:
 		S_WordBlank,
 		S_WordBlankS,
 		S_Blank,
-		S_Directive,
 		S_Qualifier,
-		S_Rule
+		S_Rule,
+		S_Directive
 	};
 	TState state;
 	void parsingInitial();
@@ -35,10 +35,10 @@ private:
 	void parsingWordBlank();
 	void parsingWordBlankS();
 	void parsingBlank();
-	void parsingDirective();
 	void parsingQualifier();
 	void parsingRuleDirection();
 	void parsingRule();
+	void parsingDirective();
 
 	// auxiliary functions
 	void checkFinished();

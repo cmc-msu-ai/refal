@@ -2,8 +2,12 @@
 
 namespace Refal2 {
 
+//----------	-------------------------------------------------------------------
+
+const char* QualifierTag = "s";
+
 CParser::CParser( IErrorHandler* errorHandler ):
-	CRuleParser( errorHandler )
+	CDirectiveParser( errorHandler )
 {
 	Reset();
 }
@@ -35,14 +39,14 @@ void CParser::AddToken()
 		case S_Blank:
 			parsingBlank();
 			break;
-		case S_Directive:
-			parsingDirective();
-			break;
 		case S_Qualifier:
 			parsingQualifier();
 			break;
 		case S_Rule:
 			parsingRule();
+			break;
+		case S_Directive:
+			parsingDirective();
 			break;
 		default:
 			assert( false );
@@ -92,11 +96,13 @@ void CParser::parsingWord()
 
 void CParser::parsingWordBlank()
 {
-	if( wordIs( "start" ) ) {
+	if( token.type == TT_Word
+		&& CDirectiveParser::StartParseIfStartDirective( savedToken1.word ) )
+	{
 		state = S_Directive;
-	} else if( wordIs( "s" ) ) {
-		state = S_WordBlankS;
+	} else if( wordIs( QualifierTag ) ) {
 		token.Move( savedToken2 );
+		state = S_WordBlankS;
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
@@ -111,11 +117,7 @@ void CParser::parsingWordBlankS()
 	if( token.type == TT_Blank ) {
 		token.Swap( savedToken1 );
 		CQualifierParser::StartNamedQualifier();
-		if( HasErrors() ) {
-			state = S_IgnoreLine;
-		} else {
-			state = S_Qualifier;
-		}
+		state = IsWrong() ? S_IgnoreLine : S_Qualifier;
 		token.Swap( savedToken1 );
 	} else {
 		token.Swap( savedToken1 );
@@ -123,7 +125,7 @@ void CParser::parsingWordBlankS()
 		token.Swap( savedToken1 );
 		state = S_Rule;
 		savedToken2.Swap( token );
-		AddToken(); // "S"
+		AddToken(); // QualifierTag
 		savedToken2.Move( token );
 		AddToken(); // current token
 	}
@@ -131,28 +133,14 @@ void CParser::parsingWordBlankS()
 
 void CParser::parsingBlank()
 {
-	if( token.type == TT_Word ) {
-		if( wordIs( "start" )
-			|| wordIs( "end" )
-			|| wordIs( "entry" )
-			|| wordIs( "empty" )
-			|| wordIs( "swap" )
-			|| wordIs( "extrn" ) )
-		{
-			CRuleParser::EndFunction(); // action
-			state = S_Directive;
-			return;
-		}
+	if( token.type == TT_Word && CDirectiveParser::StartParseIfDirective() ) {
+		CRuleParser::EndFunction(); // action
+		state = S_Directive;
+		return;
 	}
 	CRuleParser::BeginRule();
 	state = S_Rule;
 	AddToken();
-}
-
-void CParser::parsingDirective()
-{
-	CErrorsHelper::Error( "directive not implemented yet" );
-	state = S_IgnoreLine;
 }
 
 void CParser::parsingQualifier()
@@ -164,6 +152,12 @@ void CParser::parsingQualifier()
 void CParser::parsingRule()
 {
 	CRuleParser::AddToken();
+	checkFinished();
+}
+
+void CParser::parsingDirective()
+{
+	CDirectiveParser::AddToken();
 	checkFinished();
 }
 
@@ -206,5 +200,7 @@ void CParser::error( TErrorCode errorCode )
 			break;
 	}
 }
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

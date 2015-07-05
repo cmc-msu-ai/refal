@@ -7,6 +7,7 @@ include_directories(include)
 set(SOURCE src/Errors.cpp
 			src/Function.cpp
 			src/FunctionCompiler.cpp
+			src/DirectiveParser.cpp
 			src/Label.cpp
 			src/main.cpp
 			src/OperationsBuilder.cpp

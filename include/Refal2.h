@@ -65,6 +65,7 @@ void MakeLower( std::string& data );
 #include <Token.h>
 #include <QualifierParser.h>
 #include <RuleParser.h>
+#include <DirectiveParser.h>
 #include <Parser.h>
 #include <Scanner.h>
 #include <OperationsExecuter.h>
