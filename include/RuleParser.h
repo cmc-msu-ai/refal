@@ -6,22 +6,37 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-class CRuleParser : public CErrorsHelper {
-public:
-	CRuleParser( IErrorHandler* errorHandler );
+class CRuleParser : public CQualifierParser {
+protected:
+	CRuleParser( IErrorHandler* errorHandler = 0 );
 
 	void Reset();
-	bool BeginFunction( CToken& nameToken );
+	void BeginFunction();
 	void EndFunction();
 	void BeginRule();
-	bool AddToken( CToken& token );
-	bool IsParsed() { return parsed; }
+	void AddToken();
 
 private:
-	bool parsed;
-
+	CQualifier qualifier;
+	TVariableType variableType;
+	enum TState {
+		S_Direction,
+		S_AfterDirection,
+		S_AfterLeftBracket,
+		S_AfterVariableType,
+		S_VariableQualifier,
+		S_AfterVariableQualifier
+	};
+	TState state;
 	// auxiliary functions
-	void error( const CToken& token, const std::string& message );
+	void error( const std::string& message );
+	void direction();
+	void afterDirection();
+	void wordAfterDirection();
+	void afterLeftBracket();
+	void afterVariableType();
+	void variableQualifier();
+	void afterVariableQualifier();
 };
 
 //-----------------------------------------------------------------------------

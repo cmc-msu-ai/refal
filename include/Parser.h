@@ -6,12 +6,8 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-class CParser :	public CErrorsHelper {
-public:
-
+class CParser : public CRuleParser {
 protected:
-	CToken token;
-
 	CParser( IErrorHandler* errorHandler = 0 );
 	void Reset();
 
@@ -20,16 +16,6 @@ protected:
 private:
 	CToken savedToken1;
 	CToken savedToken2;
-	CRuleParser ruleParser;
-	CQualifierParser qualifierParser;
-	// processing errors
-	enum TErrorCode {
-		EC_LineShouldBeginWithIdentifierOrSpace,
-		EC_NewLineExpected,
-		EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
-		EC_STUB
-	};
-	void error( TErrorCode errorCode );	
 	// parsing
 	enum TState {
 		S_Initial,
@@ -55,7 +41,17 @@ private:
 	void parsingRule();
 
 	// auxiliary functions
+	void checkFinished();
 	bool wordIs( const std::string& word ) const;
+	// processing errors
+	enum TErrorCode {
+		EC_LineShouldBeginWithIdentifierOrSpace,
+		EC_NewLineExpected,
+		EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
+		EC_STUB
+	};
+	void error( TErrorCode errorCode );
+
 };
 
 //-----------------------------------------------------------------------------

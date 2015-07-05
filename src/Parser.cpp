@@ -3,28 +3,15 @@
 namespace Refal2 {
 
 CParser::CParser( IErrorHandler* errorHandler ):
-	CErrorsHelper( errorHandler ),
-	ruleParser( errorHandler ),
-	qualifierParser( errorHandler )
+	CRuleParser( errorHandler )
 {
 	Reset();
 }
 
 void CParser::Reset()
 {
-	ruleParser.Reset();
-	qualifierParser.Reset();
+	CRuleParser::Reset();
 	state = S_Initial;
-}
-
-bool CParser::wordIs( const std::string& value ) const
-{
-	if( token.type == TT_Word ) {
-		std::string lowerWord( token.word );
-		MakeLower( lowerWord );
-		return ( lowerWord == value );
-	}
-	return false;
 }
 
 void CParser::AddToken()
@@ -66,13 +53,13 @@ void CParser::AddToken()
 void CParser::parsingInitial()
 {
 	if( token.type == TT_Word ) {
-		ruleParser.EndFunction(); // action
+		CRuleParser::EndFunction(); // action
 		token.Move( savedToken1 );
 		state = S_Word;
 	} else if( token.type == TT_Blank ) {
 		state = S_Blank;
 	} else if( token.type != TT_LineFeed ) {
-		ruleParser.EndFunction(); // action
+		CRuleParser::EndFunction(); // action
 		error( EC_LineShouldBeginWithIdentifierOrSpace );
 		state = S_IgnoreLine;
 	}
@@ -88,12 +75,16 @@ void CParser::parsingIgnoreLine()
 void CParser::parsingWord()
 {
 	if( token.type == TT_LineFeed ) {
-		ruleParser.BeginFunction( savedToken1 ); // action
+		token.Swap( savedToken1 );
+		CRuleParser::BeginFunction(); // action
+		token.Swap( savedToken1 );
 		state = S_Initial;
 	} else if( token.type == TT_Blank ) {
 		state = S_WordBlank;
 	} else {
-		ruleParser.BeginFunction( savedToken1 ); // action
+		token.Swap( savedToken1 );
+		CRuleParser::BeginFunction(); // action
+		token.Swap( savedToken1 );
 		state = S_Rule;
 		AddToken();
 	}
@@ -107,7 +98,9 @@ void CParser::parsingWordBlank()
 		state = S_WordBlankS;
 		token.Move( savedToken2 );
 	} else {
-		ruleParser.BeginFunction( savedToken1 ); // action
+		token.Swap( savedToken1 );
+		CRuleParser::BeginFunction(); // action
+		token.Swap( savedToken1 );
 		state = S_Rule;
 		AddToken();
 	}
@@ -116,13 +109,18 @@ void CParser::parsingWordBlank()
 void CParser::parsingWordBlankS()
 {
 	if( token.type == TT_Blank ) {
-		if( qualifierParser.StartNamedQualifier( savedToken1 ) ) {
-			state = S_Qualifier;
-		} else {
+		token.Swap( savedToken1 );
+		CQualifierParser::StartNamedQualifier();
+		if( HasErrors() ) {
 			state = S_IgnoreLine;
+		} else {
+			state = S_Qualifier;
 		}
+		token.Swap( savedToken1 );
 	} else {
-		ruleParser.BeginFunction( savedToken1 ); // action
+		token.Swap( savedToken1 );
+		CRuleParser::BeginFunction(); // action
+		token.Swap( savedToken1 );
 		state = S_Rule;
 		savedToken2.Swap( token );
 		AddToken(); // "S"
@@ -141,71 +139,72 @@ void CParser::parsingBlank()
 			|| wordIs( "swap" )
 			|| wordIs( "extrn" ) )
 		{
-			ruleParser.EndFunction(); // action
+			CRuleParser::EndFunction(); // action
 			state = S_Directive;
 			return;
 		}
 	}
-	ruleParser.BeginRule();
+	CRuleParser::BeginRule();
 	state = S_Rule;
 	AddToken();
 }
 
 void CParser::parsingDirective()
 {
-	std::ostringstream errorStream;
-	errorStream << ":" << token.line << ":" << token.position
-		<< ": error in directive: " << "not implemented yet" << ".";
-	CErrorsHelper::Error( errorStream.str() );
+	CErrorsHelper::Error( "directive not implemented yet" );
 	state = S_IgnoreLine;
 }
 
 void CParser::parsingQualifier()
 {
-	if( qualifierParser.AddToken( token ) ) {
-		if( qualifierParser.HasErrors() ) {
-			state = S_IgnoreLine;
-			AddToken();
-		} else {
-			state = S_Initial;
-		}
-	}
+	CQualifierParser::AddToken();
+	checkFinished();
 }
 
 void CParser::parsingRule()
 {
-	if( ruleParser.AddToken( token ) ) {
-		if( ruleParser.HasErrors() ) {
-			state = S_IgnoreLine;
-			AddToken();
-		} else {
-			state = S_Initial;
-		}
+	CRuleParser::AddToken();
+	checkFinished();
+}
+
+void CParser::checkFinished()
+{
+	if( IsCorrect() ) {
+		state = S_Initial;
+	} else if( IsWrong() ) {
+		state = S_IgnoreLine;
+		AddToken();
 	}
+}
+
+bool CParser::wordIs( const std::string& value ) const
+{
+	if( token.type == TT_Word ) {
+		std::string lowerWord( token.word );
+		MakeLower( lowerWord );
+		return ( lowerWord == value );
+	}
+	return false;
 }
 
 void CParser::error( TErrorCode errorCode )
 {
-	std::ostringstream errorStream;
-	errorStream << token.line << ":" << token.position << ": error: ";
 	switch( errorCode ) {
 		case EC_LineShouldBeginWithIdentifierOrSpace:
-			errorStream << "line should begin with identifier or space";
+			CErrorsHelper::Error( "line should begin with identifier or space" );
 			break;
 		case EC_NewLineExpected:
-			errorStream << "line feed expected";
+			CErrorsHelper::Error( "line feed expected" );
 			break;
 		case EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine:
-			errorStream << "unexpected token after identifier in the beginning of the line";
+			CErrorsHelper::Error( "unexpected token after identifier in the beginning of the line" );
 		case EC_STUB:
-			errorStream << "stub" ;
+			CErrorsHelper::Error( "stub" );
 			break;
 		default:
 			assert( false );
 			break;
 	}
-	errorStream << ".";
-	CErrorsHelper::Error( errorStream.str() );
 }
 
 } // end of namespace Refal2

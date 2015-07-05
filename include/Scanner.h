@@ -6,7 +6,7 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-class CScanner : public CParser {
+class CScanner : public CParser, private IErrorHandler {
 public:
 	CScanner( IErrorHandler* errorHandler );
 	void Reset();
@@ -15,6 +15,7 @@ public:
 	void AddEndOfFile();
 
 private:
+	IErrorHandler* errorHandler;
 	int line;
 	int position;
 	// for line feed normalize
@@ -94,6 +95,10 @@ private:
 	void processingWord( char c );
 	void processingBeginOfQualifier( char c );
 	void processingQualifier( char c );
+
+	// IErrorHandler
+	virtual void Error( const std::string& errorText );
+	virtual void Warning( const std::string& warningText );
 };
 
 //-----------------------------------------------------------------------------

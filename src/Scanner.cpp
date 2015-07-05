@@ -71,9 +71,10 @@ static bool IsControl( char c )
 			&& c != CarriageReturn && c != LineFeed ) );
 }
 
-CScanner::CScanner( IErrorHandler* errorHandler ):
-	CParser( errorHandler )
+CScanner::CScanner( IErrorHandler* _errorHandler ):
+	errorHandler( _errorHandler )
 {
+	SetErrorHandler( this );
 	Reset();
 }
 
@@ -621,6 +622,24 @@ void CScanner::processingQualifier( char c )
 		state = S_Initial;
 		processing( c );
 	}
+}
+
+void CScanner::Error( const std::string& errorText )
+{
+	std::ostringstream errorStream;
+	errorStream << token.line << ":" << token.position << ": error: "
+		<< errorText << ".";
+	CErrorHandlerSwitcher switcher( this, errorHandler );
+	CErrorsHelper::Error( errorStream.str() );
+}
+
+void CScanner::Warning( const std::string& warningText )
+{
+	std::ostringstream warningStream;
+	warningStream << token.line << ":" << token.position << ": warning: "
+		<< warningText << ".";
+	CErrorHandlerSwitcher switcher( this, errorHandler );
+	CErrorsHelper::Warning( warningStream.str() );
 }
 
 //-----------------------------------------------------------------------------

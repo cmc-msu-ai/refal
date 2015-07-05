@@ -6,19 +6,52 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-class CQualifierParser : public CErrorsHelper {
+enum TParsingElementState {
+	PES_NotFinished,
+	PES_Correct,
+	PES_Wrong
+};
+
+class CParsingElementState {
 public:
-	CQualifierParser( IErrorHandler* errorHandler );
+	CParsingElementState() { Reset(); }
+
+	void Reset() { state = PES_NotFinished; }
+	TParsingElementState State() const { return state; }
+	bool IsFinished() const { return ( state != PES_NotFinished ); }
+	void SetFinished( bool correct = false );
+	bool IsCorrect() const { return ( state == PES_Correct ); }
+	void SetCorrect() { SetFinished( true ); }
+	bool IsWrong() const { return ( state == PES_Wrong ); }
+	void SetWrong() { SetFinished(); }
+
+private:
+	TParsingElementState state;
+};
+
+inline void CParsingElementState::SetFinished( bool correct )
+{
+	assert( !IsFinished() );
+	state = correct ? PES_Correct : PES_Wrong;
+}
+
+//-----------------------------------------------------------------------------
+
+class CQualifierParser : public CFunctionBuilder, public CParsingElementState {
+protected:
+	CToken token;
+	CLabelTable labels;
+
+	CQualifierParser( IErrorHandler* errorHandler = 0 );
 
 	void Reset();
 	void StartQualifer();
-	bool StartNamedQualifier( CToken& nameToken );
-	bool AddToken( CToken& token );
-	bool IsParsed() const { return parsed; }
+	void StartNamedQualifier();
+	void AddToken();
 	void GetQualifier( CQualifier& qualifier );
+	void GetNamedQualifier( CQualifier& qualifier );
 
 private:
-	bool parsed;
 	bool afterRightParen;
 	CQualifierBuilder builder;
 	// named qualifiers
@@ -27,16 +60,16 @@ private:
 	CNamedQualifiers::iterator currentNamedQualifier;
 	// auxiliary functions
 	void resetParser();
-	void error( const CToken& token, const std::string& message );
-	void addWord( CToken& token );
-	void addLabel( const CToken& token );
-	void addNumber( const CToken& token );
-	void addString( const CToken& token );
-	void addQualifier( CToken& token );
-	void addLineFeed( const CToken& token );
-	void addLeftParen( const CToken& token );
-	void addRightParen( const CToken& token );
-	// disallow copy construct and operator=
+	void error( const std::string& message );
+	void addWord();
+	void addLabel();
+	void addNumber();
+	void addString();
+	void addQualifier();
+	void addLineFeed();
+	void addLeftParen();
+	void addRightParen();
+
 	CQualifierParser( const CQualifierParser& );
 	CQualifierParser& operator=( const CQualifierParser& );
 };
