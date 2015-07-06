@@ -24,9 +24,9 @@ private:
 		S_WordBlank,
 		S_WordBlankS,
 		S_Blank,
-		S_Qualifier,
 		S_Rule,
-		S_Directive
+		S_Directive,
+		S_Qualifier
 	};
 	TState state;
 	void parsingInitial();
@@ -39,19 +39,9 @@ private:
 	void parsingRuleDirection();
 	void parsingRule();
 	void parsingDirective();
-
 	// auxiliary functions
 	void checkFinished();
 	bool wordIs( const std::string& word ) const;
-	// processing errors
-	enum TErrorCode {
-		EC_LineShouldBeginWithIdentifierOrSpace,
-		EC_NewLineExpected,
-		EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine,
-		EC_STUB
-	};
-	void error( TErrorCode errorCode );
-
 };
 
 //-----------------------------------------------------------------------------

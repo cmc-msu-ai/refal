@@ -39,14 +39,14 @@ void CParser::AddToken()
 		case S_Blank:
 			parsingBlank();
 			break;
-		case S_Qualifier:
-			parsingQualifier();
-			break;
 		case S_Rule:
 			parsingRule();
 			break;
 		case S_Directive:
 			parsingDirective();
+			break;
+		case S_Qualifier:
+			parsingQualifier();
 			break;
 		default:
 			assert( false );
@@ -64,7 +64,7 @@ void CParser::parsingInitial()
 		state = S_Blank;
 	} else if( token.type != TT_LineFeed ) {
 		CRuleParser::EndFunction(); // action
-		error( EC_LineShouldBeginWithIdentifierOrSpace );
+		CErrorsHelper::Error( "line should begin with word or space" );
 		state = S_IgnoreLine;
 	}
 }
@@ -179,26 +179,6 @@ bool CParser::wordIs( const std::string& value ) const
 		return ( lowerWord == value );
 	}
 	return false;
-}
-
-void CParser::error( TErrorCode errorCode )
-{
-	switch( errorCode ) {
-		case EC_LineShouldBeginWithIdentifierOrSpace:
-			CErrorsHelper::Error( "line should begin with identifier or space" );
-			break;
-		case EC_NewLineExpected:
-			CErrorsHelper::Error( "line feed expected" );
-			break;
-		case EC_UnexpectedLexemeAfterIdentifierInTheBeginningOfLine:
-			CErrorsHelper::Error( "unexpected token after identifier in the beginning of the line" );
-		case EC_STUB:
-			CErrorsHelper::Error( "stub" );
-			break;
-		default:
-			assert( false );
-			break;
-	}
 }
 
 //-----------------------------------------------------------------------------
