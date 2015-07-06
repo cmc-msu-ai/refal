@@ -75,4 +75,6 @@ inline void CErrorHandlerSwitcher::Revert() const
 	errorsHelper->SetErrorHandler( oldErrorHandler );
 }
 
+//-----------------------------------------------------------------------------
+
 } // end of namespace Refal2
