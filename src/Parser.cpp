@@ -136,11 +136,11 @@ void CParser::parsingBlank()
 	if( token.type == TT_Word && CDirectiveParser::StartParseIfDirective() ) {
 		CRuleParser::EndFunction(); // action
 		state = S_Directive;
-		return;
+	} else {
+		CRuleParser::BeginRule();
+		state = S_Rule;
+		AddToken();
 	}
-	CRuleParser::BeginRule();
-	state = S_Rule;
-	AddToken();
 }
 
 void CParser::parsingQualifier()
