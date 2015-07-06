@@ -16,7 +16,6 @@ CDirectiveParser::CDirectiveParser( IErrorHandler* errorHandler ):
 	Reset();
 }
 
-
 void CDirectiveParser::Reset()
 {
 	CRuleParser::Reset();
