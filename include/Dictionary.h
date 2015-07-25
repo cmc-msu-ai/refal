@@ -107,7 +107,7 @@ void CDictionary<Data, Key>::SetCapacity( TDictionaryIndex newCapacity )
 template<class Data, class Key>
 TDictionaryIndex CDictionary<Data, Key>::AddKey( const Key& key )
 {
-	typedef std::pair<CKeyToIndex::iterator, bool> CPair;
+	typedef std::pair<typename CKeyToIndex::iterator, bool> CPair;
 	CPair insert = keyToIndex.insert( std::make_pair( key, size ) );
 	const TDictionaryIndex result = insert.first->second;
 	if( insert.second ) {

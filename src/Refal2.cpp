@@ -2,9 +2,6 @@
 
 namespace Refal2 {
 
-// definition of global variables
-CLabelTable LabelTable;
-
 // tools function
 void MakeLower( std::string& data )
 {

@@ -101,8 +101,7 @@ void CRuleParser::afterDirection()
 			error( "unexpected token in the function rule" );
 			break;
 		case TT_Label:
-			MakeLower( token.word );
-			CFunctionBuilder::AddLabel( labels.AddLabel( token.word ) );
+			CFunctionBuilder::AddLabel( CModuleBuilder::Declare( token ) );
 			break;
 		case TT_Number:
 			CFunctionBuilder::AddNumber( token.number );
@@ -167,8 +166,7 @@ void CRuleParser::afterLeftBracket()
 {
 	state = S_AfterDirection;
 	if( token.type == TT_Word ) {
-		MakeLower( token.word );
-		CFunctionBuilder::AddLabel( labels.AddLabel( token.word ) );
+		CFunctionBuilder::AddLabel( CModuleBuilder::Declare( token ) );
 	} else {
 		AddToken();
 	}

@@ -22,7 +22,7 @@ void HandyPrintFieldOfView( const CUnitList& fieldOfView )
 				std::cout << i->Char();
 				break;
 			case UT_Label:
-				std::cout << "/" << LabelTable.GetLabelText( i->Label() ) << "/";
+				std::cout << "/L:" << i->Label() << "/";
 				break;
 			case UT_Number:
 				std::cout << "/" << i->Number() << "/";
@@ -57,7 +57,7 @@ void PrintUnit(const CUnit& unit, const CVariables* variables)
 			std::cout << "'" << unit.Char() << "' ";
 			break;
 		case UT_Label:
-			std::cout << "/" << LabelTable.GetLabelText( unit.Label() ) << "/ ";
+			std::cout << "/L:" << unit.Label() << "/ ";
 			break;
 		case UT_Number:
 			std::cout << "/" << unit.Number() << "/ ";

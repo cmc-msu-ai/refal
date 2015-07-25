@@ -16,8 +16,8 @@ typedef int TTableIndex;
 // classes
 class CExecuter;
 
-class CFunction;
-struct CFunctionRule;
+class CRule;
+class CPreparatoryFunction;
 class CFunctionCompiler;
 class CFunctionBuilder;
 
@@ -41,9 +41,6 @@ class CVariable;
 class CVariables;
 class CVariablesBuilder;
 
-// declaration of global variables
-extern CLabelTable LabelTable;
-
 // tools functions
 void MakeLower( std::string& data );
 
@@ -61,9 +58,8 @@ void MakeLower( std::string& data );
 #include <OperationsBuilder.h>
 #include <Variables.h>
 #include <Token.h>
-#include <Function.h>
 #include <FunctionCompiler.h>
-#include <Label.h>
+#include <Function.h>
 #include <ModuleBuilder.h>
 #include <QualifierParser.h>
 #include <RuleParser.h>

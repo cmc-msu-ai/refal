@@ -18,7 +18,7 @@ static void strangePrint( const CUnitList& expression )
 				std::cout << i->Char();
 				break;
 			case UT_Label:
-				std::cout << "'" << LabelTable.GetLabelText( i->Label() ) << "'";
+				std::cout << "'" << i->Label() << "'";
 				break;
 			case UT_Number:
 				std::cout << "'" << i->Number() << "'";
@@ -82,7 +82,6 @@ void CErrorHandler::Warning( const std::string& warningText )
 
 bool ParseFile( std::istream& fileStream )
 {
-	LabelTable.Empty();
 	CErrorHandler errorHandler;
 	CScanner scanner( &errorHandler );
 

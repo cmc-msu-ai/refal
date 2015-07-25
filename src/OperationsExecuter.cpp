@@ -143,6 +143,7 @@ void COperationsExecuter::restoreLeftBrackets()
 
 void COperationsExecuter::doFunction()
 {
+#if 0
 	CUnitNode* savedRightBracket = initialLeftBracket.PairedParen();
 	right = savedRightBracket;
 	left = right->PairedParen();
@@ -198,6 +199,7 @@ void COperationsExecuter::doFunction()
 	} else {
 		initialLeftBracket.PairedParen() = savedRightBracket;
 	}
+#endif
 }
 
 void COperationsExecuter::doFunctionBody()

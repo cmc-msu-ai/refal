@@ -75,12 +75,7 @@ void CQualifierParser::GetQualifier( CQualifier& qualifier )
 	assert( IsCorrect() );
 	builder.Export( qualifier );
 }
-/*
-void CQualifierParser::GetNamedQualifier( CQualifier& qualifier )
-{
 
-}
-*/
 void CQualifierParser::resetParser()
 {
 	CParsingElementState::Reset();
@@ -135,8 +130,7 @@ void CQualifierParser::addWord()
 
 void CQualifierParser::addLabel()
 {
-	MakeLower( token.word );
-	builder.AddLabel( labels.AddLabel( token.word ) );
+	builder.AddLabel( CModuleBuilder::Declare( token ) );
 	afterRightParen = false;
 }
 

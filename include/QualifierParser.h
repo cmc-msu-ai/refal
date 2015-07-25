@@ -40,7 +40,6 @@ inline void CParsingElementState::SetFinished( bool correct )
 class CQualifierParser : public CModuleBuilder, public CParsingElementState {
 protected:
 	CToken token;
-	CLabelTable labels;
 
 	CQualifierParser( IErrorHandler* errorHandler = 0 );
 

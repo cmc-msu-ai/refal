@@ -89,7 +89,7 @@ static void printLabels( const CFastSet<TLabel>& labels, bool isIncludeAll )
 	std::set<TLabel> a;
 	labels.GetSet( &a );
 	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		std::cout << "/" << LabelTable.GetLabelText(*i) << "/";
+		std::cout << "/" << *i << "/";
 	}
 
 	if( isIncludeAll && !labels.IsEmpty() ) {

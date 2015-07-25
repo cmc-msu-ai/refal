@@ -8,7 +8,7 @@ const TTableIndex InvalideTableIndex = -1;
 
 class CHole : public CUnitList {
 public:
-	CHole( CUnitList* hole, TTableIndex left, TTableIndex right );
+	CHole( CUnitList& hole, TTableIndex left, TTableIndex right );
 	CHole( CUnitNode* first, CUnitNode* last,
 		TTableIndex left, TTableIndex right );
 	
@@ -48,7 +48,7 @@ class CLeftPartCompiler : public CFunctionCompilerBase {
 protected:
 	CLeftPartCompiler();
 	
-	void CompileLeftPart( CUnitList* leftPart, bool isRightDirection );
+	void CompileLeftPart( CUnitList& leftPart, bool isRightDirection );
 	
 private:
 	void removeHole();
@@ -123,19 +123,20 @@ inline bool CLeftPartCompiler::isFreeVE( CUnitNode* unit ) const
 	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
 }
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class CRightPartCompiler : public CLeftPartCompiler {
 protected:
-	void CompileRightPart( CUnitList* rightPart );
+	void CompileRightPart( CUnitList& rightPart );
 };
+
+//-----------------------------------------------------------------------------
 
 class CFunctionCompiler : public CRightPartCompiler {
 public:
-	void Compile( CFunction* function );
+	CFunctionCompiler();
 
-private:
-	void compileRule( CFunctionRule* rule );
+	void CompileRule( CRule& rule );
 };
 
 } // end of namespace refal2

@@ -2,11 +2,11 @@
 
 namespace Refal2 {
 
-CHole::CHole( CUnitList* hole, const TTableIndex _left,
+CHole::CHole( CUnitList& hole, const TTableIndex _left,
 		const TTableIndex _right ):
 	left( _left ), right( _right )
 {
-	hole->Move( *this );
+	hole.Move( *this );
 }
 
 CHole::CHole(CUnitNode* const first, CUnitNode* const last,
@@ -98,8 +98,8 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 }
 #endif
 
-void CLeftPartCompiler::CompileLeftPart(CUnitList* leftPart,
-	const bool isRightDirection)
+void CLeftPartCompiler::CompileLeftPart( CUnitList& leftPart,
+	const bool isRightDirection )
 {
 	left = 0;
 	right = 1;
@@ -324,7 +324,7 @@ void CLeftPartCompiler::matchLeftParens()
 	hole->SetLeft( left );
 	hole->SetRight( right );
 	
-	holes.InsertAfter( hole, CHole( &newHole, right, oldRight ) );
+	holes.InsertAfter( hole, CHole( newHole, right, oldRight ) );
 }
 
 void CLeftPartCompiler::matchRightParens()
@@ -354,7 +354,7 @@ void CLeftPartCompiler::matchRightParens()
 	hole->SetLeft( left );
 	hole->SetRight( right );
 	
-	holes.InsertBefore( hole, CHole( &newHole, oldLeft, left ) );
+	holes.InsertBefore( hole, CHole( newHole, oldLeft, left ) );
 }
 
 void CLeftPartCompiler::matchLeftSymbol()
@@ -451,10 +451,10 @@ void CLeftPartCompiler::matchRightDuplicateVE()
 	hole->RemoveLast();
 }
 
-void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
+void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 {
 	CUnitList hole;
-	rightPart->Move( hole );
+	rightPart.Move( hole );
 	
 	while( !hole.IsEmpty() ) {
 		CUnitNode unit = *hole.GetFirst();
@@ -512,23 +512,14 @@ void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 	}
 }
 
-void CFunctionCompiler::Compile(CFunction* function)
-{
-	assert( function->IsParsed() );
-	
-	for( CFunctionRule* rule = function->firstRule; rule != 0;
-		rule = rule->nextRule )
-	{
-		compileRule( rule );
-	}
-}
+//-----------------------------------------------------------------------------
 
-void CFunctionCompiler::compileRule(CFunctionRule* rule)
+void CFunctionCompiler::CompileRule( CRule& rule )
 {
-	rule->variables.Move( variables );
-	CompileLeftPart( &rule->leftPart, rule->isRightDirection );
+	rule.Variables.Move( variables );
+	CompileLeftPart( rule.Left, rule.RightMatching );
 	COperationsBuilder::AddMatchingComplete();
-	CompileRightPart( &rule->rightPart );
+	CompileRightPart( rule.Right );
 	COperationsBuilder::AddReturn();
 }
 

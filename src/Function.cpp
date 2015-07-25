@@ -4,27 +4,17 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-void PrintRule( const CFunctionRule& rule )
+void CRule::Print( std::ostream& outputStream ) const
 {
-	std::cout << "\t";
-	if( rule.isRightDirection ) {
-		std::cout << "R";
-	}
-	std::cout << " ";
-	PrintUnitList( rule.leftPart, &rule.variables );
-	std::cout << "= ";
-	PrintUnitList( rule.rightPart );
+	outputStream << "\t" << ( RightMatching ? "R" : "" ) << " ";
+	PrintUnitList( Left, &Variables );
+	outputStream << "= ";
+	PrintUnitList( Right );
 }
 
-void PrintFunction( const CFunction& function )
+void CRule::Compile( CFunctionCompiler& compiler ) const
 {
-	assert( function.IsParsed() );
-	for( const CFunctionRule* rule = function.firstRule; rule != 0;
-		rule = rule->nextRule )
-	{
-		PrintRule( *rule );
-		std::cout << std::endl;
-	}
+	compiler.CompileRule( const_cast<CRule&>( *this ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -34,6 +24,12 @@ CPreparatoryFunction::CPreparatoryFunction( const CToken& _name ):
 	entry( false ),
 	name( _name )
 {
+}
+
+const CRule* CPreparatoryFunction::GetFirstRule() const
+{
+	assert( IsOrdinary() );
+	return ( firstRule.get() );
 }
 
 void CPreparatoryFunction::SetDefined( const CToken& _name )
@@ -73,6 +69,27 @@ void CPreparatoryFunction::SetExternal( const CToken& _externalName )
 	externalName = _externalName;
 }
 
+void CPreparatoryFunction::Compile( CFunctionCompiler& compiler ) const
+{
+	assert( IsOrdinary() );
+	const CRule* rule = GetFirstRule();
+	while( rule != 0 ) {
+		rule->Compile( compiler );
+		rule = rule->NextRule.get();
+	}
+}
+
+void CPreparatoryFunction::Print( std::ostream& outputStream ) const
+{
+	assert( IsOrdinary() );
+	const CRule* rule = GetFirstRule();
+	while( rule != 0 ) {
+		rule->Print( outputStream );
+		outputStream << std::endl;
+		rule = rule->NextRule.get();
+	}
+}
+
 //-----------------------------------------------------------------------------
 
 CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorHandler ):
@@ -99,15 +116,11 @@ void CFunctionBuilder::Reset()
 	emptyStack();
 }
 
-void CFunctionBuilder::Export( CFunction& function )
+void CFunctionBuilder::Export( CRulePtr& _firstRule )
 {
 	// todo: check rule
-	if( !HasErrors() ) {
-		if( firstRule != 0 ) {
-			//function.SetParsed( &firstRule );
-		} else {
-			error( EC_ThereAreNoRulesInFunction );
-		}
+	if( !HasErrors() && static_cast<bool>( firstRule ) ) {
+		_firstRule.reset( firstRule.release() );
 	}
 	Reset();
 }
@@ -243,9 +256,6 @@ void CFunctionBuilder::AddRightBracket()
 void CFunctionBuilder::error( TErrorCode errorCode )
 {
 	switch( errorCode ) {
-		case EC_ThereAreNoRulesInFunction:
-			CErrorsHelper::Error( "there are no rules in function" );
-			break;
 		case EC_IllegalLeftBracketInLeftPart:
 			CErrorsHelper::Error( "illegal left bracket in left part" );
 			break;

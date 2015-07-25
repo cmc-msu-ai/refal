@@ -162,6 +162,7 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 
 TLabel CModuleBuilder::declare( const CToken& nameToken )
 {
+	assert( !nameToken.word.empty() );
 	std::string name = nameToken.word;
 	MakeLower( name );
 	const TLabel label = module->Functions.AddKey( name );

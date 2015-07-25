@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+#include <string.h>
 #include <map>
 #include <set>
 #include <stack>

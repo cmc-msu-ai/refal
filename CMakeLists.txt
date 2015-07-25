@@ -8,7 +8,6 @@ set(SOURCE src/DirectiveParser.cpp
 			src/Errors.cpp
 			src/Function.cpp
 			src/FunctionCompiler.cpp
-			src/Label.cpp
 			src/main.cpp
 			src/Module.cpp
 			src/ModuleBuilder.cpp
