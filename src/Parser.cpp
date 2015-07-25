@@ -14,7 +14,7 @@ CParser::CParser( IErrorHandler* errorHandler ):
 
 void CParser::Reset()
 {
-	CRuleParser::Reset();
+	CDirectiveParser::Reset();
 	state = S_Initial;
 }
 
@@ -97,7 +97,7 @@ void CParser::parsingWord()
 void CParser::parsingWordBlank()
 {
 	if( token.type == TT_Word
-		&& CDirectiveParser::StartParseIfStartDirective( savedToken1.word ) )
+		&& CDirectiveParser::StartParseIfStartDirective( savedToken1 ) )
 	{
 		state = S_Directive;
 	} else if( wordIs( QualifierTag ) ) {

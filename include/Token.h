@@ -30,10 +30,12 @@ struct CToken {
 	TNumber number;
 	std::string word;
 
+	CToken(): type( TT_None ) {}
+
 	void Swap( CToken& swapWith );
 	void Move( CToken& moveTo );
 
-	CToken(): type( TT_None ) {}
+	bool IsNone() const { return ( type == TT_None ); }
 };
 
 //-----------------------------------------------------------------------------
@@ -56,6 +58,8 @@ inline void CToken::Move( CToken& moveTo )
 	moveTo.word.clear();
 	word.swap( moveTo.word );
 }
+
+bool AreTokenWordsEqual( const CToken& word1, const CToken& word2 );
 
 //-----------------------------------------------------------------------------
 

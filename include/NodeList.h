@@ -41,8 +41,8 @@ public:
 	void Empty();
 	bool IsEmpty() const { return ( first == 0 ); }
 	
-	inline void Swap( CNodeList* swapWith );
-	inline void Move( CNodeList* moveTo );
+	inline void Swap( CNodeList& swapWith );
+	inline void Move( CNodeList& moveTo );
 	
 	inline CNodeType* DetachFirst();
 	void RemoveFirst() { free( DetachFirst() ); }
@@ -97,17 +97,17 @@ private:
 };
 
 template<class T>
-inline void CNodeList<T>::Swap( CNodeList* swapWith )
+inline void CNodeList<T>::Swap( CNodeList& swapWith )
 {
-	std::swap( first, swapWith->first );
-	std::swap( last, swapWith->last );
+	std::swap( first, swapWith.first );
+	std::swap( last, swapWith.last );
 }
 
 template<class T>
-inline void CNodeList<T>::Move( CNodeList* moveTo )
+inline void CNodeList<T>::Move( CNodeList& moveTo )
 {
-	if( this != moveTo ) {
-		moveTo->Empty();
+	if( this != &moveTo ) {
+		moveTo.Empty();
 		Swap( moveTo );
 	}
 }

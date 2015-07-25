@@ -2,11 +2,11 @@
 
 namespace Refal2 {
 
-CHole::CHole(CUnitList* hole, const TTableIndex _left,
-		const TTableIndex _right):
+CHole::CHole( CUnitList* hole, const TTableIndex _left,
+		const TTableIndex _right ):
 	left( _left ), right( _right )
 {
-	hole->Move( this );
+	hole->Move( *this );
 }
 
 CHole::CHole(CUnitNode* const first, CUnitNode* const last,
@@ -15,17 +15,17 @@ CHole::CHole(CUnitNode* const first, CUnitNode* const last,
 {
 }
 
-CHole::CHole(const CHole& hole)
+CHole::CHole( const CHole& hole )
 	: left( hole.left ), right( hole.right )
 {
-	const_cast<CHole&>( hole ).Move( this );
+	const_cast<CHole&>( hole ).Move( *this );
 }
 
-CHole& CHole::operator=(const CHole& hole)
+CHole& CHole::operator=( const CHole& hole )
 {
 	left = hole.left;
 	right = hole.right;
-	const_cast<CHole&>( hole ).Move( this );
+	const_cast<CHole&>( hole ).Move( *this );
 	return *this;
 }
 
@@ -454,7 +454,7 @@ void CLeftPartCompiler::matchRightDuplicateVE()
 void CRightPartCompiler::CompileRightPart(CUnitList* rightPart)
 {
 	CUnitList hole;
-	rightPart->Move( &hole );
+	rightPart->Move( hole );
 	
 	while( !hole.IsEmpty() ) {
 		CUnitNode unit = *hole.GetFirst();

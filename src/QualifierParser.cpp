@@ -5,15 +5,14 @@ namespace Refal2 {
 //-----------------------------------------------------------------------------
 
 CQualifierParser::CQualifierParser( IErrorHandler* errorHandler ):
-	CFunctionBuilder( errorHandler )
+	CModuleBuilder( errorHandler )
 {
 	Reset();
 }
 
 void CQualifierParser::Reset()
 {
-	CFunctionBuilder::Reset();
-	namedQualifiers.clear();
+	CModuleBuilder::Reset();
 	resetParser();
 }
 
@@ -27,15 +26,7 @@ void CQualifierParser::StartNamedQualifier()
 	assert( token.type == TT_Word );
 	assert( !token.word.empty() );
 	resetParser();
-	std::string& name = token.word;
-	MakeLower( name );
-	typedef std::pair<CNamedQualifiers::iterator, bool> CPair;
-	CPair pair = namedQualifiers.insert( std::make_pair( name, CQualifier() ) );
-	if( pair.second ) {
-		currentNamedQualifier = pair.first;
-	} else {
-		error( "qualifier `" + name + "` already defined" );
-	}
+	namedQualifier = token;
 }
 
 void CQualifierParser::AddToken()
@@ -84,26 +75,18 @@ void CQualifierParser::GetQualifier( CQualifier& qualifier )
 	assert( IsCorrect() );
 	builder.Export( qualifier );
 }
-
+/*
 void CQualifierParser::GetNamedQualifier( CQualifier& qualifier )
 {
-	assert( token.type == TT_Qualifier );
-	assert( !token.word.empty() );
-	MakeLower( token.word );
-	CNamedQualifiers::iterator i = namedQualifiers.find( token.word );
-	if( i == namedQualifiers.end() ) {
-		error( "qualifier `" + token.word + "` wasn't defined" );
-	} else {
-		qualifier = i->second;
-	}
-}
 
+}
+*/
 void CQualifierParser::resetParser()
 {
 	CParsingElementState::Reset();
 	afterRightParen = false;
 	builder.Reset();
-	currentNamedQualifier = namedQualifiers.end();
+	namedQualifier = CToken();
 }
 
 void CQualifierParser::error( const std::string& message )
@@ -174,16 +157,17 @@ void CQualifierParser::addString()
 void CQualifierParser::addQualifier()
 {
 	CQualifier qualifier;
-	GetNamedQualifier( qualifier );
-	if( !IsWrong() ) {
+	if( CModuleBuilder::GetNamedQualifier( token, qualifier ) ) {
 		builder.AddQualifier( qualifier );
 		afterRightParen = false;
+	} else {
+		SetWrong();
 	}
 }
 
 void CQualifierParser::addLineFeed()
 {
-	if( currentNamedQualifier == namedQualifiers.end() ) {
+	if( namedQualifier.IsNone() ) {
 		error( "unexpected line feed in variable qualifier" );
 	} else if( builder.IsNegative() ) {
 		error( "no parenthesis balance in qualifier" );
@@ -192,7 +176,11 @@ void CQualifierParser::addLineFeed()
 			builder.IsNegative();
 		}
 		SetCorrect();
-		GetQualifier( currentNamedQualifier->second );
+		CQualifier qualifier;
+		GetQualifier( qualifier );
+		if( !CModuleBuilder::SetNamedQualifier( namedQualifier, qualifier ) ) {
+			SetWrong();
+		}
 	}
 }
 
@@ -211,7 +199,7 @@ void CQualifierParser::addRightParen()
 	if( builder.IsNegative() ) {
 		builder.AddNegative();
 		afterRightParen = true;
-	} else if( currentNamedQualifier == namedQualifiers.end() ) {
+	} else if( namedQualifier.IsNone() ) {
 		if( !afterRightParen ) {
 			builder.IsNegative();
 		}

@@ -77,10 +77,13 @@ void CRuleParser::direction()
 		switch( token.word[0] ) {
 			case 'r':
 			case 'R':
-				// TODO: set right direction
+				CFunctionBuilder::SetRightDirection();
+				return;
 			case 'l':
 			case 'L':
 				return;
+			default:
+				break;
 		}
 	}
 	AddToken();
@@ -177,8 +180,11 @@ void CRuleParser::afterVariableType()
 		CQualifierParser::StartQualifer();
 		state = S_VariableQualifier;
 	} else if( token.type == TT_Qualifier ) {
-		state = S_AfterVariableQualifier;
-		CQualifierParser::GetNamedQualifier( qualifier );
+		if( CModuleBuilder::GetNamedQualifier( token, qualifier ) ) {
+			state = S_AfterVariableQualifier;
+		} else {
+			SetWrong();
+		}
 	} else {
 		error( "unexpected token after variable type" );
 	}

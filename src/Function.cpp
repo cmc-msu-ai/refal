@@ -29,11 +29,56 @@ void PrintFunction( const CFunction& function )
 
 //-----------------------------------------------------------------------------
 
+CPreparatoryFunction::CPreparatoryFunction( const CToken& _name ):
+	type( PFT_Declared ),
+	entry( false ),
+	name( _name )
+{
+}
+
+void CPreparatoryFunction::SetDefined( const CToken& _name )
+{
+	assert( AreTokenWordsEqual( name, _name ) );
+	assert( type == PFT_Declared );
+	type = PFT_Defined;
+	name = _name;
+}
+
+void CPreparatoryFunction::SetOrdinary( CRulePtr& _firstRule )
+{
+	assert( type == PFT_Defined );
+	assert( static_cast<bool>( _firstRule ) );
+	type = PFT_Ordinary;
+	firstRule.reset( _firstRule.release() );
+}
+
+void CPreparatoryFunction::SetEmpty()
+{
+	assert( type == PFT_Defined );
+	type = PFT_Empty;
+}
+
+void CPreparatoryFunction::SetEntry( const CToken& _externalName )
+{
+	assert( type != PFT_External );
+	entry = true;
+	externalName = _externalName;
+}
+
+void CPreparatoryFunction::SetExternal( const CToken& _externalName )
+{
+	assert( !entry );
+	assert( type == PFT_Defined );
+	type = PFT_External;
+	externalName = _externalName;
+}
+
+//-----------------------------------------------------------------------------
+
 CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorHandler ):
 	CVariablesBuilder( errorHandler ),
 	isProcessRightPart( false ),
 	isRightDirection( false ),
-	firstRule( 0 ),
 	lastRule( 0 )
 {
 }
@@ -59,12 +104,17 @@ void CFunctionBuilder::Export( CFunction& function )
 	// todo: check rule
 	if( !HasErrors() ) {
 		if( firstRule != 0 ) {
-			function.SetParsed( &firstRule );
+			//function.SetParsed( &firstRule );
 		} else {
 			error( EC_ThereAreNoRulesInFunction );
 		}
 	}
 	Reset();
+}
+
+void CFunctionBuilder::SetRightDirection()
+{
+	isRightDirection = true;
 }
 
 void CFunctionBuilder::AddEndOfLeft()
@@ -79,7 +129,7 @@ void CFunctionBuilder::AddEndOfLeft()
 		if( HasErrors() ) {
 			acc.Empty();
 		} else {
-			acc.Move( &leftPart );
+			acc.Move( leftPart );
 		}
 		isProcessRightPart = true;
 	}
@@ -237,30 +287,24 @@ void CFunctionBuilder::emptyStack()
 
 void CFunctionBuilder::emptyRules()
 {
-	if( firstRule != 0 ) {
-		while( firstRule != 0 ) {
-			CFunctionRule* tmp = firstRule;
-			firstRule = firstRule->nextRule;
-			delete tmp;
-		}
-	}
-	firstRule = 0;
+	firstRule.reset();
 	lastRule = 0;
 }
 
 void CFunctionBuilder::addRule()
 {
-	CFunctionRule* newRule = new CFunctionRule( isRightDirection );
-	leftPart.Move( &(newRule->leftPart) );
-	acc.Move( &(newRule->rightPart) );
-	CVariablesBuilder::Export( newRule->variables );
-	if( firstRule != 0 ) {
-		lastRule->nextRule = newRule;
-		lastRule = lastRule->nextRule;
+	if( static_cast<bool>( firstRule ) ) {
+		lastRule->NextRule.reset( new CRule );
+		lastRule = lastRule->NextRule.get();
 	} else {
-		firstRule = newRule;
-		lastRule = firstRule;
+		firstRule.reset( new CRule );
+		lastRule = firstRule.get();
 	}
+
+	lastRule->RightMatching = isRightDirection;
+	leftPart.Move( lastRule->Left );
+	acc.Move( lastRule->Right );
+	CVariablesBuilder::Export( lastRule->Variables );
 }
 
 //-----------------------------------------------------------------------------

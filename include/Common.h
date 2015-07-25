@@ -6,6 +6,7 @@
 #include <stack>
 #include <queue>
 #include <bitset>
+#include <memory>
 #include <string>
 #include <vector>
 #include <fstream>

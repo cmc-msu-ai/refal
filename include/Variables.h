@@ -156,7 +156,7 @@ inline void CVariables::allocVariablesValues()
 const int VariablesInfoSize = 128;
 
 class CVariablesBuilder : public CErrorsHelper {
-public:
+protected:
 	explicit CVariablesBuilder( IErrorHandler* errorHandler = 0 );
 
 	void Reset();

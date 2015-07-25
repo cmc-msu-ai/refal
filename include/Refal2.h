@@ -49,20 +49,22 @@ void MakeLower( std::string& data );
 
 } // end of namespace Refal2
 
-#include <SmartPointers.h>
+#include <Dictionary.h>
 #include <Errors.h>
 #include <NodeList.h>
 #include <FastSet.h>
 #include <SetBuilder.h>
+#include <Dictionary.h>
 #include <Unit.h>
 #include <Qualifier.h>
 #include <QualifierBuilder.h>
 #include <OperationsBuilder.h>
 #include <Variables.h>
+#include <Token.h>
 #include <Function.h>
 #include <FunctionCompiler.h>
 #include <Label.h>
-#include <Token.h>
+#include <ModuleBuilder.h>
 #include <QualifierParser.h>
 #include <RuleParser.h>
 #include <DirectiveParser.h>

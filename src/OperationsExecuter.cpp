@@ -101,7 +101,7 @@ TExecutionResult COperationsExecuter::Run( const TLabel entry,
 	CUnitList& fieldOfView, CUnitNode*& errorCall )
 {
 	COperationsExecuter executer( entry );
-	executer.fieldOfView.Move( &fieldOfView );
+	executer.fieldOfView.Move( fieldOfView );
 	errorCall = executer.initialLeftBracket.PairedParen();
 	return executer.executionResult;
 }

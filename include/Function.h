@@ -55,13 +55,13 @@ public:
 	bool IsCompiled() const { return ( functionState == FS_Compiled ); }
 	bool IsEmpty() const { return ( functionState == FS_Empty ); }
 	bool IsExternal() const { return ( functionState == FS_External ); }
-	
+
 	void SetDefined();
 	void SetParsed( CFunctionRule** firstRule );
 	void SetCompiled( COperation* operation );
 	void SetEmpty();
 	void SetExternal( TExternalFunction externalFunction );
-	
+
 private:
 	TFunctionState functionState;
 	union {
@@ -107,8 +107,72 @@ inline void CFunction::SetExternal( TExternalFunction _externalFunction )
 
 //-----------------------------------------------------------------------------
 
-class CFunctionBuilder : public CVariablesBuilder {
+class CRule {
 public:
+	CUnitList Left;
+	CUnitList Right;
+	bool RightMatching;
+	CVariables Variables;
+	std::unique_ptr<CRule> NextRule;
+
+	CRule(): RightMatching( false ) {}
+
+private:
+	CRule( const CRule& );
+	CRule& operator=( const CRule& );
+};
+
+typedef std::unique_ptr<CRule> CRulePtr;
+
+//-----------------------------------------------------------------------------
+
+enum TPreparatoryFunctionType {
+	PFT_Declared,
+	PFT_Defined,
+	PFT_Ordinary,
+	PFT_Empty,
+	PFT_External
+};
+
+class CPreparatoryFunction {
+public:
+	CPreparatoryFunction( const CToken& name );
+
+	TPreparatoryFunctionType GetType() const { return type; }
+	const CToken& GetName() const { return name; }
+	const CToken& GetExternalName() const { return externalName; }
+
+	bool IsEntry() const { return entry; }
+	bool IsDeclared() const { return ( GetType() == PFT_Declared ); }
+	bool IsDefined() const { return ( GetType() == PFT_Defined ); }
+	bool IsOrdinary() const { return ( GetType() == PFT_Ordinary ); }
+	bool IsEmpty() const { return ( GetType() == PFT_Empty ); }
+	bool IsExternal() const { return ( GetType() == PFT_External ); }
+
+	void SetDefined( const CToken& name );
+	void SetOrdinary( CRulePtr& firstRule );
+	void SetEmpty();
+	void SetEntry( const CToken& externalName );
+	void SetExternal( const CToken& externalName );
+
+private:
+	TPreparatoryFunctionType type;
+	bool entry;
+	CToken name;
+	CToken externalName;
+	CRulePtr firstRule;
+
+	CPreparatoryFunction( const CPreparatoryFunction& );
+	CPreparatoryFunction& operator=( const CPreparatoryFunction& );
+};
+
+typedef std::unique_ptr<CPreparatoryFunction> CPreparatoryFunctionPtr;
+typedef CDictionary<CPreparatoryFunctionPtr, std::string> CPreparatoryFunctions;
+
+//-----------------------------------------------------------------------------
+
+class CFunctionBuilder : public CVariablesBuilder {
+protected:
 	explicit CFunctionBuilder( IErrorHandler* errorHandler = 0 );
 	~CFunctionBuilder();
 
@@ -117,7 +181,7 @@ public:
 
 	bool IsProcessRightPart() const { return isProcessRightPart; }
 
-	void SetRightDirection() { isRightDirection = true; }
+	void SetRightDirection();
 	void AddEndOfLeft();
 	void AddEndOfRight();
 	void AddChar( TChar c );
@@ -135,8 +199,8 @@ private:
 	bool isRightDirection;
 	CUnitList acc;
 	CUnitList leftPart;
-	CFunctionRule* firstRule;
-	CFunctionRule* lastRule;
+	CRulePtr firstRule;
+	CRule* lastRule;
 	std::stack<CUnitNode*> balanceStack;
 	// processing errors
 	enum TErrorCode {

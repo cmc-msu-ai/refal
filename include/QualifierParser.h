@@ -37,7 +37,7 @@ inline void CParsingElementState::SetFinished( bool correct )
 
 //-----------------------------------------------------------------------------
 
-class CQualifierParser : public CFunctionBuilder, public CParsingElementState {
+class CQualifierParser : public CModuleBuilder, public CParsingElementState {
 protected:
 	CToken token;
 	CLabelTable labels;
@@ -49,15 +49,11 @@ protected:
 	void StartNamedQualifier();
 	void AddToken();
 	void GetQualifier( CQualifier& qualifier );
-	void GetNamedQualifier( CQualifier& qualifier );
 
 private:
 	bool afterRightParen;
 	CQualifierBuilder builder;
-	// named qualifiers
-	typedef std::map<std::string, CQualifier> CNamedQualifiers;
-	CNamedQualifiers namedQualifiers;
-	CNamedQualifiers::iterator currentNamedQualifier;
+	CToken namedQualifier;
 	// auxiliary functions
 	void resetParser();
 	void error( const std::string& message );

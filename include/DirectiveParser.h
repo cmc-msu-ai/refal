@@ -11,7 +11,7 @@ protected:
 	CDirectiveParser( IErrorHandler* errorHandler = 0 );
 
 	void Reset();
-	bool StartParseIfStartDirective( const std::string& module );
+	bool StartParseIfStartDirective( const CToken& moduleName );
 	bool StartParseIfDirective();
 	void AddToken();
 
@@ -43,8 +43,6 @@ private:
 	void twoNamesAfterAlias();
 	void twoNamesAfterRightParen();
 
-	void startModule( const std::string& name = "" );
-	void endModule();
 	void addEmpty();
 	void addExternal();
 	void addEntry();

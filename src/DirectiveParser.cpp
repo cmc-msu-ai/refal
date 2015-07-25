@@ -22,7 +22,7 @@ void CDirectiveParser::Reset()
 	handler = 0;
 }
 
-bool CDirectiveParser::StartParseIfStartDirective( const std::string& module )
+bool CDirectiveParser::StartParseIfStartDirective( const CToken& moduleName )
 {
 	assert( token.type == TT_Word );
 	std::string word = token.word;
@@ -31,7 +31,7 @@ bool CDirectiveParser::StartParseIfStartDirective( const std::string& module )
 		CParsingElementState::Reset();
 		state = S_Simple;
 		token.Move( directive );
-		startModule( module );
+		CModuleBuilder::StartModule( token, moduleName );
 		return ( !IsWrong() );
 	}
 	return false;
@@ -46,12 +46,12 @@ bool CDirectiveParser::StartParseIfDirective()
 		CParsingElementState::Reset();
 		state = S_Simple;
 		token.Move( directive );
-		startModule();
-		return ( !IsWrong() );
+		CModuleBuilder::StartModule( directive );
 	} else if( word == EndDirectiveTag ) {
 		CParsingElementState::Reset();
 		state = S_Simple;
 		token.Move( directive );
+		CModuleBuilder::EndModule( directive );
 	} else if( word == EmptyDirectiveTag ) {
 		CParsingElementState::Reset();
 		state = S_OneName;
@@ -109,7 +109,7 @@ void CDirectiveParser::AddToken()
 void CDirectiveParser::wrongDirectiveFormat()
 {
 	SetWrong();
-	CErrorsHelper::Error( "wrong `" + directive.word + "` format." );
+	CErrorsHelper::Error( "wrong `" + directive.word + "` directive format." );
 }
 
 void CDirectiveParser::simple()
@@ -197,46 +197,29 @@ void CDirectiveParser::twoNamesAfterRightParen()
 	}
 }
 
-void CDirectiveParser::startModule( const std::string& name )
-{
-}
-
-void CDirectiveParser::endModule()
-{
-}
-
 void CDirectiveParser::addEmpty()
 {
 	assert( token.type == TT_Word );
-	MakeLower( token.word );
-	std::cerr << "EMPTY " << token.word << std::endl;
+	CModuleBuilder::SetEmpty( token );
 }
 
 void CDirectiveParser::addExternal()
 {
 	if( token.type == TT_Word ) {
-		MakeLower( token.word );
-		MakeLower( savedToken.word );
-		std::cerr << "EXTRN " << savedToken.word
-			<< "(" << token.word << ")" << std::endl;
+		CModuleBuilder::SetExternal( savedToken, token );
 	} else {
 		assert( token.type == TT_Comma || token.type == TT_LineFeed );
-		MakeLower( savedToken.word );
-		std::cerr << "EXTRN " << savedToken.word << std::endl;
+		CModuleBuilder::SetExternal( savedToken );
 	}
 }
 
 void CDirectiveParser::addEntry()
 {
 	if( token.type == TT_Word ) {
-		MakeLower( token.word );
-		MakeLower( savedToken.word );
-		std::cerr << "ENTRY " << savedToken.word
-			<< "(" << token.word << ")" << std::endl;
+		CModuleBuilder::SetEntry( savedToken, token );
 	} else {
 		assert( token.type == TT_Comma || token.type == TT_LineFeed );
-		MakeLower( savedToken.word );
-		std::cerr << "ENTRY " << savedToken.word << std::endl;
+		CModuleBuilder::SetEntry( savedToken );
 	}
 }
 

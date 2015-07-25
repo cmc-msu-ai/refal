@@ -4,12 +4,14 @@ project(Refal2)
 
 include_directories(include)
 
-set(SOURCE src/Errors.cpp
+set(SOURCE src/DirectiveParser.cpp
+			src/Errors.cpp
 			src/Function.cpp
 			src/FunctionCompiler.cpp
-			src/DirectiveParser.cpp
 			src/Label.cpp
 			src/main.cpp
+			src/Module.cpp
+			src/ModuleBuilder.cpp
 			src/OperationsBuilder.cpp
 			src/OperationsExecuter.cpp
 			src/Parser.cpp
