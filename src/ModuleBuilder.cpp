@@ -4,26 +4,46 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
+CModules::CModules( IErrorHandler* errorHandler ):
 	CFunctionBuilder( errorHandler )
 {
 	Reset();
 }
 
-void CModuleBuilder::OnModuleReady( CModuleInfoPtr& module )
+void CModules::GetModules( std::queue<CModuleInfoPtr>& _modules )
 {
-	const CToken& start = module->StartToken;
-	const CToken& name = module->NameToken;
-	const CToken& end = module->EndToken;
-	if( !name.IsNone() ) {
-		std::cout << "MODULE: " << name.word << std::endl;
-	}
+	_modules.swap( modules );
+	EmptyModules();
+}
+
+void CModules::Reset()
+{
+	CFunctionBuilder::Reset();
+}
+
+void CModules::EmptyModules()
+{
+	std::queue<CModuleInfoPtr> emptyModules;
+	modules.swap( emptyModules );
+}
+
+void CModules::AddModule( CModuleInfoPtr& module )
+{
+	modules.push( CModuleInfoPtr( module.release() ) );
+}
+
+//-----------------------------------------------------------------------------
+
+CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
+	CModules( errorHandler )
+{
+	Reset();
 }
 
 void CModuleBuilder::Reset()
 {
+	CModules::Reset();
 	module.reset();
-	CFunctionBuilder::Reset();
 }
 
 bool CModuleBuilder::IsStarted() const
@@ -220,7 +240,7 @@ void CModuleBuilder::endModule()
 	if( !CErrorsHelper::HasErrors() ) {
 		CModuleInfoPtr savedModule( module.release() );
 		Reset();
-		OnModuleReady( savedModule );
+		CModules::AddModule( savedModule );
 	} else {
 		Reset();
 	}

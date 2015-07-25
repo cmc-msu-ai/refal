@@ -15,6 +15,24 @@ struct CModuleInfo {
 
 typedef std::unique_ptr<CModuleInfo> CModuleInfoPtr;
 
+class CModules : public CFunctionBuilder {
+public:
+	void GetModules( std::queue<CModuleInfoPtr>& modules );
+
+protected:
+	CModules( IErrorHandler* errorHandler = 0 );
+
+	void Reset();
+
+	void EmptyModules();
+	void AddModule( CModuleInfoPtr& module );
+
+private:
+	std::queue<CModuleInfoPtr> modules;
+};
+
+//-----------------------------------------------------------------------------
+
 struct CNamedQualifierInfo {
 	CToken NameToken;
 	CQualifier qualifier;
@@ -24,11 +42,9 @@ struct CNamedQualifierInfo {
 
 typedef std::map<std::string, CNamedQualifierInfo> CNamedQualifiers;
 
-class CModuleBuilder : public CFunctionBuilder {
+class CModuleBuilder : public CModules {
 protected:
 	CModuleBuilder( IErrorHandler* errorHandler = 0 );
-
-	virtual void OnModuleReady( CModuleInfoPtr& module );
 
 	void Reset();
 

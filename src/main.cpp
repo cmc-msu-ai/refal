@@ -88,6 +88,20 @@ bool ParseFile( std::istream& fileStream )
 	for( char c; fileStream.get( c ); ) {
 		scanner.AddChar( c );
 	}
+	scanner.AddEndOfFile();
+
+	std::queue<CModuleInfoPtr> modules;
+	scanner.GetModules( modules );
+	while( !modules.empty() ) {
+		CModuleInfoPtr module( modules.front().release() );
+		modules.pop();
+		const CToken& start = module->StartToken;
+		const CToken& name = module->NameToken;
+		const CToken& end = module->EndToken;
+		if( !name.IsNone() ) {
+			std::cout << "MODULE: " << name.word << std::endl;
+		}
+	}
 
 	return ( !scanner.HasErrors() );
 }
