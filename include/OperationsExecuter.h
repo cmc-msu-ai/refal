@@ -207,11 +207,6 @@ inline void COperationsExecuter::saveToTable( CUnitNode* const node )
 {
 	table[tableTop] = node;
 	tableTop++;
-#ifdef _DEBUG
-	if( node != 0 ) {
-		PrintUnit( *node );
-	}
-#endif
 }
 
 inline void COperationsExecuter::saveToTable( CUnitNode* const nodeA,
@@ -219,11 +214,6 @@ inline void COperationsExecuter::saveToTable( CUnitNode* const nodeA,
 {
 	saveToTable( nodeA );
 	saveToTable( nodeB );
-#ifdef _DEBUG
-	if( nodeA != 0 && nodeB != 0 ) {
-		PrintUnitList( nodeA, nodeB, 0 );
-	}
-#endif
 }
 
 inline bool COperationsExecuter::isEmpty() const
@@ -426,13 +416,13 @@ inline bool COperationsExecuter::matchRightWithQualifierSaveToTable_S(
 inline bool COperationsExecuter::matchLeftDuplicate_S(
 	const TTableIndex origin )
 {
-	return ( shiftLeft() && CompareUnit( *left, *table[origin] ) );
+	return ( shiftLeft() && left->IsEqualWith( *table[origin] ) );
 }
 
 inline bool COperationsExecuter::matchLeftDuplicateSaveToTable_S(
 	const TTableIndex origin )
 {
-	if( shiftLeft() && CompareUnit( *left, *table[origin] ) ) {
+	if( shiftLeft() && left->IsEqualWith( *table[origin] ) ) {
 		saveToTable( left );
 		return true;
 	} else {
@@ -442,13 +432,13 @@ inline bool COperationsExecuter::matchLeftDuplicateSaveToTable_S(
 
 inline bool COperationsExecuter::matchRightDuplicate_S(const TTableIndex origin)
 {
-	return ( shiftRight() && CompareUnit( *right, *table[origin] ) );
+	return ( shiftRight() && right->IsEqualWith( *table[origin] ) );
 }
 
 inline bool COperationsExecuter::matchRightDuplicateSaveToTable_S(
 	const TTableIndex origin )
 {
-	if( shiftRight() && CompareUnit( *right, *table[origin] ) ) {
+	if( shiftRight() && right->IsEqualWith( *table[origin] ) ) {
 		saveToTable( right );
 		return true;
 	} else {
@@ -564,7 +554,7 @@ inline bool COperationsExecuter::matchLeftDuplicate_WV(
 	for( ; originLeft != originRight->Next();
 		originLeft = originLeft->Next() )
 	{
-		if( !shiftLeft() || !CompareUnit( *left, *originLeft ) ) {
+		if( !shiftLeft() || !left->IsEqualWith( *originLeft ) ) {
 			return false;
 		}
 	}
@@ -580,7 +570,7 @@ inline bool COperationsExecuter::matchLeftDuplicateSaveToTable_WV(
 	for( ; originLeft != originRight->Next();
 		originLeft = originLeft->Next() )
 	{
-		if( !shiftLeft() || !CompareUnit( *left, *originLeft ) ) {
+		if( !shiftLeft() || !left->IsEqualWith( *originLeft ) ) {
 			return false;
 		}
 	}
@@ -596,7 +586,7 @@ inline bool COperationsExecuter::matchRightDuplicate_WV(
 	for( ; originRight != originLeft->Prev();
 		originRight = originRight->Prev() )
 	{
-		if( !shiftRight() || !CompareUnit( *right, *originRight ) ) {
+		if( !shiftRight() || !right->IsEqualWith( *originRight ) ) {
 			return false;
 		}
 	}
@@ -612,7 +602,7 @@ inline bool COperationsExecuter::matchRightDuplicateSaveToTable_WV(
 	for( ; originRight != originLeft->Prev();
 		originRight = originRight->Prev() )
 	{
-		if( !shiftRight() || !CompareUnit( *right, *originRight ) ) {
+		if( !shiftRight() || !right->IsEqualWith( *originRight ) ) {
 			return false;
 		}
 	}

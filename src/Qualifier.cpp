@@ -2,148 +2,7 @@
 
 namespace Refal2 {
 
-static void printAnsiSet( const CAnsiSet& ansichars, const std::string& chars,
-	const std::string& mark )
-{
-	bool isInclude = false;
-	if( ansichars.count() > chars.length() / 2 ) {
-		isInclude = true;
-	}
-
-	if( isInclude ) {
-		std::cout << "(";
-	}
-
-	std::cout << "'";
-	for( std::size_t i = 0; i < chars.length(); i++ ) {
-		if( ansichars.test( chars[i] ) != isInclude ) {
-			std::cout << chars[i];
-		}
-	}
-	std::cout << "'";
-
-	if( isInclude ) {
-		std::cout << ")" << mark << " ";
-	} else {
-		std::cout << "(" << mark << ") ";
-	}
-}
-
-static void printChars( const CFastSet<TChar>& chars, const CAnsiSet& ansichars,
-	bool isIncludeAll )
-{
-	CAnsiSet L = ansichars & CQualifierBuilder::AnsiL;
-	CAnsiSet D = ansichars & CQualifierBuilder::AnsiD;
-
-	printAnsiSet( L, CQualifierBuilder::Alphabet, "L" );
-	printAnsiSet( D, CQualifierBuilder::Numbers, "D" );
-
-	CAnsiSet other = ansichars & ~(L | D);
-	bool superFlag = other.count() < 31;
-	if( !superFlag ) {
-		other |= CQualifierBuilder::AnsiL | CQualifierBuilder::AnsiD;
-		std::cout << "(";
-	}
-	std::cout << "'";	
-	for( int i = 1; i < AnsiSetSize; i++ ) {
-		if( other.test( i ) == superFlag ) {
-			std::cout << static_cast<char>( i );
-		}
-	}
-	std::cout << "' ";
-	if( !superFlag ) {
-		std::cout << ")";
-	}
-
-	if( isIncludeAll && !chars.IsEmpty() ) {
-		std::cout << "(";
-	}
-	if( !chars.IsEmpty() ) {
-		std::cout << "'";
-	}
-	std::set<TChar> a;
-	chars.GetSet( &a );
-	for( std::set<TChar>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		std::cout << *i;
-	}
-	if( !chars.IsEmpty() ) {
-		std::cout << "'";
-	}
-	if( isIncludeAll && !chars.IsEmpty() ) {
-		std::cout << ") ";
-	}
-
-	if( isIncludeAll ) {
-		std::cout << "O ";
-	} else {
-		std::cout << "(O) ";
-	} 
-}
-
-static void printLabels( const CFastSet<TLabel>& labels, bool isIncludeAll )
-{
-	if( isIncludeAll && !labels.IsEmpty() ) {
-		std::cout << "(";
-	}
-
-	std::set<TLabel> a;
-	labels.GetSet( &a );
-	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		std::cout << "/" << *i << "/";
-	}
-
-	if( isIncludeAll && !labels.IsEmpty() ) {
-		std::cout << ")";
-	}
-
-	if( isIncludeAll ) {
-		std::cout << "F ";
-	} else {
-		std::cout << "(F) ";
-	}
-}
-
-static void printNumbers( const CFastSet<TNumber>& numbers, bool isIncludeAll )
-{
-	if( isIncludeAll && !numbers.IsEmpty() ) {
-		std::cout << "(";
-	}
-
-	std::set<TNumber> a;
-	numbers.GetSet( &a );
-	for( std::set<TNumber>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		std::cout << "/" << *i << "/";
-	}
-
-	if( isIncludeAll && !numbers.IsEmpty() ) {
-		std::cout << ")";
-	}
-
-	if( isIncludeAll ) {
-		std::cout << "N ";
-	} else {
-		std::cout << "(N) ";
-	}
-}
-
-void PrintQualifier( const CQualifier& qualifier )
-{
-	if( !qualifier.IsEmpty() ) {
-		std::cout << "( ";
-
-		printChars( qualifier.chars, qualifier.ansichars,
-			qualifier.IsIncludeAllChars() );
-		printLabels( qualifier.labels, qualifier.IsIncludeAllLabels() );
-		printNumbers( qualifier.numbers, qualifier.IsIncludeAllNumbers() );
-
-		if( qualifier.IsIncludeTerms() ) {
-			std::cout << "B ";
-		} else {
-			std::cout << "(B) ";
-		}
-		std::cout << ")";
-	}
-}
+//-----------------------------------------------------------------------------
 
 void CQualifier::Empty()
 {
@@ -237,5 +96,142 @@ void CQualifier::DestructiveIntersection( CQualifier& withQualifier )
 		withQualifier.Empty();
 	}
 }
+
+void CQualifier::Print( std::ostream& outputStream ) const
+{
+	if( IsEmpty() ) {
+		return;
+	}
+	outputStream << "( ";
+	printChars( outputStream );
+	printLabels( outputStream );
+	printNumbers( outputStream );
+	outputStream << ( IsIncludeTerms() ? "B" : "(B)" ) << " )";
+}
+
+static void printAnsiSet( std::ostream& outputStream, const CAnsiSet& ansichars,
+	const std::string& chars, const std::string& mark )
+{
+	bool isInclude = false;
+	if( ansichars.count() > chars.length() / 2 ) {
+		isInclude = true;
+	}
+
+	if( isInclude ) {
+		outputStream << "(";
+	}
+
+	outputStream << "'";
+	for( std::size_t i = 0; i < chars.length(); i++ ) {
+		if( ansichars.test( chars[i] ) != isInclude ) {
+			outputStream << chars[i];
+		}
+	}
+	outputStream << "'";
+
+	if( isInclude ) {
+		outputStream << ")" << mark << " ";
+	} else {
+		outputStream << "(" << mark << ") ";
+	}
+}
+
+void CQualifier::printChars( std::ostream& outputStream ) const
+{
+	CAnsiSet L = ansichars & CQualifierBuilder::AnsiL;
+	CAnsiSet D = ansichars & CQualifierBuilder::AnsiD;
+
+	printAnsiSet( outputStream, L, CQualifierBuilder::Alphabet, "L" );
+	printAnsiSet( outputStream, D, CQualifierBuilder::Numbers, "D" );
+
+	CAnsiSet other = ansichars & ~(L | D);
+	bool superFlag = other.count() < 31;
+	if( !superFlag ) {
+		other |= CQualifierBuilder::AnsiL | CQualifierBuilder::AnsiD;
+		outputStream << "(";
+	}
+	outputStream << "'";
+	for( int i = 1; i < AnsiSetSize; i++ ) {
+		if( other.test( i ) == superFlag ) {
+			outputStream << static_cast<char>( i );
+		}
+	}
+	outputStream << "' ";
+	if( !superFlag ) {
+		outputStream << ")";
+	}
+
+	if( IsIncludeAllChars() && !chars.IsEmpty() ) {
+		outputStream << "(";
+	}
+	if( !chars.IsEmpty() ) {
+		outputStream << "'";
+	}
+	std::set<TChar> a;
+	chars.GetSet( &a );
+	for( std::set<TChar>::const_iterator i = a.begin(); i != a.end(); ++i ) {
+		outputStream << *i;
+	}
+	if( !chars.IsEmpty() ) {
+		outputStream << "'";
+	}
+	if( IsIncludeAllChars() && !chars.IsEmpty() ) {
+		outputStream << ") ";
+	}
+
+	if( IsIncludeAllChars() ) {
+		outputStream << "O ";
+	} else {
+		outputStream << "(O) ";
+	}
+}
+
+void CQualifier::printLabels( std::ostream& outputStream ) const
+{
+	if( IsIncludeAllLabels() && !labels.IsEmpty() ) {
+		outputStream << "(";
+	}
+
+	std::set<TLabel> a;
+	labels.GetSet( &a );
+	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
+		outputStream << "/L:" << *i << "/";
+	}
+
+	if( IsIncludeAllLabels() && !labels.IsEmpty() ) {
+		outputStream << ")";
+	}
+
+	if( IsIncludeAllLabels() ) {
+		outputStream << "F ";
+	} else {
+		outputStream << "(F) ";
+	}
+}
+
+void CQualifier::printNumbers( std::ostream& outputStream ) const
+{
+	if( IsIncludeAllNumbers() && !numbers.IsEmpty() ) {
+		outputStream << "(";
+	}
+
+	std::set<TNumber> a;
+	numbers.GetSet( &a );
+	for( std::set<TNumber>::const_iterator i = a.begin(); i != a.end(); ++i ) {
+		outputStream << "/" << *i << "/";
+	}
+
+	if( IsIncludeAllNumbers() && !numbers.IsEmpty() ) {
+		outputStream << ")";
+	}
+
+	if( IsIncludeAllNumbers() ) {
+		outputStream << "N ";
+	} else {
+		outputStream << "(N) ";
+	}
+}
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

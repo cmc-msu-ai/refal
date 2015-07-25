@@ -7,9 +7,9 @@ namespace Refal2 {
 void CRule::Print( std::ostream& outputStream ) const
 {
 	outputStream << "\t" << ( RightMatching ? "R" : "" ) << " ";
-	PrintUnitList( Left, &Variables );
+	Left.Print( outputStream, &Variables );
 	outputStream << "= ";
-	PrintUnitList( Right );
+	Right.Print( outputStream );
 }
 
 void CRule::Compile( CFunctionCompiler& compiler ) const

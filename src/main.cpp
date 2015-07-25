@@ -18,7 +18,7 @@ static void strangePrint( const CUnitList& expression )
 				std::cout << i->Char();
 				break;
 			case UT_Label:
-				std::cout << "'" << i->Label() << "'";
+				std::cout << "'L:" << i->Label() << "'";
 				break;
 			case UT_Number:
 				std::cout << "'" << i->Number() << "'";
@@ -45,7 +45,7 @@ bool ExtrnPrint( CUnitList& argument, std::string& errorText )
 
 bool ExtrnPrintm( CUnitList& argument, std::string& errorText )
 {
-	HandyPrintFieldOfView( argument );
+	argument.HandyPrint( std::cout );
 	return true;
 }
 
@@ -58,7 +58,7 @@ bool ExtrnProut( CUnitList& argument, std::string& errorText )
 
 bool ExtrnProutm( CUnitList& argument, std::string& errorText )
 {
-	HandyPrintFieldOfView( argument );
+	argument.HandyPrint( std::cout );
 	argument.Empty();
 	return true;
 }

@@ -4,6 +4,8 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
 const std::size_t AnsiSetSize = 128;
 typedef std::bitset<AnsiSetSize> CAnsiSet;
 
@@ -15,11 +17,8 @@ enum TQualifierIncludeFlags {
 	QIF_All = QIF_Terms | QIF_AllChars | QIF_AllLabels | QIF_AllNumbers
 };
 
-void PrintQualifier( const CQualifier& qualifier );
-
 class CQualifier {
 	friend class CQualifierBuilder;
-	friend void PrintQualifier( const CQualifier& qualifier );
 
 public:
 	CQualifier(): flags( 0 ) {}
@@ -39,13 +38,21 @@ public:
 	bool IsIncludeAllNumbers() const;
 	bool IsIncludeTerms() const;
 
+	void Print( std::ostream& outputStream ) const;
+
 private:
 	int flags;
 	CAnsiSet ansichars;
 	CFastSet<TChar> chars;
 	CFastSet<TLabel> labels;
 	CFastSet<TNumber> numbers;
+
+	void printChars( std::ostream& outputStream ) const;
+	void printLabels( std::ostream& outputStream ) const;
+	void printNumbers( std::ostream& outputStream ) const;
 };
+
+//-----------------------------------------------------------------------------
 
 inline void CQualifier::Move( CQualifier& moveTo )
 {
@@ -75,5 +82,6 @@ inline bool CQualifier::IsIncludeTerms() const
 	return ( ( flags & QIF_Terms ) != 0 );
 }
 
-} // end of namespace refal2
+//-----------------------------------------------------------------------------
 
+} // end of namespace refal2

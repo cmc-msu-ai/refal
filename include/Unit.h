@@ -4,6 +4,8 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
 typedef CNodeList<CUnit>::CNodeType CUnitNode;
 
 enum TUnitType {
@@ -24,18 +26,7 @@ enum TUnitTypeMask {
 	UTM_Bracket = UT_LeftBracket | UT_RightBracket
 };
 
-void HandyPrintFieldOfView( const CUnitList& fieldOfView );
-
-void PrintUnit( const CUnit& unit, const CVariables* variables = 0 );
-bool CompareUnit( const CUnit& unitA, const CUnit& unitB );
-void PrintUnitList( const CUnitNode* fromNode, const CUnitNode* toNode,
-	const CVariables* variables = 0 );
-inline void PrintUnitList( const CUnitList& unitList,
-	const CVariables* variables = 0 );
-
 class CUnit {
-	friend bool CompareUnit(const CUnit& unitA, const CUnit& unitB);
-
 public:
 	explicit CUnit( TUnitType _type ): type( _type ) {}
 	
@@ -72,6 +63,11 @@ public:
 	CUnitNode*& PairedParen() { return pairedParen; }
 	const CUnitNode* PairedParen() const { return pairedParen; }
 
+	bool IsEqualWith( const CUnit& unit ) const;
+
+	void Print( std::ostream& outputStream,
+		const CVariables* variables = 0 ) const;
+
 private:
 	TUnitType type;
 	union {
@@ -82,6 +78,8 @@ private:
 		TVariableIndex variable;
 	};
 };
+
+//-----------------------------------------------------------------------------
 
 class CUnitList : public CNodeList<CUnit> {
 public:
@@ -96,7 +94,13 @@ public:
 	inline CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
 	inline CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
 	inline CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
+
+	void Print( std::ostream& outputStream,
+		const CVariables* variables = 0 ) const;
+	void HandyPrint( std::ostream& outputStream ) const;
 };
+
+//-----------------------------------------------------------------------------
 
 inline CUnitNode* CUnitList::AppendChar(TChar c)
 {
@@ -154,10 +158,6 @@ inline CUnitNode* CUnitList::AppendRightBracket(CUnitNode* leftBracket)
 	return Append( unit );
 }
 
-inline void PrintUnitList( const CUnitList& unitList,
-	const CVariables* variables )
-{
-	PrintUnitList( unitList.GetFirst(), unitList.GetLast(), variables );
-}
+//-----------------------------------------------------------------------------
 
 } // end of namespace Refal2
