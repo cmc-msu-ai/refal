@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.5)
 
 project(Refal2)
 
+add_definitions( "-std=c++0x" )
+
 include_directories(include)
 
 set(SOURCE src/DirectiveParser.cpp
