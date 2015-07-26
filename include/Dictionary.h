@@ -130,7 +130,7 @@ const Key& CDictionary<Data, Key>::GetKey( TDictionaryIndex index ) const
 template<class Data, class Key>
 TDictionaryIndex CDictionary<Data, Key>::FindKey( const Key& key ) const
 {
-	CKeyToIndex::const_iterator i = keyToIndex.find( key );
+	typename CKeyToIndex::const_iterator i = keyToIndex.find( key );
 	if( i != keyToIndex.end() ) {
 		return i->second;
 	}
