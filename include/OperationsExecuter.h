@@ -4,6 +4,15 @@
 
 namespace Refal2 {
 
+class CContext {
+
+};
+
+class COrdinaryExecuter {
+public:
+	static bool Execute( CUnitList& argument, CUnitList& result );
+};
+
 enum TExecutionResult {
 	ER_OK = 0,
 	ER_RecognitionImpossible,

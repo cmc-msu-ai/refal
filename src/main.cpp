@@ -4,6 +4,9 @@ using namespace Refal2;
 
 namespace Refal2 {
 
+const char* eMsg = "program.ref:101:20: error: ";
+const char* wMsg = "program.ref:101:20: warning: ";
+
 class CStandartFunctionTable : std::map<std::string, void*> {
 public:
 	bool FindByName( const std::string& name,
@@ -90,7 +93,9 @@ bool ParseFile( std::istream& fileStream )
 	}
 	scanner.AddEndOfFile();
 
-	std::queue<CModuleInfoPtr> modules;
+	scanner.BuildProgram();
+
+	/*std::queue<CModuleInfoPtr> modules;
 	scanner.GetModules( modules );
 	while( !modules.empty() ) {
 		CModuleInfoPtr module( modules.front().release() );
@@ -101,7 +106,7 @@ bool ParseFile( std::istream& fileStream )
 		if( !name.IsNone() ) {
 			std::cout << "MODULE: " << name.word << std::endl;
 		}
-	}
+	}*/
 
 	return ( !scanner.HasErrors() );
 }

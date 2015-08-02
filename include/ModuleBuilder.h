@@ -6,15 +6,7 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-struct CModuleInfo {
-	CToken NameToken;
-	CToken StartToken;
-	CToken EndToken;
-	CPreparatoryFunctions Functions;
-};
-
-typedef std::unique_ptr<CModuleInfo> CModuleInfoPtr;
-
+#if 0
 class CModules : public CFunctionBuilder {
 public:
 	void GetModules( std::queue<CModuleInfoPtr>& modules );
@@ -30,6 +22,7 @@ protected:
 private:
 	std::queue<CModuleInfoPtr> modules;
 };
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -42,7 +35,7 @@ struct CNamedQualifierInfo {
 
 typedef std::map<std::string, CNamedQualifierInfo> CNamedQualifiers;
 
-class CModuleBuilder : public CModules {
+class CModuleBuilder : public CProgramBuilder {
 protected:
 	CModuleBuilder( IErrorHandler* errorHandler = 0 );
 

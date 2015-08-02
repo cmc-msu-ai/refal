@@ -128,6 +128,9 @@ V:Q:X = OT_MatchLeftWithQulifierBegin_V; OT_MatchLeftWithQulifier_E;
 class COperation {
 	friend class COperationsBuilder;
 	friend class COperationsExecuter;
+
+public:
+	COperation() {}
 	
 private:
 	explicit COperation( const TOperationType _type ): type( _type ) {}
@@ -143,6 +146,58 @@ private:
 		TOperationAddress operation;
 	};
 };
+
+//-----------------------------------------------------------------------------
+
+class COperationId {
+	friend class COperations;
+
+public:
+	COperationId& Next();
+
+private:
+	std::size_t id;
+
+	COperationId( std::size_t _id ) : id( _id ) {}
+};
+
+inline COperationId& COperationId::Next()
+{
+	id++;
+	return *this;
+}
+
+class COperations {
+public:
+	COperations() { Empty(); }
+	void Empty();
+	std::size_t Size() const;
+	COperationId AddOperation( const COperation& operation );
+	const COperation& Operation( const COperationId operationId ) const;
+	const COperation& operator[]( const COperationId operationId ) const
+		{ return Operation( operationId ); }
+
+private:
+	static const int PageSize = 256;
+	typedef std::array<COperation, PageSize> CPage;
+	typedef std::unique_ptr<CPage> CPagePtr;
+	std::vector<CPagePtr> operations;
+	std::size_t lastPageSize;
+
+	COperations( const COperations& );
+	COperations& operator=( const COperations& );
+};
+
+inline void COperations::Empty()
+{
+	operations.clear();
+	lastPageSize = PageSize;
+}
+
+inline std::size_t COperations::Size() const
+{
+	return ( operations.size() * PageSize - ( PageSize - lastPageSize ) );	
+}
 
 //-----------------------------------------------------------------------------
 

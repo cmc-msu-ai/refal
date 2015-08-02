@@ -6,14 +6,13 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-typedef int TDictionaryIndex;
 const int InvalidDictionaryIndex = -1;
 const int DefaultDictionaryCapacity = 512;
 
 template<class Data, class Key = std::string>
 class CDictionary {
 public:
-	CDictionary( TDictionaryIndex initialCapacity = DefaultDictionaryCapacity );
+	CDictionary( int initialCapacity = DefaultDictionaryCapacity );
 	~CDictionary() { Free(); }
 
 	void Free();
@@ -21,18 +20,18 @@ public:
 	void Swap( CDictionary& swapWith );
 	void Move( CDictionary& moveTo );
 	bool IsEmpty() { return ( Size() == 0 ); }
-	TDictionaryIndex Size() const { return size; }
-	TDictionaryIndex Capacity() const { return capacity; }
-	void SetCapacity( TDictionaryIndex newCapacity );
-	TDictionaryIndex AddKey( const Key& key );
-	const Key& GetKey( TDictionaryIndex index ) const;
-	TDictionaryIndex FindKey( const Key& key ) const;
-	Data& GetData( TDictionaryIndex index ) const;
+	int Size() const { return size; }
+	int Capacity() const { return capacity; }
+	void SetCapacity( int newCapacity );
+	int AddKey( const Key& key );
+	const Key& GetKey( int index ) const;
+	int FindKey( const Key& key ) const;
+	Data& GetData( int index ) const;
 
 private:
-	TDictionaryIndex size;
-	TDictionaryIndex capacity;
-	typedef std::map<Key, TDictionaryIndex> CKeyToIndex;
+	int size;
+	int capacity;
+	typedef std::map<Key, int> CKeyToIndex;
 	typedef typename CKeyToIndex::const_iterator CKeyToIndexConstIterator;
 	struct CKeyDataPair {
 		CKeyToIndexConstIterator key;
@@ -44,7 +43,7 @@ private:
 	CKeyToIndex keyToIndex;
 
 	// auxiliary functions
-	void grow( TDictionaryIndex newCapacity );
+	void grow( int newCapacity );
 
 	CDictionary( const CDictionary& );
 	CDictionary& operator=( const CDictionary& );
@@ -53,7 +52,7 @@ private:
 //-----------------------------------------------------------------------------
 
 template<class Data, class Key>
-CDictionary<Data, Key>::CDictionary( TDictionaryIndex initialCapacity ):
+CDictionary<Data, Key>::CDictionary( int initialCapacity ):
 	size( 0 ),
 	capacity( 0 ),
 	keyDataPairs( 0 )
@@ -74,7 +73,7 @@ template<class Data, class Key>
 void CDictionary<Data, Key>::Empty()
 {
 	keyToIndex.clear();
-	for( TDictionaryIndex i = 0; i < size; i++ ) {
+	for( int i = 0; i < size; i++ ) {
 		keyDataPairs[i].~CKeyDataPair();
 	}
 	size = 0;
@@ -99,17 +98,17 @@ void CDictionary<Data, Key>::Move( CDictionary& moveTo )
 }
 
 template<class Data, class Key>
-void CDictionary<Data, Key>::SetCapacity( TDictionaryIndex newCapacity )
+void CDictionary<Data, Key>::SetCapacity( int newCapacity )
 {
 	grow( newCapacity );
 }
 
 template<class Data, class Key>
-TDictionaryIndex CDictionary<Data, Key>::AddKey( const Key& key )
+int CDictionary<Data, Key>::AddKey( const Key& key )
 {
 	typedef std::pair<typename CKeyToIndex::iterator, bool> CPair;
 	CPair insert = keyToIndex.insert( std::make_pair( key, size ) );
-	const TDictionaryIndex result = insert.first->second;
+	const int result = insert.first->second;
 	if( insert.second ) {
 		size++;
 		if( capacity < size ) {
@@ -121,14 +120,14 @@ TDictionaryIndex CDictionary<Data, Key>::AddKey( const Key& key )
 }
 
 template<class Data, class Key>
-const Key& CDictionary<Data, Key>::GetKey( TDictionaryIndex index ) const
+const Key& CDictionary<Data, Key>::GetKey( int index ) const
 {
 	assert( index >= 0 && index < size );
 	return keyDataPairs[index].key->first;
 }
 
 template<class Data, class Key>
-TDictionaryIndex CDictionary<Data, Key>::FindKey( const Key& key ) const
+int CDictionary<Data, Key>::FindKey( const Key& key ) const
 {
 	typename CKeyToIndex::const_iterator i = keyToIndex.find( key );
 	if( i != keyToIndex.end() ) {
@@ -138,14 +137,14 @@ TDictionaryIndex CDictionary<Data, Key>::FindKey( const Key& key ) const
 }
 
 template<class Data, class Key>
-Data& CDictionary<Data, Key>::GetData( TDictionaryIndex index ) const
+Data& CDictionary<Data, Key>::GetData( int index ) const
 {
 	assert( index >= 0 && index < size );
 	return const_cast<Data&>( keyDataPairs[index].data );
 }
 
 template<class Data, class Key>
-void CDictionary<Data, Key>::grow( TDictionaryIndex newCapacity )
+void CDictionary<Data, Key>::grow( int newCapacity )
 {
 	assert( newCapacity > capacity );
 	capacity = newCapacity;

@@ -34,7 +34,9 @@ enum TPreparatoryFunctionType {
 	PFT_Defined,
 	PFT_Ordinary,
 	PFT_Empty,
-	PFT_External
+	PFT_External,
+	PFT_Compiled,
+	PFT_Embedded
 };
 
 class CPreparatoryFunction {
@@ -42,9 +44,12 @@ public:
 	CPreparatoryFunction( const CToken& name );
 
 	TPreparatoryFunctionType GetType() const { return type; }
-	const CToken& GetName() const { return name; }
-	const CToken& GetExternalName() const { return externalName; }
-	const CRule* GetFirstRule() const;
+
+	const std::string& Name() const { return name; }
+	const CToken& NameToken() const { return nameToken; }
+	const std::string& ExternalName() const;
+	const CToken& ExternalNameToken() const;
+	const CRule* FirstRule() const;
 
 	bool IsEntry() const { return entry; }
 	bool IsDeclared() const { return ( GetType() == PFT_Declared ); }
@@ -52,23 +57,32 @@ public:
 	bool IsOrdinary() const { return ( GetType() == PFT_Ordinary ); }
 	bool IsEmpty() const { return ( GetType() == PFT_Empty ); }
 	bool IsExternal() const { return ( GetType() == PFT_External ); }
+	bool IsCompiled() const { return ( GetType() == PFT_Compiled ); }
+	bool IsEmbedded() const { return ( GetType() == PFT_Embedded ); }
 
-	void SetDefined( const CToken& name );
+	void SetDefined( const CToken& nameToken );
 	void SetOrdinary( CRulePtr& firstRule );
 	void SetEmpty();
-	void SetEntry( const CToken& externalName );
-	void SetExternal( const CToken& externalName );
+	void SetEntry( const CToken& externalNameToken );
+	void SetExternal( const CToken& externalNameToken );
 
-	void Compile( CFunctionCompiler& compiler ) const;
+	// Only for ordinary function
+	void Compile( CFunctionCompiler& compiler );
+	// Only for external function
+	void Link( const CPreparatoryFunction& function );
 
 	void Print( std::ostream& outputStream ) const;
 
 private:
 	TPreparatoryFunctionType type;
 	bool entry;
-	CToken name;
-	CToken externalName;
+	std::string name;
+	CToken nameToken;
+	std::string externalName;
+	CToken externalNameToken;
 	CRulePtr firstRule;
+
+	void setExternalName( const CToken& externalNameToken );
 
 	CPreparatoryFunction( const CPreparatoryFunction& );
 	CPreparatoryFunction& operator=( const CPreparatoryFunction& );

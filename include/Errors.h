@@ -6,7 +6,60 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
+enum TErrorCriticality {
+	EC_Warning,
+	EC_Error,
+	EC_CriticalError
+};
+
+class CError {
+public:
+	CError( TErrorCriticality criticality, const std::string& message );
+	virtual ~CError() {}
+
+	TErrorCriticality Criticality() const { return criticality; }
+	const std::string& Message() const { return message; }
+
+	virtual void Print( std::ostream& outputStream ) const;
+
+private:
+	TErrorCriticality criticality;
+	std::string message;
+};
+
+struct CFilePosition {
+	int Line;
+	int Position;
+};
+
+class CPositionError : public CError {
+public:
+	CPositionError( TErrorCriticality criticality,
+		const std::string& message, const CFilePosition& position );
+};
+
+class CFileError : public CError {
+public:
+
+	void SetFile( const std::string& file );
+	const std::string& GetFile() const { return file; }
+	void SetLine( int line );
+	int GetLine() const { return line; }
+	void SetPosition( int position );
+	int GetPosition() const { return position; }
+
+private:
+	std::string file;
+	int line;
+	int position;
+};
+
+typedef std::unique_ptr<CError> CErrorPtr;
+
+//-----------------------------------------------------------------------------
+
 struct IErrorHandler {
+	//virtual void Error( const CError* error ) = 0;
 	virtual void Error( const std::string& errorText ) = 0;
 	virtual void Warning( const std::string& warningText ) = 0;
 };

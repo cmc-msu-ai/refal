@@ -31,28 +31,6 @@ private:
 	CModules modules;
 };
 
-enum TProgramBuilderState {
-	PBS_AddingModules,
-	PBS_CheckedLinks,
-	PBS_Compiled
-};
-
-class CProgramBuilder {
-public:
-	CProgramBuilder( IErrorHandler* errorHandler );
-
-	void Reset();
-	TProgramBuilderState GetState() const { return state; }
-	bool AddModule( CScopedPtr<CModule> module );
-	bool CheckExternalLinks();
-	bool Compile();
-	CScopedPtr<CProgram> Link();
-
-private:
-	TProgramBuilderState state;
-	CScopedPtr<CProgram> program;
-};
-
 //-----------------------------------------------------------------------------
 
 class CModule {
@@ -128,7 +106,139 @@ private:
 	TEmbeddedFunction embeddedFunction;
 };
 
+typedef int TModuleId;
+
+class CFunction {
+};
+
+class CModule {
+private:
+	TModuleId moduleId;
+	CDictionary<CFunction> functions;
+};
+
+class CProgram {
+public:
+private:
+	CDictionary<CModule> modules;
+};
 #endif
+
+//-----------------------------------------------------------------------------
+
+struct CModuleInfo {
+	CToken NameToken;
+	CToken StartToken;
+	CToken EndToken;
+	CPreparatoryFunctions Functions;
+};
+
+typedef std::unique_ptr<CModuleInfo> CModuleInfoPtr;
+
+//-----------------------------------------------------------------------------
+
+typedef void (*TEmbeddedFunction)();
+
+class CEntryFunctionInfo {
+public:
+	CEntryFunctionInfo():
+		preparatoryFunction( 0 ),
+		embeddedFunction( 0 )
+	{
+	}
+
+	bool IsEmbeddedFunction() const
+	{
+		return ( embeddedFunction != 0 );
+	}
+
+	bool IsPreparatoryFunction() const
+	{
+		return ( preparatoryFunction != 0 );
+	}
+
+	bool IsDefined() const
+	{
+		return ( IsEmbeddedFunction() || IsPreparatoryFunction() ); 
+	}
+
+	void SetPreparatoryFunction(
+		const CPreparatoryFunction* _preparatoryFunction )
+	{
+		assert( !IsDefined() );
+		assert( _preparatoryFunction != 0 );
+		preparatoryFunction = _preparatoryFunction;
+	}
+
+	const CPreparatoryFunction* PreparatoryFunction() const
+	{
+		assert( IsPreparatoryFunction() );
+		return preparatoryFunction;
+	}
+
+	void SetEmbeddedFunction( TEmbeddedFunction _embeddedFunction )
+	{
+		assert( !IsDefined() );
+		assert( _embeddedFunction != 0 );
+		embeddedFunction = _embeddedFunction;
+	}
+
+	TEmbeddedFunction EmbeddedFunction() const
+	{
+		assert( IsEmbeddedFunction() );
+		return embeddedFunction;
+	}
+
+private:
+	const CPreparatoryFunction* preparatoryFunction;
+	TEmbeddedFunction embeddedFunction;
+};
+
+//-----------------------------------------------------------------------------
+
+class CExternalFunctionInfo {
+public:
+	CExternalFunctionInfo( int _externalFunctionIndex,
+			const CPreparatoryFunction* _preparatoryFunction ):
+		externalFunctionIndex( _externalFunctionIndex ),
+		preparatoryFunction( _preparatoryFunction )
+	{
+		assert( externalFunctionIndex >= 0 );
+		assert( preparatoryFunction != 0 );
+	}
+
+	int ExternalFunctionIndex() const { return externalFunctionIndex; }
+	const CPreparatoryFunction* PreparatoryFunction() const
+		{ return preparatoryFunction; }
+
+private:
+	int externalFunctionIndex;
+	const CPreparatoryFunction* preparatoryFunction;
+};
+
+//-----------------------------------------------------------------------------
+
+class CProgramBuilder : public CFunctionBuilder {
+public:
+	void BuildProgram();
+
+protected:
+	CProgramBuilder( IErrorHandler* errorHandler = 0 );
+
+	void Reset();
+	void AddModule( CModuleInfoPtr& module );
+
+private:
+	std::vector<CModuleInfoPtr> modules;
+	std::vector<CExternalFunctionInfo> externalFunctions;
+	CDictionary<CEntryFunctionInfo, std::string> entryFunctions;
+
+	void addFunctions( const CPreparatoryFunctions& functions );
+	void collect();
+	void check();
+	void compile();
+	void link();
+};
 
 //-----------------------------------------------------------------------------
 

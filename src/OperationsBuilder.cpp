@@ -2,6 +2,29 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+
+COperationId COperations::AddOperation( const COperation& operation )
+{
+	const int operationId = Size();
+	if( lastPageSize == PageSize ) {
+		operations.push_back( CPagePtr( new CPage ) );
+		lastPageSize = 0;
+	}
+	operations.back()->operator[]( lastPageSize ) = operation;
+	lastPageSize++;
+	return operationId;
+}
+
+const COperation& COperations::Operation( const COperationId operationId ) const
+{
+	const std::size_t id = operationId.id;
+	assert( id < Size() );
+	return operations[id / PageSize]->operator[]( id % PageSize );
+}
+
+//-----------------------------------------------------------------------------
+
 void COperationsBuilder::Reset()
 {
 	operations.Empty();

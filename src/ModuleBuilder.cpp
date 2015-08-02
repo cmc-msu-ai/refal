@@ -4,7 +4,8 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-CModules::CModules( IErrorHandler* errorHandler ):
+#if 0
+CModules::CModules( IErrorHandler* errorHandler ) :
 	CFunctionBuilder( errorHandler )
 {
 	Reset();
@@ -31,18 +32,19 @@ void CModules::AddModule( CModuleInfoPtr& module )
 {
 	modules.push( CModuleInfoPtr( module.release() ) );
 }
+#endif
 
 //-----------------------------------------------------------------------------
 
 CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
-	CModules( errorHandler )
+	CProgramBuilder( errorHandler )
 {
 	Reset();
 }
 
 void CModuleBuilder::Reset()
 {
-	CModules::Reset();
+	CProgramBuilder::Reset();
 	module.reset();
 }
 
@@ -240,7 +242,7 @@ void CModuleBuilder::endModule()
 	if( !CErrorsHelper::HasErrors() ) {
 		CModuleInfoPtr savedModule( module.release() );
 		Reset();
-		CModules::AddModule( savedModule );
+		CProgramBuilder::AddModule( savedModule );
 	} else {
 		Reset();
 	}

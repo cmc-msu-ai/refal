@@ -19,25 +19,40 @@ void CRule::Compile( CFunctionCompiler& compiler ) const
 
 //-----------------------------------------------------------------------------
 
-CPreparatoryFunction::CPreparatoryFunction( const CToken& _name ):
+CPreparatoryFunction::CPreparatoryFunction( const CToken& _nameToken ):
 	type( PFT_Declared ),
 	entry( false ),
-	name( _name )
+	name( _nameToken.word ),
+	nameToken( _nameToken )
 {
+	assert( !name.empty() );
+	MakeLower( name );
 }
 
-const CRule* CPreparatoryFunction::GetFirstRule() const
+const std::string& CPreparatoryFunction::ExternalName() const
+{
+	assert( entry );
+	return externalName;
+}
+
+const CToken& CPreparatoryFunction::ExternalNameToken() const
+{
+	assert( entry );
+	return externalNameToken;
+}
+
+const CRule* CPreparatoryFunction::FirstRule() const
 {
 	assert( IsOrdinary() );
 	return ( firstRule.get() );
 }
 
-void CPreparatoryFunction::SetDefined( const CToken& _name )
+void CPreparatoryFunction::SetDefined( const CToken& _nameToken )
 {
-	assert( AreTokenWordsEqual( name, _name ) );
+	assert( AreTokenWordsEqual( nameToken, _nameToken ) );
 	assert( type == PFT_Declared );
 	type = PFT_Defined;
-	name = _name;
+	nameToken = _nameToken;
 }
 
 void CPreparatoryFunction::SetOrdinary( CRulePtr& _firstRule )
@@ -54,40 +69,65 @@ void CPreparatoryFunction::SetEmpty()
 	type = PFT_Empty;
 }
 
-void CPreparatoryFunction::SetEntry( const CToken& _externalName )
+void CPreparatoryFunction::SetEntry( const CToken& _externalNameToken )
 {
 	assert( type != PFT_External );
 	entry = true;
-	externalName = _externalName;
+	setExternalName( _externalNameToken );
 }
 
-void CPreparatoryFunction::SetExternal( const CToken& _externalName )
+void CPreparatoryFunction::SetExternal( const CToken& _externalNameToken )
 {
 	assert( !entry );
 	assert( type == PFT_Defined );
 	type = PFT_External;
-	externalName = _externalName;
+	setExternalName( _externalNameToken );
 }
 
-void CPreparatoryFunction::Compile( CFunctionCompiler& compiler ) const
+void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 {
 	assert( IsOrdinary() );
-	const CRule* rule = GetFirstRule();
+	const CRule* rule = FirstRule();
 	while( rule != 0 ) {
 		rule->Compile( compiler );
 		rule = rule->NextRule.get();
+	}
+	type = PFT_Compiled;
+}
+
+void CPreparatoryFunction::Link( const CPreparatoryFunction& function )
+{
+	assert( IsExternal() );
+	assert( function.IsEntry() );
+	assert( externalName == function.externalName );
+	if( function.IsCompiled() ) {
+		type = PFT_Compiled;
+		// TODO: copy
+	} else if( function.IsEmpty() ) {
+		type = PFT_Empty;
+	} else {
+		assert( false );
 	}
 }
 
 void CPreparatoryFunction::Print( std::ostream& outputStream ) const
 {
 	assert( IsOrdinary() );
-	const CRule* rule = GetFirstRule();
+	const CRule* rule = FirstRule();
 	while( rule != 0 ) {
 		rule->Print( outputStream );
 		outputStream << std::endl;
 		rule = rule->NextRule.get();
 	}
+}
+
+void CPreparatoryFunction::setExternalName( const CToken& _externalNameToken )
+{
+	assert( ( entry && !IsExternal() ) || ( !entry && IsExternal() ) );
+	externalNameToken = _externalNameToken;
+	externalName = externalNameToken.word;
+	assert( !externalName.empty() );
+	MakeLower( externalName );
 }
 
 //-----------------------------------------------------------------------------
