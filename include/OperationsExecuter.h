@@ -34,144 +34,139 @@ private:
 	void restoreLeftBrackets();
 	void doFunction();
 	void doFunctionBody();
-	inline void nextOperation();
+	void nextOperation();
 	
-	inline bool checkQualifier( CUnitNode* const node,
+	bool checkQualifier( CUnitNode* const node,
 		const TQualifierIndex qualifier ) const;
 	
-	inline void saveToTable( CUnitNode* const node );
-	inline void saveToTable( CUnitNode* const nodeA, CUnitNode* const nodeB );
+	void saveToTable( CUnitNode* const node );
+	void saveToTable( CUnitNode* const nodeA, CUnitNode* const nodeB );
 	
-	inline bool isEmpty() const;
+	bool isEmpty() const;
 	
-	inline bool shiftLeft();
-	inline bool shiftRight();
+	bool shiftLeft();
+	bool shiftRight();
 	
-	inline void saveState( COperationNode* operationForSaving );
+	void saveState( COperationNode* operationForSaving );
 	void saveState() { saveState( operation ); }
-	inline bool fail();
+	bool fail();
 	
-	inline void matchingComplete();
-	inline void doReturn();
-	inline void insertJump( const TOperationAddress operationAddress );
-	inline void decrementStackDepth( const TUint32 count );
-	inline void setLeftBorder( const TTableIndex tableIndex );
-	inline void setRightBorder( const TTableIndex tableIndex );
+	void matchingComplete();
+	void doReturn();
+	void insertJump( const TOperationAddress operationAddress );
+	void decrementStackDepth( const TUint32 count );
+	void setLeftBorder( const TTableIndex tableIndex );
+	void setRightBorder( const TTableIndex tableIndex );
 	// matching empty expression
-	inline bool matchEmptyExpression();
+	bool matchEmptyExpression();
 	// matching symbols
-	inline bool matchLeftChar( const TChar c );
-	inline bool matchLeftLabel( const TLabel label );
-	inline bool matchLeftNumber( const TNumber number );
-	inline bool matchRightChar( const TChar c );
-	inline bool matchRightLabel( const TLabel label );
-	inline bool matchRightNumber( const TNumber number );
+	bool matchLeftChar( const TChar c );
+	bool matchLeftLabel( const TLabel label );
+	bool matchLeftNumber( const TNumber number );
+	bool matchRightChar( const TChar c );
+	bool matchRightLabel( const TLabel label );
+	bool matchRightNumber( const TNumber number );
 	// matching parens
-	inline bool matchLeftParens();
-	inline bool matchRightParens();
+	bool matchLeftParens();
+	bool matchRightParens();
 	// matching S-variables
-	inline bool matchLeft_S();
-	inline bool matchLeftSaveToTable_S();
-	inline bool matchLeftWithQualifier_S( const TQualifierIndex qualifier );
-	inline bool matchLeftWithQualifierSaveToTable_S(
-		const TQualifierIndex qualifier);
-	inline bool matchRight_S();
-	inline bool matchRightSaveToTable_S();
-	inline bool matchRightWithQualifier_S( const TQualifierIndex qualifier );
-	inline bool matchRightWithQualifierSaveToTable_S(
-		const TQualifierIndex qualifier);
+	bool matchLeft_S();
+	bool matchLeftSaveToTable_S();
+	bool matchLeftWithQualifier_S( const TQualifierIndex qualifier );
+	bool matchLeftWithQualifierSaveToTable_S( const TQualifierIndex qualifier);
+	bool matchRight_S();
+	bool matchRightSaveToTable_S();
+	bool matchRightWithQualifier_S( const TQualifierIndex qualifier );
+	bool matchRightWithQualifierSaveToTable_S( const TQualifierIndex qualifier);
 	// matching duplicate of S-variables
-	inline bool matchLeftDuplicate_S( const TTableIndex origin );
-	inline bool matchLeftDuplicateSaveToTable_S( const TTableIndex origin );
-	inline bool matchRightDuplicate_S( const TTableIndex origin );
-	inline bool matchRightDuplicateSaveToTable_S( const TTableIndex origin );
+	bool matchLeftDuplicate_S( const TTableIndex origin );
+	bool matchLeftDuplicateSaveToTable_S( const TTableIndex origin );
+	bool matchRightDuplicate_S( const TTableIndex origin );
+	bool matchRightDuplicateSaveToTable_S( const TTableIndex origin );
 	// matching W-variables
-	inline bool matchLeft_W();
-	inline bool matchLeftSaveToTable_W();
-	inline bool matchLeftWithQualifier_W( const TQualifierIndex qualifier );
-	inline bool matchLeftWithQualifierSaveToTable_W(
-		const TQualifierIndex qualifier );
-	inline bool matchRight_W();
-	inline bool matchRightSaveToTable_W();
-	inline bool matchRightWithQualifier_W( const TQualifierIndex qualifier );
-	inline bool matchRightWithQualifierSaveToTable_W(
+	bool matchLeft_W();
+	bool matchLeftSaveToTable_W();
+	bool matchLeftWithQualifier_W( const TQualifierIndex qualifier );
+	bool matchLeftWithQualifierSaveToTable_W( const TQualifierIndex qualifier );
+	bool matchRight_W();
+	bool matchRightSaveToTable_W();
+	bool matchRightWithQualifier_W( const TQualifierIndex qualifier );
+	bool matchRightWithQualifierSaveToTable_W(
 		const TQualifierIndex qualifier );
 	// matching duplicate of WV-variables
-	inline bool matchLeftDuplicate_WV( const TTableIndex origin );
-	inline bool matchLeftDuplicateSaveToTable_WV( const TTableIndex origin );
-	inline bool matchRightDuplicate_WV( const TTableIndex origin );
-	inline bool matchRightDuplicateSaveToTable_WV( const TTableIndex origin );
+	bool matchLeftDuplicate_WV( const TTableIndex origin );
+	bool matchLeftDuplicateSaveToTable_WV( const TTableIndex origin );
+	bool matchRightDuplicate_WV( const TTableIndex origin );
+	bool matchRightDuplicateSaveToTable_WV( const TTableIndex origin );
 	// matching duplicate of E-variables
-	inline bool matchLeftDuplicate_E( const TTableIndex origin );
-	inline bool matchLeftDuplicateSaveToTable_E( const TTableIndex origin );
-	inline bool matchRightDuplicate_E( const TTableIndex origin );
-	inline bool matchRightDuplicateSaveToTable_E( const TTableIndex origin );
+	bool matchLeftDuplicate_E( const TTableIndex origin );
+	bool matchLeftDuplicateSaveToTable_E( const TTableIndex origin );
+	bool matchRightDuplicate_E( const TTableIndex origin );
+	bool matchRightDuplicateSaveToTable_E( const TTableIndex origin );
 	// matching closed V-variables
-	inline bool matchClosed_V();
-	inline bool matchClosedSaveToTable_V();
-	inline bool matchClosedWithQualifier_V( const TQualifierIndex qualifier );
-	inline bool matchClosedWithQualifierSaveToTable_V(
+	bool matchClosed_V();
+	bool matchClosedSaveToTable_V();
+	bool matchClosedWithQualifier_V( const TQualifierIndex qualifier );
+	bool matchClosedWithQualifierSaveToTable_V(
 		const TQualifierIndex qualifier );
 	// matching closed E-variables
-	inline void matchClosed_E();
-	inline void matchClosedSaveToTable_E();
-	inline bool matchClosedWithQualifier_E( const TQualifierIndex qualifier );
-	inline bool matchClosedWithQualifierSaveToTable_E(
+	void matchClosed_E();
+	void matchClosedSaveToTable_E();
+	bool matchClosedWithQualifier_E( const TQualifierIndex qualifier );
+	bool matchClosedWithQualifierSaveToTable_E(
 		const TQualifierIndex qualifier);
 	// matching V-variables by qualifier
-	inline bool macthLeftMaxByQualifier_V( const TQualifierIndex qualifier );
-	inline bool macthLeftMaxByQualifierSaveToTable_V(
+	bool macthLeftMaxByQualifier_V( const TQualifierIndex qualifier );
+	bool macthLeftMaxByQualifierSaveToTable_V(
 		const TQualifierIndex qualifier );
-	inline bool macthRightMaxByQualifier_V( const TQualifierIndex qualifier );
-	inline bool macthRightMaxByQualifierSaveToTable_V(
+	bool macthRightMaxByQualifier_V( const TQualifierIndex qualifier );
+	bool macthRightMaxByQualifierSaveToTable_V(
 		const TQualifierIndex qualifier );
 	// matching E-variables by qualifier
-	inline void macthLeftMaxByQualifier_E( const TQualifierIndex qualifier );
-	inline void macthLeftMaxByQualifierSaveToTable_E(
+	void macthLeftMaxByQualifier_E( const TQualifierIndex qualifier );
+	void macthLeftMaxByQualifierSaveToTable_E(
 		const TQualifierIndex qualifier );
-	inline void macthRightMaxByQualifier_E( const TQualifierIndex qualifier );
-	inline void macthRightMaxByQualifierSaveToTable_E(
+	void macthRightMaxByQualifier_E( const TQualifierIndex qualifier );
+	void macthRightMaxByQualifierSaveToTable_E(
 		const TQualifierIndex qualifier );
 	// match left VE-variable
-	inline void matchLeftBegin_E();
-	inline void matchLeftBeginSaveToTable_E();
-	inline bool matchLeftBegin_V();
-	inline bool matchLeftBeginSaveToTable_V();
-	inline bool matchLeftWithQulifierBegin_V( const TQualifierIndex qualifier );
-	inline bool matchLeftWithQulifierBeginSaveToTable_V(
+	void matchLeftBegin_E();
+	void matchLeftBeginSaveToTable_E();
+	bool matchLeftBegin_V();
+	bool matchLeftBeginSaveToTable_V();
+	bool matchLeftWithQulifierBegin_V( const TQualifierIndex qualifier );
+	bool matchLeftWithQulifierBeginSaveToTable_V(
 		const TQualifierIndex qualifier );
-	inline bool matchLeft_E();
-	inline bool matchLeftSaveToTable_E();
-	inline bool matchLeftWithQulifier_E( const TQualifierIndex qualifier );
-	inline bool matchLeftWithQulifierSaveToTable_E(
-		const TQualifierIndex qualifier );
+	bool matchLeft_E();
+	bool matchLeftSaveToTable_E();
+	bool matchLeftWithQulifier_E( const TQualifierIndex qualifier );
+	bool matchLeftWithQulifierSaveToTable_E( const TQualifierIndex qualifier );
 	// match right VE-variable
-	inline void matchRightBegin_E();
-	inline void matchRightBeginSaveToTable_E();
-	inline bool matchRightBegin_V();
-	inline bool matchRightBeginSaveToTable_V();
-	inline bool matchRightWithQulifierBegin_V(
+	void matchRightBegin_E();
+	void matchRightBeginSaveToTable_E();
+	bool matchRightBegin_V();
+	bool matchRightBeginSaveToTable_V();
+	bool matchRightWithQulifierBegin_V(
 		const TQualifierIndex qualifier );
-	inline bool matchRightWithQulifierBeginSaveToTable_V(
+	bool matchRightWithQulifierBeginSaveToTable_V(
 		const TQualifierIndex qualifier );
-	inline bool matchRight_E();
-	inline bool matchRightSaveToTable_E();
-	inline bool matchRightWithQulifier_E( const TQualifierIndex qualifier );
-	inline bool matchRightWithQulifierSaveToTable_E(
-		const TQualifierIndex qualifier );
+	bool matchRight_E();
+	bool matchRightSaveToTable_E();
+	bool matchRightWithQulifier_E( const TQualifierIndex qualifier );
+	bool matchRightWithQulifierSaveToTable_E( const TQualifierIndex qualifier );
 	// making operations
-	inline void insertChar( const TChar c );
-	inline void insertLabel( const TLabel label );
-	inline void insertNumber( const TNumber number );
-	inline void insertLeftParen();
-	inline void insertRightParen();
-	inline void insertRightBracket();
-	inline void move_S( const TTableIndex tableIndex );
-	inline void copy_S( const TTableIndex tableIndex );
-	inline void move_E( const TTableIndex tableIndex );
-	inline void copy_E( const TTableIndex tableIndex );
-	inline void move_WV( const TTableIndex tableIndex );
-	inline void copy_WV( const TTableIndex tableIndex );
+	void insertChar( const TChar c );
+	void insertLabel( const TLabel label );
+	void insertNumber( const TNumber number );
+	void insertLeftParen();
+	void insertRightParen();
+	void insertRightBracket();
+	void move_S( const TTableIndex tableIndex );
+	void copy_S( const TTableIndex tableIndex );
+	void move_E( const TTableIndex tableIndex );
+	void copy_E( const TTableIndex tableIndex );
+	void move_WV( const TTableIndex tableIndex );
+	void copy_WV( const TTableIndex tableIndex );
 	
 	TExecutionResult executionResult;
 	
