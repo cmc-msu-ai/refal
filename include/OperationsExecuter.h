@@ -1114,7 +1114,7 @@ inline void COperationsExecuter::move_E( const TTableIndex tableIndex )
 inline void COperationsExecuter::copy_E( const TTableIndex tableIndex )
 {
 	if( table[tableIndex] != 0 ) {
-		left = fieldOfView.Move( left, table[tableIndex],
+		left = fieldOfView.Copy( left, table[tableIndex],
 			table[tableIndex + 1] );
 	} else {
 		assert( table[tableIndex + 1] == 0 );
@@ -1128,7 +1128,7 @@ inline void COperationsExecuter::move_WV( const TTableIndex tableIndex )
 
 inline void COperationsExecuter::copy_WV( const TTableIndex tableIndex )
 {
-	left = fieldOfView.Move( left, table[tableIndex], table[tableIndex + 1] );
+	left = fieldOfView.Copy( left, table[tableIndex], table[tableIndex + 1] );
 }
 
 } // end of namespace refal2
