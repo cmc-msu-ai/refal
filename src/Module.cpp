@@ -411,20 +411,21 @@ void CInternalProgramBuilder::link()
 				case RFT_External:
 					assert( preparatoryFunction->IsEmpty()
 						|| preparatoryFunction->IsEmbedded()
-						|| preparatoryFunction->IsOrdinary() );
+						|| preparatoryFunction->IsCompiled() );
 					// todo: ---
-					newRuntimeFunction.reset( new CExternalFunction( 0,
-						function.RuntimeModuleId() ) );
+					//newRuntimeFunction.reset( new CExternalFunction( 0,
+					//	function.RuntimeModuleId() ) );
 					break;
 				case RFT_Ordinary:
-					assert( preparatoryFunction->IsOrdinary() );
+					assert( preparatoryFunction->IsCompiled() );
 					// todo: ---
-					newRuntimeFunction.reset( new COrdinaryFunction( 0 ) );
+					//newRuntimeFunction.reset( new COrdinaryFunction( 0 ) );
 					break;
 				default:
 					assert( false );
 					break;
 			}
+			functions.GetData( i ).reset( newRuntimeFunction.release() );
 		}
 	}
 }
