@@ -134,9 +134,13 @@ protected:
 
 class CFunctionCompiler : public CRightPartCompiler {
 public:
-	CFunctionCompiler() {}
+	CFunctionCompiler( COperationList& operationsHolder );
 
 	void CompileRule( CRule& rule );
+	TOperationAddress GetFirstOperation();
+
+private:
+	 COperationList& operationsHolder;
 };
 
 } // end of namespace refal2

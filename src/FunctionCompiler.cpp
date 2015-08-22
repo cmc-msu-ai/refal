@@ -514,6 +514,11 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 
 //-----------------------------------------------------------------------------
 
+CFunctionCompiler::CFunctionCompiler( COperationList& _operationsHolder ) :
+	operationsHolder( _operationsHolder )
+{
+}
+
 void CFunctionCompiler::CompileRule( CRule& rule )
 {
 	rule.Variables.Move( variables );
@@ -521,6 +526,20 @@ void CFunctionCompiler::CompileRule( CRule& rule )
 	COperationsBuilder::AddMatchingComplete();
 	CompileRightPart( rule.Right );
 	COperationsBuilder::AddReturn();
+}
+
+TOperationAddress CFunctionCompiler::GetFirstOperation()
+{
+	COperationNode* lastOperationNode = operationsHolder.GetLast();
+	COperationsBuilder::Export( operationsHolder );
+	TOperationAddress resultOperation = nullptr;
+	if( lastOperationNode == nullptr ) {
+		resultOperation = operationsHolder.GetFirst();
+	} else {
+		resultOperation = lastOperationNode->Next();
+	}
+	assert( resultOperation != nullptr );
+	return resultOperation;
 }
 
 } // end of namespace refal2
