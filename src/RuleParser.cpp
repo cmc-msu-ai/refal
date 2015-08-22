@@ -18,12 +18,23 @@ void CRuleParser::Reset()
 
 void CRuleParser::BeginFunction()
 {
+	functionName = token;
 	BeginRule();
 }
 
 void CRuleParser::EndFunction()
 {
 	//assert( IsFinished() );
+	if( !functionName.word.empty() ) {
+		CRulePtr firstRule;
+		CFunctionBuilder::Export( firstRule );
+		if( static_cast<bool>( firstRule ) ) {
+			CModuleBuilder::SetOrdinary( functionName, firstRule );
+		} else {
+			CModuleBuilder::SetEmpty( functionName );
+		}
+		functionName.word.clear();
+	}
 }
 
 void CRuleParser::BeginRule()

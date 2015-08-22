@@ -17,6 +17,7 @@ protected:
 	void AddToken();
 
 private:
+	CToken functionName;
 	CQualifier qualifier;
 	TVariableType variableType;
 	enum TState {
