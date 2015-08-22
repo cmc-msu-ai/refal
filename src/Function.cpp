@@ -31,13 +31,13 @@ CPreparatoryFunction::CPreparatoryFunction( const CToken& _nameToken ):
 
 const std::string& CPreparatoryFunction::ExternalName() const
 {
-	assert( entry );
+	assert( IsEntry() || IsExternal() );
 	return externalName;
 }
 
 const CToken& CPreparatoryFunction::ExternalNameToken() const
 {
-	assert( entry );
+	assert( IsEntry() || IsExternal() );
 	return externalNameToken;
 }
 
