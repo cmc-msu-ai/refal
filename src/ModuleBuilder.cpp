@@ -140,8 +140,8 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 	const CToken& externalNameToken )
 {
 	CPreparatoryFunction& function = addFunction( nameToken );
-	if( !checkOnlyDeclared( function, nameToken ) ) {
-		if( function.IsEntry() ) {
+	if( checkOnlyDeclared( function, nameToken ) ) {
+		if( !function.IsEntry() ) {
 			function.SetDefined( nameToken );
 			function.SetExternal( externalNameToken );
 		} else {
@@ -179,7 +179,11 @@ bool CModuleBuilder::checkOnlyDeclared( CPreparatoryFunction& function,
 	if( function.IsDeclared() ) {
 		return true;
 	}
-	// TODO: error
+	std::ostringstream stringStream;
+	stringStream << "function `" << nameToken.word
+		<< "` already defined at line " << function.NameToken().word
+		<< " in `" << function.NameToken().word << "`";
+	CErrorsHelper::Error( stringStream.str() );
 	return false;
 }
 
