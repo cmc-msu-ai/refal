@@ -4,38 +4,6 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-#if 0
-CModules::CModules( IErrorHandler* errorHandler ) :
-	CFunctionBuilder( errorHandler )
-{
-	Reset();
-}
-
-void CModules::GetModules( std::queue<CModuleInfoPtr>& _modules )
-{
-	_modules.swap( modules );
-	EmptyModules();
-}
-
-void CModules::Reset()
-{
-	CFunctionBuilder::Reset();
-}
-
-void CModules::EmptyModules()
-{
-	std::queue<CModuleInfoPtr> emptyModules;
-	modules.swap( emptyModules );
-}
-
-void CModules::AddModule( CModuleInfoPtr& module )
-{
-	modules.push( CModuleInfoPtr( module.release() ) );
-}
-#endif
-
-//-----------------------------------------------------------------------------
-
 CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
 	CProgramBuilder( errorHandler )
 {

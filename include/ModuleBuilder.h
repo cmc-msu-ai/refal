@@ -6,26 +6,6 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-#if 0
-class CModules : public CFunctionBuilder {
-public:
-	void GetModules( std::queue<CModuleInfoPtr>& modules );
-
-protected:
-	CModules( IErrorHandler* errorHandler = 0 );
-
-	void Reset();
-
-	void EmptyModules();
-	void AddModule( CModuleInfoPtr& module );
-
-private:
-	std::queue<CModuleInfoPtr> modules;
-};
-#endif
-
-//-----------------------------------------------------------------------------
-
 struct CNamedQualifierInfo {
 	CToken NameToken;
 	CQualifier qualifier;
