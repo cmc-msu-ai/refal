@@ -14,7 +14,7 @@ CProgram::CProgram( int numberOfModules ) :
 
 CProgram::~CProgram()
 {
-	delete modules;
+	delete[] modules;
 }
 
 CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
