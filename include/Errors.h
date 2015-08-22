@@ -77,9 +77,8 @@ public:
 	bool HasErrors() const { return hasErrors; }
 	bool HasWarnings() const { return hasWarnings; }
 
-protected:
-	void Error(  const std::string& errorText );
-	void Warning(  const std::string& warningText );
+	void Error( const std::string& errorText );
+	void Warning( const std::string& warningText );
 
 private:
 	IErrorHandler* errorHandler;
