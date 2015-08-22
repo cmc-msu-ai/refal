@@ -3,6 +3,7 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CProgram
 
 CProgram::CProgram( int numberOfModules ) :
 	modulesSize( numberOfModules ),
@@ -24,6 +25,10 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 }
 
 //-----------------------------------------------------------------------------
+// Standart embedded functions
+
+//-----------------------------------------------------------------------------
+// CGlobalFunctionData
 
 class CGlobalFunctionData {
 public:
@@ -91,6 +96,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// CExternalFunctionData
 
 class CExternalFunctionData {
 public:
@@ -113,6 +119,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// CPreparatoryRuntimeFunction
 
 class CPreparatoryRuntimeFunction : public CRuntimeFunction {
 public:
@@ -162,6 +169,7 @@ TRuntimeFunctionType CPreparatoryRuntimeFunction::convertType(
 }
 
 //-----------------------------------------------------------------------------
+// CInternalProgramBuilder
 
 class CInternalProgramBuilder {
 public:
@@ -228,7 +236,11 @@ void CInternalProgramBuilder::addFunction( CPreparatoryFunction* function,
 		assert( !isExternal );
 		CGlobalFunctionData& global = globals.GetData( globalIndex );
 		if( global.IsDefined() ) {
-			errors.Error( "already defined" );
+			std::ostringstream stringStream;
+			stringStream << "function with external name `"
+				<< function->ExternalNameToken().word
+				<< "` already defined in program";
+			errors.Error( stringStream.str() );
 		} else {
 			global.SetPreparatoryFunction( function, runtimeModuleId );
 		}
@@ -272,7 +284,11 @@ void CInternalProgramBuilder::check()
 	{
 		const int globalIndex = function->GlobalIndex();
 		if( !globals.GetData( globalIndex ).IsDefined() ) {
-			errors.Error( "link error" );
+			std::ostringstream stringStream;
+			stringStream << "function with external name `"
+				<< globals.GetKey( globalIndex )
+				<< "` was not defined in program";
+			errors.Error( stringStream.str() );
 		}
 	}
 }
@@ -355,6 +371,7 @@ void CInternalProgramBuilder::link()
 }
 
 //-----------------------------------------------------------------------------
+// CProgramBuilder
 
 CProgramBuilder::CProgramBuilder( IErrorHandler* errorHandler ) :
 	CFunctionBuilder( errorHandler )
