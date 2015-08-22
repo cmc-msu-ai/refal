@@ -125,10 +125,11 @@ void CModuleBuilder::SetEntry( const CToken& nameToken,
 {
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( function.IsExternal() ) {
-		// TODO: error
-		return;
+		CErrorsHelper::Error( "function `" + nameToken.word +
+			"` already defined as external" );
+	} else {
+		function.SetEntry( externalNameToken );
 	}
-	function.SetEntry( externalNameToken );
 }
 
 void CModuleBuilder::SetExternal( const CToken& nameToken )
@@ -145,7 +146,8 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 			function.SetDefined( nameToken );
 			function.SetExternal( externalNameToken );
 		} else {
-			// TODO: error
+			CErrorsHelper::Error( "function `" + nameToken.word +
+				"` already defined as entry" );
 		}
 	}
 }
@@ -181,8 +183,8 @@ bool CModuleBuilder::checkOnlyDeclared( CPreparatoryFunction& function,
 	}
 	std::ostringstream stringStream;
 	stringStream << "function `" << nameToken.word
-		<< "` already defined at line " << function.NameToken().word
-		<< " in `" << function.NameToken().word << "`";
+		<< "` already defined in line " << function.NameToken().word
+		<< " as `" << function.NameToken().word << "`";
 	CErrorsHelper::Error( stringStream.str() );
 	return false;
 }
@@ -196,7 +198,12 @@ void CModuleBuilder::checkModule()
 		const CPreparatoryFunction& function = getFunction( label );
 		assert( !function.IsDefined() );
 		if( function.IsDeclared() ) {
-			// TODO: error
+			std::ostringstream stringStream;
+			stringStream << "function `" << function.NameToken().word
+				<< "` used in line " << function.NameToken().line
+				<< " at position " << function.NameToken().position
+				<< " was not defined in module";
+			CErrorsHelper::Error( stringStream.str() );
 		}
 	}
 }
