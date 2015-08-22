@@ -4,11 +4,42 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-const char* StartDirectiveTag = "start";
-const char* EndDirectiveTag = "end";
-const char* EmptyDirectiveTag = "empty";
-const char* ExternalDirectiveTag = "extrn";
-const char* EntryDirectiveTag = "entry";
+enum TDirectiveType {
+	DT_None,
+	DT_Start,
+	DT_End,
+	DT_Empty,
+	DT_External,
+	DT_Entry
+};
+
+struct TDirectiveKindTag {
+	TDirectiveType Type;
+	const char* const Tag;
+};
+
+const TDirectiveKindTag Directives[] = {
+	{ DT_Start, "start" },
+	{ DT_End, "end" },
+	{ DT_Empty, "empty" },
+	{ DT_External, "extrn" },
+	{ DT_Entry, "entry" },
+	{ DT_None, 0 }
+};
+
+static TDirectiveType findDirective( const std::string& _tag )
+{
+	std::string tag( _tag );
+	MakeLower( tag );
+	int i = 0;
+	while( Directives[i].Tag != 0 ) {
+		if( tag == Directives[i].Tag ) {
+			break;
+		}
+		i++;
+	}
+	return Directives[i].Type;
+}
 
 CDirectiveParser::CDirectiveParser( IErrorHandler* errorHandler ):
 	CRuleParser( errorHandler )
@@ -25,9 +56,7 @@ void CDirectiveParser::Reset()
 bool CDirectiveParser::StartParseIfStartDirective( const CToken& moduleName )
 {
 	assert( token.type == TT_Word );
-	std::string word = token.word;
-	MakeLower( word );
-	if( word == StartDirectiveTag ) {
+	if( findDirective( token.word ) == DT_Start ) {
 		CParsingElementState::Reset();
 		state = S_Simple;
 		token.Move( directive );
@@ -40,37 +69,40 @@ bool CDirectiveParser::StartParseIfStartDirective( const CToken& moduleName )
 bool CDirectiveParser::StartParseIfDirective()
 {
 	assert( token.type == TT_Word );
-	std::string word = token.word;
-	MakeLower( word );
-	if( word == StartDirectiveTag ) {
+	TDirectiveType directiveType = findDirective( token.word );
+	if( directiveType != DT_None ) {
+		CRuleParser::EndFunction();
 		CParsingElementState::Reset();
-		state = S_Simple;
 		token.Move( directive );
-		CModuleBuilder::StartModule( directive );
-	} else if( word == EndDirectiveTag ) {
-		CParsingElementState::Reset();
-		state = S_Simple;
-		token.Move( directive );
-		CModuleBuilder::EndModule( directive );
-	} else if( word == EmptyDirectiveTag ) {
-		CParsingElementState::Reset();
-		state = S_OneName;
-		token.Move( directive );
-		handler = &CDirectiveParser::addEmpty;
-	} else if( word == ExternalDirectiveTag ) {
-		CParsingElementState::Reset();
-		state = S_TwoNames;
-		token.Move( directive );
-		handler = &CDirectiveParser::addExternal;
-	} else if( word == EntryDirectiveTag ) {
-		CParsingElementState::Reset();
-		state = S_TwoNames;
-		token.Move( directive );
-		handler = &CDirectiveParser::addEntry;
-	} else {
-		return false;
+		switch( directiveType ) {
+			case DT_Start:
+				state = S_Simple;
+				CModuleBuilder::StartModule( directive );
+				break;
+			case DT_End:
+				state = S_Simple;
+				CModuleBuilder::EndModule( directive );
+				break;
+			case DT_Empty:
+				state = S_OneName;
+				handler = &CDirectiveParser::addEmpty;
+				break;
+			case DT_External:
+				state = S_TwoNames;
+				handler = &CDirectiveParser::addExternal;
+				break;
+			case DT_Entry:
+				state = S_TwoNames;
+				handler = &CDirectiveParser::addEntry;
+				break;
+			case DT_None:
+			default:
+				assert( false );
+				break;
+		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 void CDirectiveParser::AddToken()
