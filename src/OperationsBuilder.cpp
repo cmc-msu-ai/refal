@@ -40,13 +40,13 @@ void COperationsBuilder::Export( COperationList& saveTo )
 
 void COperationsBuilder::AddMatchingComplete()
 {
-	std::cout << "COperationsBuilder::AddMatchingComplete\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchingComplete" )
 	addNoArgumensOperation( OT_MatchingComplete );
 }
 
 void COperationsBuilder::AddReturn()
 {
-	std::cout << "COperationsBuilder::AddReturn\n";
+	DEBUG_PRINT( "COperationsBuilder::AddReturn" )
 	addNoArgumensOperation( OT_Return );
 	if( savedOperation != 0 ) {
 		operations.InsertBefore( operations.GetFirst(),
@@ -57,81 +57,81 @@ void COperationsBuilder::AddReturn()
 
 void COperationsBuilder::AddDecrementStackDepth( int count )
 {
-	std::cout << "COperationsBuilder::AddDecrementStackDepth\n";
+	DEBUG_PRINT( "COperationsBuilder::AddDecrementStackDepth" )
 	addStackDecrementOperation( count );
 }
 
 void COperationsBuilder::AddSetLeftBorder( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddSetLeftBorder\n";
+	DEBUG_PRINT( "COperationsBuilder::AddSetLeftBorder" )
 	addTableIndexOperation( OT_SetLeftBorder, tableIndex );
 }
 
 void COperationsBuilder::AddSetRightBorder( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddSetRightBorder\n";
+	DEBUG_PRINT( "COperationsBuilder::AddSetRightBorder" )
 	addTableIndexOperation( OT_SetRightBorder, tableIndex );
 }
 
 /* matching operation */
 void COperationsBuilder::AddMatchEmptyExpression()
 {
-	std::cout << "COperationsBuilder::AddMatchEmptyExpression\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchEmptyExpression" )
 	addNoArgumensOperation( OT_MatchEmptyExpression );
 }
 
 void COperationsBuilder::AddMatchLeftChar( TChar c )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftChar\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftChar" )
 	addCharOperation( OT_MatchLeftChar, c );
 }
 
 void COperationsBuilder::AddMatchLeftLabel( TLabel label )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftLabel\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftLabel" )
 	addLabelOperation( OT_MatchLeftLabel, label );
 }
 
 void COperationsBuilder::AddMatchLeftNumber( TNumber number )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftNumber\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftNumber" )
 	addNumberOperation( OT_MatchLeftNumber, number );
 }
 
 void COperationsBuilder::AddMatchRightChar( TChar c )
 {
-	std::cout << "COperationsBuilder::AddMatchRightChar\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightChar" )
 	addCharOperation( OT_MatchRightChar, c );
 }
 
 void COperationsBuilder::AddMatchRightLabel( TLabel label )
 {
-	std::cout << "COperationsBuilder::AddMatchRightLabel\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightLabel" )
 	addLabelOperation( OT_MatchRightLabel, label );
 }
 
 void COperationsBuilder::AddMatchRightNumber( TNumber number )
 {
-	std::cout << "COperationsBuilder::AddMatchRightNumber\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightNumber" )
 	addNumberOperation( OT_MatchRightNumber, number );
 }
 
 void COperationsBuilder::AddMatchLeftParens()
 {
-	std::cout << "COperationsBuilder::AddMatchLeftParens\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftParens" )
 	addNoArgumensOperation( OT_MatchLeftParens );
 }
 
 void COperationsBuilder::AddMatchRightParens()
 {
-	std::cout << "COperationsBuilder::AddMatchRightParens\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightParens" )
 	addNoArgumensOperation( OT_MatchRightParens );
 }
 
 void COperationsBuilder::AddMatchLeft_S( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeft_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeft_S" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchLeftSaveToTable_S : OT_MatchLeft_S ) );
@@ -145,7 +145,7 @@ void COperationsBuilder::AddMatchLeft_S( CQualifier& qualifier,
 void COperationsBuilder::AddMatchRight_S( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRight_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRight_S" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchRightSaveToTable_S : OT_MatchRight_S ) );
@@ -159,7 +159,7 @@ void COperationsBuilder::AddMatchRight_S( CQualifier& qualifier,
 void COperationsBuilder::AddMatchLeftDuplicate_S( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftDuplicate_S" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchLeftDuplicateSaveToTable_S : OT_MatchLeftDuplicate_S ),
 		tableIndex );
@@ -169,7 +169,7 @@ void COperationsBuilder::AddMatchLeftDuplicate_S( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchRightDuplicate_S( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRightDuplicate_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightDuplicate_S" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchRightDuplicateSaveToTable_S : OT_MatchRightDuplicate_S ),
 		tableIndex );
@@ -179,7 +179,7 @@ void COperationsBuilder::AddMatchRightDuplicate_S( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchLeft_W( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeft_W\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeft_W" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchLeftSaveToTable_W : OT_MatchLeft_W ) );
@@ -193,7 +193,7 @@ void COperationsBuilder::AddMatchLeft_W( CQualifier& qualifier,
 void COperationsBuilder::AddMatchRight_W( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRight_W\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRight_W" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchRightSaveToTable_W : OT_MatchRight_W ) );
@@ -207,7 +207,7 @@ void COperationsBuilder::AddMatchRight_W( CQualifier& qualifier,
 void COperationsBuilder::AddMatchLeftDuplicate_WV( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_WV\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftDuplicate_WV" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchLeftDuplicateSaveToTable_WV : OT_MatchLeftDuplicate_WV ),
 		tableIndex );
@@ -216,7 +216,7 @@ void COperationsBuilder::AddMatchLeftDuplicate_WV( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchRightDuplicate_WV( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRightDuplicate_WV\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightDuplicate_WV" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchRightDuplicateSaveToTable_WV : OT_MatchRightDuplicate_WV ),
 		tableIndex );
@@ -225,7 +225,7 @@ void COperationsBuilder::AddMatchRightDuplicate_WV( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchLeftDuplicate_E( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeftDuplicate_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeftDuplicate_E" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchLeftDuplicateSaveToTable_E : OT_MatchLeftDuplicate_E ),
 		tableIndex );
@@ -235,7 +235,7 @@ void COperationsBuilder::AddMatchLeftDuplicate_E( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchRightDuplicate_E( TTableIndex tableIndex,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRightDuplicate_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRightDuplicate_E" )
 	addTableIndexOperation( ( saveInTable ?
 		OT_MatchRightDuplicateSaveToTable_E : OT_MatchRightDuplicate_E ),
 		tableIndex );
@@ -244,7 +244,7 @@ void COperationsBuilder::AddMatchRightDuplicate_E( TTableIndex tableIndex,
 void COperationsBuilder::AddMatchClosed_V( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchClosed_V\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchClosed_V" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchClosedSaveToTable_V : OT_MatchClosed_V ) );
@@ -258,7 +258,7 @@ void COperationsBuilder::AddMatchClosed_V( CQualifier& qualifier,
 void COperationsBuilder::AddMatchClosed_E( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchClosed_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchClosed_E" )
 	if( qualifier.IsEmpty() ) {
 		addNoArgumensOperation(
 			( saveInTable ? OT_MatchClosedSaveToTable_E : OT_MatchClosed_E ) );
@@ -273,7 +273,7 @@ void COperationsBuilder::AddMatchClosed_E( CQualifier& qualifier,
 void COperationsBuilder::AddMacthLeftMaxByQualifier_V( CQualifier& qualifier, 
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMacthLeftMaxByQualifier_V\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMacthLeftMaxByQualifier_V" )
 	addQualifierIndexOperation( ( saveInTable ?
 		OT_MacthLeftMaxByQualifierSaveToTable_V :
 		OT_MacthLeftMaxByQualifier_V ), qualifier );
@@ -309,7 +309,7 @@ void COperationsBuilder::AddMacthRightMaxByQualifier_E( CQualifier& qualifier,
 void COperationsBuilder::AddMatchLeft_E( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeft_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeft_E" )
 	if( qualifier.IsEmpty() ) {
 		if( saveInTable ) {
 			addOperation_VE( OT_MatchLeftBeginSaveToTable_E );
@@ -339,7 +339,7 @@ void COperationsBuilder::AddMatchLeft_E( CQualifier& qualifier,
 void COperationsBuilder::AddMatchLeft_V( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchLeft_V\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchLeft_V" )
 	if( qualifier.IsEmpty() ) {
 		if( saveInTable ) {
 			addOperation_VE( OT_MatchLeftBeginSaveToTable_V );
@@ -365,7 +365,7 @@ void COperationsBuilder::AddMatchLeft_V( CQualifier& qualifier,
 void COperationsBuilder::AddMatchRight_E( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRight_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRight_E" )
 	if( qualifier.IsEmpty() ) {
 		if( saveInTable ) {
 			addOperation_VE( OT_MatchRightBeginSaveToTable_E );
@@ -396,7 +396,7 @@ void COperationsBuilder::AddMatchRight_E( CQualifier& qualifier,
 void COperationsBuilder::AddMatchRight_V( CQualifier& qualifier,
 	bool saveInTable )
 {
-	std::cout << "COperationsBuilder::AddMatchRight_V\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMatchRight_V" )
 	if( qualifier.IsEmpty() ) {
 		if( saveInTable ) {
 			addOperation_VE( OT_MatchRightBeginSaveToTable_V );
@@ -422,73 +422,73 @@ void COperationsBuilder::AddMatchRight_V( CQualifier& qualifier,
 /* result builder operation */
 void COperationsBuilder::AddInsertChar( TChar c )
 {
-	std::cout << "COperationsBuilder::AddInsertChar\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertChar" )
 	addOperation( OT_InsertChar )->c = c;
 }
 
 void COperationsBuilder::AddInsertLabel( TLabel label )
 {
-	std::cout << "COperationsBuilder::AddInsertLabel\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertLabel" )
 	addOperation( OT_InsertLabel )->label = label;
 }
 
 void COperationsBuilder::AddInsertNumber( TNumber number )
 {
-	std::cout << "COperationsBuilder::AddInsertNumber\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertNumber" )
 	addOperation( OT_InsertNumber )->number = number;
 }
 
 void COperationsBuilder::AddInsertLeftParen()
 {
-	std::cout << "COperationsBuilder::AddInsertLeftParen\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertLeftParen" )
 	addOperation( OT_InsertLeftParen );
 }
 
 void COperationsBuilder::AddInsertRightParen()
 {
-	std::cout << "COperationsBuilder::AddInsertRightParen\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertRightParen" )
 	addOperation( OT_InsertRightParen );
 }
 
 void COperationsBuilder::AddInsertRightBracket()
 {
-	std::cout << "COperationsBuilder::AddInsertRightBracket\n";
+	DEBUG_PRINT( "COperationsBuilder::AddInsertRightBracket" )
 	addOperation( OT_InsertRightBracket );
 }
 
 void COperationsBuilder::AddMove_S( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddMove_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMove_S" )
 	addOperation( OT_Move_S )->tableIndex = tableIndex;
 }
 
 void COperationsBuilder::AddCopy_S( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddCopy_S\n";
+	DEBUG_PRINT( "COperationsBuilder::AddCopy_S" )
 	addOperation( OT_Copy_S )->tableIndex = tableIndex;
 }
 
 void COperationsBuilder::AddMove_E( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddMove_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMove_E" )
 	addOperation( OT_Move_E )->tableIndex = tableIndex;
 }
 
 void COperationsBuilder::AddCopy_E( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddCopy_E\n";
+	DEBUG_PRINT( "COperationsBuilder::AddCopy_E" )
 	addOperation( OT_Copy_E )->tableIndex = tableIndex;
 }
 
 void COperationsBuilder::AddMove_WV( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddMove_WV\n";
+	DEBUG_PRINT( "COperationsBuilder::AddMove_WV" )
 	addOperation( OT_Move_WV )->tableIndex = tableIndex;
 }
 
 void COperationsBuilder::AddCopy_WV( TTableIndex tableIndex )
 {
-	std::cout << "COperationsBuilder::AddCopy_WV\n";
+	DEBUG_PRINT( "COperationsBuilder::AddCopy_WV" )
 	addOperation( OT_Copy_WV )->tableIndex = tableIndex;
 }
 

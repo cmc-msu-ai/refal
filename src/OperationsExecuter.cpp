@@ -205,9 +205,7 @@ void COperationsExecuter::doFunction()
 void COperationsExecuter::doFunctionBody()
 {
 	while( true ) {
-#ifdef _DEBUG
-		std::cout << operationNames[operation->type] << "\n";
-#endif
+		DEBUG_PRINT( operationNames[operation->type] )
 		bool success = true;
 		switch( operation->type ) {
 			case OT_Goto: // TOperationAddress

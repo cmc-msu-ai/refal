@@ -102,6 +102,7 @@ bool ParseFile( std::istream& fileStream )
 
 int main( int argc, const char* argv[] )
 {
+	std::ios::sync_with_stdio( false );
 	if( argc < 2 ) {
 		std::cerr << "Wrong arguments: source files were not set." << std::endl;
 		return 1;

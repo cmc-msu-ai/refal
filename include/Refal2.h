@@ -2,6 +2,12 @@
 
 #include <Common.h>
 
+#ifdef _DEBUG
+#define DEBUG_PRINT( arg ) std::cout << arg << std::endl;
+#else
+#define DEBUG_PRINT( arg )
+#endif
+
 namespace Refal2 {
 
 // typedefs
