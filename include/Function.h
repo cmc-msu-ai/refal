@@ -16,6 +16,10 @@ enum TRuntimeFunctionType {
 class CRuntimeFunction {
 public:
 	TRuntimeFunctionType Type() const { return type; }
+	bool IsEmpty() const { return ( Type() == RFT_Empty ); }
+	bool IsEmbedded() const { return ( Type() == RFT_Embedded ); }
+	bool IsExternal() const { return ( Type() == RFT_External ); }
+	bool IsOrdinary() const { return ( Type() == RFT_Ordinary ); }
 
 protected:
 	CRuntimeFunction( TRuntimeFunctionType _type ) :
@@ -64,43 +68,40 @@ private:
 
 //-----------------------------------------------------------------------------
 
-typedef int TOperation;
-
 class COrdinaryFunction : public CRuntimeFunction {
 public:
-	COrdinaryFunction( const TOperation _firstOperation ) :
+	COrdinaryFunction( const TOperationAddress _firstOperation ) :
 		CRuntimeFunction( RFT_Ordinary ),
 		firstOperation( _firstOperation )
 	{
 		assert( firstOperation != 0 );
 	}
 
-	TOperation FirstOperation() const { return firstOperation; }
+	TOperationAddress FirstOperation() const { return firstOperation; }
 
 private:
-	TOperation firstOperation;
+	TOperationAddress firstOperation;
 };
 
 //-----------------------------------------------------------------------------
 
-typedef int TModuleId;
-
 class CExternalFunction : public CRuntimeFunction {
 public:
-	CExternalFunction( TOperation _firstOperation, TModuleId _module ) :
+	CExternalFunction( const TOperationAddress _firstOperation,
+			TRuntimeModuleId _runtimeModuleId ) :
 		CRuntimeFunction( RFT_External ),
 		firstOperation( _firstOperation ),
-		module( _module )
+		runtimeModuleId( _runtimeModuleId )
 	{
 		assert( firstOperation != 0 );
 	}
 
-	TOperation FirstOperation() const { return firstOperation; }
-	TModuleId Module() const { return module; }
+	TOperationAddress FirstOperation() const { return firstOperation; }
+	TRuntimeModuleId RuntimeModuleId() const { return runtimeModuleId; }
 
 private:
-	TOperation firstOperation;
-	TModuleId module;
+	TOperationAddress firstOperation;
+	TRuntimeModuleId runtimeModuleId;
 };
 
 //-----------------------------------------------------------------------------

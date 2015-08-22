@@ -399,29 +399,32 @@ void CInternalProgramBuilder::link()
 			const CPreparatoryFunction* preparatoryFunction =
 				function.PreparatoryFunction();
 			CRuntimeFunctionPtr newRuntimeFunction;
-			switch( function.Type() ) {
-				case RFT_Empty:
-					assert( preparatoryFunction->IsEmpty() );
+			switch( preparatoryFunction->GetType() ) {
+				case PFT_Empty:
+					assert( function.IsEmpty() || function.IsExternal() );
 					newRuntimeFunction.reset( new CEmptyFunction );
 					break;
-				case RFT_Embedded:
-					assert( preparatoryFunction->IsEmbedded() );
+				case PFT_Embedded:
+					assert( function.IsExternal() );
 					newRuntimeFunction.reset( new CEmbeddedFunction(
 						preparatoryFunction->EmbeddedFunction() ) );
 					break;
-				case RFT_External:
-					assert( preparatoryFunction->IsEmpty()
-						|| preparatoryFunction->IsEmbedded()
-						|| preparatoryFunction->IsCompiled() );
-					// todo: ---
-					//newRuntimeFunction.reset( new CExternalFunction( 0,
-					//	function.RuntimeModuleId() ) );
+				case PFT_Compiled:
+					if( function.IsExternal() ) {
+						newRuntimeFunction.reset( new CExternalFunction(
+							preparatoryFunction->FirstOperation(),
+							function.RuntimeModuleId() ) );
+					} else if( function.IsOrdinary() ) {
+						newRuntimeFunction.reset( new COrdinaryFunction(
+							preparatoryFunction->FirstOperation() ) );
+					} else {
+						assert( false );
+					}
 					break;
-				case RFT_Ordinary:
-					assert( preparatoryFunction->IsCompiled() );
-					// todo: ---
-					//newRuntimeFunction.reset( new COrdinaryFunction( 0 ) );
-					break;
+				case PFT_Declared:
+				case PFT_Defined:
+				case PFT_Ordinary:
+				case PFT_External:
 				default:
 					assert( false );
 					break;

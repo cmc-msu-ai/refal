@@ -10,8 +10,6 @@ struct CRuntimeModule {
 	CRuntimeFunctions Functions;
 };
 
-typedef int TRuntimeModuleId;
-
 const TRuntimeModuleId InvalidRuntimeModuleId = -1;
 
 class CProgram {

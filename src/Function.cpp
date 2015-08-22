@@ -107,6 +107,8 @@ void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 		rule = rule->NextRule.get();
 	}
 	type = PFT_Compiled;
+	firstOperation = compiler.GetFirstOperation();
+	assert( firstOperation != nullptr );
 }
 
 void CPreparatoryFunction::Link( const CPreparatoryFunction& function )

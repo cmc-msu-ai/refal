@@ -18,6 +18,7 @@ typedef unsigned char TVariableName;
 typedef char TVariableType;
 typedef int TVariableIndex;
 typedef int TTableIndex;
+typedef int TRuntimeModuleId;
 
 // classes
 class CExecuter;
