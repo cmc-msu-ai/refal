@@ -62,7 +62,7 @@ protected:
 		const CToken& externalNameToken );
 
 private:
-	CModuleInfoPtr module;
+	CModuleDataPtr module;
 	CNamedQualifiers namedQualifiers;
 	// auxiliary functions
 	TLabel declare( const CToken& nameToken );

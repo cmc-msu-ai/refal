@@ -44,7 +44,13 @@ const CToken& CPreparatoryFunction::ExternalNameToken() const
 const CRule* CPreparatoryFunction::FirstRule() const
 {
 	assert( IsOrdinary() );
-	return ( firstRule.get() );
+	return firstRule.get();
+}
+
+TEmbeddedFunctionPtr CPreparatoryFunction::EmbeddedFunction() const
+{
+	assert( IsEmbedded() );
+	return embeddedFunction;
 }
 
 void CPreparatoryFunction::SetDefined( const CToken& _nameToken )
@@ -108,6 +114,14 @@ void CPreparatoryFunction::Link( const CPreparatoryFunction& function )
 	} else {
 		assert( false );
 	}
+}
+
+void CPreparatoryFunction::SetEmbedded( const TEmbeddedFunctionPtr
+	_embeddedFunction )
+{
+	assert( IsExternal() );
+	type = PFT_Embedded;
+	embeddedFunction = _embeddedFunction;
 }
 
 void CPreparatoryFunction::Print( std::ostream& outputStream ) const

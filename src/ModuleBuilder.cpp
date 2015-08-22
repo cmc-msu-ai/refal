@@ -232,7 +232,7 @@ void CModuleBuilder::checkModule()
 void CModuleBuilder::startModule()
 {
 	assert( !IsStarted() );
-	module.reset( new CModuleInfo );
+	module.reset( new CModuleData );
 }
 
 void CModuleBuilder::endModule()
@@ -240,7 +240,7 @@ void CModuleBuilder::endModule()
 	assert( IsStarted() );
 	checkModule();
 	if( !CErrorsHelper::HasErrors() ) {
-		CModuleInfoPtr savedModule( module.release() );
+		CModuleDataPtr savedModule( module.release() );
 		Reset();
 		CProgramBuilder::AddModule( savedModule );
 	} else {

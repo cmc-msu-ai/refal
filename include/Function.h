@@ -6,6 +6,105 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
+enum TRuntimeFunctionType {
+	RFT_Empty,
+	RFT_Embedded,
+	RFT_External,
+	RFT_Ordinary
+};
+
+class CRuntimeFunction {
+public:
+	TRuntimeFunctionType Type() const { return type; }
+
+protected:
+	CRuntimeFunction( TRuntimeFunctionType _type ) :
+		type( _type )
+	{
+	}
+
+private:
+	TRuntimeFunctionType type;
+
+	CRuntimeFunction( const CRuntimeFunction& );
+	CRuntimeFunction& operator=( const CRuntimeFunction& );
+};
+
+typedef std::unique_ptr<CRuntimeFunction> CRuntimeFunctionPtr;
+typedef CDictionary<CRuntimeFunctionPtr, std::string> CRuntimeFunctions;
+
+//-----------------------------------------------------------------------------
+
+class CEmptyFunction : public CRuntimeFunction {
+public:
+	CEmptyFunction() :
+		CRuntimeFunction( RFT_Empty )
+	{
+	}
+};
+
+//-----------------------------------------------------------------------------
+
+typedef bool ( *TEmbeddedFunctionPtr )();
+
+class CEmbeddedFunction : public CRuntimeFunction {
+public:
+	CEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction ) :
+		CRuntimeFunction( RFT_Embedded ),
+		embeddedFunction( _embeddedFunction )
+	{
+		assert( embeddedFunction != 0 );
+	}
+
+	TEmbeddedFunctionPtr EmbeddedFunction() const { return embeddedFunction; }
+
+private:
+	TEmbeddedFunctionPtr embeddedFunction;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef int TOperation;
+
+class COrdinaryFunction : public CRuntimeFunction {
+public:
+	COrdinaryFunction( const TOperation _firstOperation ) :
+		CRuntimeFunction( RFT_Ordinary ),
+		firstOperation( _firstOperation )
+	{
+		assert( firstOperation != 0 );
+	}
+
+	TOperation FirstOperation() const { return firstOperation; }
+
+private:
+	TOperation firstOperation;
+};
+
+//-----------------------------------------------------------------------------
+
+typedef int TModuleId;
+
+class CExternalFunction : public CRuntimeFunction {
+public:
+	CExternalFunction( TOperation _firstOperation, TModuleId _module ) :
+		CRuntimeFunction( RFT_External ),
+		firstOperation( _firstOperation ),
+		module( _module )
+	{
+		assert( firstOperation != 0 );
+	}
+
+	TOperation FirstOperation() const { return firstOperation; }
+	TModuleId Module() const { return module; }
+
+private:
+	TOperation firstOperation;
+	TModuleId module;
+};
+
+//-----------------------------------------------------------------------------
+
 class CRule {
 public:
 	CUnitList Left;
@@ -50,6 +149,7 @@ public:
 	const std::string& ExternalName() const;
 	const CToken& ExternalNameToken() const;
 	const CRule* FirstRule() const;
+	TEmbeddedFunctionPtr EmbeddedFunction() const;
 
 	bool IsEntry() const { return entry; }
 	bool IsDeclared() const { return ( GetType() == PFT_Declared ); }
@@ -70,6 +170,7 @@ public:
 	void Compile( CFunctionCompiler& compiler );
 	// Only for external function
 	void Link( const CPreparatoryFunction& function );
+	void SetEmbedded( const TEmbeddedFunctionPtr embeddedFunction );
 
 	void Print( std::ostream& outputStream ) const;
 
@@ -81,6 +182,7 @@ private:
 	std::string externalName;
 	CToken externalNameToken;
 	CRulePtr firstRule;
+	TEmbeddedFunctionPtr embeddedFunction;
 
 	void setExternalName( const CToken& externalNameToken );
 
