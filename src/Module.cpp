@@ -10,7 +10,7 @@ CProgram::CProgram( int numberOfModules ) :
 	modules( new CRuntimeModule[modulesSize] )
 {
 	assert( modulesSize > 0 );
-	assert( modules != 0 );
+	assert( modules != nullptr );
 }
 
 CProgram::~CProgram()
@@ -27,26 +27,71 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 //-----------------------------------------------------------------------------
 // Standart embedded functions
 
+static void notImplemented( const char* name )
+{
+	std::cout << "external function `" << name << "` not implemented yet.";
+}
+
+static bool embeddedPrint()
+{
+	notImplemented( __FUNCTION__ );
+	return false;
+}
+
+static bool embeddedPrintm()
+{
+	notImplemented( __FUNCTION__ );
+	return false;
+}
+
+static bool embeddedProut()
+{
+	notImplemented( __FUNCTION__ );
+	return false;
+}
+
+static bool embeddedProutm()
+{
+	notImplemented( __FUNCTION__ );
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// CStandartEmbeddedFunctionData
+
+struct CStandartEmbeddedFunctionData {
+	const char* const externalName;
+	const TEmbeddedFunctionPtr EmbeddedFunction;
+};
+
+const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
+	{ "print", embeddedPrint },
+	{ "printm", embeddedPrintm },
+	{ "prout", embeddedProut },
+	{ "proutm", embeddedProutm },
+	{ nullptr, nullptr }
+};
+
 //-----------------------------------------------------------------------------
 // CGlobalFunctionData
 
 class CGlobalFunctionData {
 public:
 	CGlobalFunctionData() :
-		preparatoryFunction( 0 ),
-		embeddedFunction( 0 ),
+		preparatoryFunction( nullptr ),
+		embeddedFunction( nullptr ),
 		runtimeModuleId( 0 )
 	{
 	}
 
 	bool IsEmbeddedFunction() const
 	{
-		return ( embeddedFunction != 0 );
+		return ( embeddedFunction != nullptr );
 	}
 
 	bool IsPreparatoryFunction() const
 	{
-		return ( preparatoryFunction != 0 );
+		return ( preparatoryFunction != nullptr );
 	}
 
 	bool IsDefined() const
@@ -59,7 +104,7 @@ public:
 		const TRuntimeModuleId _runtimeModuleId )
 	{
 		assert( !IsDefined() );
-		assert( _preparatoryFunction != 0 );
+		assert( _preparatoryFunction != nullptr );
 		preparatoryFunction = _preparatoryFunction;
 		runtimeModuleId = _runtimeModuleId;
 	}
@@ -79,7 +124,7 @@ public:
 	void SetEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction )
 	{
 		assert( !IsDefined() );
-		assert( _embeddedFunction != 0 );
+		assert( _embeddedFunction != nullptr );
 		embeddedFunction = _embeddedFunction;
 	}
 
@@ -106,7 +151,7 @@ public:
 		preparatoryFunction( _preparatoryFunction )
 	{
 		assert( globalIndex >= 0 );
-		assert( preparatoryFunction != 0 );
+		assert( preparatoryFunction != nullptr );
 	}
 
 	int GlobalIndex() const { return globalIndex; }
@@ -123,14 +168,14 @@ private:
 
 class CPreparatoryRuntimeFunction : public CRuntimeFunction {
 public:
-	CPreparatoryRuntimeFunction( CPreparatoryFunction* const function,
+	CPreparatoryRuntimeFunction( CPreparatoryFunctionPtr& function,
 		const TRuntimeModuleId moduleId );
 
-	CPreparatoryFunction* PreparatoryFunction() const { return function; }
+	CPreparatoryFunction* PreparatoryFunction() const { return function.get(); }
 	TRuntimeModuleId RuntimeModuleId() const { return moduleId; }
 
 private:
-	CPreparatoryFunction* const function;
+	const CPreparatoryFunctionPtr function;
 	const TRuntimeModuleId moduleId;
 
 	static TRuntimeFunctionType convertType(
@@ -138,10 +183,9 @@ private:
 };
 
 CPreparatoryRuntimeFunction::CPreparatoryRuntimeFunction(
-		CPreparatoryFunction* const _function,
-		const TRuntimeModuleId _moduleId ) :
-	CRuntimeFunction( convertType( _function ) ),
-	function( _function ),
+		CPreparatoryFunctionPtr& _function, const TRuntimeModuleId _moduleId ) :
+CRuntimeFunction( convertType( _function.get() ) ),
+	function( _function.release() ),
 	moduleId( _moduleId )
 {
 }
@@ -149,7 +193,7 @@ CPreparatoryRuntimeFunction::CPreparatoryRuntimeFunction(
 TRuntimeFunctionType CPreparatoryRuntimeFunction::convertType(
 	const CPreparatoryFunction* const function )
 {
-	assert( function != 0 );
+	assert( function != nullptr );
 	switch( function->GetType() ) {
 		case PFT_Ordinary:
 			return RFT_Ordinary;
@@ -183,12 +227,7 @@ private:
 	CDictionary<CGlobalFunctionData, std::string> globals;
 	CProgramPtr program;
 
-	CInternalProgramBuilder( CErrorsHelper& _errors, int numberOfModules ) :
-		errors( _errors ),
-		program( new CProgram( numberOfModules ) )
-	{
-		assert( static_cast<bool>( program ) );
-	}
+	CInternalProgramBuilder( CErrorsHelper& _errors, int numberOfModules );
 
 	void addFunction( CPreparatoryFunction* function,
 		const TRuntimeModuleId runtimeModuleId );
@@ -201,6 +240,25 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
+CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
+		int numberOfModules ) :
+	errors( _errors ),
+	program( new CProgram( numberOfModules ) )
+{
+	assert( static_cast<bool>( program ) );
+	for( int i = 0; standartEmbeddedFunctions[i].EmbeddedFunction != nullptr;
+		i++ )
+	{
+		assert( standartEmbeddedFunctions[i].externalName != nullptr );
+		std::string externalName = standartEmbeddedFunctions[i].externalName;
+		assert( !externalName.empty() );
+		const int globalIndex = globals.AddKey( externalName );
+		CGlobalFunctionData& global = globals.GetData( globalIndex );
+		global.SetEmbeddedFunction(
+			standartEmbeddedFunctions[i].EmbeddedFunction );
+	}
+}
 
 CProgramPtr CInternalProgramBuilder::Build( CModuleDataVector& modules,
 	CErrorsHelper& errors )
@@ -231,7 +289,7 @@ void CInternalProgramBuilder::addFunction( CPreparatoryFunction* function,
 	if( !( isExternal || isGlobal ) ) {
 		return;
 	}
-	int globalIndex = globals.AddKey( function->ExternalName() );
+	const int globalIndex = globals.AddKey( function->ExternalName() );
 	if( isGlobal ) {
 		assert( !isExternal );
 		CGlobalFunctionData& global = globals.GetData( globalIndex );
@@ -254,13 +312,13 @@ void CInternalProgramBuilder::addFunctions( const CModuleData& module,
 {
 	const CPreparatoryFunctions& functions = module.Functions;
 	for( int i = 0; i < functions.Size(); i++ ) {
-		CPreparatoryFunction* function = functions.GetData( i ).get();
+		CPreparatoryFunctionPtr function( functions.GetData( i ).release() );
+		addFunction( function.get(), runtimeModuleId );
 		CRuntimeFunctionPtr& runtimeFunction = runtimeModule.Functions.GetData(
 			runtimeModule.Functions.AddKey( function->Name() ) );
 		assert( !static_cast<bool>( runtimeFunction ) );
 		runtimeFunction.reset( new CPreparatoryRuntimeFunction( function,
 			runtimeModuleId ) );
-		addFunction( function, runtimeModuleId );
 	}
 }
 
@@ -301,8 +359,9 @@ void CInternalProgramBuilder::compile()
 		const CRuntimeFunctions& functions =
 			program->Module( moduleId ).Functions;
 		for( int i = 0; i < functions.Size(); i++ ) {
+			const CRuntimeFunction& runtimeFunction = *functions.GetData( i );
 			const CPreparatoryRuntimeFunction& function = static_cast<
-				CPreparatoryRuntimeFunction&>( *functions.GetData( i ) );
+				const CPreparatoryRuntimeFunction&>( runtimeFunction );
 			if( function.PreparatoryFunction()->IsOrdinary() ) {
 				function.PreparatoryFunction()->Compile( compiler );
 			}
