@@ -9,7 +9,6 @@ namespace Refal2 {
 enum TRuntimeFunctionType {
 	RFT_Empty,
 	RFT_Embedded,
-	RFT_External,
 	RFT_Ordinary
 };
 
@@ -18,7 +17,6 @@ public:
 	TRuntimeFunctionType Type() const { return type; }
 	bool IsEmpty() const { return ( Type() == RFT_Empty ); }
 	bool IsEmbedded() const { return ( Type() == RFT_Embedded ); }
-	bool IsExternal() const { return ( Type() == RFT_External ); }
 	bool IsOrdinary() const { return ( Type() == RFT_Ordinary ); }
 
 protected:
@@ -70,26 +68,9 @@ private:
 
 class COrdinaryFunction : public CRuntimeFunction {
 public:
-	COrdinaryFunction( const TOperationAddress _firstOperation ) :
-		CRuntimeFunction( RFT_Ordinary ),
-		firstOperation( _firstOperation )
-	{
-		assert( firstOperation != 0 );
-	}
-
-	TOperationAddress FirstOperation() const { return firstOperation; }
-
-private:
-	TOperationAddress firstOperation;
-};
-
-//-----------------------------------------------------------------------------
-
-class CExternalFunction : public CRuntimeFunction {
-public:
-	CExternalFunction( const TOperationAddress _firstOperation,
+	COrdinaryFunction( const TOperationAddress _firstOperation,
 			TRuntimeModuleId _runtimeModuleId ) :
-		CRuntimeFunction( RFT_External ),
+		CRuntimeFunction( RFT_Ordinary ),
 		firstOperation( _firstOperation ),
 		runtimeModuleId( _runtimeModuleId )
 	{
@@ -135,8 +116,7 @@ enum TPreparatoryFunctionType {
 	PFT_Ordinary,
 	PFT_Empty,
 	PFT_External,
-	PFT_Compiled,
-	PFT_Embedded
+	PFT_Compiled
 };
 
 class CPreparatoryFunction {
@@ -151,7 +131,6 @@ public:
 	const CToken& ExternalNameToken() const;
 	const CRule* FirstRule() const;
 	TOperationAddress FirstOperation() const;
-	TEmbeddedFunctionPtr EmbeddedFunction() const;
 
 	bool IsEntry() const { return entry; }
 	bool IsDeclared() const { return ( GetType() == PFT_Declared ); }
@@ -160,7 +139,6 @@ public:
 	bool IsEmpty() const { return ( GetType() == PFT_Empty ); }
 	bool IsExternal() const { return ( GetType() == PFT_External ); }
 	bool IsCompiled() const { return ( GetType() == PFT_Compiled ); }
-	bool IsEmbedded() const { return ( GetType() == PFT_Embedded ); }
 
 	void SetDefined( const CToken& nameToken );
 	void SetOrdinary( CRulePtr& firstRule );
@@ -170,9 +148,6 @@ public:
 
 	// Only for ordinary function
 	void Compile( CFunctionCompiler& compiler );
-	// Only for external function
-	void Link( const CPreparatoryFunction& function );
-	void SetEmbedded( const TEmbeddedFunctionPtr embeddedFunction );
 
 	void Print( std::ostream& outputStream ) const;
 
@@ -185,7 +160,6 @@ private:
 	CToken externalNameToken;
 	CRulePtr firstRule;
 	TOperationAddress firstOperation;
-	TEmbeddedFunctionPtr embeddedFunction;
 
 	void setExternalName( const CToken& externalNameToken );
 

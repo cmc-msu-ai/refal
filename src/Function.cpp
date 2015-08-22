@@ -24,8 +24,7 @@ CPreparatoryFunction::CPreparatoryFunction( const CToken& _nameToken ):
 	entry( false ),
 	name( _nameToken.word ),
 	nameToken( _nameToken ),
-	firstOperation( nullptr ),
-	embeddedFunction( nullptr )
+	firstOperation( nullptr )
 {
 	assert( !name.empty() );
 	MakeLower( name );
@@ -53,12 +52,6 @@ TOperationAddress CPreparatoryFunction::FirstOperation() const
 {
 	assert( IsCompiled() );
 	return firstOperation;
-}
-
-TEmbeddedFunctionPtr CPreparatoryFunction::EmbeddedFunction() const
-{
-	assert( IsEmbedded() );
-	return embeddedFunction;
 }
 
 void CPreparatoryFunction::SetDefined( const CToken& _nameToken )
@@ -109,29 +102,6 @@ void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 	type = PFT_Compiled;
 	firstOperation = compiler.GetFirstOperation();
 	assert( firstOperation != nullptr );
-}
-
-void CPreparatoryFunction::Link( const CPreparatoryFunction& function )
-{
-	assert( IsExternal() );
-	assert( function.IsEntry() );
-	assert( externalName == function.externalName );
-	if( function.IsCompiled() ) {
-		type = PFT_Compiled;
-		firstOperation = function.firstOperation;
-	} else if( function.IsEmpty() ) {
-		type = PFT_Empty;
-	} else {
-		assert( false );
-	}
-}
-
-void CPreparatoryFunction::SetEmbedded( const TEmbeddedFunctionPtr
-	_embeddedFunction )
-{
-	assert( IsExternal() );
-	type = PFT_Embedded;
-	embeddedFunction = _embeddedFunction;
 }
 
 void CPreparatoryFunction::Print( std::ostream& outputStream ) const

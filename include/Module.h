@@ -25,10 +25,23 @@ public:
 	COperationList& OperationsHolder() { return operationsHolder; }
 	const COperationList& OperationsHolder() const { return operationsHolder; }
 
+	void SetStartProgramFunction(
+		const COrdinaryFunction* const _startProgramFunction )
+	{
+		assert( _startProgramFunction != 0 );
+		startProgramFunction = _startProgramFunction;
+	}
+
+	const COrdinaryFunction* GetStartProgramFunction() const
+	{
+		return startProgramFunction;
+	}
+
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
+	const COrdinaryFunction* startProgramFunction;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );
