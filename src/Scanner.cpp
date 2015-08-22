@@ -267,6 +267,7 @@ void CScanner::preprocessingInitital( char c )
 {
 	switch( c ) {
 		case Plus:
+			processing( UniversalSeparatorOfTokens );
 			preprocessingState = PS_Plus;
 			break;
 		case Quote:
