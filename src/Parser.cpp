@@ -134,7 +134,6 @@ void CParser::parsingWordBlankS()
 void CParser::parsingBlank()
 {
 	if( token.type == TT_Word && CDirectiveParser::StartParseIfDirective() ) {
-		CRuleParser::EndFunction(); // action
 		state = S_Directive;
 	} else {
 		CRuleParser::BeginRule();
