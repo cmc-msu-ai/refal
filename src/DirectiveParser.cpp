@@ -141,7 +141,7 @@ void CDirectiveParser::AddToken()
 void CDirectiveParser::wrongDirectiveFormat()
 {
 	SetWrong();
-	CErrorsHelper::Error( "wrong `" + directive.word + "` directive format." );
+	CErrorsHelper::Error( "wrong `" + directive.word + "` directive format" );
 }
 
 void CDirectiveParser::simple()
