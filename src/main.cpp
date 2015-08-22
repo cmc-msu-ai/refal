@@ -93,7 +93,9 @@ bool ParseFile( std::istream& fileStream )
 	}
 	scanner.AddEndOfFile();
 
-	scanner.BuildProgram();
+	if( !scanner.HasErrors() ) {
+		scanner.BuildProgram();
+	}
 
 	return ( !scanner.HasErrors() );
 }
