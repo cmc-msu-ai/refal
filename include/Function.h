@@ -32,7 +32,7 @@ private:
 	CRuntimeFunction& operator=( const CRuntimeFunction& );
 };
 
-typedef std::unique_ptr<CRuntimeFunction> CRuntimeFunctionPtr;
+typedef std::shared_ptr<CRuntimeFunction> CRuntimeFunctionPtr;
 typedef CDictionary<CRuntimeFunctionPtr, std::string> CRuntimeFunctions;
 
 //-----------------------------------------------------------------------------

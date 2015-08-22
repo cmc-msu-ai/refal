@@ -77,81 +77,118 @@ const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 
 class CGlobalFunctionData {
 public:
-	CGlobalFunctionData() :
-		preparatoryFunction( nullptr ),
-		embeddedFunction( nullptr ),
-		runtimeModuleId( 0 )
-	{
-	}
+	CGlobalFunctionData();
 
-	bool IsEmbeddedFunction() const
-	{
-		return ( embeddedFunction != nullptr );
-	}
+	static CRuntimeFunctionPtr EmptyFunction();
 
-	bool IsPreparatoryFunction() const
-	{
-		return ( preparatoryFunction != nullptr );
-	}
-
-	bool IsDefined() const
-	{
-		return ( IsEmbeddedFunction() || IsPreparatoryFunction() ); 
-	}
+	bool IsEmbeddedFunction() const;
+	bool IsPreparatoryFunction() const;
+	bool IsDefined() const;
 
 	void SetPreparatoryFunction(
 		const CPreparatoryFunction* const _preparatoryFunction,
-		const TRuntimeModuleId _runtimeModuleId )
-	{
-		assert( !IsDefined() );
-		assert( _preparatoryFunction != nullptr );
-		preparatoryFunction = _preparatoryFunction;
-		runtimeModuleId = _runtimeModuleId;
-	}
+		const TRuntimeModuleId _runtimeModuleId );
+	const CPreparatoryFunction* PreparatoryFunction() const;
 
-	const CPreparatoryFunction* PreparatoryFunction() const
-	{
-		assert( IsPreparatoryFunction() );
-		return preparatoryFunction;
-	}
+	const TRuntimeModuleId RuntimeModuleId() const;
 
-	const TRuntimeModuleId RuntimeModuleId() const
-	{
-		assert( IsPreparatoryFunction() );
-		return runtimeModuleId;
-	}
+	void SetEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction );
+	TEmbeddedFunctionPtr EmbeddedFunction() const;	
 
-	void SetEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction )
-	{
-		assert( !IsDefined() );
-		assert( _embeddedFunction != nullptr );
-		embeddedFunction = _embeddedFunction;
-	}
-
-	TEmbeddedFunctionPtr EmbeddedFunction() const
-	{
-		assert( IsEmbeddedFunction() );
-		return embeddedFunction;
-	}
-
-	CRuntimeFunction* CreateRuntimeFunction() const
-	{
-		if( IsEmbeddedFunction() ) {
-			return new CEmbeddedFunction( EmbeddedFunction() );
-		}
-		assert( IsPreparatoryFunction() );
-		if( PreparatoryFunction()->IsEmpty() ) {
-			return new CEmptyFunction;
-		}
-		return new COrdinaryFunction( PreparatoryFunction()->FirstOperation(),
-			RuntimeModuleId() );
-	}
+	CRuntimeFunctionPtr RuntimeFunction() const;
 
 private:
 	const CPreparatoryFunction* preparatoryFunction;
 	TEmbeddedFunctionPtr embeddedFunction;
 	TRuntimeModuleId runtimeModuleId;
+	mutable CRuntimeFunctionPtr runtimeFunction;
 };
+
+//-----------------------------------------------------------------------------
+
+CGlobalFunctionData::CGlobalFunctionData() :
+	preparatoryFunction( nullptr ),
+	embeddedFunction( nullptr ),
+	runtimeModuleId( 0 )
+{
+}
+
+CRuntimeFunctionPtr CGlobalFunctionData::EmptyFunction()
+{
+	static const CRuntimeFunctionPtr emptyFunction( new CEmptyFunction );
+	return emptyFunction;
+}
+
+bool CGlobalFunctionData::IsEmbeddedFunction() const
+{
+	return ( embeddedFunction != nullptr );
+}
+
+bool CGlobalFunctionData::IsPreparatoryFunction() const
+{
+	return ( preparatoryFunction != nullptr );
+}
+
+bool CGlobalFunctionData::IsDefined() const
+{
+	return ( IsEmbeddedFunction() || IsPreparatoryFunction() );
+}
+
+void CGlobalFunctionData::SetPreparatoryFunction(
+	const CPreparatoryFunction* const _preparatoryFunction,
+	const TRuntimeModuleId _runtimeModuleId )
+{
+	assert( !IsDefined() );
+	assert( _preparatoryFunction != nullptr );
+	preparatoryFunction = _preparatoryFunction;
+	runtimeModuleId = _runtimeModuleId;
+}
+
+const CPreparatoryFunction* CGlobalFunctionData::PreparatoryFunction() const
+{
+	assert( IsPreparatoryFunction() );
+	return preparatoryFunction;
+}
+
+const TRuntimeModuleId CGlobalFunctionData::RuntimeModuleId() const
+{
+	assert( IsPreparatoryFunction() );
+	return runtimeModuleId;
+}
+
+void CGlobalFunctionData::SetEmbeddedFunction(
+	const TEmbeddedFunctionPtr _embeddedFunction )
+{
+	assert( !IsDefined() );
+	assert( _embeddedFunction != nullptr );
+	embeddedFunction = _embeddedFunction;
+}
+
+TEmbeddedFunctionPtr CGlobalFunctionData::EmbeddedFunction() const
+{
+	assert( IsEmbeddedFunction() );
+	return embeddedFunction;
+}
+
+CRuntimeFunctionPtr CGlobalFunctionData::RuntimeFunction() const
+{
+	if( !static_cast<bool>( runtimeFunction ) ) {
+		if( IsEmbeddedFunction() ) {
+			runtimeFunction.reset( new CEmbeddedFunction(
+				embeddedFunction ) );
+		} else {
+			assert( IsPreparatoryFunction() );
+			if( PreparatoryFunction()->IsEmpty() ) {
+				runtimeFunction = EmptyFunction();
+			} else {
+				runtimeFunction.reset( new COrdinaryFunction(
+					PreparatoryFunction()->FirstOperation(),
+					RuntimeModuleId() ) );
+			}
+		}
+	}
+	return runtimeFunction;
+}
 
 //-----------------------------------------------------------------------------
 // CInternalProgramBuilder
@@ -319,8 +356,7 @@ void CInternalProgramBuilder::linkFunction( CPreparatoryFunction* function,
 
 	switch( function->GetType() ) {
 		case PFT_Empty:
-			functions.AddKey( function->Name() );
-			runtimeFunction.reset( new CEmptyFunction );
+			runtimeFunction = CGlobalFunctionData::EmptyFunction();
 			break;
 		case PFT_Compiled:
 			runtimeFunction.reset( new COrdinaryFunction(
@@ -329,8 +365,7 @@ void CInternalProgramBuilder::linkFunction( CPreparatoryFunction* function,
 		case PFT_External:
 		{
 			const int globalIndex = globals.FindKey( function->ExternalName() );
-			runtimeFunction.reset(
-				globals.GetData( globalIndex ).CreateRuntimeFunction() );
+			runtimeFunction = globals.GetData( globalIndex ).RuntimeFunction();
 			break;
 		}
 		default:
@@ -342,6 +377,12 @@ void CInternalProgramBuilder::linkFunction( CPreparatoryFunction* function,
 void CInternalProgramBuilder::link( const CModuleDataVector& modules )
 {
 	processModules( modules, &CInternalProgramBuilder::linkFunction );
+	// set program start function
+	CRuntimeFunctionPtr goFunction = globals.GetData(
+		globals.FindKey( ProgramStartFunctionName ) ).RuntimeFunction();
+	assert( goFunction->IsOrdinary() );
+	program->SetProgramStartFunction(
+		static_cast<COrdinaryFunction*>( goFunction.get() ) );
 }
 
 //-----------------------------------------------------------------------------

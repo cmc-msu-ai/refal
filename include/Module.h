@@ -20,28 +20,30 @@ public:
 	int NumberOfModules() const { return modulesSize; }
 	CRuntimeModule& Module( TRuntimeModuleId moduleId );
 	const CRuntimeModule& Module( const TRuntimeModuleId moduleId ) const
-		{ return const_cast<CProgram*>( this )->Module( moduleId ); }
+	{
+		return const_cast<CProgram*>( this )->Module( moduleId );
+	}
 
 	COperationList& OperationsHolder() { return operationsHolder; }
 	const COperationList& OperationsHolder() const { return operationsHolder; }
 
-	void SetStartProgramFunction(
-		const COrdinaryFunction* const _startProgramFunction )
+	void SetProgramStartFunction(
+		const COrdinaryFunction* const _programStartFunction )
 	{
-		assert( _startProgramFunction != 0 );
-		startProgramFunction = _startProgramFunction;
+		assert( _programStartFunction != 0 );
+		programStartFunction = _programStartFunction;
 	}
 
-	const COrdinaryFunction* GetStartProgramFunction() const
+	const COrdinaryFunction* GetProgramStartFunction() const
 	{
-		return startProgramFunction;
+		return programStartFunction;
 	}
 
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
-	const COrdinaryFunction* startProgramFunction;
+	const COrdinaryFunction* programStartFunction;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );
