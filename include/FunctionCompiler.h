@@ -134,7 +134,7 @@ protected:
 
 class CFunctionCompiler : public CRightPartCompiler {
 public:
-	CFunctionCompiler();
+	CFunctionCompiler() {}
 
 	void CompileRule( CRule& rule );
 };
