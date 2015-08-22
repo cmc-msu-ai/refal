@@ -22,9 +22,13 @@ public:
 	const CRuntimeModule& Module( const TRuntimeModuleId moduleId ) const
 		{ return const_cast<CProgram*>( this )->Module( moduleId ); }
 
+	COperationList& OperationsHolder() { return operationsHolder; }
+	const COperationList& OperationsHolder() const { return operationsHolder; }
+
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
+	COperationList operationsHolder;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );

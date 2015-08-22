@@ -353,8 +353,7 @@ void CInternalProgramBuilder::check()
 
 void CInternalProgramBuilder::compile()
 {
-	COperationList* operationsList = new COperationList;
-	CFunctionCompiler compiler( *operationsList );
+	CFunctionCompiler compiler( program->OperationsHolder() );
 	for( int moduleId = 0; moduleId < program->NumberOfModules(); moduleId++ )
 	{
 		const CRuntimeFunctions& functions =
