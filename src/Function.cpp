@@ -23,7 +23,9 @@ CPreparatoryFunction::CPreparatoryFunction( const CToken& _nameToken ):
 	type( PFT_Declared ),
 	entry( false ),
 	name( _nameToken.word ),
-	nameToken( _nameToken )
+	nameToken( _nameToken ),
+	firstOperation( nullptr ),
+	embeddedFunction( nullptr )
 {
 	assert( !name.empty() );
 	MakeLower( name );
@@ -45,6 +47,12 @@ const CRule* CPreparatoryFunction::FirstRule() const
 {
 	assert( IsOrdinary() );
 	return firstRule.get();
+}
+
+TOperationAddress CPreparatoryFunction::FirstOperation() const
+{
+	assert( IsCompiled() );
+	return firstOperation;
 }
 
 TEmbeddedFunctionPtr CPreparatoryFunction::EmbeddedFunction() const
@@ -94,7 +102,7 @@ void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 {
 	assert( IsOrdinary() );
 	const CRule* rule = FirstRule();
-	while( rule != 0 ) {
+	while( rule != nullptr ) {
 		rule->Compile( compiler );
 		rule = rule->NextRule.get();
 	}
@@ -108,7 +116,7 @@ void CPreparatoryFunction::Link( const CPreparatoryFunction& function )
 	assert( externalName == function.externalName );
 	if( function.IsCompiled() ) {
 		type = PFT_Compiled;
-		// TODO: copy
+		firstOperation = function.firstOperation;
 	} else if( function.IsEmpty() ) {
 		type = PFT_Empty;
 	} else {
@@ -128,7 +136,7 @@ void CPreparatoryFunction::Print( std::ostream& outputStream ) const
 {
 	assert( IsOrdinary() );
 	const CRule* rule = FirstRule();
-	while( rule != 0 ) {
+	while( rule != nullptr ) {
 		rule->Print( outputStream );
 		outputStream << std::endl;
 		rule = rule->NextRule.get();
@@ -150,7 +158,7 @@ CFunctionBuilder::CFunctionBuilder( IErrorHandler* errorHandler ):
 	CVariablesBuilder( errorHandler ),
 	isProcessRightPart( false ),
 	isRightDirection( false ),
-	lastRule( 0 )
+	lastRule( nullptr )
 {
 }
 
@@ -268,11 +276,11 @@ void CFunctionBuilder::AddLeftParen()
 
 void CFunctionBuilder::AddRightParen()
 {
-	CUnitNode* leftParen = 0;
+	CUnitNode* leftParen = nullptr;
 	if( !balanceStack.empty() ) {
 		leftParen = balanceStack.top();
 	}
-	if( leftParen != 0 && leftParen->IsLeftParen() ) {
+	if( leftParen != nullptr && leftParen->IsLeftParen() ) {
 		leftParen->PairedParen() = acc.AppendRightParen(leftParen);
 		balanceStack.pop();
 	} else {
@@ -292,11 +300,11 @@ void CFunctionBuilder::AddLeftBracket()
 void CFunctionBuilder::AddRightBracket()
 {	
 	if( isProcessRightPart ) {
-		CUnitNode* leftBracket = 0;
+		CUnitNode* leftBracket = nullptr;
 		if( !balanceStack.empty() ) {
 			leftBracket = balanceStack.top();
 		}
-		if( leftBracket != 0 && leftBracket->IsLeftBracket() ) {
+		if( leftBracket != nullptr && leftBracket->IsLeftBracket() ) {
 			leftBracket->PairedParen() = acc.AppendRightBracket(leftBracket);
 			balanceStack.pop();
 		} else {
@@ -352,7 +360,7 @@ void CFunctionBuilder::emptyStack()
 void CFunctionBuilder::emptyRules()
 {
 	firstRule.reset();
-	lastRule = 0;
+	lastRule = nullptr;
 }
 
 void CFunctionBuilder::addRule()

@@ -149,6 +149,7 @@ public:
 	const std::string& ExternalName() const;
 	const CToken& ExternalNameToken() const;
 	const CRule* FirstRule() const;
+	TOperationAddress FirstOperation() const;
 	TEmbeddedFunctionPtr EmbeddedFunction() const;
 
 	bool IsEntry() const { return entry; }
@@ -182,6 +183,7 @@ private:
 	std::string externalName;
 	CToken externalNameToken;
 	CRulePtr firstRule;
+	TOperationAddress firstOperation;
 	TEmbeddedFunctionPtr embeddedFunction;
 
 	void setExternalName( const CToken& externalNameToken );
