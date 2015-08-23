@@ -20,17 +20,10 @@ private:
 	CToken functionName;
 	CQualifier qualifier;
 	TVariableType variableType;
-	enum TState {
-		S_Direction,
-		S_AfterDirection,
-		S_AfterLeftBracket,
-		S_AfterVariableType,
-		S_VariableQualifier,
-		S_AfterVariableQualifier
-	};
+	// parsing
+	typedef void ( CRuleParser::*TState )();
 	TState state;
-	// auxiliary functions
-	void error( const std::string& message );
+
 	void direction();
 	void afterDirection();
 	void wordAfterDirection();
@@ -38,6 +31,8 @@ private:
 	void afterVariableType();
 	void variableQualifier();
 	void afterVariableQualifier();
+	// auxiliary functions
+	void error( const std::string& message );
 };
 
 //-----------------------------------------------------------------------------

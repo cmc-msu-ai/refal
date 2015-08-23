@@ -41,35 +41,13 @@ void CRuleParser::BeginRule()
 {
 	//assert( IsFinished() );
 	CParsingElementState::Reset();
-	state = S_Direction;
+	state = &CRuleParser::direction;
 }
 
 void CRuleParser::AddToken()
 {
 	assert( !IsFinished() );
-	switch( state ) {
-		case S_Direction:
-			direction();
-			break;
-		case S_AfterDirection:
-			afterDirection();
-			break;
-		case S_AfterLeftBracket:
-			afterLeftBracket();
-			break;
-		case S_AfterVariableType:
-			afterVariableType();
-			break;
-		case S_VariableQualifier:
-			variableQualifier();
-			break;
-		case S_AfterVariableQualifier:
-			afterVariableQualifier();
-			break;
-		default:
-			assert( false );
-			break;
-	}
+	( this->*state )();
 }
 
 void CRuleParser::error( const std::string& message )
@@ -83,7 +61,7 @@ void CRuleParser::direction()
 	if( token.type == TT_Blank ) {
 		return;
 	}
-	state = S_AfterDirection;
+	state = &CRuleParser::afterDirection;
 	if( token.type == TT_Word && token.word.length() == 1 ) {
 		switch( token.word[0] ) {
 			case 'r':
@@ -132,7 +110,7 @@ void CRuleParser::afterDirection()
 			CFunctionBuilder::AddRightParen();
 			break;
 		case TT_LeftBracket:
-			state = S_AfterLeftBracket;
+			state = &CRuleParser::afterLeftBracket;
 			CFunctionBuilder::AddLeftBracket();
 			break;
 		case TT_RightBracket:
@@ -166,7 +144,7 @@ void CRuleParser::wordAfterDirection()
 				token.position += 2;
 				token.word.erase( 0, 2 );
 			} else {
-				state = S_AfterVariableType;
+				state = &CRuleParser::afterVariableType;
 				return;
 			}
 		}
@@ -175,7 +153,7 @@ void CRuleParser::wordAfterDirection()
 
 void CRuleParser::afterLeftBracket()
 {
-	state = S_AfterDirection;
+	state = &CRuleParser::afterDirection;
 	if( token.type == TT_Word ) {
 		CFunctionBuilder::AddLabel( CModuleBuilder::Declare( token ) );
 	} else {
@@ -187,10 +165,10 @@ void CRuleParser::afterVariableType()
 {
 	if( token.type == TT_LeftParen ) {
 		CQualifierParser::StartQualifer();
-		state = S_VariableQualifier;
+		state = &CRuleParser::variableQualifier;
 	} else if( token.type == TT_Qualifier ) {
 		if( CModuleBuilder::GetNamedQualifier( token, qualifier ) ) {
-			state = S_AfterVariableQualifier;
+			state = &CRuleParser::afterVariableQualifier;
 		} else {
 			SetWrong();
 		}
@@ -205,14 +183,14 @@ void CRuleParser::variableQualifier()
 	if( IsCorrect() ) {
 		CQualifierParser::GetQualifier( qualifier );
 		CParsingElementState::Reset();
-		state = S_AfterVariableQualifier;
+		state = &CRuleParser::afterVariableQualifier;
 	}
 }
 
 void CRuleParser::afterVariableQualifier()
 {
 	if( token.type == TT_Word ) {
-		state = S_AfterDirection;
+		state = &CRuleParser::afterDirection;
 		CFunctionBuilder::AddVariable( variableType, token.word[0], &qualifier );
 		token.word.erase( 0, 1 );
 		token.position++;
