@@ -12,8 +12,10 @@ CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
 
 void CModuleBuilder::Reset()
 {
+	if( IsStarted() ) {
+		endModule();
+	}
 	CProgramBuilder::Reset();
-	module.reset();
 }
 
 bool CModuleBuilder::IsStarted() const
@@ -70,6 +72,9 @@ bool CModuleBuilder::GetNamedQualifier( const CToken& nameToken,
 bool CModuleBuilder::SetNamedQualifier( const CToken& nameToken,
 	CQualifier& qualifier )
 {
+	if( !IsStarted() ) {
+		startModule();
+	}
 	assert( nameToken.type == TT_Word );
 	std::string qualifierName = nameToken.word;
 	MakeLower( qualifierName );
@@ -154,6 +159,9 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 
 TLabel CModuleBuilder::declare( const CToken& nameToken )
 {
+	if( !IsStarted() ) {
+		startModule();
+	}
 	assert( !nameToken.word.empty() );
 	std::string name = nameToken.word;
 	MakeLower( name );
@@ -218,12 +226,10 @@ void CModuleBuilder::endModule()
 {
 	assert( IsStarted() );
 	checkModule();
-	if( !CErrorsHelper::HasErrors() ) {
-		CModuleDataPtr savedModule( module.release() );
-		Reset();
+	CModuleDataPtr savedModule( module.release() );
+	Reset();
+	if( !CErrorsHelper::HasErrors() && static_cast<bool>( savedModule ) ) {
 		CProgramBuilder::AddModule( savedModule );
-	} else {
-		Reset();
 	}
 }
 

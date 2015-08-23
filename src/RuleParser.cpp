@@ -16,6 +16,9 @@ CRuleParser::CRuleParser( IErrorHandler* errorHandler ):
 
 void CRuleParser::Reset()
 {
+	if( !functionName.IsNone() ) {
+		EndFunction();
+	}
 	CQualifierParser::Reset();
 	SetWrong();
 }
