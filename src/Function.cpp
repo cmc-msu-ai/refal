@@ -86,7 +86,8 @@ TOperationAddress CPreparatoryFunction::FirstOperation() const
 
 void CPreparatoryFunction::SetDefined( const CToken& _nameToken )
 {
-	assert( AreTokenWordsEqual( nameToken, _nameToken ) );
+	assert( _nameToken.type == TT_Word );
+	assert( CompareNoCase( nameToken.word, _nameToken.word ) );
 	assert( type == PFT_Declared );
 	type = PFT_Defined;
 	nameToken = _nameToken;

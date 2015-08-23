@@ -5,6 +5,7 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CToken
 
 enum TTokenType {
 	TT_None,
@@ -59,9 +60,8 @@ inline void CToken::Move( CToken& moveTo )
 	word.swap( moveTo.word );
 }
 
-bool AreTokenWordsEqual( const CToken& word1, const CToken& word2 );
-
 //-----------------------------------------------------------------------------
+// CTokenQueue
 
 class CTokenQueue : public std::queue<CToken> {
 public:
