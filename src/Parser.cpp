@@ -15,43 +15,12 @@ CParser::CParser( IErrorHandler* errorHandler ):
 void CParser::Reset()
 {
 	CDirectiveParser::Reset();
-	state = S_Initial;
+	state = &CParser::parsingInitial;
 }
 
 void CParser::AddToken()
 {
-	switch( state ) {
-		case S_Initial:
-			parsingInitial();
-			break;
-		case S_IgnoreLine:
-			parsingIgnoreLine();
-			break;		
-		case S_Word:
-			parsingWord();
-			break;
-		case S_WordBlank:
-			parsingWordBlank();
-			break;
-		case S_WordBlankS:
-			parsingWordBlankS();
-			break;
-		case S_Blank:
-			parsingBlank();
-			break;
-		case S_Rule:
-			parsingRule();
-			break;
-		case S_Directive:
-			parsingDirective();
-			break;
-		case S_Qualifier:
-			parsingQualifier();
-			break;
-		default:
-			assert( false );
-			break;
-	}
+	( this->*state )();
 }
 
 void CParser::parsingInitial()
@@ -59,20 +28,20 @@ void CParser::parsingInitial()
 	if( token.type == TT_Word ) {
 		CRuleParser::EndFunction(); // action
 		token.Move( savedToken1 );
-		state = S_Word;
+		state = &CParser::parsingWord;
 	} else if( token.type == TT_Blank ) {
-		state = S_Blank;
+		state = &CParser::parsingBlank;
 	} else if( token.type != TT_LineFeed ) {
 		CRuleParser::EndFunction(); // action
 		CErrorsHelper::Error( "line should begin with word or space" );
-		state = S_IgnoreLine;
+		state = &CParser::parsingIgnoreLine;
 	}
 }
 
 void CParser::parsingIgnoreLine()
 {
 	if( token.type == TT_LineFeed ) {
-		state = S_Initial;
+		state = &CParser::parsingInitial;
 	}
 }
 
@@ -82,14 +51,14 @@ void CParser::parsingWord()
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
 		token.Swap( savedToken1 );
-		state = S_Initial;
+		state = &CParser::parsingInitial;
 	} else if( token.type == TT_Blank ) {
-		state = S_WordBlank;
+		state = &CParser::parsingWordBlank;
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
 		token.Swap( savedToken1 );
-		state = S_Rule;
+		state = &CParser::parsingRule;
 		AddToken();
 	}
 }
@@ -99,15 +68,15 @@ void CParser::parsingWordBlank()
 	if( token.type == TT_Word
 		&& CDirectiveParser::StartParseIfStartDirective( savedToken1 ) )
 	{
-		state = S_Directive;
+		state = &CParser::parsingDirective;
 	} else if( wordIs( QualifierTag ) ) {
 		token.Move( savedToken2 );
-		state = S_WordBlankS;
+		state = &CParser::parsingWordBlankS;
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
 		token.Swap( savedToken1 );
-		state = S_Rule;
+		state = &CParser::parsingRule;
 		AddToken();
 	}
 }
@@ -117,13 +86,14 @@ void CParser::parsingWordBlankS()
 	if( token.type == TT_Blank ) {
 		token.Swap( savedToken1 );
 		CQualifierParser::StartNamedQualifier();
-		state = IsWrong() ? S_IgnoreLine : S_Qualifier;
+		state = IsWrong() ?
+			&CParser::parsingIgnoreLine : &CParser::parsingQualifier;
 		token.Swap( savedToken1 );
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
 		token.Swap( savedToken1 );
-		state = S_Rule;
+		state = &CParser::parsingRule;
 		savedToken2.Swap( token );
 		AddToken(); // QualifierTag
 		savedToken2.Move( token );
@@ -134,10 +104,10 @@ void CParser::parsingWordBlankS()
 void CParser::parsingBlank()
 {
 	if( token.type == TT_Word && CDirectiveParser::StartParseIfDirective() ) {
-		state = S_Directive;
+		state = &CParser::parsingDirective;
 	} else {
 		CRuleParser::BeginRule();
-		state = S_Rule;
+		state = &CParser::parsingRule;
 		AddToken();
 	}
 }
@@ -163,9 +133,9 @@ void CParser::parsingDirective()
 void CParser::checkFinished()
 {
 	if( IsCorrect() ) {
-		state = S_Initial;
+		state = &CParser::parsingInitial;
 	} else if( IsWrong() ) {
-		state = S_IgnoreLine;
+		state = &CParser::parsingIgnoreLine;
 		AddToken();
 	}
 }

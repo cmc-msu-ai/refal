@@ -17,18 +17,9 @@ private:
 	CToken savedToken1;
 	CToken savedToken2;
 	// parsing
-	enum TState {
-		S_Initial,
-		S_IgnoreLine,
-		S_Word,
-		S_WordBlank,
-		S_WordBlankS,
-		S_Blank,
-		S_Rule,
-		S_Directive,
-		S_Qualifier
-	};
+	typedef void ( CParser::*TState )();
 	TState state;
+
 	void parsingInitial();
 	void parsingIgnoreLine();
 	void parsingWord();
