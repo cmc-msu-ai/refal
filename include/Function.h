@@ -47,7 +47,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-typedef bool ( *TEmbeddedFunctionPtr )();
+typedef bool ( *TEmbeddedFunctionPtr )( CUnitList& argument );
 
 class CEmbeddedFunction : public CRuntimeFunction {
 public:

@@ -3,7 +3,7 @@
 #include <Common.h>
 
 #ifdef _DEBUG
-#define DEBUG_PRINT( arg ) std::cout << arg << std::endl;
+#define DEBUG_PRINT( arg ) std::cout << "DEBUG " << arg << std::endl;
 #else
 #define DEBUG_PRINT( arg )
 #endif

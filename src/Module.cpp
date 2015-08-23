@@ -27,33 +27,66 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 //-----------------------------------------------------------------------------
 // Standart embedded functions
 
+static void strangePrint( const CUnitList& expression )
+{
+	for( const CUnitNode* i = expression.GetFirst(); i != 0; i = i->Next() ) {
+		switch( i->GetType() ) {
+			case UT_Char:
+				std::cout << i->Char();
+				break;
+			case UT_Label:
+				std::cout << "'L:" << i->Label() << "'";
+				break;
+			case UT_Number:
+				std::cout << "'" << i->Number() << "'";
+				break;
+			case UT_LeftParen:
+				std::cout << "(";
+				break;
+			case UT_RightParen:
+				std::cout << ")";
+				break;
+			default:
+				assert( false );
+				break;
+		}
+	}
+	std::cout << std::endl;
+}
+
 static void notImplemented( const char* name )
 {
 	std::cout << "external function `" << name
 		<< "` not implemented yet." << std::endl;
 }
 
-static bool embeddedPrint()
+static bool embeddedPrint( CUnitList& argument )
 {
-	notImplemented( __FUNCTION__ );
+	DEBUG_PRINT( __FUNCTION__ )
+	strangePrint( argument );
 	return true;
 }
 
-static bool embeddedPrintm()
+static bool embeddedPrintm( CUnitList& argument )
 {
-	notImplemented( __FUNCTION__ );
+	DEBUG_PRINT( __FUNCTION__ )
+	argument.HandyPrint( std::cout );
 	return true;
 }
 
-static bool embeddedProut()
+static bool embeddedProut( CUnitList& argument )
 {
-	notImplemented( __FUNCTION__ );
+	DEBUG_PRINT( __FUNCTION__ )
+	strangePrint( argument );
+	argument.Empty();
 	return true;
 }
 
-static bool embeddedProutm()
+static bool embeddedProutm( CUnitList& argument )
 {
-	notImplemented( __FUNCTION__ );
+	DEBUG_PRINT( __FUNCTION__ )
+	argument.HandyPrint( std::cout );
+	argument.Empty();
 	return true;
 }
 

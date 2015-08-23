@@ -180,7 +180,7 @@ void COperationsExecuter::doFunction()
 				fieldOfView.Detach( argumentBegin, argumentEnd );
 				argument.Assign( argumentBegin, argumentEnd );
 			}
-			if( embeddedFunction->EmbeddedFunction()() ) {
+			if( embeddedFunction->EmbeddedFunction()( argument ) ) {
 				if( !argument.IsEmpty() ) {
 					CUnitNode* argumentBegin = argument.GetFirst();
 					CUnitNode* argumentEnd = argument.GetLast();
