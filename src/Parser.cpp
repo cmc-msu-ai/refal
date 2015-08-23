@@ -4,7 +4,7 @@ namespace Refal2 {
 
 //----------	-------------------------------------------------------------------
 
-const char* QualifierTag = "s";
+const char* const QualifierTag = "s";
 
 CParser::CParser( IErrorHandler* errorHandler ):
 	CDirectiveParser( errorHandler )
