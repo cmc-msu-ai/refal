@@ -15,8 +15,7 @@ void CQualifier::Empty()
 
 bool CQualifier::IsEmpty() const
 {
-	// !(~ansichars).any() equal to ansichars.all() from std++11
-	return ( ( ( flags & QIF_All ) == QIF_All ) && !(~ansichars).any()
+	return ( ( ( flags & QIF_All ) == QIF_All ) && ansichars.all()
 		&& chars.IsEmpty() && labels.IsEmpty() && numbers.IsEmpty() );
 }
 
@@ -97,14 +96,15 @@ void CQualifier::DestructiveIntersection( CQualifier& withQualifier )
 	}
 }
 
-void CQualifier::Print( std::ostream& outputStream ) const
+void CQualifier::Print( std::ostream& outputStream,
+	const CPrintHelper& printHelper  ) const
 {
 	if( IsEmpty() ) {
 		return;
 	}
 	outputStream << "( ";
 	printChars( outputStream );
-	printLabels( outputStream );
+	printLabels( outputStream, printHelper );
 	printNumbers( outputStream );
 	outputStream << ( IsIncludeTerms() ? "B" : "(B)" ) << " )";
 }
@@ -186,7 +186,8 @@ void CQualifier::printChars( std::ostream& outputStream ) const
 	}
 }
 
-void CQualifier::printLabels( std::ostream& outputStream ) const
+void CQualifier::printLabels( std::ostream& outputStream,
+	const CPrintHelper& printHelper ) const
 {
 	if( IsIncludeAllLabels() && !labels.IsEmpty() ) {
 		outputStream << "(";
@@ -195,7 +196,7 @@ void CQualifier::printLabels( std::ostream& outputStream ) const
 	std::set<TLabel> a;
 	labels.GetSet( &a );
 	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		outputStream << "/L:" << *i << "/";
+		outputStream << "/" << printHelper.Label( outputStream, *i ) << "/";
 	}
 
 	if( IsIncludeAllLabels() && !labels.IsEmpty() ) {

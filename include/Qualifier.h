@@ -38,7 +38,8 @@ public:
 	bool IsIncludeAllNumbers() const;
 	bool IsIncludeTerms() const;
 
-	void Print( std::ostream& outputStream ) const;
+	void Print( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
 
 private:
 	int flags;
@@ -48,7 +49,8 @@ private:
 	CFastSet<TNumber> numbers;
 
 	void printChars( std::ostream& outputStream ) const;
-	void printLabels( std::ostream& outputStream ) const;
+	void printLabels( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
 	void printNumbers( std::ostream& outputStream ) const;
 };
 

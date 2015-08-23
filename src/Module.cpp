@@ -25,34 +25,22 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 }
 
 //-----------------------------------------------------------------------------
-// Standart embedded functions
+// CProgramPrintHelper
 
-static void strangePrint( const CUnitList& expression )
+std::ostream& CProgramPrintHelper::Label( std::ostream& outputStream,
+	const TLabel label ) const
 {
-	for( const CUnitNode* i = expression.GetFirst(); i != 0; i = i->Next() ) {
-		switch( i->GetType() ) {
-			case UT_Char:
-				std::cout << i->Char();
-				break;
-			case UT_Label:
-				std::cout << "'L:" << i->Label() << "'";
-				break;
-			case UT_Number:
-				std::cout << "'" << i->Number() << "'";
-				break;
-			case UT_LeftParen:
-				std::cout << "(";
-				break;
-			case UT_RightParen:
-				std::cout << ")";
-				break;
-			default:
-				assert( false );
-				break;
-		}
+	const int labelModuleId = label / LabelMask;
+	if( PrintLabelWithModule() ) {
+		outputStream << labelModuleId << ":";
 	}
-	std::cout << std::endl;
+	outputStream << program->Module( labelModuleId ).Functions.
+		GetKey(	label % LabelMask );
+	return outputStream;
 }
+
+//-----------------------------------------------------------------------------
+// Standart embedded functions
 
 static void notImplemented( const char* name )
 {
@@ -63,21 +51,21 @@ static void notImplemented( const char* name )
 static bool embeddedPrint( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	strangePrint( argument );
+	argument.StrangePrint( std::cout, CPrintHelper() );
 	return true;
 }
 
 static bool embeddedPrintm( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.HandyPrint( std::cout );
+	argument.HandyPrint( std::cout, CPrintHelper() );
 	return true;
 }
 
 static bool embeddedProut( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	strangePrint( argument );
+	argument.StrangePrint( std::cout, CPrintHelper() );
 	argument.Empty();
 	return true;
 }
@@ -85,7 +73,7 @@ static bool embeddedProut( CUnitList& argument )
 static bool embeddedProutm( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.HandyPrint( std::cout );
+	argument.HandyPrint( std::cout, CPrintHelper() );
 	argument.Empty();
 	return true;
 }

@@ -99,7 +99,8 @@ public:
 
 	void Compile( CFunctionCompiler& compiler ) const;
 
-	void Print( std::ostream& outputStream ) const;
+	void Print( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
 
 private:
 	CRule( const CRule& );
@@ -149,7 +150,8 @@ public:
 	// Only for ordinary function
 	void Compile( CFunctionCompiler& compiler );
 
-	void Print( std::ostream& outputStream ) const;
+	void Print( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
 
 private:
 	TPreparatoryFunctionType type;

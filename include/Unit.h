@@ -5,6 +5,32 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CPrintHelper
+
+class CPrintHelper {
+public:
+	CPrintHelper() :
+		printLabelWithModule( false )
+	{
+	}
+
+	bool PrintLabelWithModule() const { return printLabelWithModule; }
+	void SetPrintLabelWithModule( bool _printLabelWithModule = true )
+	{
+		printLabelWithModule = _printLabelWithModule;
+	}
+
+	virtual std::ostream& Variable( std::ostream& outputStream,
+		const TVariableIndex variable ) const;
+	virtual std::ostream& Label( std::ostream& outputStream,
+		const TLabel label ) const;
+
+private:
+	bool printLabelWithModule;
+};
+
+//-----------------------------------------------------------------------------
+// CUnit
 
 typedef CNodeList<CUnit>::CNodeType CUnitNode;
 
@@ -66,7 +92,7 @@ public:
 	bool IsEqualWith( const CUnit& unit ) const;
 
 	void Print( std::ostream& outputStream,
-		const CVariables* variables = 0 ) const;
+		const CPrintHelper& printHelper ) const;
 
 private:
 	TUnitType type;
@@ -80,24 +106,28 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// CUnitList
 
 class CUnitList : public CNodeList<CUnit> {
 public:
 	CUnitList() {}
 	CUnitList(CUnitNode* first, CUnitNode* last): CNodeList( first, last ) {}
 
-	inline CUnitNode* AppendChar(TChar c);
-	inline CUnitNode* AppendLabel(TLabel label);
-	inline CUnitNode* AppendNumber(TNumber number);
-	inline CUnitNode* AppendVariable(TVariableIndex variable);
-	inline CUnitNode* AppendLeftParen(CUnitNode* rightParen = 0);
-	inline CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
-	inline CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
-	inline CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
+	CUnitNode* AppendChar(TChar c);
+	CUnitNode* AppendLabel(TLabel label);
+	CUnitNode* AppendNumber(TNumber number);
+	CUnitNode* AppendVariable(TVariableIndex variable);
+	CUnitNode* AppendLeftParen(CUnitNode* rightParen = 0);
+	CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
+	CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
+	CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
 
 	void Print( std::ostream& outputStream,
-		const CVariables* variables = 0 ) const;
-	void HandyPrint( std::ostream& outputStream ) const;
+		const CPrintHelper& printHelper ) const;
+	void HandyPrint( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
+	void StrangePrint( std::ostream& outputStream,
+		const CPrintHelper& printHelper ) const;
 };
 
 //-----------------------------------------------------------------------------

@@ -4,12 +4,43 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-void CRule::Print( std::ostream& outputStream ) const
+class CRulePrintHelper : public CPrintHelper {
+public:
+	CRulePrintHelper( const CPrintHelper& _printHelper,
+			const CVariables& _variables ) :
+		printHelper( _printHelper ),
+		variables( _variables )
+	{
+	}
+
+	virtual std::ostream& Variable( std::ostream& outputStream,
+		const TVariableIndex variable ) const
+	{
+		outputStream << variables.GetVariable( variable ).GetType();
+		variables.GetVariable( variable ).GetQualifier().Print( outputStream,
+			printHelper );
+		return outputStream;
+	}
+
+	virtual std::ostream& Label( std::ostream& outputStream,
+		const TLabel label ) const
+	{
+		return printHelper.Label( outputStream, label );
+	}
+
+private:
+	const CPrintHelper& printHelper;
+	const CVariables& variables;
+};
+
+void CRule::Print( std::ostream& outputStream,
+	const CPrintHelper& printHelper ) const
 {
+	CRulePrintHelper rulePrintHelper( printHelper, Variables );
 	outputStream << "\t" << ( RightMatching ? "R" : "" ) << " ";
-	Left.Print( outputStream, &Variables );
+	Left.Print( outputStream, rulePrintHelper );
 	outputStream << "= ";
-	Right.Print( outputStream );
+	Right.Print( outputStream, printHelper );
 }
 
 void CRule::Compile( CFunctionCompiler& compiler ) const
@@ -104,12 +135,13 @@ void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 	assert( firstOperation != nullptr );
 }
 
-void CPreparatoryFunction::Print( std::ostream& outputStream ) const
+void CPreparatoryFunction::Print( std::ostream& outputStream,
+	const CPrintHelper& printHelper ) const
 {
 	assert( IsOrdinary() );
 	const CRule* rule = FirstRule();
 	while( rule != nullptr ) {
-		rule->Print( outputStream );
+		rule->Print( outputStream, printHelper );
 		outputStream << std::endl;
 		rule = rule->NextRule.get();
 	}

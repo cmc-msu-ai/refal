@@ -3,6 +3,28 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CPrintHelper
+
+std::ostream& CPrintHelper::Variable( std::ostream& outputStream,
+	const TVariableIndex variable ) const
+{
+	outputStream << "V" << variable;
+	return outputStream;
+}
+
+std::ostream& CPrintHelper::Label( std::ostream& outputStream,
+	const TLabel label ) const
+{
+	outputStream << "L:";
+	if( PrintLabelWithModule() ) {
+		outputStream << ( label / LabelMask ) << ":";
+	}
+	outputStream << ( label % LabelMask );
+	return outputStream;
+}
+
+//-----------------------------------------------------------------------------
+// CUnit
 
 bool CUnit::IsEqualWith( const CUnit& unit ) const
 {
@@ -35,27 +57,22 @@ bool CUnit::IsEqualWith( const CUnit& unit ) const
 }
 
 void CUnit::Print( std::ostream& outputStream,
-	const CVariables* variables ) const
+	const CPrintHelper& printHelper ) const
 {
 	switch( GetType() ) {
 		case UT_Char:
 			outputStream << "'" << Char() << "' ";
 			break;
 		case UT_Label:
-			outputStream << "/L:" << Label() << "/ ";
+			outputStream << "/" << printHelper.Label( outputStream, Label() )
+				<< "/ ";
 			break;
 		case UT_Number:
 			outputStream << "/" << Number() << "/ ";
 			break;
 		case UT_Variable:
-			if( variables != 0 ) {
-				outputStream << variables->GetVariable( Variable() ).GetType();
-				variables->GetVariable( Variable() ).GetQualifier().Print(
-					outputStream );
-			} else {
-				outputStream << "V";
-			}
-			outputStream << Variable() << " ";
+			outputStream << printHelper.Variable( outputStream, Variable() )
+				<< " ";
 			break;
 		case UT_LeftParen:
 			outputStream << "( ";
@@ -76,16 +93,18 @@ void CUnit::Print( std::ostream& outputStream,
 }
 
 //-----------------------------------------------------------------------------
+// CUnitList
 
 void CUnitList::Print( std::ostream& outputStream,
-	const CVariables* variables ) const
+	const CPrintHelper& printHelper ) const
 {
 	for( const CUnitNode* node = GetFirst(); node != 0; node = node->Next() ) {
-		node->Print( outputStream, variables );
+		node->Print( outputStream, printHelper );
 	}
 }
 
-void CUnitList::HandyPrint( std::ostream& outputStream ) const
+void CUnitList::HandyPrint( std::ostream& outputStream,
+	const CPrintHelper& printHelper ) const
 {
 	bool lastWasChar = false;
 	for( const CUnitNode* node = GetFirst(); node != 0; node = node->Next() ) {
@@ -105,7 +124,8 @@ void CUnitList::HandyPrint( std::ostream& outputStream ) const
 				outputStream << node->Char();
 				break;
 			case UT_Label:
-				outputStream << "/L:" << node->Label() << "/";
+				outputStream << "/" << printHelper.Label( outputStream,
+					node->Label() ) << "/";
 				break;
 			case UT_Number:
 				outputStream << "/" << node->Number() << "/";
@@ -122,6 +142,7 @@ void CUnitList::HandyPrint( std::ostream& outputStream ) const
 			case UT_RightBracket:
 				outputStream << ">";
 				break;
+			case UT_Variable:
 			default:
 				assert( false );
 				break;
@@ -131,6 +152,38 @@ void CUnitList::HandyPrint( std::ostream& outputStream ) const
 		outputStream << "'";
 	}
 	outputStream << std::endl;
+}
+
+void CUnitList::StrangePrint( std::ostream& outputStream,
+	const CPrintHelper& printHelper ) const
+{
+	for( const CUnitNode* node = GetFirst(); node != 0; node = node->Next() ) {
+		switch( node->GetType() ) {
+			case UT_Char:
+				outputStream<< node->Char();
+				break;
+			case UT_Label:
+				outputStream << "'" << printHelper.Label( outputStream,
+					node->Label() ) << "'";
+				break;
+			case UT_Number:
+				std::cout << "'" << node->Number() << "'";
+				break;
+			case UT_LeftParen:
+				std::cout << "(";
+				break;
+			case UT_RightParen:
+				std::cout << ")";
+				break;
+			case UT_Variable:
+			case UT_LeftBracket:
+			case UT_RightBracket:
+			default:
+				assert( false );
+				break;
+		}
+	}
+	std::cout << std::endl;
 }
 
 //-----------------------------------------------------------------------------

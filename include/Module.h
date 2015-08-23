@@ -5,6 +5,7 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CProgram
 
 struct CRuntimeModule {
 	CRuntimeFunctions Functions;
@@ -48,6 +49,25 @@ private:
 typedef std::shared_ptr<CProgram> CProgramPtr;
 
 //-----------------------------------------------------------------------------
+// CProgramPrintHelper
+
+class CProgramPrintHelper : public CPrintHelper {
+public:
+	CProgramPrintHelper( const CProgramPtr _program ) :
+		program( _program )
+	{
+		assert( static_cast<bool>( program ) );
+	}
+
+	virtual std::ostream& Label( std::ostream& outputStream,
+		const TLabel label ) const;
+
+private:
+	CProgramPtr program;
+};
+
+//-----------------------------------------------------------------------------
+// CModuleData
 
 struct CModuleData {
 	CToken NameToken;
@@ -60,6 +80,7 @@ typedef std::unique_ptr<CModuleData> CModuleDataPtr;
 typedef std::vector<CModuleDataPtr> CModuleDataVector;
 
 //-----------------------------------------------------------------------------
+// CProgramBuilder
 
 class CProgramBuilder : public CFunctionBuilder {
 public:

@@ -93,7 +93,9 @@ int main( int argc, const char* argv[] )
 	if( result == ER_OK ) {
 		std::cout << "------------------------" << std::endl;
 		std::cout << "Field of view: " << std::endl << std::endl;
-		fieldOfView.Print( std::cout );
+		CProgramPrintHelper programPrintHelper( program );
+		programPrintHelper.SetPrintLabelWithModule();
+		fieldOfView.HandyPrint( std::cout, programPrintHelper );
 		std::cout << std::endl;
 	} else {
 		std::cout << ExecutionResultStrings[result] << std::endl;
