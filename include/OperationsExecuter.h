@@ -216,7 +216,7 @@ inline bool COperationsExecuter::checkQualifier( CUnitNode* const node,
 {
 	if( node->IsLabel() ) {
 		if( ( node->Label() / LabelMask ) != RuntimeModuleId ) {
-			return false;
+			return qualifier->IsIncludeAllLabels();
 		}
 		CUnit unit( *node );
 		unit.Label() %= LabelMask;
