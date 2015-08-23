@@ -325,8 +325,8 @@ CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
 			standartEmbeddedFunctions[i].EmbeddedFunction );
 	}
 	// add `ProgramStartFunctionName`
-	assert( !globals.GetData( globals.AddKey(
-		ProgramStartFunctionName ) ).IsDefined() );
+	const int globalGoIndex = globals.AddKey( ProgramStartFunctionName );
+	assert( !globals.GetData( globalGoIndex ).IsDefined() );
 }
 
 CProgramPtr CInternalProgramBuilder::Build( CModuleDataVector& modules,
