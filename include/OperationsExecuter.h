@@ -4,15 +4,6 @@
 
 namespace Refal2 {
 
-class CContext {
-
-};
-
-class COrdinaryExecuter {
-public:
-	static bool Execute( CUnitList& argument, CUnitList& result );
-};
-
 enum TExecutionResult {
 	ER_OK = 0,
 	ER_RecognitionImpossible,
@@ -23,34 +14,34 @@ enum TExecutionResult {
 
 class COperationsExecuter {
 public:
-	static TExecutionResult Run( const TLabel entry, CUnitList& fieldOfView,
+	static TExecutionResult Run( CProgramPtr& program, CUnitList& fieldOfView,
 		CUnitNode*& errorCall );
-	
+
 private:
-	explicit COperationsExecuter( const TLabel entry );
+	explicit COperationsExecuter( CProgramPtr& program );
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
-	
+
 	void restoreLeftBrackets();
 	void doFunction();
 	void doFunctionBody();
 	void nextOperation();
-	
+
 	bool checkQualifier( CUnitNode* const node,
 		const TQualifierIndex qualifier ) const;
-	
+
 	void saveToTable( CUnitNode* const node );
 	void saveToTable( CUnitNode* const nodeA, CUnitNode* const nodeB );
-	
+
 	bool isEmpty() const;
-	
+
 	bool shiftLeft();
 	bool shiftRight();
-	
+
 	void saveState( COperationNode* operationForSaving );
 	void saveState() { saveState( operation ); }
 	bool fail();
-	
+
 	void matchingComplete();
 	void doReturn();
 	void insertJump( const TOperationAddress operationAddress );
@@ -167,18 +158,18 @@ private:
 	void copy_E( const TTableIndex tableIndex );
 	void move_WV( const TTableIndex tableIndex );
 	void copy_WV( const TTableIndex tableIndex );
-	
+
 	TExecutionResult executionResult;
-	
+
 	CUnitList fieldOfView;
 	CUnitNode* left;
 	CUnitNode* right;
-	
+
 	CUnitNode* table[4096];
 	TTableIndex tableTop;
-	
+
 	COperationNode* operation;
-	
+
 	struct CStackData {
 		CUnitNode* left;
 		CUnitNode* right;
@@ -187,11 +178,16 @@ private:
 	};
 	CStackData stack[128];
 	int stackTop;
-	
+
 	CUnitNode initialLeftBracket;
 	CUnitNode* lastAddedLeftParen;
 	CUnitNode* lastAddedLeftBracket;
+
+	CProgramPtr& program;
+	TRuntimeModuleId runtimeModuleId;
 };
+
+const TLabel LabelMask = 256 * 256;
 
 inline void COperationsExecuter::nextOperation()
 {
@@ -204,6 +200,14 @@ inline void COperationsExecuter::nextOperation()
 inline bool COperationsExecuter::checkQualifier( CUnitNode* const node,
 	const TQualifierIndex qualifier ) const
 {
+	if( node->IsLabel() ) {
+		if( ( node->Label() / LabelMask ) != runtimeModuleId ) {
+			return false;
+		}
+		CUnit unit( *node );
+		unit.Label() %= LabelMask;
+		return qualifier->Check( unit );
+	}
 	return qualifier->Check( *node );
 }
 
@@ -1056,7 +1060,7 @@ inline void COperationsExecuter::insertChar( const TChar c )
 inline void COperationsExecuter::insertLabel( const TLabel label )
 {
 	left = fieldOfView.InsertAfter( left, CUnit( UT_Label ) );
-	left->Label() = label;
+	left->Label() = label + LabelMask * runtimeModuleId;
 }
 
 inline void COperationsExecuter::insertNumber( const TNumber number )

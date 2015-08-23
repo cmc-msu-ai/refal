@@ -97,27 +97,31 @@ static const char* operationNames[] = {
 	"OT_Copy_WV"
 };
 
-TExecutionResult COperationsExecuter::Run( const TLabel entry,
+TExecutionResult COperationsExecuter::Run( CProgramPtr& program,
 	CUnitList& fieldOfView, CUnitNode*& errorCall )
 {
-	COperationsExecuter executer( entry );
+	COperationsExecuter executer( program );
 	executer.fieldOfView.Move( fieldOfView );
 	errorCall = executer.initialLeftBracket.PairedParen();
 	return executer.executionResult;
 }
 
-COperationsExecuter::COperationsExecuter( const TLabel entry ):
+COperationsExecuter::COperationsExecuter( CProgramPtr& _program ):
 	executionResult( ER_OK ),
 	left( 0 ), right( 0 ),
 	tableTop( 0 ),
 	operation( 0 ),
 	stackTop( 0 ),
 	initialLeftBracket( CUnit( UT_LeftBracket ) ),
-	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 )
+	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 ),
+	program( _program )
 {
+	assert( static_cast<bool>( program ) );
 	left = fieldOfView.Append( CUnit( UT_LeftBracket ) );
 	left->PairedParen() = 0;
-	fieldOfView.Append( CUnit( UT_Label ) )->Label() = entry;
+
+	fieldOfView.Append( CUnit( UT_Label ) )->Label() =
+		program->GetProgramStartFunction();
 	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
 	right->PairedParen() = left;
 
@@ -143,16 +147,22 @@ void COperationsExecuter::restoreLeftBrackets()
 
 void COperationsExecuter::doFunction()
 {
-#if 0
 	CUnitNode* savedRightBracket = initialLeftBracket.PairedParen();
 	right = savedRightBracket;
 	left = right->PairedParen();
 	CUnitNode* savedNextRightBracket = left->PairedParen();
 	left = left->Next();
 	if( left->IsLabel() ) {
-		const CFunction& function = LabelTable.GetLabelFunction( left->Label() );
-		if( function.IsCompiled() ) {
-			operation = static_cast<COperationNode*>( function.firstOperation );
+		runtimeModuleId = left->Label() / LabelMask;
+		const TLabel functionIndex = left->Label() % LabelMask;
+		const CRuntimeFunction* function = program->Module( runtimeModuleId ).
+			Functions.GetData( functionIndex ).get();
+		if( function->IsOrdinary() ) {
+			const COrdinaryFunction* ordinaryFunction =
+				static_cast<const COrdinaryFunction*>( function );
+			operation = static_cast<COperationNode*>(
+				ordinaryFunction->FirstOperation() );
+			runtimeModuleId = ordinaryFunction->RuntimeModuleId();
 			tableTop = 0;
 			stackTop = 0;
 			lastAddedLeftParen = 0;
@@ -160,8 +170,9 @@ void COperationsExecuter::doFunction()
 			initialLeftBracket.PairedParen() = 0;
 			saveToTable( left, right );
 			doFunctionBody();
-		} else if( function.IsExternal() ) {
-			// TODO: execute extern
+		} else if( function->IsEmbedded() ) {
+			const CEmbeddedFunction* embeddedFunction =
+				static_cast<const CEmbeddedFunction*>( function );
 			CUnitList argument;
 			if( left->Next() != right ) {
 				CUnitNode* argumentBegin = left->Next();
@@ -169,8 +180,7 @@ void COperationsExecuter::doFunction()
 				fieldOfView.Detach( argumentBegin, argumentEnd );
 				argument.Assign( argumentBegin, argumentEnd );
 			}
-			std::string errorText;
-			if( function.externalFunction( argument, errorText ) ) {
+			if( embeddedFunction->EmbeddedFunction()() ) {
 				if( !argument.IsEmpty() ) {
 					CUnitNode* argumentBegin = argument.GetFirst();
 					CUnitNode* argumentEnd = argument.GetLast();
@@ -184,7 +194,7 @@ void COperationsExecuter::doFunction()
 			} else {
 				executionResult = ER_WrongArgumentOfExternalFunction;
 			}
-		} else if( function.IsEmpty() ) {
+		} else if( function->IsEmpty() ) {
 			// TODO: error, can't execute empty function
 			executionResult = ER_CallEmptyFunction;
 		} else {
@@ -199,7 +209,6 @@ void COperationsExecuter::doFunction()
 	} else {
 		initialLeftBracket.PairedParen() = savedRightBracket;
 	}
-#endif
 }
 
 void COperationsExecuter::doFunctionBody()

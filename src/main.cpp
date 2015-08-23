@@ -124,6 +124,14 @@ CProgramPtr ParseFiles( const CFileNames& fileNames )
 	return CProgramPtr();
 }
 
+const char* const ExecutionResultStrings[] = {
+	"ER_OK",
+	"ER_RecognitionImpossible",
+	"ER_CallEmptyFunction",
+	"ER_LostFunctionLabel",
+	"ER_WrongArgumentOfExternalFunction"
+};
+
 int main( int argc, const char* argv[] )
 {
 	std::ios::sync_with_stdio( false );
@@ -139,5 +147,16 @@ int main( int argc, const char* argv[] )
 
 	CProgramPtr program = ParseFiles( fileNames );
 
-	return ( static_cast<bool>( program ) ? 0 : 1 );
+	if( !static_cast<bool>( program ) ) {
+		return 1;
+	}
+
+	CUnitList fieldOfView;
+	CUnitNode* errorNode;
+	TExecutionResult result =
+		COperationsExecuter::Run( program, fieldOfView, errorNode );
+
+	std::cout << ExecutionResultStrings[result] << std::endl;
+
+	return 0;
 }

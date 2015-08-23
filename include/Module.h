@@ -27,23 +27,19 @@ public:
 	COperationList& OperationsHolder() { return operationsHolder; }
 	const COperationList& OperationsHolder() const { return operationsHolder; }
 
-	void SetProgramStartFunction(
-		const COrdinaryFunction* const _programStartFunction )
+	void SetProgramStartFunction( const TLabel _programStartFunction )
 	{
-		assert( _programStartFunction != 0 );
+		assert( _programStartFunction != InvalidDictionaryIndex );
 		programStartFunction = _programStartFunction;
 	}
 
-	const COrdinaryFunction* GetProgramStartFunction() const
-	{
-		return programStartFunction;
-	}
+	TLabel GetProgramStartFunction() const { return programStartFunction; }
 
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
-	const COrdinaryFunction* programStartFunction;
+	TLabel programStartFunction;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );

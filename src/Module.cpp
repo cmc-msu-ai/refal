@@ -29,31 +29,32 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 
 static void notImplemented( const char* name )
 {
-	std::cout << "external function `" << name << "` not implemented yet.";
+	std::cout << "external function `" << name
+		<< "` not implemented yet." << std::endl;
 }
 
 static bool embeddedPrint()
 {
 	notImplemented( __FUNCTION__ );
-	return false;
+	return true;
 }
 
 static bool embeddedPrintm()
 {
 	notImplemented( __FUNCTION__ );
-	return false;
+	return true;
 }
 
 static bool embeddedProut()
 {
 	notImplemented( __FUNCTION__ );
-	return false;
+	return true;
 }
 
 static bool embeddedProutm()
 {
 	notImplemented( __FUNCTION__ );
-	return false;
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -376,13 +377,28 @@ void CInternalProgramBuilder::linkFunction( CPreparatoryFunction* function,
 
 void CInternalProgramBuilder::link( const CModuleDataVector& modules )
 {
+	const CGlobalFunctionData& goFunction = globals.GetData( globals.FindKey(
+		ProgramStartFunctionName ) );
+	TOperationAddress goFirstOperation =
+		goFunction.PreparatoryFunction()->FirstOperation();
+	TRuntimeModuleId goRuntimeModuleId = goFunction.RuntimeModuleId();
+	// link all
 	processModules( modules, &CInternalProgramBuilder::linkFunction );
 	// set program start function
-	CRuntimeFunctionPtr goFunction = globals.GetData(
-		globals.FindKey( ProgramStartFunctionName ) ).RuntimeFunction();
-	assert( goFunction->IsOrdinary() );
-	program->SetProgramStartFunction(
-		static_cast<COrdinaryFunction*>( goFunction.get() ) );
+	const CRuntimeFunctions& runtimeFunctions =
+		program->Module( goRuntimeModuleId ).Functions;
+	TLabel goLabel = InvalidDictionaryIndex;
+	for( int i = 0; i < runtimeFunctions.Size(); i++ ) {
+		if( runtimeFunctions.GetData( i )->IsOrdinary()
+			&& static_cast<const COrdinaryFunction*>(
+				runtimeFunctions.GetData( i ).get() )->FirstOperation() ==
+				goFirstOperation )
+		{
+			goLabel = i;
+		}
+	}
+	assert( goLabel != InvalidDictionaryIndex );
+	program->SetProgramStartFunction( goLabel + goRuntimeModuleId * LabelMask );
 }
 
 //-----------------------------------------------------------------------------
