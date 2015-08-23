@@ -4,6 +4,10 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
+const char* const RuleLeftMatchingDirectionTag = "l";
+const char* const RuleRightMatchingDirectionTag = "r";
+const char RuleLeftBracketTag = 'k';
+
 CRuleParser::CRuleParser( IErrorHandler* errorHandler ):
 	CQualifierParser( errorHandler )
 {
@@ -18,14 +22,15 @@ void CRuleParser::Reset()
 
 void CRuleParser::BeginFunction()
 {
+	assert( token.type == TT_Word && !token.word.empty() );
 	functionName = token;
 	BeginRule();
 }
 
 void CRuleParser::EndFunction()
 {
-	//assert( IsFinished() );
-	if( !functionName.word.empty() ) {
+	if( !functionName.IsNone() ) {
+		assert( !token.word.empty() );
 		CRulePtr firstRule;
 		CFunctionBuilder::Export( firstRule );
 		if( static_cast<bool>( firstRule ) ) {
@@ -33,13 +38,12 @@ void CRuleParser::EndFunction()
 		} else {
 			CModuleBuilder::SetEmpty( functionName );
 		}
-		functionName.word.clear();
+		functionName = CToken();
 	}
 }
 
 void CRuleParser::BeginRule()
 {
-	//assert( IsFinished() );
 	CParsingElementState::Reset();
 	state = &CRuleParser::direction;
 }
@@ -62,17 +66,12 @@ void CRuleParser::direction()
 		return;
 	}
 	state = &CRuleParser::afterDirection;
-	if( token.type == TT_Word && token.word.length() == 1 ) {
-		switch( token.word[0] ) {
-			case 'r':
-			case 'R':
-				CFunctionBuilder::SetRightDirection();
-				return;
-			case 'l':
-			case 'L':
-				return;
-			default:
-				break;
+	if( token.type == TT_Word ) {
+		if( CompareNoCase( token.word, RuleRightMatchingDirectionTag ) ) {
+			CFunctionBuilder::SetRightDirection();
+			return;
+		} else if( CompareNoCase( token.word, RuleLeftMatchingDirectionTag ) ) {
+			return;
 		}
 	}
 	AddToken();
@@ -133,7 +132,7 @@ void CRuleParser::wordAfterDirection()
 {
 	assert( token.type == TT_Word );
 	while( !token.word.empty() ) {
-		if( token.word[0] == 'k' ) {
+		if( CompareCharNoCase( token.word[0], 'k' ) ) {
 			CFunctionBuilder::AddLeftBracket();
 			token.position++;
 			token.word.erase( 0, 1 );
