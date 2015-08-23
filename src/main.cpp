@@ -59,11 +59,11 @@ CProgramPtr ParseFiles( const CFileNames& fileNames )
 }
 
 const char* const ExecutionResultStrings[] = {
-	"ER_OK",
-	"ER_RecognitionImpossible",
-	"ER_CallEmptyFunction",
-	"ER_LostFunctionLabel",
-	"ER_WrongArgumentOfExternalFunction"
+	"ok",
+	"recognition impossible",
+	"call empty function",
+	"lost function label",
+	"wrong argument of external function"
 };
 
 int main( int argc, const char* argv[] )
@@ -90,16 +90,14 @@ int main( int argc, const char* argv[] )
 	TExecutionResult result =
 		COperationsExecuter::Run( program, fieldOfView, errorNode );
 
-	if( result == ER_OK ) {
-		std::cout << "------------------------" << std::endl;
-		std::cout << "Field of view: " << std::endl << std::endl;
-		CProgramPrintHelper programPrintHelper( program );
-		programPrintHelper.SetPrintLabelWithModule();
-		fieldOfView.HandyPrint( std::cout, programPrintHelper );
-		std::cout << std::endl;
-	} else {
-		std::cout << ExecutionResultStrings[result] << std::endl;
-	}
+	std::cout << "------------------------" << std::endl;
+	std::cout << "Execution result: "
+		<< ExecutionResultStrings[result] << "." << std::endl;
+	std::cout << "Field of view: " << std::endl << std::endl;
+	CProgramPrintHelper programPrintHelper( program );
+	programPrintHelper.SetPrintLabelWithModule();
+	fieldOfView.HandyPrint( std::cout, programPrintHelper );
+	std::cout << std::endl;
 
 	return 0;
 }
