@@ -26,6 +26,7 @@ bool ParseFile( CScanner& scanner, const std::string& fileName )
 		return false;
 	}
 	std::cout << "Source file: `" << fileName << "`." << std::endl;
+	std::cerr << "Source file: `" << fileName << "`." << std::endl;
 
 	for( char c; fileStream.get( c ); ) {
 		scanner.AddChar( c );
