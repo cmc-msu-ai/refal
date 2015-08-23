@@ -90,7 +90,14 @@ int main( int argc, const char* argv[] )
 	TExecutionResult result =
 		COperationsExecuter::Run( program, fieldOfView, errorNode );
 
-	std::cout << ExecutionResultStrings[result] << std::endl;
+	if( result == ER_OK ) {
+		std::cout << "------------------------" << std::endl;
+		std::cout << "Field of view: " << std::endl << std::endl;
+		fieldOfView.Print( std::cout );
+		std::cout << std::endl;
+	} else {
+		std::cout << ExecutionResultStrings[result] << std::endl;
+	}
 
 	return 0;
 }

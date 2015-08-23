@@ -90,6 +90,24 @@ static bool embeddedProutm( CUnitList& argument )
 	return true;
 }
 
+static bool embeddedChartof( CUnitList& argument )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	return true;
+}
+
+static bool embeddedFtochar( CUnitList& argument )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	return true;
+}
+
+static bool embeddedFunctab( CUnitList& argument )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 // CStandartEmbeddedFunctionData
 
@@ -103,6 +121,9 @@ const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 	{ "printm", embeddedPrintm },
 	{ "prout", embeddedProut },
 	{ "proutm", embeddedProutm },
+	{ "chartof", embeddedChartof },
+	{ "ftochar", embeddedFtochar },
+	{ "functab", embeddedFunctab },
 	{ nullptr, nullptr }
 };
 
