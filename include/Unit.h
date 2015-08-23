@@ -20,9 +20,9 @@ public:
 		printLabelWithModule = _printLabelWithModule;
 	}
 
-	virtual std::ostream& Variable( std::ostream& outputStream,
+	virtual void Variable( std::ostream& outputStream,
 		const TVariableIndex variable ) const;
-	virtual std::ostream& Label( std::ostream& outputStream,
+	virtual void Label( std::ostream& outputStream,
 		const TLabel label ) const;
 
 private:

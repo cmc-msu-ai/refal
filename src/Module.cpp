@@ -27,7 +27,7 @@ CRuntimeModule& CProgram::Module( TRuntimeModuleId moduleId )
 //-----------------------------------------------------------------------------
 // CProgramPrintHelper
 
-std::ostream& CProgramPrintHelper::Label( std::ostream& outputStream,
+void CProgramPrintHelper::Label( std::ostream& outputStream,
 	const TLabel label ) const
 {
 	const int labelModuleId = label / LabelMask;
@@ -36,7 +36,6 @@ std::ostream& CProgramPrintHelper::Label( std::ostream& outputStream,
 	}
 	outputStream << program->Module( labelModuleId ).Functions.
 		GetKey(	label % LabelMask );
-	return outputStream;
 }
 
 //-----------------------------------------------------------------------------
@@ -81,18 +80,21 @@ static bool embeddedProutm( CUnitList& argument )
 static bool embeddedChartof( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
+	argument.Empty();
 	return true;
 }
 
 static bool embeddedFtochar( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
+	argument.Empty();
 	return true;
 }
 
 static bool embeddedFunctab( CUnitList& argument )
 {
 	DEBUG_PRINT( __FUNCTION__ )
+	argument.Empty();
 	return true;
 }
 

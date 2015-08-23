@@ -13,19 +13,18 @@ public:
 	{
 	}
 
-	virtual std::ostream& Variable( std::ostream& outputStream,
+	virtual void Variable( std::ostream& outputStream,
 		const TVariableIndex variable ) const
 	{
 		outputStream << variables.GetVariable( variable ).GetType();
 		variables.GetVariable( variable ).GetQualifier().Print( outputStream,
 			printHelper );
-		return outputStream;
 	}
 
-	virtual std::ostream& Label( std::ostream& outputStream,
+	virtual void Label( std::ostream& outputStream,
 		const TLabel label ) const
 	{
-		return printHelper.Label( outputStream, label );
+		printHelper.Label( outputStream, label );
 	}
 
 private:

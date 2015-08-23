@@ -59,7 +59,7 @@ public:
 		assert( static_cast<bool>( program ) );
 	}
 
-	virtual std::ostream& Label( std::ostream& outputStream,
+	virtual void Label( std::ostream& outputStream,
 		const TLabel label ) const;
 
 private:

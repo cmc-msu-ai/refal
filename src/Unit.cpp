@@ -5,14 +5,13 @@ namespace Refal2 {
 //-----------------------------------------------------------------------------
 // CPrintHelper
 
-std::ostream& CPrintHelper::Variable( std::ostream& outputStream,
+void CPrintHelper::Variable( std::ostream& outputStream,
 	const TVariableIndex variable ) const
 {
 	outputStream << "V" << variable;
-	return outputStream;
 }
 
-std::ostream& CPrintHelper::Label( std::ostream& outputStream,
+void CPrintHelper::Label( std::ostream& outputStream,
 	const TLabel label ) const
 {
 	outputStream << "L:";
@@ -20,7 +19,6 @@ std::ostream& CPrintHelper::Label( std::ostream& outputStream,
 		outputStream << ( label / LabelMask ) << ":";
 	}
 	outputStream << ( label % LabelMask );
-	return outputStream;
 }
 
 //-----------------------------------------------------------------------------
@@ -64,15 +62,16 @@ void CUnit::Print( std::ostream& outputStream,
 			outputStream << "'" << Char() << "' ";
 			break;
 		case UT_Label:
-			outputStream << "/" << printHelper.Label( outputStream, Label() )
-				<< "/ ";
+			outputStream << "/";
+			printHelper.Label( outputStream, Label() );
+			outputStream << "/ ";
 			break;
 		case UT_Number:
 			outputStream << "/" << Number() << "/ ";
 			break;
 		case UT_Variable:
-			outputStream << printHelper.Variable( outputStream, Variable() )
-				<< " ";
+			printHelper.Variable( outputStream, Variable() );
+			outputStream << " ";
 			break;
 		case UT_LeftParen:
 			outputStream << "( ";
@@ -124,8 +123,9 @@ void CUnitList::HandyPrint( std::ostream& outputStream,
 				outputStream << node->Char();
 				break;
 			case UT_Label:
-				outputStream << "/" << printHelper.Label( outputStream,
-					node->Label() ) << "/";
+				outputStream << "/";
+				printHelper.Label( outputStream, node->Label() );
+				outputStream << "/";
 				break;
 			case UT_Number:
 				outputStream << "/" << node->Number() << "/";
@@ -163,8 +163,9 @@ void CUnitList::StrangePrint( std::ostream& outputStream,
 				outputStream<< node->Char();
 				break;
 			case UT_Label:
-				outputStream << "'" << printHelper.Label( outputStream,
-					node->Label() ) << "'";
+				outputStream << "'";
+				printHelper.Label( outputStream, node->Label() );
+				outputStream << "'";
 				break;
 			case UT_Number:
 				std::cout << "'" << node->Number() << "'";

@@ -196,7 +196,9 @@ void CQualifier::printLabels( std::ostream& outputStream,
 	std::set<TLabel> a;
 	labels.GetSet( &a );
 	for( std::set<TLabel>::const_iterator i = a.begin(); i != a.end(); ++i ) {
-		outputStream << "/" << printHelper.Label( outputStream, *i ) << "/";
+		outputStream << "/";
+		printHelper.Label( outputStream, *i );
+		outputStream << "/";
 	}
 
 	if( IsIncludeAllLabels() && !labels.IsEmpty() ) {
