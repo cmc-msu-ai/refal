@@ -3,6 +3,23 @@
 #include <Refal2.h>
 
 namespace Refal2 {
+//-----------------------------------------------------------------------------
+// CExecutionContext
+
+struct CExecutionContext {
+	CUnitList Argument;
+	const CProgramPtr Program;
+	TRuntimeModuleId RuntimeModuleId;
+
+	CExecutionContext( const CProgramPtr& program ) :
+		Program( program ),
+		RuntimeModuleId( InvalidRuntimeModuleId )
+	{
+	}
+};
+
+//-----------------------------------------------------------------------------
+// COperationsExecuter
 
 enum TExecutionResult {
 	ER_OK = 0,
@@ -12,13 +29,13 @@ enum TExecutionResult {
 	ER_WrongArgumentOfExternalFunction
 };
 
-class COperationsExecuter {
+class COperationsExecuter : public CExecutionContext {
 public:
-	static TExecutionResult Run( CProgramPtr& program, CUnitList& fieldOfView,
-		CUnitNode*& errorCall );
+	static TExecutionResult Run( const CProgramPtr& program,
+		CUnitList& fieldOfView,	CUnitNode*& errorCall );
 
 private:
-	explicit COperationsExecuter( CProgramPtr& program );
+	explicit COperationsExecuter( const CProgramPtr& program );
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
 
@@ -182,9 +199,6 @@ private:
 	CUnitNode initialLeftBracket;
 	CUnitNode* lastAddedLeftParen;
 	CUnitNode* lastAddedLeftBracket;
-
-	CProgramPtr& program;
-	TRuntimeModuleId runtimeModuleId;
 };
 
 const TLabel LabelMask = 256 * 256;
@@ -201,7 +215,7 @@ inline bool COperationsExecuter::checkQualifier( CUnitNode* const node,
 	const TQualifierIndex qualifier ) const
 {
 	if( node->IsLabel() ) {
-		if( ( node->Label() / LabelMask ) != runtimeModuleId ) {
+		if( ( node->Label() / LabelMask ) != RuntimeModuleId ) {
 			return false;
 		}
 		CUnit unit( *node );
@@ -1060,7 +1074,7 @@ inline void COperationsExecuter::insertChar( const TChar c )
 inline void COperationsExecuter::insertLabel( const TLabel label )
 {
 	left = fieldOfView.InsertAfter( left, CUnit( UT_Label ) );
-	left->Label() = label + LabelMask * runtimeModuleId;
+	left->Label() = label + LabelMask * RuntimeModuleId;
 }
 
 inline void COperationsExecuter::insertNumber( const TNumber number )

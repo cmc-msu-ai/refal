@@ -47,54 +47,54 @@ static void notImplemented( const char* name )
 		<< "` not implemented yet." << std::endl;
 }
 
-static bool embeddedPrint( CUnitList& argument )
+static bool embeddedPrint( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.StrangePrint( std::cout, CPrintHelper() );
+	executionContext.Argument.StrangePrint( std::cout, CPrintHelper() );
 	return true;
 }
 
-static bool embeddedPrintm( CUnitList& argument )
+static bool embeddedPrintm( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.HandyPrint( std::cout, CPrintHelper() );
+	executionContext.Argument.HandyPrint( std::cout, CPrintHelper() );
 	return true;
 }
 
-static bool embeddedProut( CUnitList& argument )
+static bool embeddedProut( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.StrangePrint( std::cout, CPrintHelper() );
-	argument.Empty();
+	executionContext.Argument.StrangePrint( std::cout, CPrintHelper() );
+	executionContext.Argument.Empty();
 	return true;
 }
 
-static bool embeddedProutm( CUnitList& argument )
+static bool embeddedProutm( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.HandyPrint( std::cout, CPrintHelper() );
-	argument.Empty();
+	executionContext.Argument.HandyPrint( std::cout, CPrintHelper() );
+	executionContext.Argument.Empty();
 	return true;
 }
 
-static bool embeddedChartof( CUnitList& argument )
+static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.Empty();
+	executionContext.Argument.Empty();
 	return true;
 }
 
-static bool embeddedFtochar( CUnitList& argument )
+static bool embeddedFtochar( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.Empty();
+	executionContext.Argument.Empty();
 	return true;
 }
 
-static bool embeddedFunctab( CUnitList& argument )
+static bool embeddedFunctab( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	argument.Empty();
+	executionContext.Argument.Empty();
 	return true;
 }
 

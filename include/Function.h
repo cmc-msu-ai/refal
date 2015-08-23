@@ -47,7 +47,9 @@ public:
 
 //-----------------------------------------------------------------------------
 
-typedef bool ( *TEmbeddedFunctionPtr )( CUnitList& argument );
+struct CExecutionContext;
+
+typedef bool ( *TEmbeddedFunctionPtr )( CExecutionContext& executionContext );
 
 class CEmbeddedFunction : public CRuntimeFunction {
 public:

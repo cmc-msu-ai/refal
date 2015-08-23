@@ -97,7 +97,7 @@ static const char* operationNames[] = {
 	"OT_Copy_WV"
 };
 
-TExecutionResult COperationsExecuter::Run( CProgramPtr& program,
+TExecutionResult COperationsExecuter::Run( const CProgramPtr& program,
 	CUnitList& fieldOfView, CUnitNode*& errorCall )
 {
 	COperationsExecuter executer( program );
@@ -106,17 +106,17 @@ TExecutionResult COperationsExecuter::Run( CProgramPtr& program,
 	return executer.executionResult;
 }
 
-COperationsExecuter::COperationsExecuter( CProgramPtr& _program ):
+COperationsExecuter::COperationsExecuter( const CProgramPtr& program ) :
+	CExecutionContext( program ),
 	executionResult( ER_OK ),
 	left( 0 ), right( 0 ),
 	tableTop( 0 ),
 	operation( 0 ),
 	stackTop( 0 ),
 	initialLeftBracket( CUnit( UT_LeftBracket ) ),
-	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 ),
-	program( _program )
+	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 )
 {
-	assert( static_cast<bool>( program ) );
+	assert( static_cast<bool>( Program ) );
 	left = fieldOfView.Append( CUnit( UT_LeftBracket ) );
 	left->PairedParen() = 0;
 
@@ -153,16 +153,16 @@ void COperationsExecuter::doFunction()
 	CUnitNode* savedNextRightBracket = left->PairedParen();
 	left = left->Next();
 	if( left->IsLabel() ) {
-		runtimeModuleId = left->Label() / LabelMask;
+		RuntimeModuleId = left->Label() / LabelMask;
 		const TLabel functionIndex = left->Label() % LabelMask;
-		const CRuntimeFunction* function = program->Module( runtimeModuleId ).
+		const CRuntimeFunction* function = Program->Module( RuntimeModuleId ).
 			Functions.GetData( functionIndex ).get();
 		if( function->IsOrdinary() ) {
 			const COrdinaryFunction* ordinaryFunction =
 				static_cast<const COrdinaryFunction*>( function );
 			operation = static_cast<COperationNode*>(
 				ordinaryFunction->FirstOperation() );
-			runtimeModuleId = ordinaryFunction->RuntimeModuleId();
+			RuntimeModuleId = ordinaryFunction->RuntimeModuleId();
 			tableTop = 0;
 			stackTop = 0;
 			lastAddedLeftParen = 0;
@@ -173,18 +173,17 @@ void COperationsExecuter::doFunction()
 		} else if( function->IsEmbedded() ) {
 			const CEmbeddedFunction* embeddedFunction =
 				static_cast<const CEmbeddedFunction*>( function );
-			CUnitList argument;
 			if( left->Next() != right ) {
 				CUnitNode* argumentBegin = left->Next();
 				CUnitNode* argumentEnd = right->Prev();
 				fieldOfView.Detach( argumentBegin, argumentEnd );
-				argument.Assign( argumentBegin, argumentEnd );
+				Argument.Assign( argumentBegin, argumentEnd );
 			}
-			if( embeddedFunction->EmbeddedFunction()( argument ) ) {
-				if( !argument.IsEmpty() ) {
-					CUnitNode* argumentBegin = argument.GetFirst();
-					CUnitNode* argumentEnd = argument.GetLast();
-					argument.Detach();
+			if( embeddedFunction->EmbeddedFunction()( *this ) ) {
+				if( !Argument.IsEmpty() ) {
+					CUnitNode* argumentBegin = Argument.GetFirst();
+					CUnitNode* argumentEnd = Argument.GetLast();
+					Argument.Detach();
 					fieldOfView.InsertAfter( right, argumentBegin, argumentEnd );
 				}
 				fieldOfView.Remove( left->Prev(), right );
