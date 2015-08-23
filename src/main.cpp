@@ -83,21 +83,45 @@ void CErrorHandler::Warning( const std::string& warningText )
 	std::cerr << warningText << std::endl;
 }
 
-bool ParseFile( std::istream& fileStream )
+bool ParseFile( CScanner& scanner, const std::string& fileName )
 {
-	CErrorHandler errorHandler;
-	CScanner scanner( &errorHandler );
+	std::ifstream fileStream( fileName );
+	if( !fileStream.good() ) {
+		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
+		std::cerr << "------------------------" << std::endl << std::endl;
+		return false;
+	}
+	std::cout << "Source file: `" << fileName << "`." << std::endl;
 
 	for( char c; fileStream.get( c ); ) {
 		scanner.AddChar( c );
 	}
 	scanner.AddEndOfFile();
 
-	if( !scanner.HasErrors() ) {
-		scanner.BuildProgram();
-	}
+	std::cout << "------------------------" << std::endl << std::endl;
+	std::cerr << "------------------------" << std::endl << std::endl;
 
 	return ( !scanner.HasErrors() );
+}
+
+typedef std::vector<std::string> CFileNames;
+
+CProgramPtr ParseFiles( const CFileNames& fileNames )
+{
+	CErrorHandler errorHandler;
+	CScanner scanner( &errorHandler );
+
+	bool success = true;
+	for( CFileNames::const_iterator i = fileNames.begin();
+		i != fileNames.end(); ++i )
+	{
+		success &= ParseFile( scanner, *i );
+	}
+
+	if( success ) {
+		return scanner.BuildProgram();
+	}
+	return CProgramPtr();
 }
 
 int main( int argc, const char* argv[] )
@@ -108,21 +132,12 @@ int main( int argc, const char* argv[] )
 		return 1;
 	}
 
-	bool success = true;
+	CFileNames fileNames;
 	for( int i = 1; i < argc; i++ ) {
-		std::ifstream fileStream( argv[i] );
-		if( !fileStream.good() ) {
-			std::cerr << "Cannot open file: `" << argv[i] << "`." << std::endl;
-			std::cerr << "------------------------" << std::endl << std::endl;
-			success = false;
-			continue;
-		}
-		std::cout << "Source file: `" << argv[i] << "`." << std::endl;
-		ParseFile( fileStream );
-		std::cout << "------------------------" << std::endl << std::endl;
-		std::cerr << "------------------------" << std::endl << std::endl;
-		fileStream.close();
+		fileNames.push_back( argv[i] );
 	}
 
-	return ( success ? 0 : 1 );
+	CProgramPtr program = ParseFiles( fileNames );
+
+	return ( static_cast<bool>( program ) ? 0 : 1 );
 }

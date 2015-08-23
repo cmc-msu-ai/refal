@@ -49,7 +49,7 @@ private:
 	CProgram& operator=( const CProgram& );
 };
 
-typedef std::unique_ptr<CProgram> CProgramPtr;
+typedef std::shared_ptr<CProgram> CProgramPtr;
 
 //-----------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ typedef std::vector<CModuleDataPtr> CModuleDataVector;
 
 class CProgramBuilder : public CFunctionBuilder {
 public:
-	void BuildProgram();
+	CProgramPtr BuildProgram();
 
 protected:
 	CProgramBuilder( IErrorHandler* errorHandler = 0 );

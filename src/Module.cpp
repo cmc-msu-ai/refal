@@ -268,7 +268,7 @@ CProgramPtr CInternalProgramBuilder::Build( CModuleDataVector& modules,
 			assert( !errors.HasErrors() );
 			builder.link( modules );
 			assert( !errors.HasErrors() );
-			return CProgramPtr( builder.program.release() );
+			return builder.program;
 		}
 	}
 	modules.clear();
@@ -404,9 +404,9 @@ void CProgramBuilder::AddModule( CModuleDataPtr& module )
 	modules.push_back( CModuleDataPtr( module.release() ) );
 }
 
-void CProgramBuilder::BuildProgram()
+CProgramPtr CProgramBuilder::BuildProgram()
 {
-	CInternalProgramBuilder::Build( modules, *this );
+	return CInternalProgramBuilder::Build( modules, *this );
 }
 
 //-----------------------------------------------------------------------------
