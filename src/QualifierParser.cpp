@@ -33,6 +33,8 @@ void CQualifierParser::AddToken()
 {
 	assert( !IsFinished() );
 	switch( token.type ) {
+		case TT_Blank:
+			break;
 		case TT_Word:
 			addWord();
 			break;
@@ -57,7 +59,6 @@ void CQualifierParser::AddToken()
 		case TT_RightParen:
 			addRightParen();
 			break;
-		case TT_Blank:
 		case TT_Comma:
 		case TT_Equal:
 		case TT_LeftBracket:
