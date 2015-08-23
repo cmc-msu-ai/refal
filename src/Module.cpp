@@ -80,14 +80,44 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
+	std::string labelText;
+	for( CUnitNode* c = executionContext.Argument.GetFirst(); c != 0;
+		c = c->Next() )
+	{
+		if( !c->IsChar() ) {
+			return false;
+		}
+		labelText += c->Char();
+	}
+	CRuntimeFunctions& functions = executionContext.Program->Module(
+		executionContext.RuntimeModuleId ).Functions;
+	const int labelId = functions.FindKey( labelText );
+	if( labelId == InvalidDictionaryIndex ) {
+		return false;
+	}
 	executionContext.Argument.Empty();
+	executionContext.Argument.AppendLabel( labelId
+		+ LabelMask * executionContext.RuntimeModuleId );
 	return true;
 }
 
 static bool embeddedFtochar( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
+	const CUnit* label = executionContext.Argument.GetFirst();
+	if( !label->IsLabel() ) {
+		return false;
+	}
+	std::ostringstream stringStream;
+	CProgramPrintHelper( executionContext.Program ).Label( stringStream,
+		label->Label() );
+	std::string labelText = stringStream.str();
 	executionContext.Argument.Empty();
+	for( std::string::const_iterator c = labelText.begin();
+		c != labelText.end(); ++c )
+	{
+		executionContext.Argument.AppendChar( *c );
+	}
 	return true;
 }
 
