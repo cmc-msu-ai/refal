@@ -5,6 +5,7 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CParser
 
 class CParser : public CDirectiveParser {
 protected:
@@ -32,7 +33,6 @@ private:
 	void parsingDirective();
 	// auxiliary functions
 	void checkFinished();
-	bool wordIs( const std::string& word ) const;
 };
 
 //-----------------------------------------------------------------------------

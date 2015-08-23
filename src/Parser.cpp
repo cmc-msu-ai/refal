@@ -3,10 +3,11 @@
 namespace Refal2 {
 
 //----------	-------------------------------------------------------------------
+// CParser
 
 const char* const QualifierTag = "s";
 
-CParser::CParser( IErrorHandler* errorHandler ):
+CParser::CParser( IErrorHandler* errorHandler ) :
 	CDirectiveParser( errorHandler )
 {
 	Reset();
@@ -65,20 +66,22 @@ void CParser::parsingWord()
 
 void CParser::parsingWordBlank()
 {
-	if( token.type == TT_Word
-		&& CDirectiveParser::StartParseIfStartDirective( savedToken1 ) )
-	{
-		state = &CParser::parsingDirective;
-	} else if( wordIs( QualifierTag ) ) {
-		token.Move( savedToken2 );
-		state = &CParser::parsingWordBlankS;
-	} else {
-		token.Swap( savedToken1 );
-		CRuleParser::BeginFunction(); // action
-		token.Swap( savedToken1 );
-		state = &CParser::parsingRule;
-		AddToken();
+	if( token.type == TT_Word ) {
+		if( CDirectiveParser::StartParseIfStartDirective( savedToken1 ) ) {
+			state = &CParser::parsingDirective;
+			return;
+		}
+		if( CompareNoCase( token.word, QualifierTag ) ) {
+			token.Move( savedToken2 );
+			state = &CParser::parsingWordBlankS;
+			return;
+		}
 	}
+	token.Swap( savedToken1 );
+	CRuleParser::BeginFunction(); // action
+	token.Swap( savedToken1 );
+	state = &CParser::parsingRule;
+	AddToken();
 }
 
 void CParser::parsingWordBlankS()
@@ -138,16 +141,6 @@ void CParser::checkFinished()
 		state = &CParser::parsingIgnoreLine;
 		AddToken();
 	}
-}
-
-bool CParser::wordIs( const std::string& value ) const
-{
-	if( token.type == TT_Word ) {
-		std::string lowerWord( token.word );
-		MakeLower( lowerWord );
-		return ( lowerWord == value );
-	}
-	return false;
 }
 
 //-----------------------------------------------------------------------------
