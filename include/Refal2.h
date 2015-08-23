@@ -50,7 +50,7 @@ class CVariablesBuilder;
 
 // tools functions
 void MakeLower( std::string& data );
-bool CompareCharNoCase( char a, char b );
+bool CompareNoCase( char a, char b );
 bool CompareNoCase( const std::string& str1, const std::string& str2 );
 
 } // end of namespace Refal2
