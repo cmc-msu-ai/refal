@@ -195,7 +195,7 @@ void CQualifierParser::addRightParen()
 		afterRightParen = true;
 	} else if( namedQualifier.IsNone() ) {
 		if( !afterRightParen ) {
-			builder.IsNegative();
+			builder.AddNegative();
 		}
 		SetCorrect();
 	} else {
