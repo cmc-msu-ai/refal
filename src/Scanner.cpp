@@ -15,6 +15,7 @@ const char Hyphen = '-';
 const char LineFeed = '\n';
 const char NullByte = '\0';
 const char Backslash = '\\';
+const char Semicolon = ';'; // char to replace with LineFeed
 const char Underline = '_';
 const char LeftParen = '(';
 const char RightParen = ')';
@@ -279,6 +280,10 @@ void CScanner::preprocessingInitital( char c )
 			savedPreprocessingState = PS_Initial;
 			preprocessingState = PS_MultilineComment;
 			break;
+		case Semicolon:
+			// TODO: warning
+			processing( LineFeed );
+			break;
 		default:
 			processing( c );
 			break;
@@ -288,6 +293,10 @@ void CScanner::preprocessingInitital( char c )
 void CScanner::preprocessingPlus( char c )
 {
 	switch( c ) {
+		case Semicolon:
+			// TODO: warning
+			preprocessingState = PS_PlusAfterLineFeed;
+			break;
 		case LineFeed:
 			preprocessingState = PS_PlusAfterLineFeed;
 			break;
@@ -310,6 +319,9 @@ void CScanner::preprocessingPlus( char c )
 void CScanner::preprocessingPlusAfterLineFeed( char c )
 {
 	switch( c ) {
+		case Semicolon:
+			// TODO: warning
+			break;
 		case LineFeed:
 			break;
 		case SingleLineCommentBegin:
