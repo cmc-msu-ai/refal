@@ -25,8 +25,6 @@ private:
 		PS_Initial,
 		PS_Plus,
 		PS_PlusAfterLineFeed,
-		PS_PlusAfterMultilineComment,
-		PS_PlusAfterMultilineCommentAndLineFeed,
 		PS_SingleLineComment,
 		PS_MultilineComment,
 		PS_String,
@@ -36,6 +34,7 @@ private:
 		PS_StringOctalCodeTwo
 	};
 	TPreprocessingState preprocessingState;
+	TPreprocessingState savedPreprocessingState;
 	// for read octal code in string
 	char octalCodeOne;
 	char octalCodeTwo;
@@ -76,8 +75,6 @@ private:
 	void preprocessingInitital( char c );
 	void preprocessingPlus( char c );
 	void preprocessingPlusAfterLineFeed( char c );
-	void preprocessingPlusAfterMultilineComment( char c );
-	void preprocessingPlusAfterMultilineCommentAndLineFeed( char c );
 	void preprocessingSingleLineComment( char c );
 	void preprocessingMultilineComment( char c );
 	void preprocessingString( char c );

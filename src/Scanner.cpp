@@ -85,6 +85,7 @@ void CScanner::Reset()
 	position = FirstCharacterNumber;
 	afterCarriageReturn = false;
 	preprocessingState = PS_Initial;
+	savedPreprocessingState = PS_Initial;
 	state = S_Initial;
 }
 
@@ -202,12 +203,6 @@ void CScanner::preprocessing( char c )
 		case PS_PlusAfterLineFeed:
 			preprocessingPlusAfterLineFeed( c );
 			break;
-		case PS_PlusAfterMultilineComment:
-			preprocessingPlusAfterMultilineComment( c );
-			break;
-		case PS_PlusAfterMultilineCommentAndLineFeed:
-			preprocessingPlusAfterMultilineCommentAndLineFeed( c );
-			break;
 		case PS_SingleLineComment:
 			preprocessingSingleLineComment( c );
 			break;
@@ -239,8 +234,6 @@ void CScanner::preprocessingEndOfFile()
 {
 	switch( preprocessingState ) {
 		case PS_MultilineComment:
-		case PS_PlusAfterMultilineComment:
-		case PS_PlusAfterMultilineCommentAndLineFeed:
 			error( E_UnclosedMultilineCommentAtTheEndOfFile );
 			preprocessingState = PS_Initial;
 			break;
@@ -266,21 +259,24 @@ void CScanner::preprocessingEndOfFile()
 void CScanner::preprocessingInitital( char c )
 {
 	switch( c ) {
-		case Plus:
-			processing( UniversalSeparatorOfTokens );
-			preprocessingState = PS_Plus;
-			break;
 		case Quote:
 			processing( UniversalSeparatorOfTokens );
 			setLineAndPositionOfToken();
 			token.word.clear();
 			preprocessingState = PS_String;
 			break;
+		case Plus:
+			processing( UniversalSeparatorOfTokens );
+			preprocessingState = PS_Plus;
+			break;
 		case SingleLineCommentBegin:
+			processing( UniversalSeparatorOfTokens );
+			savedPreprocessingState = PS_Initial;
 			preprocessingState = PS_SingleLineComment;
 			break;
 		case MultilineCommentBegin:
 			processing( UniversalSeparatorOfTokens );
+			savedPreprocessingState = PS_Initial;
 			preprocessingState = PS_MultilineComment;
 			break;
 		default:
@@ -291,50 +287,59 @@ void CScanner::preprocessingInitital( char c )
 
 void CScanner::preprocessingPlus( char c )
 {
-	if( c == LineFeed ) {
-		preprocessingState = PS_PlusAfterLineFeed;
-	} else if( c == MultilineCommentBegin ) {
-		preprocessingState = PS_PlusAfterMultilineComment;
+	switch( c ) {
+		case LineFeed:
+			preprocessingState = PS_PlusAfterLineFeed;
+			break;
+		case SingleLineCommentBegin:
+			savedPreprocessingState = PS_Plus;
+			preprocessingState = PS_SingleLineComment;
+			break;
+		case MultilineCommentBegin:
+			savedPreprocessingState = PS_Plus;
+			preprocessingState = PS_MultilineComment;
+			break;
+		default:
+			if( !IsSpace( c ) ) {
+				// TODO: warning
+			}
+			break;
 	}
 }
 
 void CScanner::preprocessingPlusAfterLineFeed( char c )
 {
-	if( !IsSpace( c ) && c != LineFeed ) {
-		preprocessingState = PS_Initial;
-		preprocessing( c );
-	}
-}
-
-void CScanner::preprocessingPlusAfterMultilineComment( char c )
-{
-	if( c == MultilineCommentEnd ) {
-		preprocessingState = PS_Plus;
-	} else if( c == LineFeed ) {
-		preprocessingState = PS_PlusAfterMultilineCommentAndLineFeed;
-	}
-}
-
-void CScanner::preprocessingPlusAfterMultilineCommentAndLineFeed( char c )
-{
-	if( c == MultilineCommentEnd ) {
-		preprocessingState = PS_PlusAfterLineFeed;
+	switch( c ) {
+		case LineFeed:
+			break;
+		case SingleLineCommentBegin:
+			savedPreprocessingState = PS_PlusAfterLineFeed;
+			preprocessingState = PS_SingleLineComment;
+			break;
+		case MultilineCommentBegin:
+			savedPreprocessingState = PS_PlusAfterLineFeed;
+			preprocessingState = PS_MultilineComment;
+			break;
+		default:
+			if( !IsSpace( c ) ) {
+				preprocessingState = PS_Initial;
+				preprocessing( c );
+			}
+			break;
 	}
 }
 
 void CScanner::preprocessingSingleLineComment( char c )
 {
 	if( c == LineFeed ) {
-		processing( LineFeed );
-		preprocessingState = PS_Initial;
+		preprocessingState = savedPreprocessingState;
+		preprocessing( LineFeed );
 	}
 }
 void CScanner::preprocessingMultilineComment( char c )
 {
-	if( c == LineFeed ) {
-		processing( LineFeed );
-	} else if( c == MultilineCommentEnd ) {
-		preprocessingState = PS_Initial;
+	if( c == MultilineCommentEnd ) {
+		preprocessingState = savedPreprocessingState;
 	}
 }
 

@@ -26,6 +26,7 @@ void CParser::AddToken()
 
 void CParser::parsingInitial()
 {
+	assert( token.type != TT_None );
 	if( token.type == TT_Word ) {
 		CRuleParser::EndFunction(); // action
 		token.Move( savedToken1 );
@@ -33,7 +34,6 @@ void CParser::parsingInitial()
 	} else if( token.type == TT_Blank ) {
 		state = &CParser::parsingBlank;
 	} else if( token.type != TT_LineFeed ) {
-		CRuleParser::EndFunction(); // action
 		CErrorsHelper::Error( "line should begin with word or space" );
 		state = &CParser::parsingIgnoreLine;
 	}
@@ -51,7 +51,6 @@ void CParser::parsingWord()
 	if( token.type == TT_LineFeed ) {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
-		token.Swap( savedToken1 );
 		state = &CParser::parsingInitial;
 	} else if( token.type == TT_Blank ) {
 		state = &CParser::parsingWordBlank;
@@ -66,6 +65,12 @@ void CParser::parsingWord()
 
 void CParser::parsingWordBlank()
 {
+	if( token.type == TT_LineFeed ) {
+		token.Swap( savedToken1 );
+		CRuleParser::BeginFunction(); // action
+		state = &CParser::parsingInitial;
+		return;
+	}
 	if( token.type == TT_Word ) {
 		if( CDirectiveParser::StartParseIfStartDirective( savedToken1 ) ) {
 			state = &CParser::parsingDirective;
@@ -108,6 +113,8 @@ void CParser::parsingBlank()
 {
 	if( token.type == TT_Word && CDirectiveParser::StartParseIfDirective() ) {
 		state = &CParser::parsingDirective;
+	} else if( token.type == TT_LineFeed ) {
+		state = &CParser::parsingInitial;
 	} else {
 		CRuleParser::BeginRule();
 		state = &CParser::parsingRule;
