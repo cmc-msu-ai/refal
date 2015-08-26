@@ -27,6 +27,9 @@ public:
 
 private:
 	bool printLabelWithModule;
+
+	CPrintHelper( const CPrintHelper& );
+	CPrintHelper& operator=( const CPrintHelper& );
 };
 
 //-----------------------------------------------------------------------------
