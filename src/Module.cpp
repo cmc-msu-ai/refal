@@ -77,6 +77,210 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 	return true;
 }
 
+typedef long long int TLongSignNumber;
+
+static bool extractNumber( const CUnitNode*& start,
+	TLongSignNumber& number )
+{
+	assert( start != 0 );
+	number = 1;
+	if( start->IsChar() ) {
+		switch( start->Char() ) {
+			case '+':
+				break;
+			case '-':
+				number = -1;
+				break;
+			default:
+				return false;
+		}
+		start = start->Next();
+	}
+	if( !start->IsNumber() ) {
+		return false;
+	}
+	number *= start->Number();
+	start = start->Next();
+	if( start != 0 && start->IsNumber() ) {
+		notImplemented( __FUNCTION__ );
+		return false;
+	}
+	return true;
+}
+
+static bool extractArguments( const CUnitList& argument,
+	TLongSignNumber& a, TLongSignNumber& b )
+{
+	if( argument.IsEmpty() ) {
+		return false;
+	}
+	const CUnitNode* start = argument.GetFirst();
+	if( !start->IsLeftParen() ) {
+		return false;
+	}
+	start = start->Next();
+	if( !extractNumber( start, a ) ) {
+		return false;
+	}
+	if( !start->IsRightParen() ) {
+		return false;
+	}
+	start = start->Next();
+	if( !extractNumber( start, b ) ) {
+		return false;
+	}
+	if( start == 0 ) {
+		return true;
+	}
+	return false;
+}
+
+static void setArithmeticResult( CUnitList& unitList, TLongSignNumber result )
+{
+	unitList.Empty();
+	if( result < 0 ) {
+		unitList.AppendChar( '-' );
+		unitList.AppendNumber( static_cast<TNumber>( -result ) );
+	} else {
+		unitList.AppendNumber( static_cast<TNumber>( result ) );
+	}
+}
+
+static bool embeddedAdd( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	if( extractArguments( executionContext.Argument, a, b ) ) {
+		setArithmeticResult( executionContext.Argument, a + b );
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedSub( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	if( extractArguments( executionContext.Argument, a, b ) ) {
+		setArithmeticResult( executionContext.Argument, a - b );
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedMul( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	if( extractArguments( executionContext.Argument, a, b ) ) {
+		setArithmeticResult( executionContext.Argument, a * b );
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedDiv( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	if( extractArguments( executionContext.Argument, a, b ) ) {
+		setArithmeticResult( executionContext.Argument, a / b );
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedDr( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	notImplemented( __FUNCTION__ )
+#if 0
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	CUnitList& argument = executionContext.Argument;
+	if( extractArguments( argument, a, b ) ) {
+		argument.Empty();
+		const bool negativeResult = ( a < 0 ) ^ ( b < 0 );
+		const bool negativeRest = a < 0;
+		a = a < 0 ? -a : a;
+		b = b < 0 ? -b : b;
+		const TLongSignNumber result = a / b;
+		const TLongSignNumber rest = a % b;
+		if( negativeResult ) {
+			argument.AppendChar( '-' );
+		}
+		argument.AppendNumber( static_cast<TNumber>( result ) );
+		CUnitNode* const leftParen = argument.AppendLeftParen();
+		if( negativeRest ) {
+			argument.AppendChar( '-' );
+		}
+		argument.AppendNumber( static_cast<TNumber>( rest ) );
+		leftParen->PairedParen() = argument.AppendRightParen();
+		leftParen->PairedParen()->PairedParen() = leftParen;
+		return true;
+	}
+#endif
+	return false;
+}
+
+static bool embeddedP1( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	TLongSignNumber x = 0;
+	const CUnitNode* start = executionContext.Argument.GetFirst();
+	if( !extractNumber( start, x ) ) {
+		return false;
+	}
+	if( start != 0 ) {
+		return false;
+	}
+	setArithmeticResult( executionContext.Argument, x + 1 );
+	return true;
+}
+
+static bool embeddedM1( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	TLongSignNumber x = 0;
+	const CUnitNode* start = executionContext.Argument.GetFirst();
+	if( !extractNumber( start, x ) ) {
+		return false;
+	}
+	if( start != 0 ) {
+		return false;
+	}
+	setArithmeticResult( executionContext.Argument, x - 1 );
+	return true;
+}
+
+static bool embeddedNrel( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TLongSignNumber a = 0;
+	TLongSignNumber b = 0;
+	if( extractArguments( executionContext.Argument, a, b ) ) {
+		CUnit sign( UT_Char );
+		sign.Char() = '<';
+		if( a >= b ) {
+			sign.Char() = ( a == b ) ? '=' : '>';
+		}
+		executionContext.Argument.InsertBefore(
+			executionContext.Argument.GetFirst(), sign ); 
+		return true;
+	}
+	return false;
+}
+
 static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
@@ -137,10 +341,21 @@ struct CStandartEmbeddedFunctionData {
 };
 
 const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
+	// input/output to standart i/o devices
 	{ "print", embeddedPrint },
 	{ "printm", embeddedPrintm },
 	{ "prout", embeddedProut },
 	{ "proutm", embeddedProutm },
+	// arithmetic
+	{ "add", embeddedAdd },
+	{ "sub", embeddedSub },
+	{ "mul", embeddedMul },
+	{ "div", embeddedDiv },
+	{ "dr", embeddedDr },
+	{ "p1", embeddedP1 },
+	{ "m1", embeddedM1 },
+	{ "nrel", embeddedNrel },
+	// work with labels
 	{ "chartof", embeddedChartof },
 	{ "ftochar", embeddedFtochar },
 	{ "functab", embeddedFunctab },
