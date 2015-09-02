@@ -191,7 +191,7 @@ bool CModuleBuilder::checkOnlyDeclared( CPreparatoryFunction& function,
 	}
 	std::ostringstream stringStream;
 	stringStream << "function `" << nameToken.word
-		<< "` already defined in line " << function.NameToken().word
+		<< "` already defined in line " << function.NameToken().line
 		<< " as `" << function.NameToken().word << "`";
 	CErrorsHelper::Error( stringStream.str() );
 	return false;
