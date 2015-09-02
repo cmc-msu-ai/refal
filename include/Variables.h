@@ -8,11 +8,13 @@ namespace Refal2 {
 
 const int InvalidVariableIndex = -1;
 
-const TVariableType InvalidVariableType = '\0';
-const TVariableType VariableTypeS = 's';
-const TVariableType VariableTypeW = 'w';
-const TVariableType VariableTypeV = 'v';
-const TVariableType VariableTypeE = 'e';
+enum TVariableType {
+	VT_None,
+	VT_S,
+	VT_W,
+	VT_V,
+	VT_E
+};
 
 class CVariable {
 	friend class CVariables;
@@ -22,13 +24,10 @@ public:
 	TVariableType GetType() const { return type; }
 
 	bool TypeIs( TVariableType type ) const;
-	bool TypeIs( TVariableType tA, TVariableType tB ) const;
+	bool TypeIs( TVariableType t1, TVariableType t2 ) const;
 
 	CQualifier& GetQualifier() { return qualifier; }
 	const CQualifier& GetQualifier() const { return qualifier; }
-
-	static bool IsValidType( TVariableType type );
-	static bool IsValidName( TVariableName name );
 
 private:
 	CVariable( TVariableType type, int originPosition, int countOfValues );
@@ -51,20 +50,9 @@ inline bool CVariable::TypeIs( TVariableType t ) const
 	return ( type == t );
 }
 
-inline bool CVariable::TypeIs( TVariableType tA, TVariableType tB ) const
+inline bool CVariable::TypeIs( TVariableType t1, TVariableType t2 ) const
 {
-	return ( TypeIs(tA) || TypeIs(tB) );
-}
-
-inline bool CVariable::IsValidType( TVariableType type )
-{
-	return ( type == VariableTypeS || type == VariableTypeW ||
-		type == VariableTypeV || type == VariableTypeE );
-}
-
-inline bool CVariable::IsValidName( TVariableName name )
-{
-	return ( ::isalnum( name ) != 0 );
+	return ( TypeIs( t1 ) || TypeIs( t2 ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -153,7 +141,8 @@ inline void CVariables::allocVariablesValues()
 
 //-----------------------------------------------------------------------------
 
-const int VariablesInfoSize = 128;
+const int VariableNameToIndexSize = 256;
+const int MaxNumberOfVariables = 64;
 
 class CVariablesBuilder : public CErrorsHelper {
 protected:
@@ -162,14 +151,32 @@ protected:
 	void Reset();
 	void Export( CVariables& variables );
 
-	TVariableIndex AddLeft( TVariableName name, TVariableType type,
-		CQualifier* qualifier = 0 );
-	TVariableIndex AddRight( TVariableName name, TVariableType type,
-		CQualifier* qualifier = 0 );
+	TVariableIndex AddLeft( const TVariableName name,
+		const TVariableTypeTag type );
+	TVariableIndex AddRight( const TVariableName name,
+		const TVariableTypeTag type );
+	void AddQualifier( const TVariableIndex variableIndex,
+		CQualifier& qualifier );
 
 private:
-	bool checkName( TVariableName name );
-	bool checkType( TVariableType type );
+	struct CVariableData {
+		TVariableType Type;
+		int CountLeft;
+		int CountRight;
+		CQualifier Qualifier;
+	};
+
+	TVariableIndex variableNameToIndex[VariableNameToIndexSize];
+	CVariableData variables[MaxNumberOfVariables];
+	int firstFreeVariableIndex;
+
+	// disable copy constructor and operator=
+	CVariablesBuilder( const CVariablesBuilder& );
+	CVariablesBuilder& operator=( const CVariablesBuilder& );
+
+	bool checkName( const TVariableName name );
+	TVariableType checkTypeTag( const TVariableTypeTag type,
+		const CQualifier** defaultQualifierForTag = 0 );
 	// processing errors
 	enum TErrorCode {
 		EC_InvalidVariableName,
@@ -178,20 +185,6 @@ private:
 		EC_NoSuchVariableInLeftPart
 	};
 	void error( TErrorCode errorCode );
-
-	struct CVariableInfo {
-		TVariableIndex name;
-		TVariableType type;
-		int countLeft;
-		int countRight;
-		CQualifier qualifier;
-	};
-
-	CVariableInfo variables[VariablesInfoSize];
-	int countOfVariables;
-
-	CVariablesBuilder( const CVariablesBuilder& );
-	CVariablesBuilder& operator=( const CVariablesBuilder& );
 };
 
 //-----------------------------------------------------------------------------

@@ -192,8 +192,8 @@ protected:
 	void AddChar( TChar c );
 	void AddLabel( TLabel label );
 	void AddNumber( TNumber number );
-	void AddVariable( TVariableType type, TVariableName name,
-		CQualifier* qualifier = 0 );
+	void AddVariable( TVariableTypeTag type, TVariableName name,
+		CQualifier* qualifier = nullptr );
 	void AddLeftParen();
 	void AddRightParen();
 	void AddLeftBracket();

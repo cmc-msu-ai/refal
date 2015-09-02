@@ -15,7 +15,7 @@ typedef char TChar;
 typedef int TNumber;
 typedef int TLabel;
 typedef unsigned char TVariableName;
-typedef char TVariableType;
+typedef char TVariableTypeTag;
 typedef int TVariableIndex;
 typedef int TTableIndex;
 typedef int TRuntimeModuleId;

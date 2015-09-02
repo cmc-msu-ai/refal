@@ -115,12 +115,12 @@ inline bool CLeftPartCompiler::isMarkedVariable(CUnitNode* unit)
 inline bool CLeftPartCompiler::isVE( CUnitNode* unit ) const
 {
 	return ( unit != 0 && unit->IsVariable() &&
-		variables.GetVariable( unit->Variable() ).TypeIs( 'v', 'e' ) );
+		variables.GetVariable( unit->Variable() ).TypeIs( VT_V, VT_E ) );
 }
 
 inline bool CLeftPartCompiler::isFreeVE( CUnitNode* unit ) const
 {
-	return ( isVE(unit) && !variables.IsSet( unit->Variable() ) );
+	return ( isVE( unit ) && !variables.IsSet( unit->Variable() ) );
 }
 
 //-----------------------------------------------------------------------------

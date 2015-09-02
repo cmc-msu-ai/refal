@@ -19,7 +19,7 @@ protected:
 private:
 	CToken functionName;
 	CQualifier qualifier;
-	TVariableType variableType;
+	TVariableTypeTag variableTypeTag;
 	// parsing
 	typedef void ( CRuleParser::*TState )();
 	TState state;

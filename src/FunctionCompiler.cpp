@@ -142,7 +142,7 @@ bool CLeftPartCompiler::setVariable(const TVariableIndex variableIndex)
 	if( !variables.IsFull( variableIndex ) ) {
 		variables.Set( variableIndex, top );
 		top++;
-		if( !variables.GetVariable( variableIndex ).TypeIs( VariableTypeS ) ) {
+		if( !variables.GetVariable( variableIndex ).TypeIs( VT_S ) ) {
 			top++;
 		}
 		return true;
@@ -182,7 +182,7 @@ void CLeftPartCompiler::matchVE(const bool isRightDirection)
 	if( isRightDirection ) {
 		TVariableIndex variableIndex = hole->GetLast()->Variable();
 
-		if( variables.GetVariable( variableIndex ).TypeIs( VariableTypeE ) ) {
+		if( variables.GetVariable( variableIndex ).TypeIs( VT_E ) ) {
 			matchVariable( variableIndex,
 				&COperationsBuilder::AddMatchRight_E );
 		} else {
@@ -194,7 +194,7 @@ void CLeftPartCompiler::matchVE(const bool isRightDirection)
 	} else {
 		TVariableIndex variableIndex = hole->GetFirst()->Variable();
 
-		if( variables.GetVariable( variableIndex ).TypeIs( VariableTypeE ) ) {
+		if( variables.GetVariable( variableIndex ).TypeIs( VT_E ) ) {
 			matchVariable( variableIndex,
 				&COperationsBuilder::AddMatchLeft_E );
 		} else {
@@ -236,16 +236,16 @@ void CLeftPartCompiler::matchElement()
 bool CLeftPartCompiler::tryMatchLeftVariable(CUnitNode* left)
 {
 	switch( variables.GetVariable( left->Variable() ).GetType() ) {
-		case VariableTypeS:
+		case VT_S:
 			matchLeftS();
 			return true;
 			break;
-		case VariableTypeW:
+		case VT_W:
 			matchLeftW();
 			return true;
 			break;
-		case VariableTypeV:
-		case VariableTypeE:
+		case VT_V:
+		case VT_E:
 			if( variables.IsSet( left->Variable() ) ) {
 				matchLeftDuplicateVE();
 				return true;
@@ -261,16 +261,16 @@ bool CLeftPartCompiler::tryMatchLeftVariable(CUnitNode* left)
 bool CLeftPartCompiler::tryMatchRightVariable(CUnitNode* right)
 {
 	switch( variables.GetVariable( right->Variable() ).GetType() ) {
-		case VariableTypeS:
+		case VT_S:
 			matchRightS();
 			return true;
 			break;
-		case VariableTypeW:
+		case VT_W:
 			matchRightW();
 			return true;
 			break;
-		case VariableTypeV:
-		case VariableTypeE:
+		case VT_V:
+		case VT_E:
 			if( variables.IsSet( right->Variable() ) ) {
 				matchRightDuplicateVE();
 				return true;
@@ -428,7 +428,7 @@ void CLeftPartCompiler::matchRightW()
 void CLeftPartCompiler::matchLeftDuplicateVE()
 {
 	TVariableIndex variableIndex = hole->GetFirst()->Variable();
-	if( variables.GetVariable( variableIndex ).TypeIs( VariableTypeV ) ) {
+	if( variables.GetVariable( variableIndex ).TypeIs( VT_V ) ) {
 		matchDuplicateVariable( variableIndex,
 			&COperationsBuilder::AddMatchLeftDuplicate_WV );
 	} else {
@@ -441,7 +441,7 @@ void CLeftPartCompiler::matchLeftDuplicateVE()
 void CLeftPartCompiler::matchRightDuplicateVE()
 {
 	TVariableIndex variableIndex = hole->GetLast()->Variable();
-	if( variables.GetVariable( variableIndex ).TypeIs( VariableTypeV ) ) {
+	if( variables.GetVariable( variableIndex ).TypeIs( VT_V ) ) {
 		matchDuplicateVariable( variableIndex,
 			&COperationsBuilder::AddMatchRightDuplicate_WV );
 	} else {
@@ -476,19 +476,19 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 				const CVariable& variable =
 					variables.GetVariable( variableIndex );
 				TTableIndex valueIndex;
-				
+
 				if( variables.Get( variableIndex, valueIndex ) ) {
-					if( variable.TypeIs( VariableTypeS ) ) {
+					if( variable.TypeIs( VT_S ) ) {
 						COperationsBuilder::AddMove_S( valueIndex );
-					} else if( variable.TypeIs( VariableTypeE ) ) {
+					} else if( variable.TypeIs( VT_E ) ) {
 						COperationsBuilder::AddMove_E( valueIndex );
 					} else { // type WV
 						COperationsBuilder::AddMove_WV( valueIndex );
 					}
 				} else {
-					if( variable.TypeIs( VariableTypeS ) ) {
+					if( variable.TypeIs( VT_S ) ) {
 						COperationsBuilder::AddCopy_S( valueIndex );
-					} else if( variable.TypeIs( VariableTypeE ) ) {
+					} else if( variable.TypeIs( VT_V ) ) {
 						COperationsBuilder::AddCopy_E( valueIndex );
 					} else { // type WV
 						COperationsBuilder::AddCopy_WV( valueIndex );

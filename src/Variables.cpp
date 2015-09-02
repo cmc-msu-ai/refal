@@ -76,116 +76,172 @@ bool CVariables::Get( TVariableIndex variableIndex, TTableIndex& tableIndex)
 //-----------------------------------------------------------------------------
 
 CVariablesBuilder::CVariablesBuilder( IErrorHandler* errorHandler ):
-	CErrorsHelper( errorHandler )
+	CErrorsHelper( errorHandler ),
+	firstFreeVariableIndex( 0 )
 {
 	Reset();
 }
 
 void CVariablesBuilder::Reset()
 {
-	countOfVariables = 0;
-	for( int i = 0; i < VariablesInfoSize; ++i ) {
-		variables[i].type = InvalidVariableType;
-		variables[i].qualifier.Empty();
+	for( int i = 0; i < firstFreeVariableIndex; i++ ) {
+		variables[i].Qualifier.Empty();
+	}
+	firstFreeVariableIndex = 0;
+	for( int i = 0; i < VariableNameToIndexSize; i++ ) {
+		variableNameToIndex[i] = InvalidVariableIndex;
 	}
 }
 
 void CVariablesBuilder::Export( CVariables& v )
 {
 	v.Reset();
-	if( countOfVariables > 0 ) {
-		v.variablesSize = countOfVariables;
+	if( firstFreeVariableIndex > 0 ) {
+		v.variablesSize = firstFreeVariableIndex;
 		v.variables = static_cast<CVariable*>(
 			::operator new( v.variablesSize * sizeof( CVariable ) ) );
 		v.variablesValuesSize = 0;
-		for( int i = 0; i < VariablesInfoSize; i++ ) {
-			CVariableInfo& vi = variables[i];
-			if( vi.type != InvalidVariableType ) {
-				int countOfValues = std::min( vi.countLeft, vi.countRight );
-				new( v.variables + vi.name )CVariable( vi.type,
-					v.variablesValuesSize, countOfValues );
-				v.variablesValuesSize += countOfValues;
-				vi.qualifier.Move( v.variables[vi.name].qualifier );
-			}
+		for( int i = 0; i < firstFreeVariableIndex; i++ ) {
+			CVariableData& vd = variables[i];
+			assert( vd.Type != VT_None );
+			const int countOfValues = std::min( vd.CountLeft, vd.CountRight );
+			new( v.variables + i )CVariable( vd.Type,
+				v.variablesValuesSize, countOfValues );
+			v.variablesValuesSize += countOfValues;
+			vd.Qualifier.Move( v.variables[i].qualifier );
 		}
 	}
 	Reset();
 }
 
-TVariableIndex CVariablesBuilder::AddLeft( TVariableName name,
-	TVariableType type, CQualifier* qualifier )
+TVariableIndex CVariablesBuilder::AddLeft( const TVariableName name,
+	const TVariableTypeTag type )
 {
-	if( !checkName( name ) ) {
-		return InvalidVariableIndex;
-	}
-	type = ::tolower( type );
-	CVariableInfo& var = variables[name];
-	if( var.type == InvalidVariableType ) {
-		if( checkType( type ) ) {
-			var.name = countOfVariables;
-			var.type = type;
-			var.countLeft = 1;
-			var.countRight = 0;
-			if( qualifier != 0 ) {
-				qualifier->Move( var.qualifier );
+	const CQualifier* defaultQualifier = nullptr;
+	const TVariableType variableType = checkTypeTag( type, &defaultQualifier );
+	if( variableType != VT_None && checkName( name ) ) {
+		if( variableNameToIndex[name] == InvalidVariableIndex ) {
+			variableNameToIndex[name] = firstFreeVariableIndex;
+			firstFreeVariableIndex++;
+			const TVariableIndex variableIndex = variableNameToIndex[name];
+			CVariableData& variable = variables[variableIndex];
+			variable.Type = variableType;
+			variable.CountLeft = 1;
+			variable.CountRight = 0;
+			assert( variable.Qualifier.IsEmpty() );
+			if( defaultQualifier != nullptr ) {
+				variable.Qualifier = *defaultQualifier;
 			}
-			++countOfVariables;
-			return var.name;
+			return variableIndex;
+		} else {
+			const TVariableIndex variableIndex = variableNameToIndex[name];
+			CVariableData& variable = variables[variableIndex];
+			if( variable.Type == variableType ) {
+				variable.CountRight++;
+				return variableIndex;
+			} else {
+				error( EC_TypeOfVariableDoesNotMatch );
+			}
 		}
-	} else if( var.type == type ) {
-		var.countLeft++;
-		if( qualifier != 0 ) {
-			var.qualifier.DestructiveIntersection( *qualifier );
-		}
-		return var.name;
-	} else {
-		error( EC_TypeOfVariableDoesNotMatch );
 	}
 	return InvalidVariableIndex;
 }
 
-TVariableIndex CVariablesBuilder::AddRight( TVariableName name,
-	TVariableType type,	CQualifier* qualifier )
+TVariableIndex CVariablesBuilder::AddRight( const TVariableName name,
+	const TVariableTypeTag type )
 {
-	if( !checkName( name ) ) {
-		return InvalidVariableIndex;
-	}
-	type = ::tolower( type );
-	CVariableInfo& var = variables[name];
-	if( var.type == type ) {
-		var.countRight++;
-		if( qualifier != 0 ) {
-			var.qualifier.DestructiveIntersection( *qualifier );
-		}
-		return var.name;
-	} else {
-		if( var.type == InvalidVariableType ) {
-			error( EC_NoSuchVariableInLeftPart );
+	const TVariableType variableType = checkTypeTag( type );
+	if( variableType != VT_None && checkName( name ) ) {
+		const TVariableIndex variableIndex = variableNameToIndex[name];
+		if( variableIndex != InvalidVariableIndex ) {
+			CVariableData& variable = variables[variableIndex];
+			if( variable.Type == variableType ) {
+				variable.CountRight++;
+				return variableIndex;
+			} else {
+				error( EC_TypeOfVariableDoesNotMatch );
+			}
 		} else {
-			error( EC_TypeOfVariableDoesNotMatch );
+			error( EC_NoSuchVariableInLeftPart );
 		}
-		return InvalidVariableIndex;
 	}
+	return InvalidVariableIndex;
 }
 
-bool CVariablesBuilder::checkName( TVariableName name )
+void CVariablesBuilder::AddQualifier( const TVariableIndex variable,
+	CQualifier& qualifier )
 {
-	if( CVariable::IsValidName( name ) ) {
-		return true;
-	} else {
-		error( EC_InvalidVariableName );
-		return false;
-	}
+	assert( variable >= 0 && variable < firstFreeVariableIndex );
+	CVariableData& variableData = variables[variable];
+	variableData.Qualifier.DestructiveIntersection( qualifier );
 }
 
-bool CVariablesBuilder::checkType( TVariableType type )
+bool CVariablesBuilder::checkName( const TVariableName name )
 {
-	if( CVariable::IsValidType( type ) ) {
+	if( ::isalnum( name ) != 0 || name == '_' ) {
 		return true;
-	} else {
-		error( EC_NoSuchTypeOfVariable );
-		return false;
 	}
+	error( EC_InvalidVariableName );
+	return false;
+}
+
+static const CQualifier* getDefaultQualifierForN()
+{
+	static CQualifier* const qualifier = new CQualifier;
+	if( qualifier == 0 ) {
+		CQualifierBuilder qualifierBuilder;
+		qualifierBuilder.AddN();
+		qualifierBuilder.AddNegative();
+		qualifierBuilder.Export( *qualifier );
+	}
+	return qualifier;
+}
+
+static const CQualifier* getDefaultQualifierForF()
+{
+	static CQualifier* const qualifier = new CQualifier;
+	if( qualifier == 0 ) {
+		CQualifierBuilder qualifierBuilder;
+		qualifierBuilder.AddF();
+		qualifierBuilder.AddNegative();
+		qualifierBuilder.Export( *qualifier );
+	}
+	return qualifier;
+}
+
+TVariableType CVariablesBuilder::checkTypeTag( const TVariableTypeTag type,
+	const CQualifier** defaultQualifierForTag )
+{
+	switch( type ) {
+		case 's':
+		case 'S':
+			return VT_S;
+		case 'w':
+		case 'W':
+			return VT_W;
+		case 'v':
+		case 'V':
+			return VT_V;
+		case 'e':
+		case 'E':
+			return VT_E;
+		case 'n':
+		case 'N':
+			if( defaultQualifierForTag != nullptr ) {
+				*defaultQualifierForTag = getDefaultQualifierForN();
+			}
+			// todo: warning
+			return VT_S;
+		case 'f':
+		case 'F':
+			if( defaultQualifierForTag != nullptr ) {
+				*defaultQualifierForTag = getDefaultQualifierForF();
+			}
+			// todo: warning
+			return VT_S;
+	}
+	error( EC_NoSuchTypeOfVariable );
+	return VT_None;
 }
 
 void CVariablesBuilder::error( TErrorCode errorCode )

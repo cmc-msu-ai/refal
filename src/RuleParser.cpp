@@ -140,9 +140,9 @@ void CRuleParser::wordAfterDirection()
 			token.position++;
 			token.word.erase( 0, 1 );
 		} else {
-			variableType = token.word[0];
+			variableTypeTag = token.word[0];
 			if( token.word.length() > 1 ) {
-				CFunctionBuilder::AddVariable( variableType, token.word[1] );
+				CFunctionBuilder::AddVariable( variableTypeTag, token.word[1] );
 				token.position += 2;
 				token.word.erase( 0, 2 );
 			} else {
@@ -193,7 +193,8 @@ void CRuleParser::afterVariableQualifier()
 {
 	if( token.type == TT_Word ) {
 		state = &CRuleParser::afterDirection;
-		CFunctionBuilder::AddVariable( variableType, token.word[0], &qualifier );
+		CFunctionBuilder::AddVariable( variableTypeTag, token.word[0],
+			&qualifier );
 		token.word.erase( 0, 1 );
 		token.position++;
 		wordAfterDirection();
