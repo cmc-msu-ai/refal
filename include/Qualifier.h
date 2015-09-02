@@ -21,7 +21,7 @@ class CQualifier {
 	friend class CQualifierBuilder;
 
 public:
-	CQualifier(): flags( 0 ) {}
+	CQualifier() { Empty(); }
 
 	void Empty();
 	bool IsEmpty() const;
