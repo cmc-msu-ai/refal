@@ -142,6 +142,7 @@ void CScanner::error( TErrorCode errorCode, char c )
 			break;
 	}
 	errorStream << ".";
+	CErrorHandlerSwitcher switcher( this, errorHandler );
 	CErrorsHelper::Error( errorStream.str() );
 }
 
