@@ -197,7 +197,7 @@ static bool embeddedDiv( CExecutionContext& executionContext )
 static bool embeddedDr( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	notImplemented( __FUNCTION__ )
+	notImplemented( __FUNCTION__ );
 #if 0
 	TLongSignNumber a = 0;
 	TLongSignNumber b = 0;
