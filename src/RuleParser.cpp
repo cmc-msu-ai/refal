@@ -135,7 +135,7 @@ void CRuleParser::wordAfterDirection()
 {
 	assert( token.type == TT_Word );
 	while( !token.word.empty() ) {
-		if( CompareNoCase( token.word[0], 'k' ) ) {
+		if( CompareNoCase( token.word[0], RuleLeftBracketTag ) ) {
 			CFunctionBuilder::AddLeftBracket();
 			token.position++;
 			token.word.erase( 0, 1 );
