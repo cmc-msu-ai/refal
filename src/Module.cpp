@@ -64,21 +64,24 @@ static bool embeddedCard( CExecutionContext& executionContext )
 static bool embeddedPrint( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Argument.StrangePrint( std::cout, CPrintHelper() );
+	executionContext.Argument.StrangePrint( std::cout,
+		CProgramPrintHelper( executionContext.Program ) );
 	return true;
 }
 
 static bool embeddedPrintm( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Argument.HandyPrint( std::cout, CPrintHelper() );
+	executionContext.Argument.HandyPrint( std::cout,
+		CProgramPrintHelper( executionContext.Program ) );
 	return true;
 }
 
 static bool embeddedProut( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Argument.StrangePrint( std::cout, CPrintHelper() );
+	executionContext.Argument.StrangePrint( std::cout,
+		CProgramPrintHelper( executionContext.Program ) );
 	executionContext.Argument.Empty();
 	return true;
 }
@@ -86,7 +89,8 @@ static bool embeddedProut( CExecutionContext& executionContext )
 static bool embeddedProutm( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Argument.HandyPrint( std::cout, CPrintHelper() );
+	executionContext.Argument.HandyPrint( std::cout,
+		CProgramPrintHelper( executionContext.Program ) );
 	executionContext.Argument.Empty();
 	return true;
 }
