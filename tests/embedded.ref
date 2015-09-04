@@ -34,7 +34,7 @@ testArithmetic
 
 *------------------------------------------------------------------------------
 
-filesTestExpr = 'Hello, Wordl!\n'('Refal'('2'))
+filesTestExpr = 'Hello, Wordl!\n\n'('Refal'('2'))
 
 readFullText
 	v1 = v1<readFullText<Libget>>
@@ -44,7 +44,7 @@ filename = 'check.txt'
 
 testFiles
 	= <opnput<filename>><libput<filesTestExpr>><clsput>+
-	<opnget<filename>><readFullText><clsget>
+	<opnget<filename>><readFullText<Libget>><clsget>
 
 *------------------------------------------------------------------------------
 

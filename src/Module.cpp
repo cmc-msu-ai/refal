@@ -485,6 +485,13 @@ static bool embeddedLibget( CExecutionContext& executionContext )
 	for( std::string::const_iterator c = text.begin(); c != text.end(); ++c ) {
 		executionContext.Argument.AppendChar( *c );
 	}
+
+	std::ostringstream stringStream;
+	stringStream << std::endl;
+	const std::string endl = stringStream.str();
+	for( std::string::const_iterator c = endl.begin(); c != endl.end(); ++c ) {
+		executionContext.Argument.AppendChar( *c );
+	}
 	return true;
 }
 
