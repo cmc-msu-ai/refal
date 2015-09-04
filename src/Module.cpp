@@ -47,6 +47,20 @@ static void notImplemented( const char* name )
 		<< "` not implemented yet." << std::endl;
 }
 
+static bool embeddedCard( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( !executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	std::string text;
+	std::getline( std::cin, text );
+	for( std::string::const_iterator c = text.begin(); c != text.end(); ++c ) {
+		executionContext.Argument.AppendChar( *c );
+	}
+	return true;
+}
+
 static bool embeddedPrint( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
@@ -76,6 +90,8 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 	executionContext.Argument.Empty();
 	return true;
 }
+
+//-----------------------------------------------------------------------------
 
 typedef long long int TLongSignNumber;
 
@@ -197,25 +213,21 @@ static bool embeddedDiv( CExecutionContext& executionContext )
 static bool embeddedDr( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	notImplemented( __FUNCTION__ );
-#if 0
 	TLongSignNumber a = 0;
 	TLongSignNumber b = 0;
 	CUnitList& argument = executionContext.Argument;
 	if( extractArguments( argument, a, b ) ) {
 		argument.Empty();
-		const bool negativeResult = ( a < 0 ) ^ ( b < 0 );
-		const bool negativeRest = a < 0;
-		a = a < 0 ? -a : a;
-		b = b < 0 ? -b : b;
-		const TLongSignNumber result = a / b;
-		const TLongSignNumber rest = a % b;
-		if( negativeResult ) {
+		TLongSignNumber result = a / b;
+		TLongSignNumber rest = a % b;
+		if( result < 0 ) {
+			result = -result;
 			argument.AppendChar( '-' );
 		}
 		argument.AppendNumber( static_cast<TNumber>( result ) );
 		CUnitNode* const leftParen = argument.AppendLeftParen();
-		if( negativeRest ) {
+		if( rest < 0 ) {
+			rest = -rest;
 			argument.AppendChar( '-' );
 		}
 		argument.AppendNumber( static_cast<TNumber>( rest ) );
@@ -223,7 +235,6 @@ static bool embeddedDr( CExecutionContext& executionContext )
 		leftParen->PairedParen()->PairedParen() = leftParen;
 		return true;
 	}
-#endif
 	return false;
 }
 
@@ -281,6 +292,85 @@ static bool embeddedNrel( CExecutionContext& executionContext )
 	return false;
 }
 
+static bool embeddedCvb( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	std::string numberText;
+	if( executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	const CUnitNode* c = executionContext.Argument.GetFirst();
+	if( !c->IsChar() ) {
+		return false;
+	}
+	bool negative = false;
+	if( c->Char() == '-' || c->Char() == '+' ) {
+		if( c->Char() == '-' ) {
+			negative = true;
+		}
+		c = c->Next();
+	}
+	TNumber number = 0;
+	for( ; c != nullptr; c = c->Next() ) {
+		if( !( c->IsChar() && c->Char() >= '0' && c->Char() <= '9' ) ) {
+			return false;
+		}
+		number = number * 10 + ( c->Char() - '0' );
+	}
+	executionContext.Argument.Empty();
+	if( negative ) {
+		executionContext.Argument.AppendChar( '-' );
+	}
+	executionContext.Argument.AppendNumber( number );
+	return true;
+}
+
+static bool embeddedCvd( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	std::string numberText;
+	if( executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	const CUnitNode* i = executionContext.Argument.GetFirst();
+	CUnitList tmp;
+	if( i->IsChar() && ( i->Char() == '-' || i->Char() == '+' ) ) {
+		if( i->Char() == '-' ) {
+			tmp.AppendChar( '-' );
+		}
+		i = i->Next();
+	}
+	if( !i->IsNumber() ) {
+		return false;
+	} else if( i->Next() != 0 ) {
+		notImplemented( __FUNCTION__ );
+		return false;
+	} else {
+		std::ostringstream stringStream;
+		stringStream << i->Number();
+		std::string numberText = stringStream.str();
+		for( std::string::const_iterator c = numberText.begin();
+			c != numberText.end(); ++c )
+		{
+			tmp.AppendChar( *c );
+		}
+	}
+	tmp.Move( executionContext.Argument );
+	return true;
+}
+
+static bool embeddedNumb( CExecutionContext& executionContext )
+{
+	return embeddedCvb( executionContext );
+}
+
+static bool embeddedSymb( CExecutionContext& executionContext )
+{
+	return embeddedCvd( executionContext );
+}
+
+//-----------------------------------------------------------------------------
+
 static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
@@ -333,6 +423,147 @@ static bool embeddedFunctab( CExecutionContext& executionContext )
 }
 
 //-----------------------------------------------------------------------------
+
+static bool readString( const CUnitNode* start, std::string& string )
+{
+	string.clear();
+	for( ; start != nullptr; start = start->Next() ) {
+		if( !start->IsChar() ) {
+			return false;
+		}
+		string += start->Char();
+	}
+	return true;
+}
+
+static std::ifstream* getStreamForReading()
+{
+	static std::ifstream* streamForReading = new std::ifstream;
+	return streamForReading;
+}
+
+static bool embeddedOpnget( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	std::string filename;
+	if( !readString( executionContext.Argument.GetFirst(), filename )
+		|| filename.empty() )
+	{
+		return false;
+	}
+	std::ifstream* streamForReading = getStreamForReading();
+	if( streamForReading->is_open() ) {
+		return false;
+	}
+	streamForReading->open( filename );
+	if( !streamForReading->good() ) {
+		return false;
+	}
+	executionContext.Argument.Empty();
+	return true;
+}
+
+static bool embeddedLibget( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( !executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	std::ifstream* streamForReading = getStreamForReading();
+	if( !streamForReading->is_open() ) {
+		return false;
+	}
+	if( streamForReading->eof() ) {
+		return true;
+	}
+	std::string text;
+	std::getline( *streamForReading, text );
+	for( std::string::const_iterator c = text.begin(); c != text.end(); ++c ) {
+		executionContext.Argument.AppendChar( *c );
+	}
+	return true;
+}
+
+static bool embeddedClsget( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( !executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	std::ifstream* streamForReading = getStreamForReading();
+	if( !streamForReading->is_open() ) {
+		return false;
+	}
+	streamForReading->close();
+	return true;
+}
+
+static std::ofstream* getStreamForWriting()
+{
+	static std::ofstream* streamForWriting = new std::ofstream;
+	return streamForWriting;
+}
+
+static bool embeddedOpnput( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	std::string filename;
+	if( !readString( executionContext.Argument.GetFirst(), filename )
+		|| filename.empty() )
+	{
+		return false;
+	}
+	std::ofstream* streamForWriting = getStreamForWriting();
+	if( streamForWriting->is_open() ) {
+		return false;
+	}
+	streamForWriting->open( filename );
+	if( !streamForWriting->good() ) {
+		return false;
+	}
+	executionContext.Argument.Empty();
+	return true;
+}
+
+static bool embeddedLibput( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	std::ofstream* streamForWriting = getStreamForWriting();
+	if( !streamForWriting->is_open() ) {
+		return false;
+	}
+	const CUnitNode* c = executionContext.Argument.GetFirst();
+	for( ; c != nullptr; c = c->Next() ) {
+		if( c->IsChar() ) {
+			*streamForWriting << c->Char();
+		} else if( c->IsLeftParen() ) {
+			*streamForWriting << '(';
+		} else if( c->IsRightParen() ) {
+			*streamForWriting << ')';
+		} else {
+			return false;
+		}
+	}
+	*streamForWriting << std::endl;
+	executionContext.Argument.Empty();
+	return true;
+}
+
+static bool embeddedClsput( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( !executionContext.Argument.IsEmpty() ) {
+		return false;
+	}
+	std::ofstream* streamForWriting = getStreamForWriting();
+	if( !streamForWriting->is_open() ) {
+		return false;
+	}
+	streamForWriting->close();
+	return true;
+}
+
+//-----------------------------------------------------------------------------
 // CStandartEmbeddedFunctionData
 
 struct CStandartEmbeddedFunctionData {
@@ -342,6 +573,7 @@ struct CStandartEmbeddedFunctionData {
 
 const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 	// input/output to standart i/o devices
+	{ "card", embeddedCard },
 	{ "print", embeddedPrint },
 	{ "printm", embeddedPrintm },
 	{ "prout", embeddedProut },
@@ -355,10 +587,21 @@ const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 	{ "p1", embeddedP1 },
 	{ "m1", embeddedM1 },
 	{ "nrel", embeddedNrel },
+	{ "numb", embeddedNumb },
+	{ "symb", embeddedSymb },
+	{ "cvb", embeddedCvb },
+	{ "cvd", embeddedCvd },
 	// work with labels
 	{ "chartof", embeddedChartof },
 	{ "ftochar", embeddedFtochar },
 	{ "functab", embeddedFunctab },
+	// work with files
+	{ "opnget", embeddedOpnget },
+	{ "libget", embeddedLibget },
+	{ "clsget", embeddedClsget },
+	{ "opnput", embeddedOpnput },
+	{ "libput", embeddedLibput },
+	{ "clsput", embeddedClsput },
 	{ nullptr, nullptr }
 };
 
