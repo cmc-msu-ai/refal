@@ -33,7 +33,7 @@ void CRuleParser::BeginFunction()
 void CRuleParser::EndFunction()
 {
 	if( !functionName.IsNone() ) {
-		assert( !token.word.empty() );
+		assert( !functionName.word.empty() );
 		CRulePtr firstRule;
 		CFunctionBuilder::Export( firstRule );
 		if( static_cast<bool>( firstRule ) ) {
