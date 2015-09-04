@@ -1,0 +1,15 @@
+	entry go
+	extrn card, print
+	extrn add, sub, mul, div, dr, p1, m1, nrel, numb, symb
+	extrn opnget, libget, clsget, opnput, libput, clsput
+	
+go
+	= <opnput 'check.txt'><libput 'chelnok'><clsput>+
+		<opnget 'check.txt'><libget><clsget>'\n'+
+		<print<card>>'\n'+
+		<numb '+345'>'\n'+
+		<symb '-'/567/>'\n'+
+		<dr (/16/)/5/>'\n'+
+		<dr (/16/)'-'/5/>'\n'+
+		<dr ('-'/16/)/5/>'\n'+
+		<dr ('-'/16/)'-'/5/>'\n'
