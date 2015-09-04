@@ -1,15 +1,51 @@
 	entry go
-	extrn card, print
+	extrn card, print, prout, printm, proutm
 	extrn add, sub, mul, div, dr, p1, m1, nrel, numb, symb
 	extrn opnget, libget, clsget, opnput, libput, clsput
+	extrn chartof, ftochar, functab
 	
-go
-	= <opnput 'check.txt'><libput 'chelnok'><clsput>+
-		<opnget 'check.txt'><libget><clsget>'\n'+
-		<print<card>>'\n'+
-		<numb '+345'>'\n'+
-		<symb '-'/567/>'\n'+
-		<dr (/16/)/5/>'\n'+
-		<dr (/16/)'-'/5/>'\n'+
-		<dr ('-'/16/)/5/>'\n'+
-		<dr ('-'/16/)'-'/5/>'\n'
+	
+sep = '\n\n----------------------------------------------------------------\n\n'
+
+go = <testIO><sep><testArithmetic><sep><testFiles><sep><testLabels>
+
+*------------------------------------------------------------------------------
+
+	empty abc, def
+
+printTestExpr = /abc/(':=()'/25/';'/def/)':=-'/9/
+
+testIO
+	= <print<printTestExpr>>'\n'+
+	<printm<printTestExpr> >'\n'+
+	<prout<printTestExpr>>'\n'+
+	<proutm<printTestExpr>>
+
+*------------------------------------------------------------------------------
+
+testArithmetic
+	= <numb '+345'>'\n'+
+	<symb '-'/567/>'\n'+
+	<dr (/16/)/5/>'\n'+
+	<dr (/16/)'-'/5/>'\n'+
+	<dr ('-'/16/)/5/>'\n'+
+	<dr ('-'/16/)'-'/5/>
+		
+
+*------------------------------------------------------------------------------
+
+filesTestExpr = 'Hello, Wordl!\n'('Refal'('2'))
+
+readFullText
+	v1 = v1<readFullText<Libget>>
+	=
+
+filename = 'check.txt'
+
+testFiles
+	= <opnput<filename>><libput<filesTestExpr>><clsput>+
+	<opnget<filename>><readFullText><clsget>
+
+*------------------------------------------------------------------------------
+
+testLabels =
