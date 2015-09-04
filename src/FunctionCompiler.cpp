@@ -215,8 +215,12 @@ void CLeftPartCompiler::matchElement()
 		CUnitNode* left = hole->GetFirst();
 		CUnitNode* right = hole->GetLast();
 		
-		if( left == right && isFreeVE(left) ) {
-			matchClosedE();
+		if( left == right && isFreeVE( left ) ) {
+			if( variables.GetVariable( left->Variable() ).TypeIs( VT_V ) ) {
+				matchClosedV();
+			} else {
+				matchClosedE();
+			}
 		} else if( left->IsParen() ) {
 			matchLeftParens();
 		} else if( left->IsSymbol() ) {
@@ -286,6 +290,14 @@ bool CLeftPartCompiler::tryMatchRightVariable(CUnitNode* right)
 void CLeftPartCompiler::matchEmptyExpression()
 {
 	COperationsBuilder::AddMatchEmptyExpression();
+	removeHole();
+}
+
+void CLeftPartCompiler::matchClosedV()
+{
+	matchVariable( hole->GetFirst()->Variable(),
+		&COperationsBuilder::AddMatchClosed_V );
+	hole->RemoveFirst();
 	removeHole();
 }
 

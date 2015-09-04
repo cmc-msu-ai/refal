@@ -77,6 +77,7 @@ private:
 	bool tryMatchRightVariable( CUnitNode* right );
 	
 	void matchEmptyExpression();
+	void matchClosedV();
 	void matchClosedE();
 	void matchLeftParens();
 	void matchRightParens();
