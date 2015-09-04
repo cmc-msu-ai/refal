@@ -124,6 +124,7 @@ public:
 	CUnitNode* AppendRightParen(CUnitNode* leftParen = 0);
 	CUnitNode* AppendLeftBracket(CUnitNode* rightBracket = 0);
 	CUnitNode* AppendRightBracket(CUnitNode* leftBracket = 0);
+	CUnitNode* AppendParens();
 
 	void Print( std::ostream& outputStream,
 		const CPrintHelper& printHelper ) const;
@@ -189,6 +190,13 @@ inline CUnitNode* CUnitList::AppendRightBracket(CUnitNode* leftBracket)
 	CUnit unit( UT_RightBracket );
 	unit.PairedParen() = leftBracket;
 	return Append( unit );
+}
+
+inline CUnitNode* CUnitList::AppendParens()
+{
+	CUnitNode* leftParen = AppendLeftParen();
+	leftParen->PairedParen() = AppendRightParen( leftParen );
+	return leftParen;
 }
 
 //-----------------------------------------------------------------------------
