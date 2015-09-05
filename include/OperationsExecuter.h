@@ -332,17 +332,17 @@ inline bool COperationsExecuter::matchLeftNumber( const TNumber number )
 
 inline bool COperationsExecuter::matchRightChar( const TChar c )
 {
-	return ( shiftRight() && left->IsChar() && left->Char() == c );
+	return ( shiftRight() && right->IsChar() && right->Char() == c );
 }
 
 inline bool COperationsExecuter::matchRightLabel( const TLabel label )
 {
-	return ( shiftRight() && left->IsLabel() && left->Label() == label );
+	return ( shiftRight() && right->IsLabel() && right->Label() == label );
 }
 
 inline bool COperationsExecuter::matchRightNumber( const TNumber number )
 {
-	return ( shiftRight() && left->IsNumber() && left->Number() == number );
+	return ( shiftRight() && right->IsNumber() && right->Number() == number );
 }
 
 inline bool COperationsExecuter::matchLeftParens()
