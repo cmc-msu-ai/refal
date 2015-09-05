@@ -52,7 +52,6 @@ void CReceptacle::DigOut( const CUnitList& key, CUnitList& value )
 
 void CReceptacle::Copy( const CUnitList& key, CUnitList& value )
 {
-	assert( value.IsEmpty() );
 	CUnitNode* leftBorderNode = nullptr;
 	CUnitNode* equalNode = nullptr;
 	if( find( key.GetFirst(), leftBorderNode, equalNode ) ) {
@@ -77,7 +76,7 @@ void CReceptacle::DigOutAll( CUnitList& receptacle )
 
 static bool isEqualNode( const CUnitNode* node )
 {
-	return ( node->IsChar() && node->Char() == '=' );
+	return ( node->IsChar() && node->Char() == Equal );
 }
 
 bool CReceptacle::IsValidKeyValue( const CUnitList& keyValue )
