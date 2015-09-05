@@ -55,9 +55,7 @@ static bool embeddedCard( CExecutionContext& executionContext )
 	}
 	std::string text;
 	std::getline( std::cin, text );
-	for( std::string::const_iterator c = text.begin(); c != text.end(); ++c ) {
-		executionContext.Argument.AppendChar( *c );
-	}
+	executionContext.Argument.AppendText( text );
 	return true;
 }
 
@@ -353,11 +351,7 @@ static bool embeddedCvd( CExecutionContext& executionContext )
 		std::ostringstream stringStream;
 		stringStream << i->Number();
 		std::string numberText = stringStream.str();
-		for( std::string::const_iterator c = numberText.begin();
-			c != numberText.end(); ++c )
-		{
-			tmp.AppendChar( *c );
-		}
+		tmp.AppendText( numberText );
 	}
 	tmp.Move( executionContext.Argument );
 	return true;
@@ -411,11 +405,7 @@ static bool embeddedFtochar( CExecutionContext& executionContext )
 		label->Label() );
 	std::string labelText = stringStream.str();
 	executionContext.Argument.Empty();
-	for( std::string::const_iterator c = labelText.begin();
-		c != labelText.end(); ++c )
-	{
-		executionContext.Argument.AppendChar( *c );
-	}
+	executionContext.Argument.AppendText( labelText );
 	return true;
 }
 
@@ -482,16 +472,11 @@ static bool embeddedLibget( CExecutionContext& executionContext )
 	}
 	std::string text;
 	std::getline( *streamForReading, text );
-	for( std::string::const_iterator c = text.begin(); c != text.end(); ++c ) {
-		executionContext.Argument.AppendChar( *c );
-	}
+	executionContext.Argument.AppendText( text );
 
 	std::ostringstream stringStream;
 	stringStream << std::endl;
-	const std::string endl = stringStream.str();
-	for( std::string::const_iterator c = endl.begin(); c != endl.end(); ++c ) {
-		executionContext.Argument.AppendChar( *c );
-	}
+	executionContext.Argument.AppendText( stringStream.str() );
 	return true;
 }
 
