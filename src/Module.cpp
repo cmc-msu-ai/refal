@@ -38,6 +38,39 @@ void CProgramPrintHelper::Label( std::ostream& outputStream,
 		GetKey(	label % LabelMask );
 }
 
+
+//-----------------------------------------------------------------------------
+// CGlobalFunctionData
+
+class CGlobalFunctionData {
+public:
+	CGlobalFunctionData();
+
+	static CRuntimeFunctionPtr EmptyFunction();
+
+	bool IsEmbeddedFunction() const;
+	bool IsPreparatoryFunction() const;
+	bool IsDefined() const;
+
+	void SetPreparatoryFunction(
+		const CPreparatoryFunction* const _preparatoryFunction,
+		const TRuntimeModuleId _runtimeModuleId );
+	const CPreparatoryFunction* PreparatoryFunction() const;
+
+	const TRuntimeModuleId RuntimeModuleId() const;
+
+	void SetEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction );
+	TEmbeddedFunctionPtr EmbeddedFunction() const;
+
+	CRuntimeFunctionPtr RuntimeFunction() const;
+
+private:
+	const CPreparatoryFunction* preparatoryFunction;
+	TEmbeddedFunctionPtr embeddedFunction;
+	TRuntimeModuleId runtimeModuleId;
+	mutable CRuntimeFunctionPtr runtimeFunction;
+};
+
 //-----------------------------------------------------------------------------
 // Standart embedded functions
 
@@ -369,23 +402,35 @@ static bool embeddedSymb( CExecutionContext& executionContext )
 
 //-----------------------------------------------------------------------------
 
+static bool readString( const CUnitNode* start, std::string& string )
+{
+	string.clear();
+	for( ; start != nullptr; start = start->Next() ) {
+		if( !start->IsChar() ) {
+			return false;
+		}
+		string += start->Char();
+	}
+	return true;
+}
+
 static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string labelText;
-	for( CUnitNode* c = executionContext.Argument.GetFirst(); c != 0;
-		c = c->Next() )
-	{
-		if( !c->IsChar() ) {
-			return false;
-		}
-		labelText += c->Char();
+	if( !readString( executionContext.Argument.GetFirst(), labelText ) ) {
+		return false;
 	}
 	CRuntimeFunctions& functions = executionContext.Program->Module(
 		executionContext.RuntimeModuleId ).Functions;
-	const int labelId = functions.FindKey( labelText );
+	std::string labelLowerCaseText( labelText );
+	MakeLower( labelLowerCaseText );
+	int labelId = functions.FindKey( labelLowerCaseText );
 	if( labelId == InvalidDictionaryIndex ) {
-		return false;
+		labelId = functions.AddKey( labelText );
+		CRuntimeFunctionPtr& function = functions.GetData( labelId );
+		assert( !static_cast<bool>( function ) );
+		function = CGlobalFunctionData::EmptyFunction();
 	}
 	executionContext.Argument.Empty();
 	executionContext.Argument.AppendLabel( labelId
@@ -401,8 +446,8 @@ static bool embeddedFtochar( CExecutionContext& executionContext )
 		return false;
 	}
 	std::ostringstream stringStream;
-	CProgramPrintHelper( executionContext.Program ).Label( stringStream,
-		label->Label() );
+	CProgramPrintHelper programPrintHelper( executionContext.Program );
+	programPrintHelper.Label( stringStream,	label->Label() );
 	std::string labelText = stringStream.str();
 	executionContext.Argument.Empty();
 	executionContext.Argument.AppendText( labelText );
@@ -417,18 +462,6 @@ static bool embeddedFunctab( CExecutionContext& executionContext )
 }
 
 //-----------------------------------------------------------------------------
-
-static bool readString( const CUnitNode* start, std::string& string )
-{
-	string.clear();
-	for( ; start != nullptr; start = start->Next() ) {
-		if( !start->IsChar() ) {
-			return false;
-		}
-		string += start->Char();
-	}
-	return true;
-}
 
 static std::ifstream* getStreamForReading()
 {
@@ -659,37 +692,6 @@ const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 
 //-----------------------------------------------------------------------------
 // CGlobalFunctionData
-
-class CGlobalFunctionData {
-public:
-	CGlobalFunctionData();
-
-	static CRuntimeFunctionPtr EmptyFunction();
-
-	bool IsEmbeddedFunction() const;
-	bool IsPreparatoryFunction() const;
-	bool IsDefined() const;
-
-	void SetPreparatoryFunction(
-		const CPreparatoryFunction* const _preparatoryFunction,
-		const TRuntimeModuleId _runtimeModuleId );
-	const CPreparatoryFunction* PreparatoryFunction() const;
-
-	const TRuntimeModuleId RuntimeModuleId() const;
-
-	void SetEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction );
-	TEmbeddedFunctionPtr EmbeddedFunction() const;	
-
-	CRuntimeFunctionPtr RuntimeFunction() const;
-
-private:
-	const CPreparatoryFunction* preparatoryFunction;
-	TEmbeddedFunctionPtr embeddedFunction;
-	TRuntimeModuleId runtimeModuleId;
-	mutable CRuntimeFunctionPtr runtimeFunction;
-};
-
-//-----------------------------------------------------------------------------
 
 CGlobalFunctionData::CGlobalFunctionData() :
 	preparatoryFunction( nullptr ),
@@ -922,6 +924,7 @@ void CInternalProgramBuilder::compileFunction( CPreparatoryFunction* function,
 {
 	CFunctionCompiler compiler( program->OperationsHolder() );
 	if( function->IsOrdinary() ) {
+		DEBUG_PRINT( __FUNCTION__ << " " << function->Name() )
 		function->Compile( compiler );
 	}
 }
