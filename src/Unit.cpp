@@ -94,11 +94,24 @@ void CUnit::Print( std::ostream& outputStream,
 //-----------------------------------------------------------------------------
 // CUnitList
 
+void CUnitList::Print( const CUnitNode* begin, const CUnitNode* end,
+	std::ostream& outputStream,	const CPrintHelper& printHelper )
+{
+	assert( begin != nullptr );
+	assert( end != nullptr );
+	const CUnitNode* node = begin;
+	while( node != end ) {
+		node->Print( outputStream, printHelper );
+		node = node->Next();
+	}
+	node->Print( outputStream, printHelper );
+}
+
 void CUnitList::Print( std::ostream& outputStream,
 	const CPrintHelper& printHelper ) const
 {
-	for( const CUnitNode* node = GetFirst(); node != 0; node = node->Next() ) {
-		node->Print( outputStream, printHelper );
+	if( !IsEmpty() ) {
+		Print( GetFirst(), GetLast(), outputStream, printHelper );
 	}
 }
 

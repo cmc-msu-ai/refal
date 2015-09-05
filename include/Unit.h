@@ -127,6 +127,8 @@ public:
 	CUnitNode* AppendParens();
 	void AppendText( const std::string& text );
 
+	static void Print( const CUnitNode* begin, const CUnitNode* end,
+		std::ostream& outputStream,	const CPrintHelper& printHelper );
 	void Print( std::ostream& outputStream,
 		const CPrintHelper& printHelper ) const;
 	void HandyPrint( std::ostream& outputStream,
