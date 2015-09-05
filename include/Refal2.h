@@ -69,6 +69,7 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 #include <Token.h>
 #include <FunctionCompiler.h>
 #include <Function.h>
+#include <Receptacle.h>
 #include <Module.h>
 #include <ModuleBuilder.h>
 #include <QualifierParser.h>

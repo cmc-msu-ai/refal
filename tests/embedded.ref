@@ -3,11 +3,17 @@
 	extrn add, sub, mul, div, dr, p1, m1, nrel, numb, symb
 	extrn opnget, libget, clsget, opnput, libput, clsput
 	extrn chartof, ftochar, functab
+	extrn br, dg, cp, rp, dgall
 	
 	
 sep = '\n\n----------------------------------------------------------------\n\n'
 
-go = <testIO><sep><testArithmetic><sep><testFiles><sep><testLabels>
+go
+	= <testIO><sep>+
+	<testArithmetic><sep>+
+	<testFiles><sep>+
+	<testLabels><sep>+
+	<testReceptacle>
 
 *------------------------------------------------------------------------------
 
@@ -49,3 +55,8 @@ testFiles
 *------------------------------------------------------------------------------
 
 testLabels =
+
+*------------------------------------------------------------------------------
+
+testReceptacle
+	= <br 'x=aaa'><br '=2'><br 'x='><cp 'x'><dgall>

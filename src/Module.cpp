@@ -575,6 +575,56 @@ static bool embeddedClsput( CExecutionContext& executionContext )
 }
 
 //-----------------------------------------------------------------------------
+
+static bool embeddedBr( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Program->Receptacle().Burry(
+			executionContext.Argument ) )
+	{
+		executionContext.Argument.Empty();
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedDg( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	executionContext.Program->Receptacle().DigOut( executionContext.Argument,
+		executionContext.Argument );
+	return true;
+}
+
+static bool embeddedCp( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	executionContext.Program->Receptacle().Copy( executionContext.Argument,
+		executionContext.Argument );
+	return true;
+}
+
+static bool embeddedRp( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Program->Receptacle().Replace(
+			executionContext.Argument ) )
+	{
+		executionContext.Argument.Empty();
+		return true;
+	}
+	return false;
+}
+
+static bool embeddedDgall( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	executionContext.Program->Receptacle().DigOutAll(
+		executionContext.Argument );
+	return true;
+}
+
+//-----------------------------------------------------------------------------
 // CStandartEmbeddedFunctionData
 
 struct CStandartEmbeddedFunctionData {
@@ -613,6 +663,12 @@ const CStandartEmbeddedFunctionData standartEmbeddedFunctions[] = {
 	{ "opnput", embeddedOpnput },
 	{ "libput", embeddedLibput },
 	{ "clsput", embeddedClsput },
+	// receptacle
+	{ "br", embeddedBr },
+	{ "dg", embeddedDg },
+	{ "cp", embeddedCp },
+	{ "rp", embeddedRp },
+	{ "dgall", embeddedDgall },
 	{ nullptr, nullptr }
 };
 

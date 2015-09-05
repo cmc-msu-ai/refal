@@ -36,11 +36,15 @@ public:
 
 	TLabel GetProgramStartFunction() const { return programStartFunction; }
 
+	CReceptacle& Receptacle() { return receptacle; }
+	const CReceptacle& Receptacle() const { return receptacle; }
+
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
 	TLabel programStartFunction;
+	CReceptacle receptacle;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );

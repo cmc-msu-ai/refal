@@ -19,6 +19,7 @@ set(SOURCE src/DirectiveParser.cpp
 			src/Qualifier.cpp
 			src/QualifierBuilder.cpp
 			src/QualifierParser.cpp
+			src/Receptacle.cpp
 			src/Refal2.cpp
 			src/RuleParser.cpp
 			src/Scanner.cpp
