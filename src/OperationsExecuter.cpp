@@ -155,8 +155,11 @@ void COperationsExecuter::doFunction()
 	if( left->IsLabel() ) {
 		RuntimeModuleId = left->Label() / LabelMask;
 		const TLabel functionIndex = left->Label() % LabelMask;
-		const CRuntimeFunction* function = Program->Module( RuntimeModuleId ).
-			Functions.GetData( functionIndex ).get();
+		const CRuntimeFunctions& functions = Program->Module(
+			RuntimeModuleId ).Functions;
+		const CRuntimeFunction* function = functions.GetData(
+			functionIndex ).get();
+		DEBUG_PRINT( __FUNCTION__ << " " << functions.GetKey( functionIndex ) )
 		if( function->IsOrdinary() ) {
 			const COrdinaryFunction* ordinaryFunction =
 				static_cast<const COrdinaryFunction*>( function );
