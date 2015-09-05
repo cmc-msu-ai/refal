@@ -34,7 +34,7 @@ void COperationsBuilder::Reset()
 
 void COperationsBuilder::Export( COperationList& saveTo )
 {
-	saveTo.Append( &operations );
+	saveTo.Append( operations );
 	Reset();
 }
 

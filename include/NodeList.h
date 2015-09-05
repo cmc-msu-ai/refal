@@ -61,6 +61,7 @@ public:
 	// return last inserted node
 	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeType* fromNode,
 		CNodeType* toNode );
+	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeList& list );
 
 	void Detach() { Detach( GetFirst(), GetLast() ); }
 	void Detach( CNodeType* node ) { Detach( node, node ); }
@@ -204,6 +205,20 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	}
 	nodeAfter->next = fromNode;
 	return toNode;
+}
+
+template<class T>
+typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
+	CNodeType* nodeAfter, CNodeList& list )
+{
+	if( list.IsEmpty() ) {
+		return nullptr;
+	}
+	CUnitNode* first = list.GetFirst();
+	CUnitNode* last = list.GetLast();
+	list.Detach( first, last );
+	assert( list.IsEmpty() );
+	return InsertAfter( nodeAfter, first, last );
 }
 
 template<class T>
