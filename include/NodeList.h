@@ -214,8 +214,8 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	if( list.IsEmpty() ) {
 		return nullptr;
 	}
-	CUnitNode* first = list.GetFirst();
-	CUnitNode* last = list.GetLast();
+	CNodeType* first = list.GetFirst();
+	CNodeType* last = list.GetLast();
 	list.Detach( first, last );
 	assert( list.IsEmpty() );
 	return InsertAfter( nodeAfter, first, last );
