@@ -500,7 +500,7 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 				} else {
 					if( variable.TypeIs( VT_S ) ) {
 						COperationsBuilder::AddCopy_S( valueIndex );
-					} else if( variable.TypeIs( VT_V ) ) {
+					} else if( variable.TypeIs( VT_E ) ) {
 						COperationsBuilder::AddCopy_E( valueIndex );
 					} else { // type WV
 						COperationsBuilder::AddCopy_WV( valueIndex );
