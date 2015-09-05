@@ -225,66 +225,94 @@ void CLeftPartCompiler::matchElement()
 			matchLeftParens();
 		} else if( left->IsSymbol() ) {
 			matchLeftSymbol();
-		} else if( left->IsVariable() && tryMatchLeftVariable( left ) ) {
+		} else if( left->IsVariable() && tryMatchLeftVariable() ) {
 		} else if( right->IsParen() ) {
 			matchRightParens();
 		} else if( right->IsSymbol() ) {
 			matchRightSymbol();
-		} else if( right->IsVariable() && tryMatchRightVariable( right ) ) {
+		} else if( right->IsVariable() && tryMatchRightVariable() ) {
 		} else {
 			assert( false );
 		}
 	}
 }
 
-bool CLeftPartCompiler::tryMatchLeftVariable(CUnitNode* left)
+bool CLeftPartCompiler::tryMatchLeftVariable()
 {
-	switch( variables.GetVariable( left->Variable() ).GetType() ) {
-		case VT_S:
-			matchLeftS();
-			return true;
-			break;
-		case VT_W:
-			matchLeftW();
-			return true;
-			break;
-		case VT_V:
-		case VT_E:
-			if( variables.IsSet( left->Variable() ) ) {
-				matchLeftDuplicateVE();
-				return true;
-			}
-			break;
-		default:
-			assert( false );
-			break;
+	assert( hole->GetFirst()->IsVariable() );
+	const TVariableIndex variable = hole->GetFirst()->Variable();
+	if( variables.IsSet( variable ) ) {
+		// match duplicate
+		switch( variables.GetVariable( variable ).GetType() ) {
+			case VT_S:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchLeftDuplicate_S );
+				break;
+			case VT_W:
+			case VT_V:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchLeftDuplicate_WV );
+				break;
+			case VT_E:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchLeftDuplicate_E );
+				break;
+		}
+	} else {
+		switch( variables.GetVariable( variable ).GetType() ) {
+			case VT_S:
+				matchVariable( variable,
+					&COperationsBuilder::AddMatchLeft_S );
+				break;
+			case VT_W:
+				matchVariable( variable,
+					&COperationsBuilder::AddMatchLeft_W );
+				break;
+			default:
+				return false;
+		}
 	}
-	return false;
+	hole->RemoveFirst();
+	return true;
 }
 
-bool CLeftPartCompiler::tryMatchRightVariable(CUnitNode* right)
+bool CLeftPartCompiler::tryMatchRightVariable()
 {
-	switch( variables.GetVariable( right->Variable() ).GetType() ) {
-		case VT_S:
-			matchRightS();
-			return true;
-			break;
-		case VT_W:
-			matchRightW();
-			return true;
-			break;
-		case VT_V:
-		case VT_E:
-			if( variables.IsSet( right->Variable() ) ) {
-				matchRightDuplicateVE();
-				return true;
-			}
-			break;
-		default:
-			assert( false );
-			break;
+	assert( hole->GetLast()->IsVariable() );
+	const TVariableIndex variable = hole->GetLast()->Variable();
+	if( variables.IsSet( variable ) ) {
+		// match duplicate
+		switch( variables.GetVariable( variable ).GetType() ) {
+			case VT_S:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchRightDuplicate_S );
+				break;
+			case VT_W:
+			case VT_V:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchRightDuplicate_WV );
+				break;
+			case VT_E:
+				matchDuplicateVariable( variable,
+					&COperationsBuilder::AddMatchRightDuplicate_E );
+				break;
+		}
+	} else {
+		switch( variables.GetVariable( variable ).GetType() ) {
+			case VT_S:
+				matchVariable( variable,
+					&COperationsBuilder::AddMatchRight_S );
+				break;
+			case VT_W:
+				matchVariable( variable,
+					&COperationsBuilder::AddMatchRight_W );
+				break;
+			default:
+				return false;
+		}
 	}
-	return false;
+	hole->RemoveLast();
+	return true;
 }
 
 void CLeftPartCompiler::matchEmptyExpression()
@@ -406,34 +434,6 @@ void CLeftPartCompiler::matchRightSymbol()
 			assert( false );
 			break;
 	}
-	hole->RemoveLast();
-}
-
-void CLeftPartCompiler::matchLeftS()
-{
-	matchVariable( hole->GetFirst()->Variable(),
-		&COperationsBuilder::AddMatchLeft_S );
-	hole->RemoveFirst();
-}
-
-void CLeftPartCompiler::matchRightS()
-{
-	matchVariable( hole->GetLast()->Variable(),
-		&COperationsBuilder::AddMatchRight_S );
-	hole->RemoveLast();
-}
-
-void CLeftPartCompiler::matchLeftW()
-{
-	matchVariable( hole->GetFirst()->Variable(),
-		&COperationsBuilder::AddMatchLeft_W );
-	hole->RemoveFirst();
-}
-
-void CLeftPartCompiler::matchRightW()
-{
-	matchVariable( hole->GetLast()->Variable(),
-		&COperationsBuilder::AddMatchRight_W );
 	hole->RemoveLast();
 }
 

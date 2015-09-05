@@ -73,8 +73,8 @@ private:
 	void matchVE( bool isRightDirection );
 	void checkBorders();
 	void matchElement();
-	bool tryMatchLeftVariable( CUnitNode* left );
-	bool tryMatchRightVariable( CUnitNode* right );
+	bool tryMatchLeftVariable();
+	bool tryMatchRightVariable();
 	
 	void matchEmptyExpression();
 	void matchClosedV();
@@ -83,10 +83,6 @@ private:
 	void matchRightParens();
 	void matchLeftSymbol();
 	void matchRightSymbol();
-	void matchLeftS();
-	void matchRightS();
-	void matchLeftW();
-	void matchRightW();
 	void matchLeftDuplicateVE();
 	void matchRightDuplicateVE();
 	
