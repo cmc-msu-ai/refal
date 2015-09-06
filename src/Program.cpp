@@ -203,7 +203,7 @@ CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
 	for( const CEmbeddedFunctionData* function = EmbeddedFunctionDataTable();
 		function->EmbeddedFunction != nullptr; function++ )
 	{
-		assert( function->externalName != nullptr );
+		assert( function->ExternalName != nullptr );
 		std::string externalName = function->ExternalName;
 		assert( !externalName.empty() );
 		const int globalIndex = globals.AddKey( externalName );
