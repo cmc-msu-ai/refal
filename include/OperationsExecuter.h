@@ -1048,7 +1048,7 @@ inline bool COperationsExecuter::matchRightBeginSaveToTable_V()
 		}
 		nextOperation();
 		saveState();
-		saveToTable( tmp, right );
+		saveToTable( right, tmp );
 		return true;
 	} else {
 		return false;
@@ -1080,7 +1080,7 @@ inline bool COperationsExecuter::matchRightWithQulifierBeginSaveToTable_V(
 		}
 		nextOperation();
 		saveState();
-		saveToTable( tmp, right );
+		saveToTable( right, tmp );
 		return true;
 	} else {
 		return false;
