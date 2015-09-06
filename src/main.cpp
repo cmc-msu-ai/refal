@@ -17,12 +17,14 @@ void CErrorHandler::Warning( const std::string& warningText )
 	std::cerr << warningText << std::endl;
 }
 
+const std::string SeparatorLine( 79, '-' );
+
 bool ParseFile( CScanner& scanner, const std::string& fileName )
 {
 	std::ifstream fileStream( fileName );
 	if( !fileStream.good() ) {
 		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
-		std::cerr << "------------------------" << std::endl << std::endl;
+		std::cerr << SeparatorLine << std::endl << std::endl;
 		return false;
 	}
 	std::cout << "Source file: `" << fileName << "`." << std::endl;
@@ -33,8 +35,8 @@ bool ParseFile( CScanner& scanner, const std::string& fileName )
 	}
 	scanner.AddEndOfFile();
 
-	std::cout << "------------------------" << std::endl << std::endl;
-	std::cerr << "------------------------" << std::endl << std::endl;
+	std::cout << SeparatorLine << std::endl << std::endl;
+	std::cerr << SeparatorLine << std::endl << std::endl;
 
 	return ( !scanner.HasErrors() );
 }
@@ -91,14 +93,18 @@ int main( int argc, const char* argv[] )
 	TExecutionResult result =
 		COperationsExecuter::Run( program, fieldOfView, errorNode );
 
-	std::cout << "------------------------" << std::endl;
+	std::cout << SeparatorLine << std::endl;
 	std::cout << "Execution result: "
 		<< ExecutionResultStrings[result] << "." << std::endl;
-	std::cout << "Field of view: " << std::endl << std::endl;
+	std::cout << "Field of view: " << std::endl;
 	CProgramPrintHelper programPrintHelper( program );
-	programPrintHelper.SetPrintLabelWithModule();
+	//programPrintHelper.SetPrintLabelWithModule();
 	fieldOfView.HandyPrint( std::cout, programPrintHelper );
+	std::cout << std::endl << SeparatorLine << std::endl;
+	std::cout << "Receptacle: " << std::endl;
+	CUnitList receptacle;
+	program->Receptacle().DigOutAll( receptacle );
+	receptacle.HandyPrint( std::cout, programPrintHelper );
 	std::cout << std::endl;
-
 	return 0;
 }
