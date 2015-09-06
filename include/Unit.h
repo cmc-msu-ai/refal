@@ -138,7 +138,7 @@ public:
 
 	// CNodeList
 	virtual void Duplicate( const CUnitNode* fromNode, const CUnitNode* toNode,
-		CUnitNode*& fromNodeCopy, CUnitNode*& toNodeCopy ) override;
+		CUnitNode*& fromNodeCopy, CUnitNode*& toNodeCopy );
 };
 
 //-----------------------------------------------------------------------------
