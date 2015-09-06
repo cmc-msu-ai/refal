@@ -25,9 +25,12 @@ bool CReceptacle::Replace( CUnitList& keyValue )
 	CUnitNode* leftBorderNode = nullptr;
 	CUnitNode* equalNode = nullptr;
 	if( find( keyValue.GetFirst(), leftBorderNode, equalNode ) ) {
-		data.Remove( leftBorderNode, leftBorderNode->PairedParen() );
+		data.Remove( leftBorderNode->Next(),
+			leftBorderNode->PairedParen()->Prev() );
+		data.InsertAfter( leftBorderNode, keyValue );
+	} else {
+		burry( keyValue );
 	}
-	burry( keyValue );
 	assert( keyValue.IsEmpty() );
 	return true;
 }
