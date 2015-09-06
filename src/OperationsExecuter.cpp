@@ -117,7 +117,7 @@ COperationsExecuter::COperationsExecuter( const CProgramPtr& program ) :
 	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 )
 {
 	assert( static_cast<bool>( Program ) );
-	left = fieldOfView.Append( CUnit( UT_LeftBracket ) );
+	left = fieldOfView.Append( CUnit( UT_LeftParen ) );
 	left->PairedParen() = 0;
 
 	fieldOfView.Append( CUnit( UT_Label ) )->Label() =
