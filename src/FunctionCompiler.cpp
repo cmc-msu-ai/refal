@@ -257,6 +257,10 @@ bool CLeftPartCompiler::tryMatchLeftVariable()
 				matchDuplicateVariable( variable,
 					&COperationsBuilder::AddMatchLeftDuplicate_E );
 				break;
+			case VT_None:
+			default:
+				assert( false );
+				break;
 		}
 	} else {
 		switch( variables.GetVariable( variable ).GetType() ) {
@@ -268,8 +272,13 @@ bool CLeftPartCompiler::tryMatchLeftVariable()
 				matchVariable( variable,
 					&COperationsBuilder::AddMatchLeft_W );
 				break;
-			default:
+			case VT_V:
+			case VT_E:
 				return false;
+			case VT_None:
+			default:
+				assert( false );
+				break;
 		}
 	}
 	hole->RemoveFirst();
@@ -296,6 +305,10 @@ bool CLeftPartCompiler::tryMatchRightVariable()
 				matchDuplicateVariable( variable,
 					&COperationsBuilder::AddMatchRightDuplicate_E );
 				break;
+			case VT_None:
+			default:
+				assert( false );
+				break;
 		}
 	} else {
 		switch( variables.GetVariable( variable ).GetType() ) {
@@ -307,8 +320,13 @@ bool CLeftPartCompiler::tryMatchRightVariable()
 				matchVariable( variable,
 					&COperationsBuilder::AddMatchRight_W );
 				break;
-			default:
+			case VT_V:
+			case VT_E:
 				return false;
+			case VT_None:
+			default:
+				assert( false );
+				break;
 		}
 	}
 	hole->RemoveLast();
