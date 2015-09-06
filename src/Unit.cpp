@@ -205,42 +205,24 @@ void CUnitList::Duplicate( const CUnitNode* fromNode,
 	const CUnitNode* toNode, CUnitNode*& fromNodeCopy, CUnitNode*& toNodeCopy )
 {
 	CNodeList::Duplicate( fromNode, toNode, fromNodeCopy, toNodeCopy );
-	CUnitNode* source = const_cast<CUnitNode*>( fromNode );
-	CUnitNode* dest = fromNodeCopy;
-	while( true ) {
-		assert( !source->IsLeftBracket() && !source->IsRightBracket() );
-		if( source->IsLeftParen() || source->IsRightParen() ) {
-			assert( source->GetType() == dest->GetType() );
-			source->PairedParen() = dest;
+	CUnitNode* node = fromNodeCopy;
+	assert( !node->IsLeftBracket() && !node->IsRightBracket() );
+	CUnitNode* lastAddedLeftParen = node->IsLeftParen() ? node : nullptr;
+	do {
+		node = node->Next();
+		assert( !node->IsLeftBracket() && !node->IsRightBracket() );
+		if( node->IsLeftParen() ) {
+			node->PairedParen() = lastAddedLeftParen;
+			lastAddedLeftParen = node;
+		} else if( node->IsRightParen() ) {
+			CUnitNode* leftParen = lastAddedLeftParen;
+			assert( leftParen != nullptr );
+			lastAddedLeftParen = lastAddedLeftParen->PairedParen();
+			node->PairedParen() = leftParen;
+			leftParen->PairedParen() = node;
 		}
-		if( source == toNode ) {
-			assert( dest == toNodeCopy );
-			break;
-		}
-		source = source->Next();
-		dest = dest->Next();
-	}
-	source = const_cast<CUnitNode*>( fromNode );
-	while( true ) {
-		if( source->IsLeftParen() ) {
-			CUnitNode* destLeftParen = source->PairedParen();
-			assert( destLeftParen->IsLeftParen() );
-			CUnitNode* sourceRightParen = destLeftParen->PairedParen();
-			assert( sourceRightParen->IsRightParen() );
-			CUnitNode* destRightParen = sourceRightParen->PairedParen();
-			assert( destRightParen->IsRightParen() );
-			// correct source list
-			source->PairedParen() = sourceRightParen;
-			sourceRightParen->PairedParen() = source;
-			// correct duplicated list
-			destLeftParen->PairedParen() = destRightParen;
-			destRightParen->PairedParen() = destLeftParen;
-		}
-		if( source == toNode ) {
-			break;
-		}
-		source = source->Next();
-	}
+	} while( node != toNodeCopy );
+	assert( lastAddedLeftParen == nullptr );
 }
 
 //-----------------------------------------------------------------------------
