@@ -87,15 +87,22 @@ int main( int argc, const char* argv[] )
 	std::cout << SeparatorLine << std::endl;
 	std::cout << "Execution result: "
 		<< ExecutionResultStrings[result] << "." << std::endl;
-	std::cout << "Field of view: " << std::endl;
-	CProgramPrintHelper programPrintHelper( program );
-	//programPrintHelper.SetPrintLabelWithModule();
-	fieldOfView.HandyPrint( std::cout, programPrintHelper );
-	std::cout << SeparatorLine << std::endl;
-	std::cout << "Receptacle: " << std::endl;
-	CUnitList receptacle;
-	program->Receptacle().DigOutAll( receptacle );
-	receptacle.HandyPrint( std::cout, programPrintHelper );
-	std::cout << std::endl;
+	if( !fieldOfView.IsEmpty() ) {
+		std::cout << "Field of view: " << std::endl;
+		CProgramPrintHelper programPrintHelper( program );
+		//programPrintHelper.SetPrintLabelWithModule();
+		fieldOfView.HandyPrint( std::cout, programPrintHelper );
+	}
+	if( !program->Receptacle().IsEmpty() ) {
+		if( !fieldOfView.IsEmpty() ) {
+			std::cout << SeparatorLine << std::endl;
+		}
+		std::cout << "Receptacle: " << std::endl;
+		CUnitList receptacle;
+		program->Receptacle().DigOutAll( receptacle );
+		CProgramPrintHelper programPrintHelper( program );
+		receptacle.HandyPrint( std::cout, programPrintHelper );
+		std::cout << std::endl;
+	}
 	return 0;
 }

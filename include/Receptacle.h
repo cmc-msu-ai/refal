@@ -9,7 +9,10 @@ namespace Refal2 {
 
 class CReceptacle {
 public:
-	CReceptacle() {}
+	CReceptacle() { Empty(); }
+
+	void Empty() { data.Empty(); }
+	bool IsEmpty() const { return data.IsEmpty(); }
 
 	// return true if keyValue is correct (contain '=' at top level)
 	bool Burry( CUnitList& keyValue );
