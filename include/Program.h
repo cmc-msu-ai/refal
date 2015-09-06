@@ -39,12 +39,15 @@ public:
 	CReceptacle& Receptacle() { return receptacle; }
 	const CReceptacle& Receptacle() const { return receptacle; }
 
+	CRuntimeFunctionPtr EmptyFunction() const { return emptyFunction; }
+
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
 	TLabel programStartFunction;
 	CReceptacle receptacle;
+	const CRuntimeFunctionPtr emptyFunction;
 
 	CProgram( const CProgram& );
 	CProgram& operator=( const CProgram& );

@@ -70,7 +70,8 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 #include <FunctionCompiler.h>
 #include <Function.h>
 #include <Receptacle.h>
-#include <Module.h>
+#include <EmbeddedFunctions.h>
+#include <Program.h>
 #include <ModuleBuilder.h>
 #include <QualifierParser.h>
 #include <RuleParser.h>
