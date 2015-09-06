@@ -135,6 +135,10 @@ public:
 		const CPrintHelper& printHelper ) const;
 	void StrangePrint( std::ostream& outputStream,
 		const CPrintHelper& printHelper ) const;
+
+	// CNodeList
+	virtual void Duplicate( const CUnitNode* fromNode, const CUnitNode* toNode,
+		CUnitNode*& fromNodeCopy, CUnitNode*& toNodeCopy ) override;
 };
 
 //-----------------------------------------------------------------------------

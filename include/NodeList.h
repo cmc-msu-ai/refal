@@ -4,58 +4,79 @@
 
 namespace Refal2 {
 
+//-----------------------------------------------------------------------------
+// CNode
+
 template<class T>
 class CNodeList;
 
 template<class T>
 class CNode : public T {
 	friend class CNodeList<T>;
-	
+
 public:
-	CNode(): prev( 0 ), next( 0 ) {}
-	explicit CNode( const T& value ): T( value ), prev( 0 ), next( 0 ) {}
+	CNode() :
+		prev( nullptr ),
+		next( nullptr )
+	{
+	}
+	explicit CNode( const T& value ) :
+		T( value ),
+		prev( nullptr ),
+		next( nullptr )
+	{
+	}
 
 	CNode* Next() { return next; }
 	const CNode* Next() const { return next; }
-	
+
 	CNode* Prev() { return prev; }
 	const CNode* Prev() const { return prev; }
-	
+
+	bool IsDetached() const { return ( prev == nullptr && next == nullptr ); }
+
 private:
 	CNode* prev;
 	CNode* next;
 };
+
+//-----------------------------------------------------------------------------
+// CNodeList
 
 template<class T>
 class CNodeList {
 public:
 	typedef CNode<T> CNodeType;
 
-	CNodeList(): first(0), last(0) {}
+	CNodeList() :
+		first( nullptr ),
+		last( nullptr )
+	{
+	}
 	CNodeList( CNodeType* first, CNodeType* last );
-	
+
 	~CNodeList() { Empty(); }
-	
+
 	void Assign( CNodeType* first, CNodeType* last );
-	
+
 	void Empty();
-	bool IsEmpty() const { return ( first == 0 ); }
-	
+	bool IsEmpty() const { return ( first == nullptr ); }
+
 	inline void Swap( CNodeList& swapWith );
 	inline void Move( CNodeList& moveTo );
-	
+
 	inline CNodeType* DetachFirst();
-	void RemoveFirst() { free( DetachFirst() ); }
+	void RemoveFirst() { Free( DetachFirst() ); }
 	CNodeType* GetFirst() { return first; }
 	const CNodeType* GetFirst() const { return first; }
-	
+
 	inline CNodeType* DetachLast();
-	void RemoveLast() { free( DetachLast() ); }
+	void RemoveLast() { Free( DetachLast() ); }
 	CNodeType* GetLast() { return last; }
 	const CNodeType* GetLast() const { return last; }
-	
+
 	CNodeType* InsertBefore( CNodeType* nodeBefore, const T& value );
-	
+
 	CNodeType* InsertAfter( CNodeType* nodeAfter, const T& value );
 	CNodeType* InsertAfter( CNodeType* nodeAfter, CNodeType* node );
 	// return last inserted node
@@ -67,22 +88,24 @@ public:
 	void Detach( CNodeType* node ) { Detach( node, node ); }
 	void Detach( CNodeType* fromNode, CNodeType* toNode );
 	
-	void Remove( CNodeType* node ) { Detach( node ); free( node ); }
+	void Remove( CNodeType* node ) { Detach( node ); Free( node ); }
 	void Remove( CNodeType* fromNode, CNodeType* toNode );
-	
+
 	CNodeType* Move( CNodeType* nodeAfter, CNodeType* node );
 	// return last moved node
 	CNodeType* Move( CNodeType* nodeAfter, CNodeType* fromNode,
 		CNodeType* toNode );
-	
+
 	CNodeType* Copy( CNodeType* nodeAfter, CNodeType* node );
 	// return last copy node
 	CNodeType* Copy( CNodeType* nodeAfter, CNodeType* fromNode,
 		CNodeType* toNode );
-	
-	static void Duplicate( const CNodeType* fromNode, const CNodeType* toNode,
+
+	virtual void Duplicate( const CNodeType* fromNode, const CNodeType* toNode,
 		CNodeType*& fromNodeCopy, CNodeType*& toNodeCopy );
-	
+	virtual CNodeType* Alloc( const T& value );
+	virtual void Free( CNodeType* node );
+
 	CNodeType* Append( const T& value );
 	void Append( CNodeList& list );
 
@@ -90,9 +113,6 @@ private:
 	CNodeList( const CNodeList& );
 	CNodeList& operator=( const CNodeList& );
 
-	static CNodeType* alloc( const T& value );
-	static void free( CNodeType* node );
-	
 	CNodeType* first;
 	CNodeType* last;
 };
@@ -117,7 +137,7 @@ template<class T>
 inline typename CNodeList<T>::CNodeType* CNodeList<T>::DetachFirst()
 {
 	CNodeType* detachedNode = GetFirst();
-	assert( detachedNode != 0 );
+	assert( detachedNode != nullptr );
 	Detach( detachedNode );
 	return detachedNode;
 }
@@ -126,7 +146,7 @@ template<class T>
 inline typename CNodeList<T>::CNodeType* CNodeList<T>::DetachLast()
 {
 	CNodeType* detachedNode = GetLast();
-	assert( detachedNode != 0 );
+	assert( detachedNode != nullptr );
 	Detach( detachedNode );
 	return detachedNode;
 }
@@ -135,14 +155,14 @@ template<class T>
 CNodeList<T>::CNodeList( CNodeType* _first, CNodeType* _last ):
 	first( _first ), last( _last )
 {
-	assert( first != 0 && last != 0 );
+	assert( first != nullptr && last != nullptr );
 }
 
 template<class T>
 void CNodeList<T>::Assign( CNodeType* _first, CNodeType* _last )
 {
 	Empty();
-	assert( _first != 0 && _last != 0 );
+	assert( _first != nullptr && _last != nullptr );
 	first = _first;
 	last = _last;
 }
@@ -150,19 +170,19 @@ void CNodeList<T>::Assign( CNodeType* _first, CNodeType* _last )
 template<class T>
 void CNodeList<T>::Empty()
 {
-	if( first != 0 ) {
+	if( first != nullptr ) {
 		Remove(first, last);
 	}
-	first = 0;
-	last = 0;
+	first = nullptr;
+	last = nullptr;
 }
 
 template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertBefore(
 	CNodeType* nodeBefore, const T& value )
 {
-	assert( nodeBefore != 0 );
-	CNodeType* newNode = alloc( value );
+	assert( nodeBefore != nullptr );
+	CNodeType* newNode = Alloc( value );
 	newNode->next = nodeBefore;
 	newNode->prev = nodeBefore->prev;
 	if( nodeBefore == first ) {
@@ -171,7 +191,7 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::InsertBefore(
 		nodeBefore->prev->next = newNode;
 	}
 	nodeBefore->prev = newNode;
-	
+
 	return newNode;
 }
 
@@ -179,7 +199,7 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	CNodeType* nodeAfter, const T& value )
 {
-	return InsertAfter( nodeAfter, alloc( value ) );
+	return InsertAfter( nodeAfter, Alloc( value ) );
 }
 
 template<class T>
@@ -193,7 +213,7 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 	CNodeType* nodeAfter, CNodeType* fromNode, CNodeType* toNode )
 {
-	assert( nodeAfter != 0 );
+	assert( nodeAfter != nullptr );
 	Detach( fromNode, toNode );
 
 	toNode->next = nodeAfter->next;
@@ -224,11 +244,11 @@ typename CNodeList<T>::CNodeType* CNodeList<T>::InsertAfter(
 template<class T>
 void CNodeList<T>::Detach( CNodeType* fromNode, CNodeType* toNode )
 {
-	assert( fromNode != 0 && toNode != 0 );
-	if( fromNode->prev != 0 ) {
+	assert( fromNode != nullptr && toNode != nullptr );
+	if( fromNode->prev != nullptr ) {
 		fromNode->prev->next = toNode->next;
 	}
-	if( toNode->next != 0 ) {
+	if( toNode->next != nullptr ) {
 		toNode->next->prev = fromNode->prev;
 	}
 	if( fromNode == first ) {
@@ -237,21 +257,21 @@ void CNodeList<T>::Detach( CNodeType* fromNode, CNodeType* toNode )
 	if( toNode == last ) {
 		last = fromNode->prev;
 	}
-	fromNode->prev = 0;
-	toNode->next = 0;
+	fromNode->prev = nullptr;
+	toNode->next = nullptr;
 }
 
 template<class T>
 void CNodeList<T>::Remove( CNodeType* fromNode, CNodeType* toNode )
 {
 	Detach( fromNode, toNode );
-	
+
 	while( fromNode != toNode ) {
 		CNodeType* tmp = fromNode;
 		fromNode = fromNode->next;
-		free( tmp );
+		Free( tmp );
 	}
-	free( fromNode );
+	Free( fromNode );
 }
 
 template<class T>
@@ -279,8 +299,8 @@ template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::Copy( CNodeType* nodeAfter,
 	CNodeType* fromNode, CNodeType* toNode )
 {
-	CNodeType* fromNodeCopy = 0;
-	CNodeType* toNodeCopy = 0;
+	CNodeType* fromNodeCopy = nullptr;
+	CNodeType* toNodeCopy = nullptr;
 	Duplicate( fromNode, toNode, fromNodeCopy, toNodeCopy );
 	return InsertAfter( nodeAfter, fromNodeCopy, toNodeCopy );
 }
@@ -289,12 +309,12 @@ template<class T>
 void CNodeList<T>::Duplicate( const CNodeType* fromNode,
 	const CNodeType* toNode, CNodeType*& fromNodeCopy, CNodeType*& toNodeCopy )
 {
-	assert( fromNode != 0 && toNode != 0 );
-	fromNodeCopy = alloc( *fromNode );
+	assert( fromNode != nullptr && toNode != nullptr );
+	fromNodeCopy = Alloc( *fromNode );
 	toNodeCopy = fromNodeCopy;
 	while( fromNode != toNode ) {
 		fromNode = fromNode->next;
-		toNodeCopy->next = alloc( *fromNode );
+		toNodeCopy->next = Alloc( *fromNode );
 		toNodeCopy->next->prev = toNodeCopy;
 		toNodeCopy = toNodeCopy->next;
 	}
@@ -303,10 +323,10 @@ void CNodeList<T>::Duplicate( const CNodeType* fromNode,
 template<class T>
 typename CNodeList<T>::CNodeType* CNodeList<T>::Append( const T& value )
 {
-	if( last != 0 ) {
+	if( last != nullptr ) {
 		InsertAfter( last, value );
 	} else {
-		first = alloc( value );
+		first = Alloc( value );
 		last = first;
 	}
 	return last;
@@ -329,15 +349,15 @@ void CNodeList<T>::Append( CNodeList& list )
 }
 
 template<class T>
-typename CNodeList<T>::CNodeType* CNodeList<T>::alloc( const T& value )
+typename CNodeList<T>::CNodeType* CNodeList<T>::Alloc( const T& value )
 {
 	CNodeType* newNode = new CNodeType( value );
-	assert( newNode != 0 );
+	assert( newNode != nullptr );
 	return newNode;
 }
 
 template<class T>
-void CNodeList<T>::free( CNodeType* node )
+void CNodeList<T>::Free( CNodeType* node )
 {
 	delete node;
 }
