@@ -205,11 +205,9 @@ void CUnitList::Duplicate( const CUnitNode* fromNode,
 	const CUnitNode* toNode, CUnitNode*& fromNodeCopy, CUnitNode*& toNodeCopy )
 {
 	CNodeList::Duplicate( fromNode, toNode, fromNodeCopy, toNodeCopy );
-	CUnitNode* node = fromNodeCopy;
-	assert( !node->IsLeftBracket() && !node->IsRightBracket() );
-	CUnitNode* lastAddedLeftParen = node->IsLeftParen() ? node : nullptr;
-	do {
-		node = node->Next();
+	CUnitNode* lastAddedLeftParen = nullptr;
+	for( CUnitNode* node = fromNodeCopy; ; node = node->Next() ) {
+		assert( node != nullptr );
 		assert( !node->IsLeftBracket() && !node->IsRightBracket() );
 		if( node->IsLeftParen() ) {
 			node->PairedParen() = lastAddedLeftParen;
@@ -221,7 +219,10 @@ void CUnitList::Duplicate( const CUnitNode* fromNode,
 			node->PairedParen() = leftParen;
 			leftParen->PairedParen() = node;
 		}
-	} while( node != toNodeCopy );
+		if( node == toNodeCopy ) {
+			break;
+		}
+	}
 	assert( lastAddedLeftParen == nullptr );
 }
 
