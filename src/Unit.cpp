@@ -103,6 +103,7 @@ void CUnitList::Print( const CUnitNode* begin, const CUnitNode* end,
 	while( node != end ) {
 		node->Print( outputStream, printHelper );
 		node = node->Next();
+		assert( node != nullptr );
 	}
 	node->Print( outputStream, printHelper );
 }
