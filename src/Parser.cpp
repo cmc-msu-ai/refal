@@ -21,6 +21,8 @@ void CParser::Reset()
 
 void CParser::AddToken()
 {
+	CError::ResetSeverity();
+	CError::SetErrorPosition( token.line, token.position, token.word );
 	( this->*state )();
 }
 
@@ -34,7 +36,9 @@ void CParser::parsingInitial()
 	} else if( token.type == TT_Blank ) {
 		state = &CParser::parsingBlank;
 	} else if( token.type != TT_LineFeed ) {
-		CErrorsHelper::Error( "line should begin with word or space" );
+		CError::SetSeverity( ES_Error );
+		CError::SetMessage( "line should begin with word or space" );
+		CErrorsHelper::Error();
 		state = &CParser::parsingIgnoreLine;
 	}
 }

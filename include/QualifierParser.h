@@ -41,7 +41,7 @@ class CQualifierParser : public CModuleBuilder, public CParsingElementState {
 protected:
 	CToken token;
 
-	CQualifierParser( IErrorHandler* errorHandler = 0 );
+	CQualifierParser( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 	void StartQualifer();

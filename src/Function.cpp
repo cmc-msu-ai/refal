@@ -324,38 +324,40 @@ void CFunctionBuilder::AddRightBracket()
 
 void CFunctionBuilder::error( TErrorCode errorCode )
 {
+	CError::SetSeverity( ES_Error );
 	switch( errorCode ) {
 		case EC_IllegalLeftBracketInLeftPart:
-			CErrorsHelper::Error( "illegal left bracket in left part" );
+			CError::SetMessage( "illegal left bracket in left part" );
 			break;
 		case EC_IllegalRightBracketInLeftPart:
-			CErrorsHelper::Error( "illegal right bracket in left part" );
+			CError::SetMessage( "illegal right bracket in left part" );
 			break;
 		case EC_RightParenDoesNotMatchLeftParen:
-			CErrorsHelper::Error( "right paren does not match left paren" );
+			CError::SetMessage( "right paren does not match left paren" );
 			break;
 		case EC_RightBracketDoesNotMatchLeftBracket:
-			CErrorsHelper::Error( "right bracket does not match left bracket" );
+			CError::SetMessage( "right bracket does not match left bracket" );
 			break;
 		case EC_UnclosedLeftParenInLeftPart:
-			CErrorsHelper::Error( "unclosed left paren in left part" );
+			CError::SetMessage( "unclosed left paren in left part" );
 			break;
 		case EC_UnclosedLeftParenInRightPart:
-			CErrorsHelper::Error( "unclosed left paren in right part" );
+			CError::SetMessage( "unclosed left paren in right part" );
 			break;
 		case EC_UnclosedLeftBracketInRightPart:
-			CErrorsHelper::Error( "unclosed left bracket in right part" );
+			CError::SetMessage( "unclosed left bracket in right part" );
 			break;
 		case EC_ThereAreMultiplePartsSeparatorInRules:
-			CErrorsHelper::Error( "there are multiple parts separator in rules" );
+			CError::SetMessage( "there are multiple parts separator in rules" );
 			break;
 		case EC_ThereAreNoPartsSeparatorInRules:
-			CErrorsHelper::Error( "there are no parts separator in rules" );
+			CError::SetMessage( "there are no parts separator in rules" );
 			break;
 		default:
 			assert( false );
 			break;
 	}
+	CErrorsHelper::Error();
 }
 
 void CFunctionBuilder::emptyStack()

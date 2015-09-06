@@ -8,7 +8,7 @@ namespace Refal2 {
 
 class CDirectiveParser : public CRuleParser {
 protected:
-	CDirectiveParser( IErrorHandler* errorHandler = 0 );
+	CDirectiveParser( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 	bool StartParseIfStartDirective( const CToken& moduleName );

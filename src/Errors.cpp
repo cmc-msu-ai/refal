@@ -3,30 +3,164 @@
 namespace Refal2 {
 
 //-----------------------------------------------------------------------------
+// CError
+
+void CError::Reset()
+{
+	ResetSeverity();
+	ResetFileName();
+	ResetErrorPosition();
+	ResetMessage();
+}
+
+bool CError::IsSet() const
+{
+	return ( Severity() != ES_None && !Message().empty() );
+}
+
+void CError::ResetSeverity()
+{
+	severity = ES_None;
+	resetCache();
+}
+
+void CError::SetSeverity( TErrorSeverity _severity )
+{
+	assert( _severity != ES_None );
+	severity = _severity;
+	resetCache();
+}
+
+void CError::ResetFileName()
+{
+	fileName.clear();
+	resetCache();
+}
+
+void CError::SetFileName( const std::string& _fileName )
+{
+	assert( !_fileName.empty() );
+	fileName = _fileName;
+	resetCache();
+}
+
+void CError::ResetErrorPosition()
+{
+	token.type = TT_None;
+	resetCache();
+}
+
+void CError::SetErrorPosition( int line, int position,
+	const std::string& text )
+{
+	token.type = TT_Word;
+	token.line = line;
+	token.position = position;
+	token.word = text;
+	resetCache();
+}
+
+void CError::ResetMessage()
+{
+	message.clear();
+	resetCache();
+}
+
+void CError::SetMessage( const std::string& _message )
+{
+	assert( !_message.empty() );
+	message = _message;
+	resetCache();
+}
+
+const std::string& CError::UserMessage() const
+{
+	if( userMessage.empty() ) {
+		std::ostringstream userMessageStream;
+		if( !fileName.empty() ) {
+			userMessageStream << fileName << ":";
+			if( !token.IsNone() ) {
+				assert( token.type == TT_Word );
+				userMessageStream << token.line << ":" << token.position << ":";
+			}
+			std::cout << " ";
+		} else {
+			assert( token.IsNone() );
+		}
+		switch( Severity() ) {
+			case ES_Warning:
+				userMessageStream << "warning";
+				break;
+			case ES_Error:
+				userMessageStream << "error";
+				break;
+			case ES_LinkError:
+				userMessageStream << "link error";
+				break;
+			case ES_FatalError:
+				userMessageStream << "fatal error";
+				break;
+			case ES_None:
+			default:
+				assert( false );
+				break;
+		}
+		assert( !message.empty() );
+		userMessageStream << ": " << message << ".";
+		userMessage = userMessageStream.str();
+	}
+	return userMessage;
+}
+
+//-----------------------------------------------------------------------------
 
 CErrorsHelper::CErrorsHelper( IErrorHandler* errorHandler )
 {
+	CError::Reset();
 	Reset();
 	SetErrorHandler( errorHandler );
 }
 
 void CErrorsHelper::Reset()
 {
-	hasErrors = false;
-	hasWarnings = false;
+	errorHandler = nullptr;
+	errorSeverity = ES_None;
 }
 
-void CErrorsHelper::Error( const std::string& errorText )
+void CErrorsHelper::SetErrorHandler( IErrorHandler* _errorHandler )
 {
-	assert( errorHandler != 0 );
-	errorHandler->Error( errorText );
-	hasErrors = true;
+	errorHandler = _errorHandler;
 }
-void CErrorsHelper::Warning( const std::string& warningText )
+
+bool CErrorsHelper::HasErrors() const
 {
-	assert( errorHandler != 0 );
-	errorHandler->Warning( warningText );
-	hasWarnings = true;
+	switch( ErrorSeverity() ) {
+		case ES_None:
+		case ES_Warning:
+			return false;
+		case ES_Error:
+		case ES_LinkError:
+		case ES_FatalError:
+			return true;
+	}
+	assert( false );
+	return false;
+}
+
+void CErrorsHelper::Error()
+{
+	assert( errorHandler != nullptr );
+	assert( CError::IsSet() );
+	const TErrorSeverity severities[] =
+		{ ES_FatalError, ES_LinkError, ES_Error, ES_Warning, ES_None };
+	for( int i = 0; i < sizeof( severities ) / sizeof( TErrorSeverity ); i++ ) {
+		if( severities[i] == CError::Severity()
+			|| severities[i] == errorSeverity )
+		{
+			errorSeverity = severities[i];
+		}
+	}
+	errorHandler->Error( *this );
 }
 
 //-----------------------------------------------------------------------------

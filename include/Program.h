@@ -94,7 +94,7 @@ public:
 	CProgramPtr BuildProgram();
 
 protected:
-	CProgramBuilder( IErrorHandler* errorHandler = 0 );
+	CProgramBuilder( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 	void AddModule( CModuleDataPtr& module );

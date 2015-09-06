@@ -4,39 +4,28 @@ using namespace Refal2;
 
 class CErrorHandler : public IErrorHandler {
 public:
-	virtual void Error( const std::string& errorText );
-	virtual void Warning( const std::string& warningText );
+	virtual void Error( const CError& error );
 };
 
-void CErrorHandler::Error( const std::string& errorText )
+void CErrorHandler::Error( const CError& error )
 {
-	std::cerr << errorText << std::endl;
+	std::cerr << error.UserMessage() << std::endl;
 }
-void CErrorHandler::Warning( const std::string& warningText )
-{
-	std::cerr << warningText << std::endl;
-}
-
-const std::string SeparatorLine( 79, '-' );
 
 bool ParseFile( CScanner& scanner, const std::string& fileName )
 {
 	std::ifstream fileStream( fileName );
 	if( !fileStream.good() ) {
 		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
-		std::cerr << SeparatorLine << std::endl << std::endl;
 		return false;
 	}
-	std::cout << "Source file: `" << fileName << "`." << std::endl;
-	std::cerr << "Source file: `" << fileName << "`." << std::endl;
 
+	scanner.SetFileName( fileName );
 	for( char c; fileStream.get( c ); ) {
 		scanner.AddChar( c );
 	}
 	scanner.AddEndOfFile();
-
-	std::cout << SeparatorLine << std::endl << std::endl;
-	std::cerr << SeparatorLine << std::endl << std::endl;
+	scanner.ResetFileName();
 
 	return ( !scanner.HasErrors() );
 }
@@ -69,6 +58,8 @@ const char* const ExecutionResultStrings[] = {
 	"wrong argument of external function"
 };
 
+const std::string SeparatorLine( 80, '-' );
+
 int main( int argc, const char* argv[] )
 {
 	std::ios::sync_with_stdio( false );
@@ -100,7 +91,7 @@ int main( int argc, const char* argv[] )
 	CProgramPrintHelper programPrintHelper( program );
 	//programPrintHelper.SetPrintLabelWithModule();
 	fieldOfView.HandyPrint( std::cout, programPrintHelper );
-	std::cout << std::endl << SeparatorLine << std::endl;
+	std::cout << SeparatorLine << std::endl;
 	std::cout << "Receptacle: " << std::endl;
 	CUnitList receptacle;
 	program->Receptacle().DigOutAll( receptacle );

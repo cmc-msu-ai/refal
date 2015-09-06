@@ -56,17 +56,17 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 } // end of namespace Refal2
 
 #include <Dictionary.h>
-#include <Errors.h>
 #include <NodeList.h>
 #include <FastSet.h>
 #include <SetBuilder.h>
 #include <Dictionary.h>
+#include <Token.h>
+#include <Errors.h>
 #include <Unit.h>
 #include <Qualifier.h>
 #include <QualifierBuilder.h>
 #include <OperationsBuilder.h>
 #include <Variables.h>
-#include <Token.h>
 #include <FunctionCompiler.h>
 #include <Function.h>
 #include <Receptacle.h>

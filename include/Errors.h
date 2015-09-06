@@ -6,73 +6,74 @@ namespace Refal2 {
 
 //-----------------------------------------------------------------------------
 
-struct IErrorHandler {
-	virtual void Error( const std::string& errorText ) = 0;
-	virtual void Warning( const std::string& warningText ) = 0;
+enum TErrorSeverity {
+	ES_None,
+	ES_Warning,
+	ES_Error,
+	ES_LinkError,
+	ES_FatalError
+};
+
+class CError {
+public:
+	CError() { Reset(); }
+	void Reset();
+	bool IsSet() const;
+
+	TErrorSeverity Severity() const { return severity; }
+	const CToken& ErrorPosition() const { return token; }
+	const std::string& FileName() const { return fileName; }
+	const std::string& Message() const { return message; }
+	const std::string& UserMessage() const;
+
+	void ResetSeverity();
+	void SetSeverity( TErrorSeverity severity );
+	void ResetFileName();
+	void SetFileName( const std::string& fileName );
+	void ResetErrorPosition();
+	void SetErrorPosition( int line, int position, const std::string& text );
+	void ResetMessage();
+	void SetMessage( const std::string& message );
+
+private:
+	TErrorSeverity severity;
+	std::string fileName;
+	CToken token;
+	std::string message;
+	mutable std::string userMessage;
+
+	void resetCache() { userMessage.clear(); }
 };
 
 //-----------------------------------------------------------------------------
 
-class CErrorsHelper {
+struct IErrorHandler {
+	virtual void Error( const CError& error ) = 0;
+};
+
+//-----------------------------------------------------------------------------
+
+class CErrorsHelper : public CError {
 public:
-	explicit CErrorsHelper( IErrorHandler* errorHandler = 0 );
+	explicit CErrorsHelper( IErrorHandler* errorHandler = nullptr );
 	void Reset();
 
+	void ResetErrorHandler();
+	bool HasErrorHandler() const { return ( ErrorHandler() != nullptr ); }
 	void SetErrorHandler( IErrorHandler* errorHandler );
-	IErrorHandler* GetErrorHandler() const { return errorHandler; }
+	IErrorHandler* ErrorHandler() const { return errorHandler; }
 
-	bool HasErrors() const { return hasErrors; }
-	bool HasWarnings() const { return hasWarnings; }
-
-	void Error( const std::string& errorText );
-	void Warning( const std::string& warningText );
+	TErrorSeverity ErrorSeverity() const { return errorSeverity; }
+	bool HasErrors() const;
+	void Error();
 
 private:
 	IErrorHandler* errorHandler;
-	bool hasErrors;
-	bool hasWarnings;
+	TErrorSeverity errorSeverity;
 
 	CErrorsHelper( const CErrorsHelper& );
 	CErrorsHelper& operator=( const CErrorsHelper& );
 };
-
-inline void CErrorsHelper::SetErrorHandler( IErrorHandler* _errorHandler )
-{
-	errorHandler = _errorHandler;
-}
-
-//-----------------------------------------------------------------------------
-
-class CErrorHandlerSwitcher {
-public:
-	CErrorHandlerSwitcher( CErrorsHelper* errorsHelper,
-		IErrorHandler* newErrorHandler );
-	~CErrorHandlerSwitcher() { Revert(); }
-
-	void Revert() const;
-
-private:
-	CErrorsHelper* errorsHelper;
-	IErrorHandler* oldErrorHandler;
-
-	CErrorHandlerSwitcher( const CErrorHandlerSwitcher& );
-	CErrorHandlerSwitcher& operator=( const CErrorHandlerSwitcher& );
-};
-
-//-----------------------------------------------------------------------------
-
-inline CErrorHandlerSwitcher::CErrorHandlerSwitcher(
-		CErrorsHelper* _errorsHelper, IErrorHandler* newErrorHandler ):
-	errorsHelper( _errorsHelper ),
-	oldErrorHandler( errorsHelper->GetErrorHandler() )
-{
-	errorsHelper->SetErrorHandler( newErrorHandler );
-}
-
-inline void CErrorHandlerSwitcher::Revert() const
-{
-	errorsHelper->SetErrorHandler( oldErrorHandler );
-}
 
 //-----------------------------------------------------------------------------
 

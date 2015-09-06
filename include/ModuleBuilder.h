@@ -17,7 +17,7 @@ typedef std::map<std::string, CNamedQualifierInfo> CNamedQualifiers;
 
 class CModuleBuilder : public CProgramBuilder {
 protected:
-	CModuleBuilder( IErrorHandler* errorHandler = 0 );
+	CModuleBuilder( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 
@@ -45,6 +45,7 @@ private:
 	CModuleDataPtr module;
 	CNamedQualifiers namedQualifiers;
 	// auxiliary functions
+	void error( const std::string& message );
 	TLabel declare( const CToken& nameToken );
 	CPreparatoryFunction& getFunction( TLabel function );
 	CPreparatoryFunction& addFunction( const CToken& nameToken );

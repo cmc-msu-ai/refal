@@ -72,10 +72,9 @@ static bool IsControl( char c )
 			&& c != CarriageReturn && c != LineFeed ) );
 }
 
-CScanner::CScanner( IErrorHandler* _errorHandler ):
-	errorHandler( _errorHandler )
+CScanner::CScanner( IErrorHandler* errorHandler ) :
+	CParser( errorHandler )
 {
-	SetErrorHandler( this );
 	Reset();
 }
 
@@ -142,8 +141,10 @@ void CScanner::error( TErrorCode errorCode, char c )
 			break;
 	}
 	errorStream << ".";
-	CErrorHandlerSwitcher switcher( this, errorHandler );
-	CErrorsHelper::Error( errorStream.str() );
+	CError::SetSeverity( ES_Error );
+	CError::SetErrorPosition( line, position, std::string( 1, c ) );
+	CError::SetMessage( errorStream.str() );
+	CErrorsHelper::Error();
 }
 
 void CScanner::setLineAndPositionOfToken()
@@ -575,7 +576,7 @@ void CScanner::processingSymbol( char c )
 		token.number = ( c - Zero );
 		state = S_Number;
 	} else {
-		error( E_UnexpectedCharacterInLabel );
+		error( E_UnexpectedCharacterInLabel, c );
 		state = S_Initial;
 		processing( c );
 	}
@@ -588,7 +589,7 @@ void CScanner::processingLabel( char c )
 		addToken( TT_Label );
 		state = S_Initial;
 	} else {
-		error( E_UnclosedLabel );
+		error( E_UnclosedLabel, c );
 		state = S_Initial;
 		processing( c );
 	}
@@ -602,7 +603,7 @@ void CScanner::processingNumber( char c )
 		addToken( TT_Number );
 		state = S_Initial;
 	} else {
-		error( E_UnclosedNumber );
+		error( E_UnclosedNumber, c );
 		state = S_Initial;
 		processing( c );
 	}
@@ -624,7 +625,7 @@ void CScanner::processingBeginOfQualifier( char c )
 		token.word = c;
 		state = S_Qualifier;
 	} else {
-		error( E_UnexpectedCharacterInQualifier );
+		error( E_UnexpectedCharacterInQualifier, c );
 		state = S_Initial;
 		processing( c );
 	}
@@ -637,28 +638,10 @@ void CScanner::processingQualifier( char c )
 		addToken( TT_Qualifier );
 		state = S_Initial;
 	} else {
-		error( E_UnclosedQualifier );
+		error( E_UnclosedQualifier, c );
 		state = S_Initial;
 		processing( c );
 	}
-}
-
-void CScanner::Error( const std::string& errorText )
-{
-	std::ostringstream errorStream;
-	errorStream << token.line << ":" << token.position << ": error: "
-		<< errorText << ".";
-	CErrorHandlerSwitcher switcher( this, errorHandler );
-	CErrorsHelper::Error( errorStream.str() );
-}
-
-void CScanner::Warning( const std::string& warningText )
-{
-	std::ostringstream warningStream;
-	warningStream << token.line << ":" << token.position << ": warning: "
-		<< warningText << ".";
-	CErrorHandlerSwitcher switcher( this, errorHandler );
-	CErrorsHelper::Warning( warningStream.str() );
 }
 
 //-----------------------------------------------------------------------------

@@ -146,7 +146,7 @@ const int MaxNumberOfVariables = 64;
 
 class CVariablesBuilder : public CErrorsHelper {
 protected:
-	explicit CVariablesBuilder( IErrorHandler* errorHandler = 0 );
+	explicit CVariablesBuilder( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 	void Export( CVariables& variables );

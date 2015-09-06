@@ -60,7 +60,9 @@ void CRuleParser::AddToken()
 void CRuleParser::error( const std::string& message )
 {
 	SetWrong();
-	CErrorsHelper::Error( message );
+	CError::SetSeverity( ES_Error );
+	CError::SetMessage( message );
+	CErrorsHelper::Error();
 }
 
 void CRuleParser::direction()

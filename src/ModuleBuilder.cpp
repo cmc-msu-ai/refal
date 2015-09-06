@@ -65,7 +65,7 @@ bool CModuleBuilder::GetNamedQualifier( const CToken& nameToken,
 		qualifier = i->second.qualifier;
 		return true;
 	}
-	CErrorsHelper::Error( "qualifier `"	+ nameToken.word + "` wasn't defined" );
+	error( "qualifier `" + nameToken.word + "` wasn't defined" );
 	return false;
 }
 
@@ -85,7 +85,7 @@ bool CModuleBuilder::SetNamedQualifier( const CToken& nameToken,
 		qualifier.Move( insertPair.first->second.qualifier );
 		return true;
 	}
-	CErrorsHelper::Error( "qualifier `" + nameToken.word + "` already defined" );
+	error( "qualifier `" + nameToken.word + "` already defined" );
 	return false;
 }
 
@@ -130,7 +130,7 @@ void CModuleBuilder::SetEntry( const CToken& nameToken,
 {
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( function.IsExternal() ) {
-		CErrorsHelper::Error( "function `" + nameToken.word +
+		error( "function `" + nameToken.word +
 			"` already defined as external" );
 	} else {
 		function.SetEntry( externalNameToken );
@@ -151,10 +151,17 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 			function.SetDefined( nameToken );
 			function.SetExternal( externalNameToken );
 		} else {
-			CErrorsHelper::Error( "function `" + nameToken.word +
+			error( "function `" + nameToken.word +
 				"` already defined as entry" );
 		}
 	}
+}
+
+void CModuleBuilder::error( const std::string& message )
+{
+	CError::SetSeverity( ES_Error );
+	CError::SetMessage( message );
+	CErrorsHelper::Error();
 }
 
 TLabel CModuleBuilder::declare( const CToken& nameToken )
@@ -193,7 +200,7 @@ bool CModuleBuilder::checkOnlyDeclared( CPreparatoryFunction& function,
 	stringStream << "function `" << nameToken.word
 		<< "` already defined in line " << function.NameToken().line
 		<< " as `" << function.NameToken().word << "`";
-	CErrorsHelper::Error( stringStream.str() );
+	error( stringStream.str() );
 	return false;
 }
 
@@ -207,11 +214,11 @@ void CModuleBuilder::checkModule()
 		assert( !function.IsDefined() );
 		if( function.IsDeclared() ) {
 			std::ostringstream stringStream;
+			CError::SetErrorPosition( function.NameToken().line,
+				function.NameToken().position, function.NameToken().word );
 			stringStream << "function `" << function.NameToken().word
-				<< "` used in line " << function.NameToken().line
-				<< " at position " << function.NameToken().position
-				<< " was not defined in module";
-			CErrorsHelper::Error( stringStream.str() );
+				<< "` was not defined in module";
+			error( stringStream.str() );
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace Refal2 {
 
 class CRuleParser : public CQualifierParser {
 protected:
-	CRuleParser( IErrorHandler* errorHandler = 0 );
+	CRuleParser( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
 	void BeginFunction();

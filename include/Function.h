@@ -178,7 +178,7 @@ typedef CDictionary<CPreparatoryFunctionPtr, std::string> CPreparatoryFunctions;
 
 class CFunctionBuilder : public CVariablesBuilder {
 protected:
-	explicit CFunctionBuilder( IErrorHandler* errorHandler = 0 );
+	explicit CFunctionBuilder( IErrorHandler* errorHandler = nullptr );
 	~CFunctionBuilder();
 
 	void Reset();
