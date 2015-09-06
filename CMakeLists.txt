@@ -7,15 +7,15 @@ add_definitions( "-std=c++0x" )
 include_directories(include)
 
 set(SOURCE src/DirectiveParser.cpp
+			src/EmbeddedFunctions.cpp
 			src/Errors.cpp
 			src/Function.cpp
 			src/FunctionCompiler.cpp
-			src/main.cpp
-			src/Module.cpp
 			src/ModuleBuilder.cpp
 			src/OperationsBuilder.cpp
 			src/OperationsExecuter.cpp
 			src/Parser.cpp
+			src/Program.cpp
 			src/Qualifier.cpp
 			src/QualifierBuilder.cpp
 			src/QualifierParser.cpp
@@ -25,6 +25,7 @@ set(SOURCE src/DirectiveParser.cpp
 			src/Scanner.cpp
 			src/Token.cpp
 			src/Unit.cpp
-			src/Variables.cpp)
+			src/Variables.cpp
+			src/main.cpp)
 
 add_executable(refal2 ${SOURCE})
