@@ -106,7 +106,6 @@ void CScanner::AddEndOfFile()
 void CScanner::error( TErrorCode errorCode, char c )
 {
 	std::ostringstream errorStream;
-	errorStream << line << ":" << position << ": error: ";
 	switch( errorCode ) {
 		case E_InvalidCharacter:
 			errorStream << "invalid character `" << c << "`";
@@ -143,7 +142,6 @@ void CScanner::error( TErrorCode errorCode, char c )
 			assert( false );
 			break;
 	}
-	errorStream << ".";
 	const std::string wrongText = ( c == '\n' ? "" : std::string( 1, c ) );
 	CError::SetTokenData( line, position, wrongText );
 	CErrorsHelper::RaiseError( ES_Error, errorStream.str() );
