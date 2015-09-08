@@ -88,7 +88,7 @@ const std::string& CError::UserMessage() const
 			if( !token.IsNone() ) {
 				userMessageStream << token.line << ":" << token.position << ":";
 			}
-			std::cout << " ";
+			userMessageStream << " ";
 		} else {
 			assert( token.IsNone() );
 		}
