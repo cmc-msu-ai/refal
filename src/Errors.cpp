@@ -86,7 +86,6 @@ const std::string& CError::UserMessage() const
 		if( !fileName.empty() ) {
 			userMessageStream << fileName << ":";
 			if( !token.IsNone() ) {
-				assert( token.type == TT_Word );
 				userMessageStream << token.line << ":" << token.position << ":";
 			}
 			std::cout << " ";
