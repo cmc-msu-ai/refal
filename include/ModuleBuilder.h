@@ -46,6 +46,7 @@ private:
 	// auxiliary functions
 	void reset();
 	bool isModuleExist() const;
+	void createModule();
 	bool attemptModule();
 	void error( const CToken& token, const std::string& message );
 	void fatalError( const CToken& token, const std::string& message );

@@ -24,7 +24,7 @@ void CModuleBuilder::StartModule( const CToken& startToken )
 		return;
 	}
 	isAnonymousModule = false;
-	module.reset( new CModuleData );
+	createModule();
 	module->StartToken = startToken;
 }
 
@@ -179,13 +179,19 @@ bool CModuleBuilder::isModuleExist() const
 	return static_cast<bool>( module );
 }
 
+void CModuleBuilder::createModule()
+{
+	assert( !isModuleExist() );
+	module.reset( new CModuleData );
+}
+
 bool CModuleBuilder::attemptModule()
 {
 	if( isModuleExist() ) {
 		return true;
 	}
 	if( isAnonymousModule ) {
-		// todo: create module
+		createModule();
 		return true;
 	}
 	return false;
