@@ -7,55 +7,64 @@ namespace Refal2 {
 CModuleBuilder::CModuleBuilder( IErrorHandler* errorHandler ):
 	CProgramBuilder( errorHandler )
 {
-	Reset();
+	reset();
 }
 
 void CModuleBuilder::Reset()
 {
-	if( IsStarted() ) {
-		endModule();
-	}
 	CProgramBuilder::Reset();
-}
-
-bool CModuleBuilder::IsStarted() const
-{
-	return static_cast<bool>( module );
-}
-
-void CModuleBuilder::StartModule()
-{
-	 startModule();
+	reset();
 }
 
 void CModuleBuilder::StartModule( const CToken& startToken )
 {
-	startModule();
+	if( isModuleExist() ) {
+		fatalError( startToken, ( isAnonymousModule ?
+			"only one anonymous module" : "lost `end` directive" ) );
+		return;
+	}
+	isAnonymousModule = false;
+	module.reset( new CModuleData );
 	module->StartToken = startToken;
 }
 
 void CModuleBuilder::StartModule( const CToken& startToken,
 	const CToken& nameToken )
 {
-	startModule();
-	module->StartToken = startToken;
-	module->NameToken = nameToken;
-}
-
-void CModuleBuilder::EndModule()
-{
-	endModule();
+	StartModule( startToken );
+	if( isModuleExist() ) {
+		module->NameToken = nameToken;
+	}
 }
 
 void CModuleBuilder::EndModule( const CToken& endToken )
 {
-	module->EndToken = endToken;
-	endModule();
+	if( isModuleExist() ) {
+		module->EndToken = endToken;
+		EndModule();
+	} else {
+		error( endToken, "alone `end` directive" );
+	}
+}
+
+void CModuleBuilder::EndModule()
+{
+	if( isModuleExist() && !CErrorsHelper::HasErrors() ) {
+		checkModule();
+		CModuleDataPtr savedModule( module.release() );
+		reset();
+		if( !CErrorsHelper::HasErrors() ) {
+			CProgramBuilder::AddModule( savedModule );
+		}
+	} else {
+		reset();
+	}
 }
 
 bool CModuleBuilder::GetNamedQualifier( const CToken& nameToken,
 	CQualifier& qualifier )
 {
+	assert( isModuleExist() );
 	assert( nameToken.type == TT_Qualifier );
 	assert( !nameToken.word.empty() );
 	std::string qualifierName = nameToken.word;
@@ -65,15 +74,16 @@ bool CModuleBuilder::GetNamedQualifier( const CToken& nameToken,
 		qualifier = i->second.qualifier;
 		return true;
 	}
-	error( "qualifier `" + nameToken.word + "` wasn't defined" );
+	error( nameToken, "qualifier `" + nameToken.word + "` wasn't defined" );
 	return false;
 }
 
 bool CModuleBuilder::SetNamedQualifier( const CToken& nameToken,
 	CQualifier& qualifier )
 {
-	if( !IsStarted() ) {
-		startModule();
+	if( !attemptModule() ) {
+		fatalError( nameToken, "Wrong named qualifier out of module" );
+		return false;
 	}
 	assert( nameToken.type == TT_Word );
 	std::string qualifierName = nameToken.word;
@@ -85,7 +95,7 @@ bool CModuleBuilder::SetNamedQualifier( const CToken& nameToken,
 		qualifier.Move( insertPair.first->second.qualifier );
 		return true;
 	}
-	error( "qualifier `" + nameToken.word + "` already defined" );
+	error( nameToken, "qualifier `" + nameToken.word + "` already defined" );
 	return false;
 }
 
@@ -130,7 +140,7 @@ void CModuleBuilder::SetEntry( const CToken& nameToken,
 {
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( function.IsExternal() ) {
-		error( "function `" + nameToken.word +
+		error( nameToken, "function `" + nameToken.word +
 			"` already defined as external" );
 	} else {
 		function.SetEntry( externalNameToken );
@@ -151,23 +161,52 @@ void CModuleBuilder::SetExternal( const CToken& nameToken,
 			function.SetDefined( nameToken );
 			function.SetExternal( externalNameToken );
 		} else {
-			error( "function `" + nameToken.word +
+			error( nameToken, "function `" + nameToken.word +
 				"` already defined as entry" );
 		}
 	}
 }
 
-void CModuleBuilder::error( const std::string& message )
+void CModuleBuilder::reset()
 {
-	CError::SetSeverity( ES_Error );
-	CError::SetMessage( message );
-	CErrorsHelper::Error();
+	isAnonymousModule = true;
+	module.reset();
+	namedQualifiers.clear();
+}
+
+bool CModuleBuilder::isModuleExist() const
+{
+	return static_cast<bool>( module );
+}
+
+bool CModuleBuilder::attemptModule()
+{
+	if( isModuleExist() ) {
+		return true;
+	}
+	if( isAnonymousModule ) {
+		// todo: create module
+		return true;
+	}
+	return false;
+}
+
+void CModuleBuilder::error( const CToken& token, const std::string& message )
+{
+	CErrorsHelper::RaiseError( ES_Error, message, token );
+}
+
+void CModuleBuilder::fatalError( const CToken& token,
+	const std::string& message )
+{
+	CErrorsHelper::RaiseError( ES_FatalError, message, token );
 }
 
 TLabel CModuleBuilder::declare( const CToken& nameToken )
 {
-	if( !IsStarted() ) {
-		startModule();
+	if( !attemptModule() ) {
+		fatalError( nameToken, "Wrong function declaration out of module" );
+		return InvalidDictionaryIndex;
 	}
 	assert( !nameToken.word.empty() );
 	std::string name = nameToken.word;
@@ -200,43 +239,21 @@ bool CModuleBuilder::checkOnlyDeclared( CPreparatoryFunction& function,
 	stringStream << "function `" << nameToken.word
 		<< "` already defined in line " << function.NameToken().line
 		<< " as `" << function.NameToken().word << "`";
-	error( stringStream.str() );
+	error( nameToken, stringStream.str() );
 	return false;
 }
 
 void CModuleBuilder::checkModule()
 {
-	if( CErrorsHelper::HasErrors() ) {
-		return;
-	}
 	for( TLabel label = 0; label < module->Functions.Size(); label++ ) {
 		const CPreparatoryFunction& function = getFunction( label );
 		assert( !function.IsDefined() );
 		if( function.IsDeclared() ) {
 			std::ostringstream stringStream;
-			CError::SetErrorPosition( function.NameToken().line,
-				function.NameToken().position, function.NameToken().word );
 			stringStream << "function `" << function.NameToken().word
 				<< "` was not defined in module";
-			error( stringStream.str() );
+			error( function.NameToken(), stringStream.str() );
 		}
-	}
-}
-
-void CModuleBuilder::startModule()
-{
-	assert( !IsStarted() );
-	module.reset( new CModuleData );
-}
-
-void CModuleBuilder::endModule()
-{
-	assert( IsStarted() );
-	checkModule();
-	CModuleDataPtr savedModule( module.release() );
-	Reset();
-	if( !CErrorsHelper::HasErrors() && static_cast<bool>( savedModule ) ) {
-		CProgramBuilder::AddModule( savedModule );
 	}
 }
 

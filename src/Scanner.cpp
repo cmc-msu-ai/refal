@@ -97,6 +97,9 @@ void CScanner::AddChar( char c )
 void CScanner::AddEndOfFile()
 {
 	preprocessingEndOfFile();
+	CRuleParser::EndFunction();
+	CModuleBuilder::EndModule();
+	CErrorsHelper::ResetFileName();
 	Reset();
 }
 
@@ -141,10 +144,10 @@ void CScanner::error( TErrorCode errorCode, char c )
 			break;
 	}
 	errorStream << ".";
-	CError::SetSeverity( ES_Error );
-	CError::SetErrorPosition( line, position, std::string( 1, c ) );
-	CError::SetMessage( errorStream.str() );
-	CErrorsHelper::Error();
+	const std::string wrongText = ( c == '\n' ? "" : std::string( 1, c ) );
+	CError::SetTokenData( line, position, wrongText );
+	CErrorsHelper::RaiseError( ES_Error, errorStream.str() );
+	CError::ResetToken();
 }
 
 void CScanner::setLineAndPositionOfToken()

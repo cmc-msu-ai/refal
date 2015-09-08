@@ -16,9 +16,6 @@ CRuleParser::CRuleParser( IErrorHandler* errorHandler ):
 
 void CRuleParser::Reset()
 {
-	if( !functionName.IsNone() ) {
-		EndFunction();
-	}
 	CQualifierParser::Reset();
 	SetWrong();
 }
@@ -26,6 +23,7 @@ void CRuleParser::Reset()
 void CRuleParser::BeginFunction()
 {
 	assert( token.type == TT_Word && !token.word.empty() );
+	CModuleBuilder::Declare( token );
 	functionName = token;
 	BeginRule();
 }
@@ -60,9 +58,7 @@ void CRuleParser::AddToken()
 void CRuleParser::error( const std::string& message )
 {
 	SetWrong();
-	CError::SetSeverity( ES_Error );
-	CError::SetMessage( message );
-	CErrorsHelper::Error();
+	CErrorsHelper::RaiseError( ES_Error, message, token );
 }
 
 void CRuleParser::direction()

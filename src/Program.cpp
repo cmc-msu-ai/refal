@@ -264,14 +264,11 @@ void CInternalProgramBuilder::collectFunction( CPreparatoryFunction* function,
 		assert( !function->IsExternal() );
 		CGlobalFunctionData& global = globals.GetData( globalIndex );
 		if( global.IsDefined() ) {
-			errors.SetSeverity( ES_Error );
-			errors.ResetErrorPosition();
 			std::ostringstream stringStream;
 			stringStream << "function with external name `"
 				<< function->ExternalNameToken().word
 				<< "` already defined in program";
-			errors.SetMessage( stringStream.str() );
-			errors.Error();
+			errors.RaiseError( ES_LinkError, stringStream.str() );
 		} else {
 			global.SetPreparatoryFunction( function, runtimeModuleId );
 		}
@@ -288,13 +285,10 @@ void CInternalProgramBuilder::check()
 	for( int globalIndex = 0; globalIndex < globals.Size(); globalIndex++ )
 	{
 		if( !globals.GetData( globalIndex ).IsDefined() ) {
-			errors.SetSeverity( ES_Error );
-			errors.ResetErrorPosition();
 			std::ostringstream stringStream;
 			stringStream << "function with external name `"
 				<< globals.GetKey( globalIndex ) << "` was not defined";
-			errors.SetMessage( stringStream.str() );
-			errors.Error();
+			errors.RaiseError( ES_LinkError, stringStream.str() );
 		}
 	}
 }

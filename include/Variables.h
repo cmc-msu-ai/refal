@@ -184,6 +184,7 @@ private:
 		EC_TypeOfVariableDoesNotMatch,
 		EC_NoSuchVariableInLeftPart
 	};
+	static const char* getErrorMessage( TErrorCode errorCode );
 	void error( TErrorCode errorCode );
 };
 

@@ -33,6 +33,7 @@ private:
 	void parsingDirective();
 	// auxiliary functions
 	void checkFinished();
+	void error( const std::string& message );
 };
 
 //-----------------------------------------------------------------------------

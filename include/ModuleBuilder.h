@@ -21,12 +21,10 @@ protected:
 
 	void Reset();
 
-	bool IsStarted() const;
-	void StartModule();
 	void StartModule( const CToken& startToken );
 	void StartModule( const CToken& startToken, const CToken& nameToken );
-	void EndModule();
 	void EndModule( const CToken& endToken );
+	void EndModule();
 
 	bool GetNamedQualifier( const CToken& nameToken, CQualifier& qualifier );
 	bool SetNamedQualifier( const CToken& nameToken, CQualifier& qualifier );
@@ -42,18 +40,21 @@ protected:
 		const CToken& externalNameToken );
 
 private:
+	bool isAnonymousModule;
 	CModuleDataPtr module;
 	CNamedQualifiers namedQualifiers;
 	// auxiliary functions
-	void error( const std::string& message );
+	void reset();
+	bool isModuleExist() const;
+	bool attemptModule();
+	void error( const CToken& token, const std::string& message );
+	void fatalError( const CToken& token, const std::string& message );
 	TLabel declare( const CToken& nameToken );
 	CPreparatoryFunction& getFunction( TLabel function );
 	CPreparatoryFunction& addFunction( const CToken& nameToken );
 	bool checkOnlyDeclared( CPreparatoryFunction& function,
 		const CToken& nameToken );
 	void checkModule();
-	void startModule();
-	void endModule();
 };
 
 //-----------------------------------------------------------------------------

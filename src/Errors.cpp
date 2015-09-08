@@ -9,7 +9,7 @@ void CError::Reset()
 {
 	ResetSeverity();
 	ResetFileName();
-	ResetErrorPosition();
+	ResetToken();
 	ResetMessage();
 }
 
@@ -44,19 +44,25 @@ void CError::SetFileName( const std::string& _fileName )
 	resetCache();
 }
 
-void CError::ResetErrorPosition()
+void CError::ResetToken()
 {
 	token.type = TT_None;
 	resetCache();
 }
 
-void CError::SetErrorPosition( int line, int position,
-	const std::string& text )
+void CError::SetTokenData( int line, int position,
+	const std::string& wrongText )
 {
 	token.type = TT_Word;
 	token.line = line;
 	token.position = position;
-	token.word = text;
+	token.word = wrongText;
+}
+
+void CError::SetToken( const CToken& _token )
+{
+	assert( !_token.IsNone() );
+	token = _token;
 	resetCache();
 }
 
@@ -147,7 +153,25 @@ bool CErrorsHelper::HasErrors() const
 	return false;
 }
 
-void CErrorsHelper::Error()
+void CErrorsHelper::RaiseError( TErrorSeverity severity,
+	const std::string& message )
+{
+	CError::SetSeverity( severity );
+	CError::SetMessage( message );
+	raiseError();
+	CError::ResetSeverity();
+	CError::ResetMessage();
+}
+
+void CErrorsHelper::RaiseError( TErrorSeverity severity,
+	const std::string& message, const CToken& token )
+{
+	CError::SetToken( token );
+	RaiseError( severity, message );
+	CError::ResetToken();
+}
+
+void CErrorsHelper::raiseError()
 {
 	assert( errorHandler != nullptr );
 	assert( CError::IsSet() );

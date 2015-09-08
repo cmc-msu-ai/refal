@@ -244,27 +244,25 @@ TVariableType CVariablesBuilder::checkTypeTag( const TVariableTypeTag type,
 	return VT_None;
 }
 
-void CVariablesBuilder::error( TErrorCode errorCode )
+const char* CVariablesBuilder::getErrorMessage( TErrorCode errorCode )
 {
-	CError::SetSeverity( ES_Error );
 	switch( errorCode ) {
 		case EC_InvalidVariableName:
-			CError::SetMessage( "invalid variable name" );
-			break;
+			return "invalid variable name";
 		case EC_NoSuchTypeOfVariable:
-			CError::SetMessage( "no such type of variable" );
-			break;
+			return "no such type of variable";
 		case EC_TypeOfVariableDoesNotMatch:
-			CError::SetMessage( "type of variable does not match" );
-			break;
+			return "type of variable does not match";
 		case EC_NoSuchVariableInLeftPart:
-			CError::SetMessage( "no such variable in left part" );
-			break;
-		default:
-			assert( false );
-			break;
+			return "no such variable in left part";
 	}
-	CErrorsHelper::Error();
+	assert( false );
+	return nullptr;
+}
+
+void CVariablesBuilder::error( TErrorCode errorCode )
+{
+	CErrorsHelper::RaiseError( ES_Error, getErrorMessage( errorCode ) );
 }
 
 //-----------------------------------------------------------------------------

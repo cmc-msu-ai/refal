@@ -21,8 +21,6 @@ void CParser::Reset()
 
 void CParser::AddToken()
 {
-	CError::ResetSeverity();
-	CError::SetErrorPosition( token.line, token.position, token.word );
 	( this->*state )();
 }
 
@@ -36,9 +34,7 @@ void CParser::parsingInitial()
 	} else if( token.type == TT_Blank ) {
 		state = &CParser::parsingBlank;
 	} else if( token.type != TT_LineFeed ) {
-		CError::SetSeverity( ES_Error );
-		CError::SetMessage( "line should begin with word or space" );
-		CErrorsHelper::Error();
+		error( "line should begin with word or space" );
 		state = &CParser::parsingIgnoreLine;
 	}
 }
@@ -152,6 +148,11 @@ void CParser::checkFinished()
 		state = &CParser::parsingIgnoreLine;
 		AddToken();
 	}
+}
+
+void CParser::error( const std::string& message )
+{
+	CErrorsHelper::RaiseError( ES_Error, message, token );
 }
 
 //-----------------------------------------------------------------------------

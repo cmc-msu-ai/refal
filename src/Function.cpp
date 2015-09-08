@@ -322,42 +322,35 @@ void CFunctionBuilder::AddRightBracket()
 	}
 }
 
-void CFunctionBuilder::error( TErrorCode errorCode )
+const char* CFunctionBuilder::getErrorMessage( TErrorCode errorCode )
 {
-	CError::SetSeverity( ES_Error );
 	switch( errorCode ) {
 		case EC_IllegalLeftBracketInLeftPart:
-			CError::SetMessage( "illegal left bracket in left part" );
-			break;
+			return "illegal left bracket in left part";
 		case EC_IllegalRightBracketInLeftPart:
-			CError::SetMessage( "illegal right bracket in left part" );
-			break;
+			return "illegal right bracket in left part";
 		case EC_RightParenDoesNotMatchLeftParen:
-			CError::SetMessage( "right paren does not match left paren" );
-			break;
+			return "right paren does not match left paren";
 		case EC_RightBracketDoesNotMatchLeftBracket:
-			CError::SetMessage( "right bracket does not match left bracket" );
-			break;
+			return "right bracket does not match left bracket";
 		case EC_UnclosedLeftParenInLeftPart:
-			CError::SetMessage( "unclosed left paren in left part" );
-			break;
+			return "unclosed left paren in left part";
 		case EC_UnclosedLeftParenInRightPart:
-			CError::SetMessage( "unclosed left paren in right part" );
-			break;
+			return "unclosed left paren in right part";
 		case EC_UnclosedLeftBracketInRightPart:
-			CError::SetMessage( "unclosed left bracket in right part" );
-			break;
+			return "unclosed left bracket in right part";
 		case EC_ThereAreMultiplePartsSeparatorInRules:
-			CError::SetMessage( "there are multiple parts separator in rules" );
-			break;
+			return "there are multiple parts separator in rules";
 		case EC_ThereAreNoPartsSeparatorInRules:
-			CError::SetMessage( "there are no parts separator in rules" );
-			break;
-		default:
-			assert( false );
-			break;
+			return "there are no parts separator in rules";
 	}
-	CErrorsHelper::Error();
+	assert( false );
+	return nullptr;
+}
+
+void CFunctionBuilder::error( TErrorCode errorCode )
+{
+	CErrorsHelper::RaiseError( ES_Error, getErrorMessage( errorCode ) );
 }
 
 void CFunctionBuilder::emptyStack()

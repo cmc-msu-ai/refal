@@ -219,6 +219,7 @@ private:
 		EC_ThereAreMultiplePartsSeparatorInRules,
 		EC_ThereAreNoPartsSeparatorInRules
 	};
+	static const char* getErrorMessage( TErrorCode errorCode );
 	void error( TErrorCode errorCode );
 	// auxiliary functions
 	void emptyStack();

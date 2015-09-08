@@ -25,7 +25,6 @@ bool ParseFile( CScanner& scanner, const std::string& fileName )
 		scanner.AddChar( c );
 	}
 	scanner.AddEndOfFile();
-	scanner.ResetFileName();
 
 	return ( !scanner.HasErrors() );
 }

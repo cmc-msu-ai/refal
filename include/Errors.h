@@ -21,7 +21,7 @@ public:
 	bool IsSet() const;
 
 	TErrorSeverity Severity() const { return severity; }
-	const CToken& ErrorPosition() const { return token; }
+	const CToken& Token() const { return token; }
 	const std::string& FileName() const { return fileName; }
 	const std::string& Message() const { return message; }
 	const std::string& UserMessage() const;
@@ -30,8 +30,10 @@ public:
 	void SetSeverity( TErrorSeverity severity );
 	void ResetFileName();
 	void SetFileName( const std::string& fileName );
-	void ResetErrorPosition();
-	void SetErrorPosition( int line, int position, const std::string& text );
+	void ResetToken();
+	void SetTokenData( int line, int position,
+		const std::string& wrongText = "" );
+	void SetToken( const CToken& token );
 	void ResetMessage();
 	void SetMessage( const std::string& message );
 
@@ -65,11 +67,15 @@ public:
 
 	TErrorSeverity ErrorSeverity() const { return errorSeverity; }
 	bool HasErrors() const;
-	void Error();
+	void RaiseError( TErrorSeverity severity, const std::string& message );
+	void RaiseError( TErrorSeverity severity, const std::string& message,
+		const CToken& token );
 
 private:
 	IErrorHandler* errorHandler;
 	TErrorSeverity errorSeverity;
+
+	void raiseError();
 
 	CErrorsHelper( const CErrorsHelper& );
 	CErrorsHelper& operator=( const CErrorsHelper& );

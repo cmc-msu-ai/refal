@@ -88,9 +88,7 @@ void CQualifierParser::resetParser()
 void CQualifierParser::error( const std::string& message )
 {
 	SetWrong();
-	CError::SetSeverity( ES_Error );
-	CError::SetMessage( message );
-	CErrorsHelper::Error();
+	CErrorsHelper::RaiseError( ES_Error, message, token );
 }
 
 void CQualifierParser::addWord()
