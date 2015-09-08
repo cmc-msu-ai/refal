@@ -52,7 +52,9 @@ void CRuleParser::BeginRule()
 void CRuleParser::AddToken()
 {
 	assert( !IsFinished() );
+	CError::SetToken( token );
 	( this->*state )();
+	CError::ResetToken();
 }
 
 void CRuleParser::error( const std::string& message )
