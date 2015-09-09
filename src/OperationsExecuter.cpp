@@ -97,17 +97,18 @@ static const char* operationNames[] = {
 	"OT_Copy_WV"
 };
 
-TExecutionResult COperationsExecuter::Run( const CProgramPtr& program,
-	CUnitList& fieldOfView, CUnitNode*& errorCall )
+TExecutionResult COperationsExecuter::Run( CProgramPtr program,
+	CReceptaclePtr receptacle, CUnitList& fieldOfView, CUnitNode*& errorCall )
 {
-	COperationsExecuter executer( program );
+	COperationsExecuter executer( program, receptacle );
 	executer.fieldOfView.Move( fieldOfView );
 	errorCall = executer.initialLeftBracket.PairedParen();
 	return executer.executionResult;
 }
 
-COperationsExecuter::COperationsExecuter( const CProgramPtr& program ) :
-	CExecutionContext( program ),
+COperationsExecuter::COperationsExecuter( CProgramPtr program,
+		CReceptaclePtr receptacle ) :
+	CExecutionContext( program, receptacle ),
 	executionResult( ER_OK ),
 	left( 0 ), right( 0 ),
 	tableTop( 0 ),

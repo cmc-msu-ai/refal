@@ -36,9 +36,6 @@ public:
 
 	TLabel GetProgramStartFunction() const { return programStartFunction; }
 
-	CReceptacle& Receptacle() { return receptacle; }
-	const CReceptacle& Receptacle() const { return receptacle; }
-
 	CRuntimeFunctionPtr EmptyFunction() const { return emptyFunction; }
 
 private:
@@ -46,7 +43,6 @@ private:
 	CRuntimeModule* const modules;
 	COperationList operationsHolder;
 	TLabel programStartFunction;
-	CReceptacle receptacle;
 	const CRuntimeFunctionPtr emptyFunction;
 
 	CProgram( const CProgram& );

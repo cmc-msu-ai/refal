@@ -9,12 +9,16 @@ namespace Refal2 {
 struct CExecutionContext {
 	CUnitList Argument;
 	const CProgramPtr Program;
+	const CReceptaclePtr Receptacle;
 	TRuntimeModuleId RuntimeModuleId;
 
-	CExecutionContext( const CProgramPtr& program ) :
+	CExecutionContext( CProgramPtr program, CReceptaclePtr receptacle ) :
 		Program( program ),
+		Receptacle( receptacle ),
 		RuntimeModuleId( InvalidRuntimeModuleId )
 	{
+		assert( static_cast<bool>( program ) );
+		assert( static_cast<bool>( receptacle ) );
 	}
 };
 
@@ -31,11 +35,11 @@ enum TExecutionResult {
 
 class COperationsExecuter : public CExecutionContext {
 public:
-	static TExecutionResult Run( const CProgramPtr& program,
+	static TExecutionResult Run( CProgramPtr program, CReceptaclePtr receptacle,
 		CUnitList& fieldOfView,	CUnitNode*& errorCall );
 
 private:
-	explicit COperationsExecuter( const CProgramPtr& program );
+	COperationsExecuter( CProgramPtr program, CReceptaclePtr receptacle );
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
 

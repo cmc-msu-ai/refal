@@ -34,6 +34,8 @@ private:
 	CReceptacle& operator=( const CReceptacle& );
 };
 
+typedef std::shared_ptr<CReceptacle> CReceptaclePtr;
+
 //-----------------------------------------------------------------------------
 
 } // end of namespace Refal2

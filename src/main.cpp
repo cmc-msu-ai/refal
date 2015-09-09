@@ -78,10 +78,11 @@ int main( int argc, const char* argv[] )
 		return 1;
 	}
 
+    CReceptaclePtr receptacle( new CReceptacle );
 	CUnitList fieldOfView;
 	CUnitNode* errorNode;
 	TExecutionResult result =
-		COperationsExecuter::Run( program, fieldOfView, errorNode );
+		COperationsExecuter::Run( program, receptacle, fieldOfView, errorNode );
 
 	std::cout << SeparatorLine << std::endl;
 	std::cout << "Execution result: "
@@ -92,15 +93,15 @@ int main( int argc, const char* argv[] )
 		//programPrintHelper.SetPrintLabelWithModule();
 		fieldOfView.HandyPrint( std::cout, programPrintHelper );
 	}
-	if( !program->Receptacle().IsEmpty() ) {
+	if( !receptacle->IsEmpty() ) {
 		if( !fieldOfView.IsEmpty() ) {
 			std::cout << SeparatorLine << std::endl;
 		}
 		std::cout << "Receptacle: " << std::endl;
-		CUnitList receptacle;
-		program->Receptacle().DigOutAll( receptacle );
+		CUnitList receptacleUnitList;
+		receptacle->DigOutAll( receptacleUnitList );
 		CProgramPrintHelper programPrintHelper( program );
-		receptacle.HandyPrint( std::cout, programPrintHelper );
+		receptacleUnitList.HandyPrint( std::cout, programPrintHelper );
 		std::cout << std::endl;
 	}
 	return 0;

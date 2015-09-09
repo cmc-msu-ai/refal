@@ -528,9 +528,7 @@ static bool embeddedClsput( CExecutionContext& executionContext )
 static bool embeddedBr( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	if( executionContext.Program->Receptacle().Burry(
-			executionContext.Argument ) )
-	{
+	if( executionContext.Receptacle->Burry( executionContext.Argument ) ) {
 		executionContext.Argument.Empty();
 		return true;
 	}
@@ -540,7 +538,7 @@ static bool embeddedBr( CExecutionContext& executionContext )
 static bool embeddedDg( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Program->Receptacle().DigOut( executionContext.Argument,
+	executionContext.Receptacle->DigOut( executionContext.Argument,
 		executionContext.Argument );
 	return true;
 }
@@ -548,7 +546,7 @@ static bool embeddedDg( CExecutionContext& executionContext )
 static bool embeddedCp( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Program->Receptacle().Copy( executionContext.Argument,
+	executionContext.Receptacle->Copy( executionContext.Argument,
 		executionContext.Argument );
 	return true;
 }
@@ -556,9 +554,7 @@ static bool embeddedCp( CExecutionContext& executionContext )
 static bool embeddedRp( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	if( executionContext.Program->Receptacle().Replace(
-			executionContext.Argument ) )
-	{
+	if( executionContext.Receptacle->Replace( executionContext.Argument ) ) {
 		executionContext.Argument.Empty();
 		return true;
 	}
@@ -568,8 +564,7 @@ static bool embeddedRp( CExecutionContext& executionContext )
 static bool embeddedDgall( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	executionContext.Program->Receptacle().DigOutAll(
-		executionContext.Argument );
+	executionContext.Receptacle->DigOutAll( executionContext.Argument );
 	return true;
 }
 
