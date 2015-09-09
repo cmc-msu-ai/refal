@@ -8,7 +8,7 @@ namespace Refal2 {
 
 class CScanner : public CParser {
 public:
-	CScanner( IErrorHandler* errorHandler );
+	CScanner( IErrorHandler* errorHandler = nullptr );
 	void Reset();
 
 	void AddChar( char c );
