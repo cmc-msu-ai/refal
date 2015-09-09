@@ -20,7 +20,8 @@ void CModuleBuilder::StartModule( const CToken& startToken )
 {
 	if( isModuleExist() ) {
 		fatalError( startToken,
-			( isAnonymousModule ? "only one anonymous module" :
+			( isAnonymousModule ?
+			"only one anonymous module is allowed in same file" :
 			"alone `start` directive, maybe you lost `end` directive before it"
 			) );
 		return;
