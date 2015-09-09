@@ -55,7 +55,7 @@ public:
 	}
 	CNodeList( CNodeType* first, CNodeType* last );
 
-	~CNodeList() { Empty(); }
+	virtual ~CNodeList() { Empty(); }
 
 	void Assign( CNodeType* first, CNodeType* last );
 
