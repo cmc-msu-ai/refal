@@ -44,7 +44,10 @@ void CModuleBuilder::EndModule( const CToken& endToken )
 {
 	if( isModuleExist() ) {
 		module->EndToken = endToken;
+		const bool savedIsAnonymousModule = isAnonymousModule;
+		// end module, but not end of file
 		EndModule();
+		isAnonymousModule = savedIsAnonymousModule;
 	} else {
 		error( endToken, "alone `end` directive" );
 	}
@@ -104,11 +107,17 @@ bool CModuleBuilder::SetNamedQualifier( const CToken& nameToken,
 
 TLabel CModuleBuilder::Declare( const CToken& nameToken )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return InvalidDictionaryIndex;
+	}
 	return ( declare( nameToken ) );
 }
 
 void CModuleBuilder::SetOrdinary( const CToken& nameToken )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return;
+	}
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( checkOnlyDeclared( function, nameToken ) ) {
 		function.SetDefined( nameToken );
@@ -117,6 +126,9 @@ void CModuleBuilder::SetOrdinary( const CToken& nameToken )
 
 void CModuleBuilder::SetOrdinary( const CToken& nameToken, CRulePtr& firstRule )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return;
+	}
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( checkOnlyDeclared( function, nameToken ) ) {
 		function.SetDefined( nameToken );
@@ -126,6 +138,9 @@ void CModuleBuilder::SetOrdinary( const CToken& nameToken, CRulePtr& firstRule )
 
 void CModuleBuilder::SetEmpty( const CToken& nameToken )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return;
+	}
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( checkOnlyDeclared( function, nameToken ) ) {
 		function.SetDefined( nameToken );
@@ -141,6 +156,9 @@ void CModuleBuilder::SetEntry( const CToken& nameToken )
 void CModuleBuilder::SetEntry( const CToken& nameToken,
 	const CToken& externalNameToken )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return;
+	}
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( function.IsExternal() ) {
 		error( nameToken, "function `" + nameToken.word +
@@ -158,6 +176,9 @@ void CModuleBuilder::SetExternal( const CToken& nameToken )
 void CModuleBuilder::SetExternal( const CToken& nameToken,
 	const CToken& externalNameToken )
 {
+	if( !checkModuleExist( nameToken ) ) {
+		return;
+	}
 	CPreparatoryFunction& function = addFunction( nameToken );
 	if( checkOnlyDeclared( function, nameToken ) ) {
 		if( !function.IsEntry() ) {
@@ -200,6 +221,15 @@ bool CModuleBuilder::attemptModule()
 	return false;
 }
 
+bool CModuleBuilder::checkModuleExist( const CToken& token )
+{
+	if( attemptModule() ) {
+		return true;
+	}
+	fatalError( token, "Wrong function declaration out of module" );
+	return false;
+}
+
 void CModuleBuilder::error( const CToken& token, const std::string& message )
 {
 	CErrorsHelper::RaiseError( ES_Error, message, token );
@@ -213,10 +243,7 @@ void CModuleBuilder::fatalError( const CToken& token,
 
 TLabel CModuleBuilder::declare( const CToken& nameToken )
 {
-	if( !attemptModule() ) {
-		fatalError( nameToken, "Wrong function declaration out of module" );
-		return InvalidDictionaryIndex;
-	}
+	assert( isModuleExist() );
 	assert( !nameToken.word.empty() );
 	std::string name = nameToken.word;
 	MakeLower( name );

@@ -48,6 +48,7 @@ private:
 	bool isModuleExist() const;
 	void createModule();
 	bool attemptModule();
+	bool checkModuleExist( const CToken& token );
 	void error( const CToken& token, const std::string& message );
 	void fatalError( const CToken& token, const std::string& message );
 	TLabel declare( const CToken& nameToken );

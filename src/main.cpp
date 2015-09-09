@@ -35,7 +35,7 @@ CSourceFilesProcessor::CSourceFilesProcessor( const CFileNames& fileNames )
 		fileName != fileNames.end(); ++fileName )
 	{
 		processFile( *fileName );
-		if( scanner.Severity() == ES_FatalError ) {
+		if( scanner.ErrorSeverity() == ES_FatalError ) {
 			break;
 		}
 	}
@@ -49,7 +49,9 @@ void CSourceFilesProcessor::processFile( const std::string& fileName )
 		for( char c; file.get( c ); ) {
 			scanner.AddChar( c );
 		}
-		scanner.AddEndOfFile();
+		if( scanner.ErrorSeverity() != ES_FatalError ) {
+			scanner.AddEndOfFile();
+		}
 	} else {
 		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
 	}

@@ -57,6 +57,9 @@ void CParser::parsingWord()
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
+		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+			return;
+		}
 		token.Swap( savedToken1 );
 		state = &CParser::parsingRule;
 		AddToken();
@@ -84,6 +87,9 @@ void CParser::parsingWordBlank()
 	}
 	token.Swap( savedToken1 );
 	CRuleParser::BeginFunction(); // action
+	if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+		return;
+	}
 	token.Swap( savedToken1 );
 	state = &CParser::parsingRule;
 	AddToken();
@@ -100,10 +106,16 @@ void CParser::parsingWordBlankS()
 	} else {
 		token.Swap( savedToken1 );
 		CRuleParser::BeginFunction(); // action
+		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+			return;
+		}
 		token.Swap( savedToken1 );
 		state = &CParser::parsingRule;
 		savedToken2.Swap( token );
 		AddToken(); // QualifierTag
+		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+			return;
+		}
 		savedToken2.Move( token );
 		AddToken(); // current token
 	}
