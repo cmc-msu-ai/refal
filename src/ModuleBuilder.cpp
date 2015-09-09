@@ -19,8 +19,10 @@ void CModuleBuilder::Reset()
 void CModuleBuilder::StartModule( const CToken& startToken )
 {
 	if( isModuleExist() ) {
-		fatalError( startToken, ( isAnonymousModule ?
-			"only one anonymous module" : "lost `end` directive" ) );
+		fatalError( startToken,
+			( isAnonymousModule ? "only one anonymous module" :
+			"alone `start` directive, maybe you lost `end` directive before it"
+			) );
 		return;
 	}
 	isAnonymousModule = false;
