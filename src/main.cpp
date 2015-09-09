@@ -2,51 +2,65 @@
 
 using namespace Refal2;
 
-class CErrorHandler : public IErrorHandler {
+typedef std::vector<std::string> CFileNames;
+
+class CSourceFilesProcessor : private IErrorHandler {
 public:
+	static CProgramPtr Process( const CFileNames& fileNames );
+
+private:
+	CScanner scanner;
+	std::ifstream file;
+
+	CSourceFilesProcessor( const CFileNames& fileNames );
+	CSourceFilesProcessor( const CSourceFilesProcessor& );
+	CSourceFilesProcessor& operator=( const CSourceFilesProcessor& );
+
+	void processFile( const std::string& fileName );
+
 	virtual void Error( const CError& error );
 };
 
-void CErrorHandler::Error( const CError& error )
+CProgramPtr CSourceFilesProcessor::Process( const CFileNames& fileNames )
+{
+	CSourceFilesProcessor sourceFilesProcessor( fileNames );
+	return sourceFilesProcessor.scanner.BuildProgram();
+}
+
+CSourceFilesProcessor::CSourceFilesProcessor( const CFileNames& fileNames )
+{
+	scanner.SetErrorHandler( this );
+	bool success = true;
+	for( CFileNames::const_iterator fileName = fileNames.begin();
+		fileName != fileNames.end(); ++fileName )
+	{
+		processFile( *fileName );
+		if( scanner.Severity() == ES_FatalError ) {
+			break;
+		}
+	}
+}
+
+void CSourceFilesProcessor::processFile( const std::string& fileName )
+{
+	file.open( fileName );
+	if( file.good() ) {
+		scanner.SetFileName( fileName );
+		for( char c; file.get( c ); ) {
+			scanner.AddChar( c );
+		}
+		scanner.AddEndOfFile();
+	} else {
+		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
+	}
+}
+
+void CSourceFilesProcessor::Error( const CError& error )
 {
 	std::cerr << error.UserMessage() << std::endl;
-}
-
-bool ParseFile( CScanner& scanner, const std::string& fileName )
-{
-	std::ifstream fileStream( fileName );
-	if( !fileStream.good() ) {
-		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
-		return false;
+	if( error.Severity() == ES_FatalError ) {
+		file.clear( std::ios_base::eofbit );
 	}
-
-	scanner.SetFileName( fileName );
-	for( char c; fileStream.get( c ); ) {
-		scanner.AddChar( c );
-	}
-	scanner.AddEndOfFile();
-
-	return ( !scanner.HasErrors() );
-}
-
-typedef std::vector<std::string> CFileNames;
-
-CProgramPtr ParseFiles( const CFileNames& fileNames )
-{
-	CErrorHandler errorHandler;
-	CScanner scanner( &errorHandler );
-
-	bool success = true;
-	for( CFileNames::const_iterator i = fileNames.begin();
-		i != fileNames.end(); ++i )
-	{
-		success &= ParseFile( scanner, *i );
-	}
-
-	if( success ) {
-		return scanner.BuildProgram();
-	}
-	return CProgramPtr();
 }
 
 const char* const ExecutionResultStrings[] = {
@@ -72,8 +86,7 @@ int main( int argc, const char* argv[] )
 		fileNames.push_back( argv[i] );
 	}
 
-	CProgramPtr program = ParseFiles( fileNames );
-
+	CProgramPtr program = CSourceFilesProcessor::Process( fileNames );
 	if( !static_cast<bool>( program ) ) {
 		return 1;
 	}
