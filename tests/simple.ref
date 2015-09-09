@@ -1,9 +1,10 @@
 simple START
-	ENTRY goImpossible
+	ENTRY go
 	EMPTY just_empty_label, simple_empty_label
 	
 go = <rev /just_empty_label/ /127/ 'abc' /simple_empty_label/ 'def' /943/ >+
-	<testQ 'DjkdfkgFRUCBTJZDGFSDIUk7676742oiufgUruefu' /11/ /121/ /247/>
+	<testQ 'DjkdfkgFRUCBTJZDGFSDIUk7676742oiufgUruefu' /11/ /121/ /247/>+
+	<goImpossible>
 
 rev w1e2 = <rev e2>w1
 	=	
