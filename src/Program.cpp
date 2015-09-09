@@ -218,18 +218,18 @@ CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
 CProgramPtr CInternalProgramBuilder::Build( CModuleDataVector& modules,
 	CErrorsHelper& errors )
 {
-	assert( !errors.HasErrors() );
-	assert( !modules.empty() );
-	CInternalProgramBuilder builder( errors, modules.size() );
-	builder.collect( modules );
-	if( !errors.HasErrors() ) {
-		builder.check();
+	if( !errors.HasErrors() && !modules.empty() ) {
+		CInternalProgramBuilder builder( errors, modules.size() );
+		builder.collect( modules );
 		if( !errors.HasErrors() ) {
-			builder.compile( modules );
-			assert( !errors.HasErrors() );
-			builder.link( modules );
-			assert( !errors.HasErrors() );
-			return builder.program;
+			builder.check();
+			if( !errors.HasErrors() ) {
+				builder.compile( modules );
+				assert( !errors.HasErrors() );
+				builder.link( modules );
+				assert( !errors.HasErrors() );
+				return builder.program;
+			}
 		}
 	}
 	modules.clear();
