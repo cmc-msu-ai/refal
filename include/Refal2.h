@@ -22,6 +22,7 @@ typedef int TRuntimeModuleId;
 
 // classes
 class CExecuter;
+struct CExecutionContext;
 
 class CRule;
 class CPreparatoryFunction;
@@ -68,9 +69,9 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 #include <OperationsBuilder.h>
 #include <Variables.h>
 #include <FunctionCompiler.h>
+#include <EmbeddedFunctions.h>
 #include <Function.h>
 #include <Receptacle.h>
-#include <EmbeddedFunctions.h>
 #include <Program.h>
 #include <ModuleBuilder.h>
 #include <QualifierParser.h>

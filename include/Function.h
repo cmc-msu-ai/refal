@@ -47,10 +47,6 @@ public:
 
 //-----------------------------------------------------------------------------
 
-struct CExecutionContext;
-
-typedef bool ( *TEmbeddedFunctionPtr )( CExecutionContext& executionContext );
-
 class CEmbeddedFunction : public CRuntimeFunction {
 public:
 	CEmbeddedFunction( const TEmbeddedFunctionPtr _embeddedFunction ) :
