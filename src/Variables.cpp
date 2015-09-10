@@ -257,6 +257,8 @@ void CVariablesBuilder::error( const std::string& errorMessage )
 static const char* convertVariableTypeToTag( TVariableType type )
 {
 	switch( type ) {
+		case VT_None:
+			break;
 		case VT_S:
 			return "s";
 		case VT_W:
