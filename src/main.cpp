@@ -70,7 +70,7 @@ const char* const ExecutionResultStrings[] = {
 	"recognition impossible",
 	"call empty function",
 	"lost function label",
-	"wrong argument of external function"
+	"wrong argument of embedded function"
 };
 
 const std::string SeparatorLine( 80, '-' );
