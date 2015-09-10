@@ -140,7 +140,7 @@ TVariableIndex CVariablesBuilder::AddLeft( const TVariableName name,
 				variable.CountRight++;
 				return variableIndex;
 			} else {
-				error( EC_TypeOfVariableDoesNotMatch );
+				errorTypesNotMatched( name, variable.Type );
 			}
 		}
 	}
@@ -159,10 +159,11 @@ TVariableIndex CVariablesBuilder::AddRight( const TVariableName name,
 				variable.CountRight++;
 				return variableIndex;
 			} else {
-				error( EC_TypeOfVariableDoesNotMatch );
+				errorTypesNotMatched( name, variable.Type );
 			}
 		} else {
-			error( EC_NoSuchVariableInLeftPart );
+			error( "variable `" + std::string( 1, static_cast<char>( name ) )
+				+ "` wasn't defined in left part of rule" );
 		}
 	}
 	return InvalidVariableIndex;
@@ -181,7 +182,9 @@ bool CVariablesBuilder::checkName( const TVariableName name )
 	if( ::isalnum( name ) != 0 || name == '_' ) {
 		return true;
 	}
-	error( EC_InvalidVariableName );
+	error( "invalid variable name `"
+		+ std::string( 1, static_cast<char>( name ) )
+		+ "`, only letter, digit or `_` allowed as variable name" );
 	return false;
 }
 
@@ -230,39 +233,56 @@ TVariableType CVariablesBuilder::checkTypeTag( const TVariableTypeTag type,
 			if( defaultQualifierForTag != nullptr ) {
 				*defaultQualifierForTag = getDefaultQualifierForN();
 			}
-			// todo: warning
+			warningObsoleteVariableType( 'n', "s(N)_" );
 			return VT_S;
 		case 'f':
 		case 'F':
 			if( defaultQualifierForTag != nullptr ) {
 				*defaultQualifierForTag = getDefaultQualifierForF();
 			}
-			// todo: warning
+			warningObsoleteVariableType( 'f', "s(F)_" );
 			return VT_S;
 	}
-	error( EC_NoSuchTypeOfVariable );
+	error( "variable type `"
+		+ std::string( 1, static_cast<char>( type ) )
+		+ "` doesn't exist, allowed variables types: `s`, `w`, `v` or `e`" );
 	return VT_None;
 }
 
-const char* CVariablesBuilder::getErrorMessage( TErrorCode errorCode )
+void CVariablesBuilder::error( const std::string& errorMessage )
 {
-	switch( errorCode ) {
-		case EC_InvalidVariableName:
-			return "invalid variable name";
-		case EC_NoSuchTypeOfVariable:
-			return "no such type of variable";
-		case EC_TypeOfVariableDoesNotMatch:
-			return "type of variable does not match";
-		case EC_NoSuchVariableInLeftPart:
-			return "no such variable in left part";
+	CErrorsHelper::RaiseError( ES_Error, errorMessage );
+}
+
+static const char* convertVariableTypeToTag( TVariableType type )
+{
+	switch( type ) {
+		case VT_S:
+			return "s";
+		case VT_W:
+			return "w";
+		case VT_V:
+			return "v";
+		case VT_E:
+			return "e";
 	}
 	assert( false );
 	return nullptr;
 }
 
-void CVariablesBuilder::error( TErrorCode errorCode )
+void CVariablesBuilder::errorTypesNotMatched( char name, TVariableType type )
 {
-	CErrorsHelper::RaiseError( ES_Error, getErrorMessage( errorCode ) );
+	error( "variable `" + std::string( 1, name )
+		+ "` previously defined in rule with type `"
+		+ convertVariableTypeToTag( type ) + " `" );
+}
+
+void CVariablesBuilder::warningObsoleteVariableType( char type,
+	const char* replacement )
+{
+	CErrorsHelper::RaiseError( ES_Warning,
+		"variable type `" + std::string( 1, type ) + "` is obsolete, use `"
+		+ replacement + "` istead it" );
 }
 
 //-----------------------------------------------------------------------------

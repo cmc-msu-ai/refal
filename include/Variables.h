@@ -178,14 +178,9 @@ private:
 	TVariableType checkTypeTag( const TVariableTypeTag type,
 		const CQualifier** defaultQualifierForTag = 0 );
 	// processing errors
-	enum TErrorCode {
-		EC_InvalidVariableName,
-		EC_NoSuchTypeOfVariable,
-		EC_TypeOfVariableDoesNotMatch,
-		EC_NoSuchVariableInLeftPart
-	};
-	static const char* getErrorMessage( TErrorCode errorCode );
-	void error( TErrorCode errorCode );
+	void error( const std::string& errorMessage );
+	void errorTypesNotMatched( char name, TVariableType type );
+	void warningObsoleteVariableType( char type, const char* replacement );
 };
 
 //-----------------------------------------------------------------------------
