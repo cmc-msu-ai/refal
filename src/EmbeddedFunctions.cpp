@@ -569,6 +569,125 @@ static bool embeddedDgall( CExecutionContext& executionContext )
 }
 
 //-----------------------------------------------------------------------------
+
+static bool embeddedLengw( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TNumber length = 0;
+	const CUnitNode* node = executionContext.Argument.GetFirst();
+	while( node != nullptr ) {
+		length++;
+		assert( !( node->IsLeftBracket() || node->IsRightBracket() ) );
+		assert( !node->IsRightParen() );
+		if( node->IsLeftParen() ) {
+			node = node->PairedParen();
+		}
+		node = node->Next();
+	}
+	executionContext.Argument.Empty();
+	executionContext.Argument.AppendNumber( length );
+	return true;
+}
+
+const char Asterisk = '*';
+
+static bool embeddedFirst( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Argument.IsEmpty()
+		|| !executionContext.Argument.GetFirst()->IsNumber() )
+	{
+		return false;
+	}
+	TNumber length = executionContext.Argument.GetFirst()->Number();
+	executionContext.Argument.RemoveFirst();
+	if( executionContext.Argument.IsEmpty() ) {
+		executionContext.Argument.AppendChar( Asterisk );
+		return true;
+	}
+	CUnitNode* node = executionContext.Argument.GetFirst();
+	while( length > 0 && node != nullptr ) {
+		length--;
+		assert( !( node->IsLeftBracket() || node->IsRightBracket() ) );
+		assert( !node->IsRightParen() );
+		if( node->IsLeftParen() ) {
+			node = node->PairedParen();
+		}
+		node = node->Next();
+	}
+	if( length > 0 ) {
+		CUnit asterisk( UT_Char );
+		asterisk.Char() = Asterisk;
+		executionContext.Argument.InsertBefore(
+			executionContext.Argument.GetFirst(), asterisk );
+	} else {
+		CUnitNode* leftParen = executionContext.Argument.InsertBefore(
+			executionContext.Argument.GetFirst(), CUnit( UT_LeftParen ) ); 
+		CUnitNode* rightParen = nullptr;
+		if( node == nullptr ) {
+			rightParen = executionContext.Argument.AppendRightParen();
+		} else {
+			rightParen = executionContext.Argument.InsertBefore(
+				node, CUnit( UT_RightParen ) );
+		}
+		leftParen->PairedParen() = rightParen;
+		rightParen->PairedParen() = leftParen;
+	}
+	return true;
+}
+
+static bool embeddedLast( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Argument.IsEmpty()
+		|| !executionContext.Argument.GetFirst()->IsNumber() )
+	{
+		return false;
+	}
+	TNumber length = executionContext.Argument.GetFirst()->Number();
+	executionContext.Argument.RemoveFirst();
+	if( executionContext.Argument.IsEmpty() ) {
+		executionContext.Argument.AppendChar( Asterisk );
+		return true;
+	}
+	CUnitNode* node = executionContext.Argument.GetLast();
+	while( length > 0 && node != nullptr ) {
+		length--;
+		assert( !( node->IsLeftBracket() || node->IsRightBracket() ) );
+		assert( !node->IsLeftParen() );
+		if( node->IsRightParen() ) {
+			node = node->PairedParen();
+		}
+		node = node->Prev();
+	}
+	if( length > 0 ) {
+		executionContext.Argument.AppendChar( Asterisk );
+	} else {
+		CUnitNode* rightParen = executionContext.Argument.AppendRightParen();
+		CUnitNode* leftParen = nullptr;
+		if( node == nullptr ) {
+			leftParen = executionContext.Argument.InsertBefore(
+				executionContext.Argument.GetFirst(), CUnit( UT_LeftParen ) );
+		} else {
+			leftParen = executionContext.Argument.InsertAfter(
+				node, CUnit( UT_LeftParen ) );
+		}
+		leftParen->PairedParen() = rightParen;
+		rightParen->PairedParen() = leftParen;
+	}
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+
+static bool embeddedApply( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	notImplemented( __FUNCTION__ );
+	return false;
+}
+
+//-----------------------------------------------------------------------------
 // CStandartEmbeddedFunctionData
 
 struct CStandartEmbeddedFunctionData {
@@ -613,6 +732,12 @@ const CEmbeddedFunctionData embeddedFunctionDataTable[] = {
 	{ "cp", embeddedCp },
 	{ "rp", embeddedRp },
 	{ "dgall", embeddedDgall },
+	// lexical
+	{ "lengw", embeddedLengw },
+	{ "first", embeddedFirst },
+	{ "last", embeddedLast },
+	// apply
+	{ "apply", embeddedApply },
 	{ nullptr, nullptr }
 };
 
