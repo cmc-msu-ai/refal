@@ -258,21 +258,15 @@ void CFunctionBuilder::AddNumber( TNumber number )
 void CFunctionBuilder::AddVariable( TVariableTypeTag type, TVariableName name,
 	CQualifier* qualifier )
 {
-	TVariableIndex index = InvalidVariableIndex;
-	if( isProcessRightPart ) {
-		index = CVariablesBuilder::AddRight( name, type );
-	} else {
-		index = CVariablesBuilder::AddLeft( name, type );
-	}
+	const TVariableIndex index = isProcessRightPart ?
+		CVariablesBuilder::AddRight( name, type ) :
+		CVariablesBuilder::AddLeft( name, type );
 	if( !HasErrors() ) {
-		if( index == InvalidVariableIndex ) {
-			//SetErrors();
-		} else {
-			if( qualifier != nullptr ) {
-				CVariablesBuilder::AddQualifier( index, *qualifier );
-			}
-			acc.AppendVariable( index );
+		assert( index != InvalidVariableIndex );
+		if( qualifier != nullptr ) {
+			CVariablesBuilder::AddQualifier( index, *qualifier );
 		}
+		acc.AppendVariable( index );
 	}
 }
 
