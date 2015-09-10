@@ -103,10 +103,10 @@ void CScanner::AddEndOfFile()
 	Reset();
 }
 
-void CScanner::error( TErrorCode errorCode, char c )
+void CScanner::error( TError error, char c )
 {
 	std::ostringstream errorStream;
-	switch( errorCode ) {
+	switch( error ) {
 		case E_InvalidCharacter:
 			errorStream << "invalid character `" << c << "`";
 			break;
@@ -145,6 +145,25 @@ void CScanner::error( TErrorCode errorCode, char c )
 	const std::string wrongText = ( c == '\n' ? "" : std::string( 1, c ) );
 	CError::SetTokenData( line, position, wrongText );
 	CErrorsHelper::RaiseError( ES_Error, errorStream.str() );
+	CError::ResetToken();
+}
+
+void CScanner::warning( TWarning warning, char c )
+{
+	std::ostringstream warningStream;
+	switch( warning ) {
+		case W_Semicolon:
+			warningStream << "using `" << c << "` as line feed is obsolete";
+			break;
+		case W_SymbolAfterPlus:
+			warningStream << "unuseful symbol `" << c << "` after plus";
+			break;
+		default:
+			assert( false );
+			break;
+	}
+	CError::SetTokenData( line, position, std::string( 1, c ) );
+	CErrorsHelper::RaiseError( ES_Warning, warningStream.str() );
 	CError::ResetToken();
 }
 
@@ -284,7 +303,7 @@ void CScanner::preprocessingInitital( char c )
 			preprocessingState = PS_MultilineComment;
 			break;
 		case Semicolon:
-			// TODO: warning
+			warning( W_Semicolon, c );
 			processing( LineFeed );
 			break;
 		default:
@@ -297,7 +316,7 @@ void CScanner::preprocessingPlus( char c )
 {
 	switch( c ) {
 		case Semicolon:
-			// TODO: warning
+			warning( W_Semicolon, c );
 			preprocessingState = PS_PlusAfterLineFeed;
 			break;
 		case LineFeed:
@@ -313,7 +332,7 @@ void CScanner::preprocessingPlus( char c )
 			break;
 		default:
 			if( !IsSpace( c ) ) {
-				// TODO: warning
+				warning( W_SymbolAfterPlus, c );
 			}
 			break;
 	}
@@ -323,7 +342,7 @@ void CScanner::preprocessingPlusAfterLineFeed( char c )
 {
 	switch( c ) {
 		case Semicolon:
-			// TODO: warning
+			warning( W_Semicolon, c );
 			break;
 		case LineFeed:
 			break;

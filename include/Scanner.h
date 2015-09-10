@@ -50,7 +50,7 @@ private:
 	};
 	TState state;
 	// processing errors
-	enum TErrorCode {
+	enum TError {
 		E_InvalidCharacter,
 		E_InvalidControlCharacter,
 		E_UnexpectedCharacter,
@@ -62,7 +62,12 @@ private:
 		E_UnclosedQualifier,
 		E_UnexpectedCharacterInQualifier
 	};
-	void error( TErrorCode errorCode, char c = '\n' );
+	void error( TError error, char c = '\n' );
+	enum TWarning {
+		W_Semicolon,
+		W_SymbolAfterPlus
+	};
+	void warning( TWarning warning, char c );
 	// auxiliary functions
 	void setLineAndPositionOfToken();
 	void addToken( TTokenType tokenType );
