@@ -198,13 +198,11 @@ void COperationsExecuter::doFunction()
 				executionResult = ER_WrongArgumentOfExternalFunction;
 			}
 		} else if( function->IsEmpty() ) {
-			// TODO: error, can't execute empty function
 			executionResult = ER_CallEmptyFunction;
 		} else {
 			assert( false );
 		}
 	} else {
-		// TODO: error, lost function label
 		executionResult = ER_LostFunctionLabel;
 	}
 	if( executionResult == ER_OK ) {
