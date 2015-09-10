@@ -326,23 +326,23 @@ const char* CFunctionBuilder::getErrorMessage( TErrorCode errorCode )
 {
 	switch( errorCode ) {
 		case EC_IllegalLeftBracketInLeftPart:
-			return "illegal left bracket in left part";
+			return "illegal left bracket in left part of rule";
 		case EC_IllegalRightBracketInLeftPart:
-			return "illegal right bracket in left part";
+			return "illegal right bracket in left part of rule";
 		case EC_RightParenDoesNotMatchLeftParen:
 			return "right paren does not match left paren";
 		case EC_RightBracketDoesNotMatchLeftBracket:
 			return "right bracket does not match left bracket";
 		case EC_UnclosedLeftParenInLeftPart:
-			return "unclosed left paren in left part";
+			return "unclosed left paren in left part of rule";
 		case EC_UnclosedLeftParenInRightPart:
-			return "unclosed left paren in right part";
+			return "unclosed left paren in right part of rule";
 		case EC_UnclosedLeftBracketInRightPart:
-			return "unclosed left bracket in right part";
+			return "unclosed left bracket in right part of rule";
 		case EC_ThereAreMultiplePartsSeparatorInRules:
-			return "there are multiple parts separator in rules";
+			return "there are multiple parts separator in rule";
 		case EC_ThereAreNoPartsSeparatorInRules:
-			return "there are no parts separator in rules";
+			return "there are no parts separator in rule";
 	}
 	assert( false );
 	return nullptr;
