@@ -88,6 +88,7 @@ typedef std::vector<CModuleDataPtr> CModuleDataVector;
 class CProgramBuilder : public CFunctionBuilder {
 public:
 	CProgramPtr BuildProgram();
+	bool CheckProgram();
 
 protected:
 	CProgramBuilder( IErrorHandler* errorHandler = nullptr );

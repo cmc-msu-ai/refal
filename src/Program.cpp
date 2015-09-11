@@ -161,13 +161,14 @@ class CInternalProgramBuilder {
 public:
 	static CProgramPtr Build( CModuleDataVector& modules,
 		CErrorsHelper& errors );
+	static bool Check( CModuleDataVector& modules, CErrorsHelper& errors );
 
 private:
 	CErrorsHelper& errors;
 	CDictionary<CGlobalFunctionData, std::string> globals;
 	CProgramPtr program;
 
-	CInternalProgramBuilder( CErrorsHelper& _errors, int numberOfModules );
+	CInternalProgramBuilder( CErrorsHelper& _errors );
 
 	typedef void ( CInternalProgramBuilder::*TProcessFunctionPtr )(
 		CPreparatoryFunction* function,
@@ -193,12 +194,9 @@ private:
 
 //-----------------------------------------------------------------------------
 
-CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
-		int numberOfModules ) :
-	errors( _errors ),
-	program( new CProgram( numberOfModules ) )
+CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors ) :
+	errors( _errors )
 {
-	assert( static_cast<bool>( program ) );
 	// add standart functions
 	for( const CEmbeddedFunctionData* function = EmbeddedFunctionDataTable();
 		function->EmbeddedFunction != nullptr; function++ )
@@ -218,22 +216,40 @@ CInternalProgramBuilder::CInternalProgramBuilder( CErrorsHelper& _errors,
 CProgramPtr CInternalProgramBuilder::Build( CModuleDataVector& modules,
 	CErrorsHelper& errors )
 {
+	CProgramPtr program;
 	if( !errors.HasErrors() && !modules.empty() ) {
-		CInternalProgramBuilder builder( errors, modules.size() );
+		CInternalProgramBuilder builder( errors );
 		builder.collect( modules );
 		if( !errors.HasErrors() ) {
 			builder.check();
 			if( !errors.HasErrors() ) {
+				builder.program.reset( new CProgram( modules.size() ) );
 				builder.compile( modules );
 				assert( !errors.HasErrors() );
 				builder.link( modules );
 				assert( !errors.HasErrors() );
-				return builder.program;
+				program = builder.program;
 			}
 		}
 	}
 	modules.clear();
-	return nullptr;
+	return program;
+}
+
+bool CInternalProgramBuilder::Check( CModuleDataVector& modules,
+	CErrorsHelper& errors )
+{
+	bool result = false;
+	if( !errors.HasErrors() && !modules.empty() ) {
+		CInternalProgramBuilder builder( errors );
+		builder.collect( modules );
+		if( !errors.HasErrors() ) {
+			builder.check();
+			result = !errors.HasErrors();
+		}
+	}
+	modules.clear();
+	return result;
 }
 
 void CInternalProgramBuilder::processModules( const CModuleDataVector& modules,
@@ -340,6 +356,7 @@ void CInternalProgramBuilder::linkFunction( CPreparatoryFunction* function,
 
 void CInternalProgramBuilder::link( const CModuleDataVector& modules )
 {
+	assert( static_cast<bool>( program ) );
 	const CGlobalFunctionData& goFunction = globals.GetData( globals.FindKey(
 		ProgramStartFunctionName ) );
 	TOperationAddress goFirstOperation =
@@ -386,6 +403,11 @@ void CProgramBuilder::AddModule( CModuleDataPtr& module )
 CProgramPtr CProgramBuilder::BuildProgram()
 {
 	return CInternalProgramBuilder::Build( modules, *this );
+}
+
+bool CProgramBuilder::CheckProgram()
+{
+	return CInternalProgramBuilder::Check( modules, *this );
 }
 
 //-----------------------------------------------------------------------------

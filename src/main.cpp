@@ -6,7 +6,8 @@ typedef std::vector<std::string> CFileNames;
 
 class CSourceFilesProcessor : private IErrorHandler {
 public:
-	static CProgramPtr Process( const CFileNames& fileNames );
+	static CProgramPtr Compile( const CFileNames& fileNames );
+	static bool Check( const CFileNames& fileNames );
 
 private:
 	CScanner scanner;
@@ -21,10 +22,16 @@ private:
 	virtual void Error( const CError& error );
 };
 
-CProgramPtr CSourceFilesProcessor::Process( const CFileNames& fileNames )
+CProgramPtr CSourceFilesProcessor::Compile( const CFileNames& fileNames )
 {
 	CSourceFilesProcessor sourceFilesProcessor( fileNames );
 	return sourceFilesProcessor.scanner.BuildProgram();
+}
+
+bool CSourceFilesProcessor::Check( const CFileNames& fileNames )
+{
+	CSourceFilesProcessor sourceFilesProcessor( fileNames );
+	return sourceFilesProcessor.scanner.CheckProgram();
 }
 
 CSourceFilesProcessor::CSourceFilesProcessor( const CFileNames& fileNames )
@@ -88,7 +95,7 @@ int main( int argc, const char* argv[] )
 		fileNames.push_back( argv[i] );
 	}
 
-	CProgramPtr program = CSourceFilesProcessor::Process( fileNames );
+	CProgramPtr program = CSourceFilesProcessor::Compile( fileNames );
 	if( !static_cast<bool>( program ) ) {
 		return 1;
 	}
