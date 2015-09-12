@@ -10,7 +10,7 @@ void MakeLower( std::string& data )
 
 bool CompareNoCase( const char a, const char b )
 {
-    return ( ::tolower( a ) == ::tolower( b ) );
+	return ( ::tolower( a ) == ::tolower( b ) );
 }
 
 bool CompareNoCase( const std::string& str1, const std::string& str2 )

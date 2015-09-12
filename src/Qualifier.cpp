@@ -97,7 +97,7 @@ void CQualifier::DestructiveIntersection( CQualifier& withQualifier )
 }
 
 void CQualifier::Print( std::ostream& outputStream,
-	const CPrintHelper& printHelper  ) const
+	const CPrintHelper& printHelper ) const
 {
 	if( IsEmpty() ) {
 		return;
