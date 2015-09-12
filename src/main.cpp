@@ -37,13 +37,21 @@ bool CSourceFilesProcessor::Check( const CFileNames& fileNames )
 CSourceFilesProcessor::CSourceFilesProcessor( const CFileNames& fileNames )
 {
 	scanner.SetErrorHandler( this );
-	bool success = true;
-	for( CFileNames::const_iterator fileName = fileNames.begin();
-		fileName != fileNames.end(); ++fileName )
-	{
-		processFile( *fileName );
-		if( scanner.ErrorSeverity() == ES_FatalError ) {
-			break;
+	if( fileNames.empty() ) {
+		for( char c; std::cin.get( c ); ) {
+			scanner.AddChar( c );
+		}
+		if( scanner.ErrorSeverity() != ES_FatalError ) {
+			scanner.AddEndOfFile();
+		}
+	} else {
+		for( CFileNames::const_iterator fileName = fileNames.begin();
+			fileName != fileNames.end(); ++fileName )
+		{
+			processFile( *fileName );
+			if( scanner.ErrorSeverity() == ES_FatalError ) {
+				break;
+			}
 		}
 	}
 }
@@ -60,7 +68,8 @@ void CSourceFilesProcessor::processFile( const std::string& fileName )
 			scanner.AddEndOfFile();
 		}
 	} else {
-		std::cerr << "Cannot open file: `" << fileName << "`." << std::endl;
+		std::cerr << UtilityName << ": " << fileName
+			<< ": No such file" << std::endl;
 	}
 }
 
@@ -69,6 +78,7 @@ void CSourceFilesProcessor::Error( const CError& error )
 	std::cerr << error.UserMessage() << std::endl;
 	if( error.Severity() == ES_FatalError ) {
 		file.clear( std::ios_base::eofbit );
+		std::cin.clear( std::ios_base::eofbit );
 	}
 }
 
@@ -85,10 +95,6 @@ const std::string SeparatorLine( 80, '-' );
 int main( int argc, const char* argv[] )
 {
 	std::ios::sync_with_stdio( false );
-	if( argc < 2 ) {
-		std::cerr << "There are no source files." << std::endl;
-		return 1;
-	}
 
 	CFileNames fileNames;
 	for( int i = 1; i < argc; i++ ) {
@@ -100,7 +106,7 @@ int main( int argc, const char* argv[] )
 		return 1;
 	}
 
-    CReceptaclePtr receptacle( new CReceptacle );
+	CReceptaclePtr receptacle( new CReceptacle );
 	CUnitList fieldOfView;
 	CUnitNode* errorNode;
 	TExecutionResult result =
