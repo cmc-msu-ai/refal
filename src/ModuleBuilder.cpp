@@ -42,12 +42,11 @@ void CModuleBuilder::StartModule( const CToken& startToken,
 
 void CModuleBuilder::EndModule( const CToken& endToken )
 {
-	if( isModuleExist() ) {
+	if( !isAnonymousModule && isModuleExist() ) {
 		module->EndToken = endToken;
-		const bool savedIsAnonymousModule = isAnonymousModule;
 		// end module, but not end of file
 		EndModule();
-		isAnonymousModule = savedIsAnonymousModule;
+		isAnonymousModule = false;
 	} else {
 		error( endToken, "alone `end` directive" );
 	}
