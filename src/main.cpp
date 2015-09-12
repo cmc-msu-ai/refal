@@ -2,7 +2,137 @@
 
 using namespace Refal2;
 
+//-----------------------------------------------------------------------------
+// Constants
+
+const char* const UtilityName = "refal2";
+
+//-----------------------------------------------------------------------------
+// CCommandLineOptions
+
 typedef std::vector<std::string> CFileNames;
+
+class CCommandLineOptions {
+public:
+	CCommandLineOptions() { ResetDefaults(); }
+
+	void ResetDefaults();
+	bool SetByCommandLineArguments( int numberOfArguments,
+		const char* const arguments[] );
+
+	bool IsCheckOnly() const { return isCheckOnly; }
+	void SetCheckOnly( bool _isCheckOnly = true )
+		{ isCheckOnly = _isCheckOnly; }
+
+	bool IsInfoOnly() const { return isInfoOnly; }
+	void SetInfoOnly( bool _isInfoOnly = true ) { isInfoOnly = _isInfoOnly; }
+
+	void ResetSourceFiles() { sourceFiles.clear(); }
+	bool HasSourceFiles() const { return !sourceFiles.empty(); }
+	CFileNames SourceFiles() const { return sourceFiles; }
+	void AddSourceFile( const std::string& fileName )
+		{ sourceFiles.push_back( fileName ); }
+
+private:
+	bool isInfoOnly;
+	bool optionsEnd;
+	// if true program only parse and print found errors
+	bool isCheckOnly;
+	// *.ref files
+	CFileNames sourceFiles;
+
+	static bool isOption( const std::string& argument );
+	bool parseArgument( const std::string& argument );
+
+	static void printInvalidOption( const std::string& argument );
+	static void printHelp();
+	static void printVersion();
+};
+
+//-----------------------------------------------------------------------------
+
+void CCommandLineOptions::ResetDefaults()
+{
+	SetInfoOnly( false );
+	SetCheckOnly( false );
+	ResetSourceFiles();
+}
+
+bool CCommandLineOptions::SetByCommandLineArguments( int numberOfArguments,
+	const char* const arguments[] )
+{
+	ResetDefaults();
+	optionsEnd = false;
+	for( int i = 0; i < numberOfArguments; i++ ) {
+		if( !parseArgument( arguments[i] ) ) {
+			ResetDefaults();
+			return false;
+		}
+		if( IsInfoOnly() ) {
+			break;
+		}
+	}
+	return true;
+}
+
+bool CCommandLineOptions::isOption( const std::string& argument )
+{
+	return ( argument.length() >= 2 && argument.front() == '-' );
+}
+
+bool CCommandLineOptions::parseArgument( const std::string& argument )
+{
+	if( !optionsEnd && isOption( argument ) ) {
+		if( argument == "-c" || argument == "--check" ) {
+			SetCheckOnly();
+		} else if( argument == "--help" ) {
+			SetInfoOnly();
+			printHelp();
+		} else if( argument == "--version" ) {
+			SetInfoOnly();
+			printVersion();
+		} else if( argument == "--" ) {
+			optionsEnd = true;
+		} else {
+			printInvalidOption( argument );
+			return false;
+		}
+	} else if( !argument.empty() ) {
+		AddSourceFile( argument );
+	}
+	return true;
+}
+
+void CCommandLineOptions::printInvalidOption( const std::string& argument )
+{
+	std::cerr
+		<< UtilityName << ": invalid option `" << argument << "`" << std::endl
+		<< "Try `" << UtilityName << " --help` for more information."
+		<< std::endl;
+}
+
+void CCommandLineOptions::printHelp()
+{
+	std::cout
+		<< "Usage: " << UtilityName << " [OPTION]... [FILE]..."
+		<< std::endl << std::endl
+		<< "  -c, --check      check source FILE(s) for errors and exit"
+		<< std::endl
+		<< "      --help       display this help and exit" << std::endl
+		<< "      --version    output version information and exit"
+		<< std::endl << std::endl << "Report bugs to <refal2@yandex.ru>."
+		<< std::endl;
+}
+
+void CCommandLineOptions::printVersion()
+{
+	std::cout
+		<< "Written by Anton Todua." << std::endl
+		<< "Report bugs to <refal2@yandex.ru>" << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+// CSourceFilesProcessor
 
 class CSourceFilesProcessor : private IErrorHandler {
 public:
@@ -21,6 +151,8 @@ private:
 
 	virtual void Error( const CError& error );
 };
+
+//-----------------------------------------------------------------------------
 
 CProgramPtr CSourceFilesProcessor::Compile( const CFileNames& fileNames )
 {
@@ -68,8 +200,9 @@ void CSourceFilesProcessor::processFile( const std::string& fileName )
 			scanner.AddEndOfFile();
 		}
 	} else {
-		std::cerr << UtilityName << ": " << fileName
-			<< ": No such file" << std::endl;
+		scanner.SetFileName( UtilityName );
+		scanner.RaiseError( ES_FatalError, "no such file" );
+		scanner.ResetFileName();
 	}
 }
 
@@ -81,6 +214,8 @@ void CSourceFilesProcessor::Error( const CError& error )
 		std::cin.clear( std::ios_base::eofbit );
 	}
 }
+
+//-----------------------------------------------------------------------------
 
 const char* const ExecutionResultStrings[] = {
 	"ok",
@@ -96,12 +231,22 @@ int main( int argc, const char* argv[] )
 {
 	std::ios::sync_with_stdio( false );
 
-	CFileNames fileNames;
-	for( int i = 1; i < argc; i++ ) {
-		fileNames.push_back( argv[i] );
+	CCommandLineOptions commandLineOptions;
+	if( !commandLineOptions.SetByCommandLineArguments( argc - 1, argv + 1 ) ) {
+		return 1;
 	}
 
-	CProgramPtr program = CSourceFilesProcessor::Compile( fileNames );
+	if( commandLineOptions.IsInfoOnly() ) {
+		return 0;
+	}
+
+	if( commandLineOptions.IsCheckOnly() ) {
+		return ( CSourceFilesProcessor::Check(
+			commandLineOptions.SourceFiles() ) ? 0 : 1 );
+	}
+
+	CProgramPtr program = CSourceFilesProcessor::Compile(
+		commandLineOptions.SourceFiles() );
 	if( !static_cast<bool>( program ) ) {
 		return 1;
 	}
