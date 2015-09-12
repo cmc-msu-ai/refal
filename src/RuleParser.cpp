@@ -20,12 +20,15 @@ void CRuleParser::Reset()
 	SetWrong();
 }
 
-void CRuleParser::BeginFunction()
+bool CRuleParser::BeginFunction()
 {
 	assert( token.type == TT_Word && !token.word.empty() );
-	CModuleBuilder::Declare( token );
-	functionName = token;
-	BeginRule();
+	if( CModuleBuilder::Declare( token ) != InvalidDictionaryIndex ) {
+		functionName = token;
+		beginRule();
+		return true;
+	}
+	return false;
 }
 
 void CRuleParser::EndFunction()
@@ -43,10 +46,15 @@ void CRuleParser::EndFunction()
 	}
 }
 
-void CRuleParser::BeginRule()
+bool CRuleParser::BeginRule()
 {
+	if( !functionName.IsNone() ) {
+		beginRule();
+		return true;
+	}
 	CParsingElementState::Reset();
-	state = &CRuleParser::direction;
+	error( "try to define rule out of function" );
+	return false;
 }
 
 void CRuleParser::AddToken()
@@ -55,6 +63,13 @@ void CRuleParser::AddToken()
 	CError::SetToken( token );
 	( this->*state )();
 	CError::ResetToken();
+}
+
+void CRuleParser::beginRule()
+{
+	CParsingElementState::Reset();
+	assert( !functionName.IsNone() );
+	state = &CRuleParser::direction;
 }
 
 void CRuleParser::error( const std::string& message )

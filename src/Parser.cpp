@@ -56,8 +56,8 @@ void CParser::parsingWord()
 		state = &CParser::parsingWordBlank;
 	} else {
 		token.Swap( savedToken1 );
-		CRuleParser::BeginFunction(); // action
-		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+		if( !CRuleParser::BeginFunction() ) { // action
+			state = &CParser::parsingIgnoreLine;
 			return;
 		}
 		token.Swap( savedToken1 );
@@ -86,8 +86,8 @@ void CParser::parsingWordBlank()
 		}
 	}
 	token.Swap( savedToken1 );
-	CRuleParser::BeginFunction(); // action
-	if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+	if( !CRuleParser::BeginFunction() ) { // action
+		state = &CParser::parsingIgnoreLine;
 		return;
 	}
 	token.Swap( savedToken1 );
@@ -105,17 +105,14 @@ void CParser::parsingWordBlankS()
 		token.Swap( savedToken1 );
 	} else {
 		token.Swap( savedToken1 );
-		CRuleParser::BeginFunction(); // action
-		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
+		if( !CRuleParser::BeginFunction() ) { // action
+			state = &CParser::parsingIgnoreLine;
 			return;
 		}
 		token.Swap( savedToken1 );
 		state = &CParser::parsingRule;
 		savedToken2.Swap( token );
 		AddToken(); // QualifierTag
-		if( CErrorsHelper::ErrorSeverity() == ES_FatalError ) {
-			return;
-		}
 		savedToken2.Move( token );
 		AddToken(); // current token
 	}
@@ -128,7 +125,10 @@ void CParser::parsingBlank()
 	} else if( token.type == TT_LineFeed ) {
 		state = &CParser::parsingInitial;
 	} else {
-		CRuleParser::BeginRule();
+		if( !CRuleParser::BeginRule() ) {
+			state = &CParser::parsingIgnoreLine;
+			return;
+		}
 		state = &CParser::parsingRule;
 		AddToken();
 	}

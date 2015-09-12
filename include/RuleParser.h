@@ -11,9 +11,9 @@ protected:
 	CRuleParser( IErrorHandler* errorHandler = nullptr );
 
 	void Reset();
-	void BeginFunction();
+	bool BeginFunction();
 	void EndFunction();
-	void BeginRule();
+	bool BeginRule();
 	void AddToken();
 
 private:
@@ -32,6 +32,7 @@ private:
 	void variableQualifier();
 	void afterVariableQualifier();
 	// auxiliary functions
+	void beginRule();
 	void error( const std::string& message );
 };
 
