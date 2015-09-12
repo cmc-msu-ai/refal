@@ -85,12 +85,12 @@ const std::string& CError::UserMessage() const
 		std::ostringstream userMessageStream;
 		if( !fileName.empty() ) {
 			userMessageStream << fileName << ":";
-			if( !token.IsNone() ) {
-				userMessageStream << token.line << ":" << token.position << ":";
-			}
+		}
+		if( !token.IsNone() ) {
+			userMessageStream << token.line << ":" << token.position << ":";
+		}
+		if( !fileName.empty() || !token.IsNone() ) {
 			userMessageStream << " ";
-		} else {
-			assert( token.IsNone() );
 		}
 		switch( Severity() ) {
 			case ES_Warning:
