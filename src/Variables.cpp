@@ -276,7 +276,7 @@ void CVariablesBuilder::errorTypesNotMatched( char name, TVariableType type )
 {
 	error( "variable `" + std::string( 1, name )
 		+ "` previously defined in rule with type `"
-		+ convertVariableTypeToTag( type ) + " `" );
+		+ convertVariableTypeToTag( type ) + "`" );
 }
 
 void CVariablesBuilder::warningObsoleteVariableType( char type,
