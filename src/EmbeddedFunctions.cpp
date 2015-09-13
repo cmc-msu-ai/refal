@@ -589,6 +589,21 @@ static bool embeddedLengw( CExecutionContext& executionContext )
 	return true;
 }
 
+static bool embeddedLengr( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	TNumber length = 0;
+	const CUnitNode* node = executionContext.Argument.GetFirst();
+	while( node != nullptr ) {
+		length++;
+		assert( !( node->IsLeftBracket() || node->IsRightBracket() ) );
+		node = node->Next();
+	}
+	executionContext.Argument.Empty();
+	executionContext.Argument.AppendNumber( length );
+	return true;
+}
+
 const char Asterisk = '*';
 
 static bool embeddedFirst( CExecutionContext& executionContext )
@@ -734,6 +749,7 @@ const CEmbeddedFunctionData embeddedFunctionDataTable[] = {
 	{ "dgall", embeddedDgall },
 	// lexical
 	{ "lengw", embeddedLengw },
+	{ "lengr", embeddedLengr },
 	{ "first", embeddedFirst },
 	{ "last", embeddedLast },
 	// apply
