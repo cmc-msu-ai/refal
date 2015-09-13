@@ -4,7 +4,17 @@ compiler:
   - clang
 before_install: "mkdir build; cd build;"
 install: "cmake -G \"Unix Makefiles\" ../ && make"
-script: "./refal2 ../tests/embedded.ref"
+script:
+  >
+    ./refal2 ../tests/embedded.ref;
+    echo;
+    echo '################################################################';
+    echo;
+    ./refal2 ../tests/matching.ref;
+    echo;
+    echo '################################################################';
+    echo;
+    ./refal2 ../tests/speed.ref
 branches:
   only:
     - master
