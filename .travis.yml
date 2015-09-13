@@ -23,7 +23,7 @@ script:
     echo '# speed.ref                                                                    #';
     echo '################################################################################';
     echo;
-    ./refal2 ../tests/speed.ref
+    ./refal2 ../tests/speed.ref;
     echo;
     echo '################################################################################';
     echo '# moduleA.ref moduleB.ref moduleC.ref                                          #';
