@@ -2,9 +2,12 @@
 
 namespace Refal2 {
 
-CHole::CHole( CUnitList& hole, const TTableIndex _left,
-		const TTableIndex _right ):
-	left( _left ), right( _right )
+//-----------------------------------------------------------------------------
+// CHole
+
+CHole::CHole( CUnitList& hole, TTableIndex _left, TTableIndex _right ) :
+	left( _left ),
+	right( _right )
 {
 	hole.Move( *this );
 }
@@ -29,8 +32,14 @@ CHole& CHole::operator=( const CHole& hole )
 	return *this;
 }
 
-CLeftPartCompiler::CLeftPartCompiler():
-	top(0), left(0), right(0), hole(0)
+//-----------------------------------------------------------------------------
+// CLeftPartCompiler
+
+CLeftPartCompiler::CLeftPartCompiler() :
+	top( 0 ),
+	left( 0 ),
+	right( 0 ),
+	hole( 0 )
 {
 }
 
@@ -99,7 +108,7 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 #endif
 
 void CLeftPartCompiler::CompileLeftPart( CUnitList& leftPart,
-	const bool isRightDirection )
+	bool isRightDirection )
 {
 	left = 0;
 	right = 1;
@@ -481,6 +490,9 @@ void CLeftPartCompiler::matchRightDuplicateVE()
 	hole->RemoveLast();
 }
 
+//-----------------------------------------------------------------------------
+// CRightPartCompiler
+
 void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 {
 	CUnitList hole;
@@ -543,6 +555,7 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 }
 
 //-----------------------------------------------------------------------------
+// CFunctionCompiler
 
 CFunctionCompiler::CFunctionCompiler( COperationList& _operationsHolder ) :
 	operationsHolder( _operationsHolder )
@@ -571,5 +584,7 @@ TOperationAddress CFunctionCompiler::GetFirstOperation()
 	assert( resultOperation != nullptr );
 	return resultOperation;
 }
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2
