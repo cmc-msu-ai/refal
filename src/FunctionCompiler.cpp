@@ -559,8 +559,8 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 
 void CCompilationContext::Reset()
 {
-	topStackIndex = 0;
-	topTableIndex = 0;
+	maxStackDepth = 0;
+	maxTableSize = 0;
 	operationsHolder.Empty();
 }
 
@@ -570,17 +570,17 @@ void CCompilationContext::SaveOperations( COperationList& operations )
 	operationsHolder.Append( operations );
 }
 
-void CCompilationContext::SetTopStackIndex( TStackIndex _topStackIndex )
+void CCompilationContext::SetStackDepth( TStackIndex stackDepth )
 {
-	if( _topStackIndex > topStackIndex ) {
-		topStackIndex = _topStackIndex;
+	if( stackDepth > maxStackDepth ) {
+		maxStackDepth = stackDepth;
 	}
 }
 
-void CCompilationContext::SetTopTableIndex( TTableIndex _topTableIndex )
+void CCompilationContext::SetTableSize( TTableIndex tableSize )
 {
-	if( _topTableIndex > topTableIndex ) {
-		topTableIndex = _topTableIndex;
+	if( tableSize > maxTableSize ) {
+		maxTableSize = tableSize;
 	}
 }
 
@@ -602,13 +602,13 @@ void CFunctionCompiler::CompileRule( CRule& rule )
 	COperationsBuilder::AddMatchingComplete();
 	CompileRightPart( rule.Right );
 	COperationsBuilder::AddReturn();
-	//compilationContext.SetTopTableIndex( top );
 }
 
 TOperationAddress CFunctionCompiler::FinalizeCompilation()
 {
 	assert( !wasFinalized );
 	wasFinalized = true;
+	compilationContext.SetStackDepth( COperationsBuilder::MaxStackDepth() );
 	COperationList functionOperations;
 	COperationsBuilder::Export( functionOperations );
 	const TOperationAddress resultOperation = functionOperations.GetFirst();

@@ -152,15 +152,15 @@ public:
 	CCompilationContext() { Reset(); }
 	void Reset();
 
-	TStackIndex TopStackIndex() const { return topStackIndex; }
-	TTableIndex TopTableIndex() const { return topTableIndex; }
+	TStackIndex MaxStackDepth() const { return maxStackDepth; }
+	TTableIndex MaxTableSize() const { return maxTableSize; }
 	void SaveOperations( COperationList& operations );
-	void SetTopStackIndex( TStackIndex topStackIndex );
-	void SetTopTableIndex( TTableIndex topTableIndex );
+	void SetStackDepth( TStackIndex stackDepth );
+	void SetTableSize( TTableIndex tableSize );
 
 private:
-	TStackIndex topStackIndex;
-	TTableIndex topTableIndex;
+	TStackIndex maxStackDepth;
+	TTableIndex maxTableSize;
 	COperationList operationsHolder;
 
 	CCompilationContext( const CCompilationContext& );
@@ -170,7 +170,7 @@ private:
 //-----------------------------------------------------------------------------
 // CFunctionCompiler
 
-class CFunctionCompiler : public CRightPartCompiler {
+class CFunctionCompiler : private CRightPartCompiler {
 public:
 	CFunctionCompiler( CCompilationContext& compilationContext );
 
