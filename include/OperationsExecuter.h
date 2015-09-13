@@ -3,6 +3,7 @@
 #include <Refal2.h>
 
 namespace Refal2 {
+
 //-----------------------------------------------------------------------------
 // CExecutionContext
 
@@ -204,6 +205,8 @@ private:
 	CUnitNode* lastAddedLeftParen;
 	CUnitNode* lastAddedLeftBracket;
 };
+
+//-----------------------------------------------------------------------------
 
 const TLabel LabelMask = 256 * 256;
 
@@ -1232,5 +1235,7 @@ inline void COperationsExecuter::copy_WV( const TTableIndex tableIndex )
 {
 	left = fieldOfView.Copy( left, table[tableIndex], table[tableIndex + 1] );
 }
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2
