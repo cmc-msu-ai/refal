@@ -39,6 +39,7 @@ CLeftPartCompiler::CLeftPartCompiler() :
 	top( 0 ),
 	left( 0 ),
 	right( 0 ),
+	maxTableSize( 0 ),
 	hole( 0 )
 {
 }
@@ -136,6 +137,10 @@ void CLeftPartCompiler::CompileLeftPart( CUnitList& leftPart,
 			hole = holes.GetFirst();
 			matchVE( isRightDirection );
 		}
+	}
+
+	if( top > maxTableSize ) {
+		maxTableSize = top;
 	}
 }
 
@@ -609,6 +614,7 @@ TOperationAddress CFunctionCompiler::FinalizeCompilation()
 	assert( !wasFinalized );
 	wasFinalized = true;
 	compilationContext.SetStackDepth( COperationsBuilder::MaxStackDepth() );
+	compilationContext.SetTableSize( CLeftPartCompiler::MaxTableSize() );
 	COperationList functionOperations;
 	COperationsBuilder::Export( functionOperations );
 	const TOperationAddress resultOperation = functionOperations.GetFirst();

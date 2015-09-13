@@ -64,6 +64,8 @@ protected:
 
 	void CompileLeftPart( CUnitList& leftPart, bool isRightDirection );
 
+	TTableIndex MaxTableSize() const { return maxTableSize; }
+
 private:
 	void removeHole();
 
@@ -103,6 +105,7 @@ private:
 	TTableIndex top;
 	TTableIndex left;
 	TTableIndex right;
+	TTableIndex maxTableSize;
 
 	CHoleList holes;
 	CHoleNode* hole;
