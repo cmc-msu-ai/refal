@@ -110,22 +110,27 @@ COperationsExecuter::COperationsExecuter( CProgramPtr program,
 		CReceptaclePtr receptacle ) :
 	CExecutionContext( program, receptacle ),
 	executionResult( ER_OK ),
-	left( 0 ), right( 0 ),
+	left( 0 ),
+	right( 0 ),
 	tableTop( 0 ),
-	operation( 0 ),
+	operation( nullptr ),
 	stackTop( 0 ),
 	initialLeftBracket( CUnit( UT_LeftBracket ) ),
-	lastAddedLeftParen( 0 ), lastAddedLeftBracket( 0 )
+	lastAddedLeftParen( nullptr ),
+	lastAddedLeftBracket( nullptr )
 {
-	assert( static_cast<bool>( Program ) );
+	allocateTableAndStack();
+
+	// add <`ProgramStartFunctionName`> to fieldOfVirw
 	left = fieldOfView.Append( CUnit( UT_LeftParen ) );
-	left->PairedParen() = 0;
+	left->PairedParen() = nullptr;
 
 	fieldOfView.Append( CUnit( UT_Label ) )->Label() =
 		program->GetProgramStartFunction();
 	right = fieldOfView.Append( CUnit( UT_RightBracket ) );
 	right->PairedParen() = left;
 
+	// start execution
 	initialLeftBracket.PairedParen() = right;
 	while( initialLeftBracket.PairedParen() != 0 ) {
 		doFunction();
@@ -134,6 +139,22 @@ COperationsExecuter::COperationsExecuter( CProgramPtr program,
 		}
 	}
 	restoreLeftBrackets();
+}
+
+COperationsExecuter::~COperationsExecuter()
+{
+	::operator delete( stack );
+}
+
+void COperationsExecuter::allocateTableAndStack()
+{
+	assert( Program->MaxTableSize() >= 2 );
+	const int stackBytes = sizeof( CStackData ) * Program->MaxStackDepth();
+	const int tableBytes = sizeof( CUnitNode* ) * Program->MaxTableSize();
+	void* memory = ::operator new( stackBytes + tableBytes );
+	stack = static_cast<CStackData*>( memory );
+	memory = static_cast<char*>( memory ) + stackBytes;
+	table = static_cast<CUnitNode**>( memory );
 }
 
 void COperationsExecuter::restoreLeftBrackets()

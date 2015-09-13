@@ -41,9 +41,11 @@ public:
 
 private:
 	COperationsExecuter( CProgramPtr program, CReceptaclePtr receptacle );
+	~COperationsExecuter();
 	COperationsExecuter( const COperationsExecuter& );
 	COperationsExecuter& operator=( const COperationsExecuter& );
 
+	void allocateTableAndStack();
 	void restoreLeftBrackets();
 	void doFunction();
 	void doFunctionBody();
@@ -187,7 +189,7 @@ private:
 	CUnitNode* left;
 	CUnitNode* right;
 
-	CUnitNode* table[4096];
+	CUnitNode** table;
 	TTableIndex tableTop;
 
 	COperationNode* operation;
@@ -198,7 +200,7 @@ private:
 		TTableIndex tableTop;
 		COperationNode* operation;
 	};
-	CStackData stack[128];
+	CStackData* stack;
 	int stackTop;
 
 	CUnitNode initialLeftBracket;
@@ -234,6 +236,7 @@ inline bool COperationsExecuter::checkQualifier( CUnitNode* const node,
 
 inline void COperationsExecuter::saveToTable( CUnitNode* const node )
 {
+	assert( tableTop < Program->MaxTableSize() );
 	table[tableTop] = node;
 	tableTop++;
 }
@@ -267,6 +270,7 @@ inline bool COperationsExecuter::shiftRight()
 
 inline void COperationsExecuter::saveState( COperationNode* operationForSaving )
 {
+	assert( stackTop < Program->MaxStackDepth() );
 	stack[stackTop].left = left;
 	stack[stackTop].right = right;
 	stack[stackTop].tableTop = tableTop;
