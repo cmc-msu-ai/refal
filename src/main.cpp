@@ -191,8 +191,8 @@ CSourceFilesProcessor::CSourceFilesProcessor( const CFileNames& fileNames )
 void CSourceFilesProcessor::processFile( const std::string& fileName )
 {
 	file.open( fileName );
+	scanner.SetFileName( fileName );
 	if( file.good() ) {
-		scanner.SetFileName( fileName );
 		for( char c; file.get( c ); ) {
 			scanner.AddChar( c );
 		}
@@ -200,10 +200,10 @@ void CSourceFilesProcessor::processFile( const std::string& fileName )
 			scanner.AddEndOfFile();
 		}
 	} else {
-		scanner.SetFileName( UtilityName );
 		scanner.RaiseError( ES_FatalError, "no such file" );
-		scanner.ResetFileName();
 	}
+	scanner.ResetFileName();
+	file.close();
 }
 
 void CSourceFilesProcessor::Error( const CError& error )
