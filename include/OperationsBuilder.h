@@ -166,7 +166,7 @@ public:
 
 	void AddMatchingComplete();
 	void AddReturn();
-	void AddDecrementStackDepth( int count );
+	void AddDecrementStackDepth( TStackIndex size );
 	void AddSetLeftBorder( TTableIndex );
 	void AddSetRightBorder( TTableIndex );
 	// matching empty expression
@@ -230,7 +230,15 @@ public:
 	void AddMove_WV( TTableIndex );
 	void AddCopy_WV( TTableIndex );
 
+	TStackIndex MaxStackDepth() const { return maxStackDepth; }
+
 private:
+	COperationList operations;
+	COperationNode* savedOperation;
+	TStackIndex stackDepth;
+	TStackIndex maxStackDepth;
+	TStackIndex maxRuleStackDepth;
+
 	void addNoArgumensOperation( TOperationType type );
 	void addCharOperation( TOperationType type, TChar c );
 	void addLabelOperation( TOperationType type, TLabel label );
@@ -240,15 +248,14 @@ private:
 		CQualifier& qualifier );
 	void addOperation_VE( TOperationType type );
 	void addOperation_VE( TOperationType type, CQualifier& qualifier );
-	void addStackDecrementOperation( TStackIndex stackDecrement );
-	
+	void addStackDecrementOperation( TStackIndex size );
+
 	TQualifierIndex registerQualifier( CQualifier& qualifier );
 	COperation* addOperation( TOperationType type );
 	void addOperation( const COperation& operation );
-	
-	COperationList operations;
-	COperationNode* savedOperation;
-	int numberOfOperations;
+
+	void increaseStackDepth();
+	void decreaseStackDepth( TStackIndex size );
 };
 
 //-----------------------------------------------------------------------------

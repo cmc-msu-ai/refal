@@ -8,8 +8,10 @@ namespace Refal2 {
 void COperationsBuilder::Reset()
 {
 	operations.Empty();
-	savedOperation = 0;
-	numberOfOperations = 0;
+	savedOperation = nullptr;
+	stackDepth = 0;
+	maxStackDepth = 0;
+	maxRuleStackDepth = 0;
 }
 
 void COperationsBuilder::Export( COperationList& saveTo )
@@ -28,17 +30,23 @@ void COperationsBuilder::AddReturn()
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	addNoArgumensOperation( OT_Return );
-	if( savedOperation != 0 ) {
+	if( savedOperation != nullptr ) {
+		maxStackDepth++;
 		operations.InsertBefore( operations.GetFirst(),
 			COperation( OT_InsertJump ) )->operation = savedOperation->Next();
 	}
+	if( maxRuleStackDepth > maxStackDepth ) {
+		maxStackDepth = maxRuleStackDepth;
+	}
+	stackDepth = 0;
+	maxRuleStackDepth = 0;
 	savedOperation = operations.GetLast();
 }
 
-void COperationsBuilder::AddDecrementStackDepth( int count )
+void COperationsBuilder::AddDecrementStackDepth( TStackIndex size )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	addStackDecrementOperation( count );
+	addStackDecrementOperation( size );
 }
 
 void COperationsBuilder::AddSetLeftBorder( TTableIndex tableIndex )
@@ -511,19 +519,21 @@ void COperationsBuilder::addQualifierIndexOperation( TOperationType type,
 
 void COperationsBuilder::addOperation_VE( TOperationType type )
 {
+	increaseStackDepth();
 	addOperation( type );
 }
 
 void COperationsBuilder::addOperation_VE( TOperationType type,
 	CQualifier& qualifier )
 {
+	increaseStackDepth();
 	addOperation( type )->qualifier = registerQualifier( qualifier );
 }
 
-void COperationsBuilder::addStackDecrementOperation(
-	TStackIndex stackDecrement )
+void COperationsBuilder::addStackDecrementOperation( TStackIndex size )
 {
-	addOperation( OT_DecrementStackDepth )->stackDecrement = stackDecrement;
+	decreaseStackDepth( size );
+	addOperation( OT_DecrementStackDepth )->stackDecrement = size;
 }
 
 TQualifierIndex COperationsBuilder::registerQualifier( CQualifier& qualifier )
@@ -547,7 +557,20 @@ COperation* COperationsBuilder::addOperation( TOperationType type )
 void COperationsBuilder::addOperation( const COperation& operation )
 {
 	operations.Append( operation );
-	numberOfOperations++;
+}
+
+void COperationsBuilder::increaseStackDepth()
+{
+	stackDepth++;
+	if( stackDepth > maxRuleStackDepth ) {
+		maxRuleStackDepth = stackDepth;
+	}
+}
+
+void COperationsBuilder::decreaseStackDepth( TStackIndex size )
+{
+	stackDepth -= size;
+	assert( stackDepth >= 0 );
 }
 
 //-----------------------------------------------------------------------------
