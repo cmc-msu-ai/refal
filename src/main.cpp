@@ -227,35 +227,51 @@ const char* const ExecutionResultStrings[] = {
 
 const std::string SeparatorLine( 80, '-' );
 
+enum TReturnCode {
+	RC_OK = 0,
+	RC_InvalidOptions = 1,
+	RC_ErrorsInSourceFiles = 2,
+	RC_RuntimeError = 3
+};
+
 int main( int argc, const char* argv[] )
 {
 	std::ios::sync_with_stdio( false );
 
 	CCommandLineOptions commandLineOptions;
 	if( !commandLineOptions.SetByCommandLineArguments( argc - 1, argv + 1 ) ) {
-		return 1;
+		return RC_InvalidOptions;
 	}
 
 	if( commandLineOptions.IsInfoOnly() ) {
-		return 0;
+		return RC_OK;
 	}
 
 	if( commandLineOptions.IsCheckOnly() ) {
-		return ( CSourceFilesProcessor::Check(
-			commandLineOptions.SourceFiles() ) ? 0 : 1 );
+		if( CSourceFilesProcessor::Check( commandLineOptions.SourceFiles() ) ) {
+			return RC_OK;
+		}
+		return RC_ErrorsInSourceFiles;
 	}
 
 	CProgramPtr program = CSourceFilesProcessor::Compile(
 		commandLineOptions.SourceFiles() );
 	if( !static_cast<bool>( program ) ) {
-		return 1;
+		return RC_ErrorsInSourceFiles;
 	}
 
 	CReceptaclePtr receptacle( new CReceptacle );
 	CUnitList fieldOfView;
-	CUnitNode* errorNode;
-	TExecutionResult result =
-		COperationsExecuter::Run( program, receptacle, fieldOfView, errorNode );
+	CUnitNode* errorNode = nullptr;
+	TExecutionResult result = ER_OK;
+	try {
+		result = COperationsExecuter::Run( program, receptacle, fieldOfView,
+			errorNode );
+	} catch( std::bad_alloc& e ) {
+		std::cerr << "Not enough memory `" << e.what() << "`," << std::endl
+			<< "Check your program for infinite recursion." << std::endl;
+		return RC_RuntimeError;
+	}
 
 	std::cout << SeparatorLine << std::endl;
 	std::cout << "Execution result: "
@@ -277,5 +293,5 @@ int main( int argc, const char* argv[] )
 		receptacleUnitList.HandyPrint( std::cout, programPrintHelper );
 		std::cout << std::endl;
 	}
-	return 0;
+	return RC_OK;
 }
