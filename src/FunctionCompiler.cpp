@@ -555,33 +555,65 @@ void CRightPartCompiler::CompileRightPart( CUnitList& rightPart )
 }
 
 //-----------------------------------------------------------------------------
+// CCompilationContext
+
+void CCompilationContext::Reset()
+{
+	topStackIndex = 0;
+	topTableIndex = 0;
+	operationsHolder.Empty();
+}
+
+void CCompilationContext::SaveOperations( COperationList& operations )
+{
+	assert( !operations.IsEmpty() );
+	operationsHolder.Append( operations );
+}
+
+void CCompilationContext::SetTopStackIndex( TStackIndex _topStackIndex )
+{
+	if( _topStackIndex > topStackIndex ) {
+		topStackIndex = _topStackIndex;
+	}
+}
+
+void CCompilationContext::SetTopTableIndex( TTableIndex _topTableIndex )
+{
+	if( _topTableIndex > topTableIndex ) {
+		topTableIndex = _topTableIndex;
+	}
+}
+
+//-----------------------------------------------------------------------------
 // CFunctionCompiler
 
-CFunctionCompiler::CFunctionCompiler( COperationList& _operationsHolder ) :
-	operationsHolder( _operationsHolder )
+CFunctionCompiler::CFunctionCompiler(
+		CCompilationContext& _compilationContext ) :
+	compilationContext( _compilationContext ),
+	wasFinalized( false )
 {
 }
 
 void CFunctionCompiler::CompileRule( CRule& rule )
 {
+	assert( !wasFinalized );
 	rule.Variables.Move( variables );
 	CompileLeftPart( rule.Left, rule.RightMatching );
 	COperationsBuilder::AddMatchingComplete();
 	CompileRightPart( rule.Right );
 	COperationsBuilder::AddReturn();
+	//compilationContext.SetTopTableIndex( top );
 }
 
-TOperationAddress CFunctionCompiler::GetFirstOperation()
+TOperationAddress CFunctionCompiler::FinalizeCompilation()
 {
-	COperationNode* lastOperationNode = operationsHolder.GetLast();
-	COperationsBuilder::Export( operationsHolder );
-	TOperationAddress resultOperation = nullptr;
-	if( lastOperationNode == nullptr ) {
-		resultOperation = operationsHolder.GetFirst();
-	} else {
-		resultOperation = lastOperationNode->Next();
-	}
+	assert( !wasFinalized );
+	wasFinalized = true;
+	COperationList functionOperations;
+	COperationsBuilder::Export( functionOperations );
+	const TOperationAddress resultOperation = functionOperations.GetFirst();
 	assert( resultOperation != nullptr );
+	compilationContext.SaveOperations( functionOperations );
 	return resultOperation;
 }
 

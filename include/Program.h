@@ -13,7 +13,7 @@ struct CRuntimeModule {
 
 const TRuntimeModuleId InvalidRuntimeModuleId = -1;
 
-class CProgram {
+class CProgram : public CCompilationContext {
 public:
 	CProgram( int numberOfModules );
 	~CProgram();
@@ -24,9 +24,6 @@ public:
 	{
 		return const_cast<CProgram*>( this )->Module( moduleId );
 	}
-
-	COperationList& OperationsHolder() { return operationsHolder; }
-	const COperationList& OperationsHolder() const { return operationsHolder; }
 
 	void SetProgramStartFunction( const TLabel _programStartFunction )
 	{
@@ -41,7 +38,6 @@ public:
 private:
 	const int modulesSize;
 	CRuntimeModule* const modules;
-	COperationList operationsHolder;
 	TLabel programStartFunction;
 	const CRuntimeFunctionPtr emptyFunction;
 

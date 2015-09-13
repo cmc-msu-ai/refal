@@ -312,7 +312,7 @@ void CInternalProgramBuilder::check()
 void CInternalProgramBuilder::compileFunction( CPreparatoryFunction* function,
 	const TRuntimeModuleId /*runtimeModuleId*/ )
 {
-	CFunctionCompiler compiler( program->OperationsHolder() );
+	CFunctionCompiler compiler( *program );
 	if( function->IsOrdinary() ) {
 		DEBUG_PRINT( __FUNCTION__ << " " << function->Name() )
 		function->Compile( compiler );

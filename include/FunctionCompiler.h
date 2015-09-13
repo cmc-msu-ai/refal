@@ -145,17 +145,42 @@ protected:
 };
 
 //-----------------------------------------------------------------------------
+// CCompilationContext
+
+class CCompilationContext {
+public:
+	CCompilationContext() { Reset(); }
+	void Reset();
+
+	TStackIndex TopStackIndex() const { return topStackIndex; }
+	TTableIndex TopTableIndex() const { return topTableIndex; }
+	void SaveOperations( COperationList& operations );
+	void SetTopStackIndex( TStackIndex topStackIndex );
+	void SetTopTableIndex( TTableIndex topTableIndex );
+
+private:
+	TStackIndex topStackIndex;
+	TTableIndex topTableIndex;
+	COperationList operationsHolder;
+
+	CCompilationContext( const CCompilationContext& );
+	CCompilationContext& operator=( const CCompilationContext& );
+};
+
+//-----------------------------------------------------------------------------
 // CFunctionCompiler
 
 class CFunctionCompiler : public CRightPartCompiler {
 public:
-	CFunctionCompiler( COperationList& operationsHolder );
+	CFunctionCompiler( CCompilationContext& compilationContext );
 
 	void CompileRule( CRule& rule );
-	TOperationAddress GetFirstOperation();
+	// return address of first operation of first function rule
+	TOperationAddress FinalizeCompilation();
 
 private:
-	 COperationList& operationsHolder;
+	CCompilationContext& compilationContext;
+	bool wasFinalized;
 };
 
 //-----------------------------------------------------------------------------

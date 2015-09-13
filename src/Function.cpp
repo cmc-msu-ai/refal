@@ -131,7 +131,7 @@ void CPreparatoryFunction::Compile( CFunctionCompiler& compiler )
 		rule = rule->NextRule.get();
 	}
 	type = PFT_Compiled;
-	firstOperation = compiler.GetFirstOperation();
+	firstOperation = compiler.FinalizeCompilation();
 	assert( firstOperation != nullptr );
 }
 
