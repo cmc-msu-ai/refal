@@ -24,6 +24,12 @@ script:
     echo '################################################################################';
     echo;
     ./refal2 ../tests/speed.ref
+    echo;
+    echo '################################################################################';
+    echo '# moduleA.ref moduleB.ref moduleC.ref                                          #';
+    echo '################################################################################';
+    echo;
+    ./refal2 ../tests/moduleA.ref ../tests/moduleB.ref ../tests/moduleC.ref
 branches:
   only:
     - master

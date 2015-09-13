@@ -1,0 +1,5 @@
+	entry main(testModuleC)
+	extrn test(testModuleA)
+	extrn print
+
+main = <print 'This is `moduleC.ref`'><test>

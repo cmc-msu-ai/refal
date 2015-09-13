@@ -1,0 +1,8 @@
+	entry go
+	entry main(testModuleA)
+	extrn testModuleB, testModuleC
+	extrn print
+
+go = <main><testModuleB><testModuleC>
+
+main = <print 'This is `moduleA.ref`'>
