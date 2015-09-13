@@ -1,5 +1,4 @@
-program START
-
+	entry go
 go = <test ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
 	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
 	'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
@@ -13,5 +12,3 @@ go = <test ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'+
 
 test (e1'x'e2'x'e3)e4'y'e5'z'e6 =+
 	'{'e1'}{'e2'}{'e3'}{'e4'}{'e5'}{'e6'}'
-
-	END
