@@ -4,7 +4,8 @@
 
 namespace Refal2 {
 
-typedef int TUint32;
+//-----------------------------------------------------------------------------
+
 typedef COperation* TOperationAddress;
 typedef CQualifier* TQualifierIndex;
 
@@ -15,7 +16,7 @@ enum TOperationType {
 	OT_Return,
 	OT_SetLeftBorder, // TTableIndex
 	OT_SetRightBorder, // TTableIndex
-	OT_DecrementStackDepth, // TUint32
+	OT_DecrementStackDepth, // TStackIndex
 	// matching empty expression
 	OT_MatchEmptyExpression,
 	// matching symbols
@@ -125,6 +126,9 @@ VX    = OT_MatchLeftBegin_V; OT_MatchLeft_E;
 V:Q:X = OT_MatchLeftWithQulifierBegin_V; OT_MatchLeftWithQulifier_E;
 */
 
+//-----------------------------------------------------------------------------
+// COperation
+
 class COperation {
 	friend class COperationsBuilder;
 	friend class COperationsExecuter;
@@ -140,7 +144,7 @@ private:
 		TChar c;
 		TLabel label;
 		TNumber number;
-		TUint32 stackDecrement;
+		TStackIndex stackDecrement;
 		TTableIndex tableIndex;
 		TQualifierIndex qualifier;
 		TOperationAddress operation;
@@ -148,58 +152,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-
-class COperationId {
-	friend class COperations;
-
-public:
-	COperationId& Next();
-
-private:
-	std::size_t id;
-
-	COperationId( std::size_t _id ) : id( _id ) {}
-};
-
-inline COperationId& COperationId::Next()
-{
-	id++;
-	return *this;
-}
-
-class COperations {
-public:
-	COperations() { Empty(); }
-	void Empty();
-	std::size_t Size() const;
-	COperationId AddOperation( const COperation& operation );
-	const COperation& Operation( const COperationId operationId ) const;
-	const COperation& operator[]( const COperationId operationId ) const
-		{ return Operation( operationId ); }
-
-private:
-	static const int PageSize = 256;
-	typedef std::array<COperation, PageSize> CPage;
-	typedef std::unique_ptr<CPage> CPagePtr;
-	std::vector<CPagePtr> operations;
-	std::size_t lastPageSize;
-
-	COperations( const COperations& );
-	COperations& operator=( const COperations& );
-};
-
-inline void COperations::Empty()
-{
-	operations.clear();
-	lastPageSize = PageSize;
-}
-
-inline std::size_t COperations::Size() const
-{
-	return ( operations.size() * PageSize - ( PageSize - lastPageSize ) );	
-}
-
-//-----------------------------------------------------------------------------
+// COperationsBuilder
 
 typedef CNodeList<COperation> COperationList;
 typedef COperationList::CNodeType COperationNode;
@@ -287,7 +240,7 @@ private:
 		CQualifier& qualifier );
 	void addOperation_VE( TOperationType type );
 	void addOperation_VE( TOperationType type, CQualifier& qualifier );
-	void addStackDecrementOperation( TUint32 stackDecrement );
+	void addStackDecrementOperation( TStackIndex stackDecrement );
 	
 	TQualifierIndex registerQualifier( CQualifier& qualifier );
 	COperation* addOperation( TOperationType type );
@@ -297,5 +250,7 @@ private:
 	COperationNode* savedOperation;
 	int numberOfOperations;
 };
+
+//-----------------------------------------------------------------------------
 
 } // end of namespace refal2

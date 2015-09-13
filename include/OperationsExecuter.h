@@ -67,7 +67,7 @@ private:
 	void matchingComplete();
 	void doReturn();
 	void insertJump( const TOperationAddress operationAddress );
-	void decrementStackDepth( const TUint32 count );
+	void decrementStackDepth( const TStackIndex count );
 	void setLeftBorder( const TTableIndex tableIndex );
 	void setRightBorder( const TTableIndex tableIndex );
 	// matching empty expression
@@ -304,7 +304,7 @@ inline void COperationsExecuter::insertJump(
 	saveState( static_cast<COperationNode*>( operationAddress ) );
 }
 
-inline void COperationsExecuter::decrementStackDepth( const TUint32 count )
+inline void COperationsExecuter::decrementStackDepth( const TStackIndex count )
 {
 	stackTop -= count;
 	assert( stackTop >= 0 );

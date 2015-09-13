@@ -18,6 +18,7 @@ typedef unsigned char TVariableName;
 typedef char TVariableTypeTag;
 typedef int TVariableIndex;
 typedef int TTableIndex;
+typedef int TStackIndex;
 typedef int TRuntimeModuleId;
 
 // classes
