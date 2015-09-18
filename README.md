@@ -10,10 +10,10 @@ Other UNIX-like operating systems may work too out of the box.
 
 ## Building Refal2
 
-- Download and install las version of [CMake](http://www.cmake.org/download/)
+- Download and install last version of [CMake](http://www.cmake.org/download/)
 - Download the source code from this repository
 - Run command line shell and navigate up to the root folder of downloaded data
-- Create project for your IDE (or just makefile)
+- Create project for your IDE (or just makefile):
 ```sh
 # Create `build` folder
 mkdir build; cd build
@@ -26,7 +26,7 @@ cmake -G "Visual Studio 10 2010" ../
 
 ## Unsing
 
-Just run executable file `refal2`
+Just run executable file `refal2`:
 ```sh
 # Run Refal2 with stdin for enter source code
 ./refal2
