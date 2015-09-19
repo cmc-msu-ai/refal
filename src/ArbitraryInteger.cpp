@@ -18,6 +18,18 @@ CArbitraryInteger::CArbitraryInteger( const std::string& text )
 	SetValueByText( text );
 }
 
+void CArbitraryInteger::Swap( CArbitraryInteger& swapWith )
+{
+	this->swap( swapWith );
+	std::swap( isNegative, swapWith.isNegative );
+}
+
+void CArbitraryInteger::Copy( CArbitraryInteger& copyTo ) const
+{
+	copyTo.assign( cbegin(), cend() );
+	copyTo.isNegative = isNegative;
+}
+
 void CArbitraryInteger::Zero()
 {
 	SetSign( false );

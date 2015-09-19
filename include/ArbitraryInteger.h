@@ -18,6 +18,9 @@ public:
 	explicit CArbitraryInteger( TDigit digit );
 	explicit CArbitraryInteger( const std::string& text );
 
+	void Swap( CArbitraryInteger& swapWith );
+	void Copy( CArbitraryInteger& copyTo ) const;
+
 	enum TCompareResult {
 		CR_Less = -1,
 		CR_Equal,
