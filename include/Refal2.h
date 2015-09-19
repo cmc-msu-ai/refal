@@ -57,6 +57,7 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 
 } // end of namespace Refal2
 
+#include <ArbitraryInteger.h>
 #include <Dictionary.h>
 #include <NodeList.h>
 #include <FastSet.h>

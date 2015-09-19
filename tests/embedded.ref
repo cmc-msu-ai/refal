@@ -7,7 +7,6 @@
 	extrn lengw, lengr, first, last, multe
 	extrn apply
 	
-	
 sep = '\n\n----------------------------------------------------------------\n\n'
 
 go

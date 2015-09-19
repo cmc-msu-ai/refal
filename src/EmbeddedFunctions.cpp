@@ -59,297 +59,260 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 
 //-----------------------------------------------------------------------------
 
-typedef long long int TLongSignNumber;
-
-static bool extractNumber( const CUnitNode*& start,
-	TLongSignNumber& number )
+static bool readText( const CUnitList& list, std::string& text )
 {
-	assert( start != 0 );
-	number = 1;
-	if( start->IsChar() ) {
-		switch( start->Char() ) {
-			case '+':
-				break;
-			case '-':
-				number = -1;
-				break;
-			default:
-				return false;
+	text.clear();
+	if( list.IsEmpty() || !list.GetFirst()->IsChar() ) {
+		return false;
+	}
+	const CUnitNode* node = list.GetFirst();
+	text += node->Char();
+	do {
+		node = node->Next();
+		if( !node->IsChar() ) {
+			return false;
 		}
-		start = start->Next();
-	}
-	if( !start->IsNumber() ) {
-		return false;
-	}
-	number *= start->Number();
-	start = start->Next();
-	if( start != 0 && start->IsNumber() ) {
-		notImplemented( __FUNCTION__ );
-		return false;
-	}
+		text += node->Char();
+	} while( node != list.GetLast() );
 	return true;
 }
 
-static bool extractArguments( const CUnitList& argument,
-	TLongSignNumber& a, TLongSignNumber& b )
+static bool readNumber( const CUnitList& list, CArbitraryInteger& number )
 {
-	if( argument.IsEmpty() ) {
-		return false;
-	}
-	const CUnitNode* start = argument.GetFirst();
-	if( !start->IsLeftParen() ) {
-		return false;
-	}
-	start = start->Next();
-	if( !extractNumber( start, a ) ) {
-		return false;
-	}
-	if( !start->IsRightParen() ) {
-		return false;
-	}
-	start = start->Next();
-	if( !extractNumber( start, b ) ) {
-		return false;
-	}
-	if( start == 0 ) {
+	number.Zero();
+	if( list.IsEmpty() ) {
 		return true;
 	}
+	const CUnitNode* node = list.GetLast();
+	for( ; node != list.GetFirst() && node->IsNumber(); node = node->Prev() ) {
+		number.AddDigit( node->Number() );
+	}
+	if( node == list.GetFirst() ) {
+		if( node->IsNumber() ) {
+			number.AddDigit( node->Number() );
+			return true;
+		} else if( node->IsChar() && number.GetSize() != 0 ) {
+			if( node->Char() == '+' ) {
+				number.SetSign( false /* isNegative */ );
+				return true;
+			} else if( node->Char() == '-' ) {
+				number.SetSign( true /* isNegative */ );
+				return true;
+			}
+		}
+	}
+	number.Zero();
 	return false;
 }
 
-static void setArithmeticResult( CUnitList& unitList, TLongSignNumber result )
+static bool readTwoNumbers( CUnitList& list,
+	CArbitraryInteger& number1, CArbitraryInteger& number2 )
 {
-	unitList.Empty();
-	if( result < 0 ) {
-		unitList.AppendChar( '-' );
-		unitList.AppendNumber( static_cast<TNumber>( -result ) );
+	if( list.IsEmpty() || !list.GetFirst()->IsLeftParen() ) {
+		return false;
+	}
+	// list contain ( `number1` ) `number2`
+	CUnitList tmp;
+	CUnitNode* first = list.GetFirst();
+	CUnitNode* last = list.GetFirst()->PairedParen();
+	list.Detach( first, last );
+	// tmp contain ( `number1` ) `number2`
+	tmp.Assign( first, last );
+	tmp.RemoveFirst();
+	tmp.RemoveLast();
+	// tmp contain `number1`, list contain `number2`
+	return ( readNumber( tmp, number1 ) && readNumber( list, number2 ) );
+}
+
+static void appendNumber( CUnitList& list, const CArbitraryInteger& result )
+{
+	list.Empty();
+	if( result.IsZero() ) {
+		list.AppendNumber( 0 );
 	} else {
-		unitList.AppendNumber( static_cast<TNumber>( result ) );
+		if( result.IsNegative() ) {
+			list.AppendChar( '-' );
+		}
+		for( CArbitraryInteger::TDigitIndex i = 0; i < result.GetSize(); i++ ) {
+			list.AppendNumber( result.GetDigit( i ) );
+		}
 	}
 }
 
 static bool embeddedAdd( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	if( extractArguments( executionContext.Argument, a, b ) ) {
-		setArithmeticResult( executionContext.Argument, a + b );
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	number1.Add( number2 );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number1 );
+	return true;
 }
 
 static bool embeddedSub( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	if( extractArguments( executionContext.Argument, a, b ) ) {
-		setArithmeticResult( executionContext.Argument, a - b );
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	number1.Sub( number2 );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number1 );
+	return true;
 }
 
 static bool embeddedMul( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	if( extractArguments( executionContext.Argument, a, b ) ) {
-		setArithmeticResult( executionContext.Argument, a * b );
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	number1.Mul( number2 );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number1 );
+	return true;
 }
 
 static bool embeddedDiv( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	if( extractArguments( executionContext.Argument, a, b ) ) {
-		setArithmeticResult( executionContext.Argument, a / b );
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	number1.Div( number2 );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number1 );
+	return true;
 }
 
 static bool embeddedDr( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	CUnitList& argument = executionContext.Argument;
-	if( extractArguments( argument, a, b ) ) {
-		argument.Empty();
-		TLongSignNumber result = a / b;
-		TLongSignNumber rest = a % b;
-		if( result < 0 ) {
-			result = -result;
-			argument.AppendChar( '-' );
-		}
-		argument.AppendNumber( static_cast<TNumber>( result ) );
-		CUnitNode* const leftParen = argument.AppendLeftParen();
-		if( rest < 0 ) {
-			rest = -rest;
-			argument.AppendChar( '-' );
-		}
-		argument.AppendNumber( static_cast<TNumber>( rest ) );
-		leftParen->PairedParen() = argument.AppendRightParen();
-		leftParen->PairedParen()->PairedParen() = leftParen;
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	number1.Div( number2 );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number1 );
+	CUnitNode* leftParen = executionContext.Argument.AppendParens();
+	CUnitList tmp;
+	appendNumber( tmp, number2 );
+	executionContext.Argument.InsertAfter( leftParen, tmp );
+	return true;
 }
 
 static bool embeddedP1( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	if( executionContext.Argument.IsEmpty() ) {
+	CArbitraryInteger number;
+	if( !readNumber( executionContext.Argument, number ) ) {
 		return false;
 	}
-	TLongSignNumber x = 0;
-	const CUnitNode* start = executionContext.Argument.GetFirst();
-	if( !extractNumber( start, x ) ) {
-		return false;
-	}
-	if( start != 0 ) {
-		return false;
-	}
-	setArithmeticResult( executionContext.Argument, x + 1 );
+	number.Add( CArbitraryInteger( 1 ) );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number );
 	return true;
 }
 
 static bool embeddedM1( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	if( executionContext.Argument.IsEmpty() ) {
+	CArbitraryInteger number;
+	if( !readNumber( executionContext.Argument, number ) ) {
 		return false;
 	}
-	TLongSignNumber x = 0;
-	const CUnitNode* start = executionContext.Argument.GetFirst();
-	if( !extractNumber( start, x ) ) {
-		return false;
-	}
-	if( start != 0 ) {
-		return false;
-	}
-	setArithmeticResult( executionContext.Argument, x - 1 );
+	number.Sub( CArbitraryInteger( 1 ) );
+	executionContext.Argument.Empty();
+	appendNumber( executionContext.Argument, number );
 	return true;
 }
 
 static bool embeddedNrel( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	TLongSignNumber a = 0;
-	TLongSignNumber b = 0;
-	if( extractArguments( executionContext.Argument, a, b ) ) {
-		CUnit sign( UT_Char );
-		sign.Char() = '<';
-		if( a >= b ) {
-			sign.Char() = ( a == b ) ? '=' : '>';
-		}
-		executionContext.Argument.InsertBefore(
-			executionContext.Argument.GetFirst(), sign ); 
-		return true;
+	CArbitraryInteger number1;
+	CArbitraryInteger number2;
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+		return false;
 	}
-	return false;
+	CUnit sign( UT_Char );
+	switch( number1.Compare( number2 ) ) {
+		case CArbitraryInteger::CR_Less:
+			sign.Char() = '<';
+			break;
+		case CArbitraryInteger::CR_Equal:
+			sign.Char() = '=';
+			break;
+		case CArbitraryInteger::CR_Great:
+			sign.Char() = '>';
+			break;
+		default:
+			assert( false );
+			break;
+	}
+	executionContext.Argument.InsertBefore(
+		executionContext.Argument.GetFirst(), sign );
+	return true;
 }
 
 static bool embeddedCvb( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	std::string numberText;
-	if( executionContext.Argument.IsEmpty() ) {
+	std::string text;
+	if( !readText( executionContext.Argument, text ) ) {
 		return false;
 	}
-	const CUnitNode* c = executionContext.Argument.GetFirst();
-	if( !c->IsChar() ) {
-		return false;
-	}
-	bool negative = false;
-	if( c->Char() == '-' || c->Char() == '+' ) {
-		if( c->Char() == '-' ) {
-			negative = true;
-		}
-		c = c->Next();
-	}
-	TNumber number = 0;
-	for( ; c != nullptr; c = c->Next() ) {
-		if( !( c->IsChar() && c->Char() >= '0' && c->Char() <= '9' ) ) {
-			return false;
-		}
-		number = number * 10 + ( c->Char() - '0' );
-	}
+	CArbitraryInteger number( text );
 	executionContext.Argument.Empty();
-	if( negative ) {
-		executionContext.Argument.AppendChar( '-' );
-	}
-	executionContext.Argument.AppendNumber( number );
+	appendNumber( executionContext.Argument, number );
 	return true;
 }
 
 static bool embeddedCvd( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	std::string numberText;
-	if( executionContext.Argument.IsEmpty() ) {
+	CArbitraryInteger number;
+	if( !readNumber( executionContext.Argument, number ) ) {
 		return false;
 	}
-	const CUnitNode* i = executionContext.Argument.GetFirst();
-	CUnitList tmp;
-	if( i->IsChar() && ( i->Char() == '-' || i->Char() == '+' ) ) {
-		if( i->Char() == '-' ) {
-			tmp.AppendChar( '-' );
-		}
-		i = i->Next();
-	}
-	if( !i->IsNumber() ) {
-		return false;
-	} else if( i->Next() != 0 ) {
-		notImplemented( __FUNCTION__ );
-		return false;
-	} else {
-		std::ostringstream stringStream;
-		stringStream << i->Number();
-		std::string numberText = stringStream.str();
-		tmp.AppendText( numberText );
-	}
-	tmp.Move( executionContext.Argument );
+	std::string text;
+	number.GetTextValue( text );
+	executionContext.Argument.Empty();
+	executionContext.Argument.AppendText( text );
 	return true;
 }
 
 static bool embeddedNumb( CExecutionContext& executionContext )
 {
+	DEBUG_PRINT( __FUNCTION__ )
 	return embeddedCvb( executionContext );
 }
 
 static bool embeddedSymb( CExecutionContext& executionContext )
 {
+	DEBUG_PRINT( __FUNCTION__ )
 	return embeddedCvd( executionContext );
 }
 
 //-----------------------------------------------------------------------------
 
-static bool readString( const CUnitNode* start, std::string& string )
-{
-	string.clear();
-	for( ; start != nullptr; start = start->Next() ) {
-		if( !start->IsChar() ) {
-			return false;
-		}
-		string += start->Char();
-	}
-	return true;
-}
-
 static bool embeddedChartof( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string labelText;
-	if( !readString( executionContext.Argument.GetFirst(), labelText ) ) {
+	if( !readText( executionContext.Argument, labelText ) ) {
 		return false;
 	}
 	MakeLower( labelText );
@@ -401,9 +364,7 @@ static bool embeddedOpnget( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string filename;
-	if( !readString( executionContext.Argument.GetFirst(), filename )
-		|| filename.empty() )
-	{
+	if( !readText( executionContext.Argument, filename ) || filename.empty() ) {
 		return false;
 	}
 	std::ifstream* streamForReading = getStreamForReading();
@@ -465,9 +426,7 @@ static bool embeddedOpnput( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string filename;
-	if( !readString( executionContext.Argument.GetFirst(), filename )
-		|| filename.empty() )
-	{
+	if( !readText( executionContext.Argument, filename ) || filename.empty() ) {
 		return false;
 	}
 	std::ofstream* streamForWriting = getStreamForWriting();
