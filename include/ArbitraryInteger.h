@@ -15,7 +15,7 @@ class CArbitraryInteger : private std::vector<uint32_t> {
 public:
 	typedef value_type TDigit;
 	typedef size_type TDigitIndex;
-	static const TDigit Base = 100;//1 << 24;
+	static const TDigit Base = 1 << 24;
 	static_assert( UINT32_MAX > Base, "too big Base");
 
 	CArbitraryInteger() { Zero(); }

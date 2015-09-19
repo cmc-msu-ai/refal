@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Refal2.h>
 
 namespace Refal2 {
@@ -249,7 +247,7 @@ void CArbitraryInteger::mulDigitDigit( TDigit x, TDigit y,
 
 void CArbitraryInteger::mul( const CArbitraryInteger& operand )
 {
-	std::vector<size_type> tmp( cbegin(), cend() );
+	std::vector<value_type> tmp( cbegin(), cend() );
 	clear();
 	resize( tmp.size() + operand.size(), 0 );
 	iterator firstDigit = begin();
