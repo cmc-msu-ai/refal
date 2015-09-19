@@ -72,22 +72,36 @@ void CArbitraryInteger::GetTextValue( std::string& text ) const
 	text.clear();
 }
 
+// [ - | x ] + [ - | y ] = [ - | x + y ]
+// [ - | x ] + [ + | y ] = [ x < y ? + : - | x - y ]
+// [ + | x ] + [ - | y ] = [ x < y ? - : + | x - y ]
+// [ + | x ] + [ + | y ] = [ + | x + y ]
+
 void CArbitraryInteger::Add( const CArbitraryInteger& operand )
 {
 	if( IsNegative() == operand.IsNegative() ) {
+		// result sign will be the same of first operand
 		add( operand );
 	} else {
 		sub( operand );
 	}
+	removeLeadingZeros();
 }
+
+// [ - | x ] - [ - | y ] = [ x < y ? + : - | x - y ]
+// [ - | x ] - [ + | y ] = [ - | x + y ]
+// [ + | x ] - [ - | y ] = [ + | x + y ]
+// [ + | x ] - [ + | y ] = [ x < y ? - : + | x - y ]
 
 void CArbitraryInteger::Sub( const CArbitraryInteger& operand )
 {
-	if( IsNegative() != operand.IsNegative() ) {
-		add( operand );
-	} else {
+	if( IsNegative() == operand.IsNegative() ) {
 		sub( operand );
+	} else {
+		// result sign will be the same of first operand
+		add( operand );
 	}
+	removeLeadingZeros();
 }
 
 void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
@@ -138,21 +152,65 @@ void CArbitraryInteger::add( const CArbitraryInteger& operand )
 	resize( std::max( size(), operand.size() ) + 1, 0 );
 	iterator i = begin();
 	const_iterator j = operand.cbegin();
-	TDigit savedDigit = 0;
+	bool carryFlag = false;
 	while( j != operand.cend() ) {
 		assert( i != end() );
-		*i += *j + savedDigit;
-		savedDigit = *i > Base ? 1 : 0;
+		*i += *j + ( carryFlag ? 1 : 0 );
+		carryFlag = ( *i > Base );
+		*i %= Base;
 		++j;
 		++i;
 	}
-	removeLeadingZeros();
+	while( carryFlag ) {
+		( *i )++;
+		carryFlag = ( *i > Base );
+		*i %= Base;
+		++i;
+	}
 }
 
 void CArbitraryInteger::sub( const CArbitraryInteger& operand )
 {
-	// todo: implement
-	Zero();
+	if( Compare( operand ) == CR_Less ) {
+		CArbitraryInteger tmp;
+		operand.Copy( tmp );
+		Swap( tmp );
+		isNegative = !isNegative;
+		subFromBigger( tmp );
+	} else {
+		// result sign will be the same of first operand
+		subFromBigger( operand );
+	}
+}
+
+void CArbitraryInteger::subFromBigger( const CArbitraryInteger& operand )
+{
+	resize( std::max( size(), operand.size() ), 0 );
+	iterator i = begin();
+	const_iterator j = operand.cbegin();
+	bool takeFlag = false;
+	while( j != operand.cend() ) {
+		assert( i != end() );
+		if( takeFlag ) {
+			( *i )--;
+		}
+		if( *i < *j ) {
+			*i += Base - *j;
+			takeFlag = true;
+		} else {
+			*i -= *j;
+		}
+		++j;
+		++i;
+	}
+	while( takeFlag ) {
+		assert( i != end() );
+		if( *i > 0 ) {
+			( *i )--;
+			takeFlag = false;
+		}
+		++i;
+	}
 }
 
 void CArbitraryInteger::mul( const CArbitraryInteger& operand )

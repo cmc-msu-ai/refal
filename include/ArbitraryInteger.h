@@ -57,6 +57,7 @@ private:
 	void removeLeadingZeros();
 	void add( const CArbitraryInteger& operand );
 	void sub( const CArbitraryInteger& operand );
+	void subFromBigger( const CArbitraryInteger& operand );
 	void mul( const CArbitraryInteger& operand );
 	void div( CArbitraryInteger& operand );
 

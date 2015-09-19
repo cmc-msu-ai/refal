@@ -132,8 +132,8 @@ static void appendNumber( CUnitList& list, const CArbitraryInteger& result )
 		if( result.IsNegative() ) {
 			list.AppendChar( '-' );
 		}
-		for( CArbitraryInteger::TDigitIndex i = 0; i < result.GetSize(); i++ ) {
-			list.AppendNumber( result.GetDigit( i ) );
+		for( CArbitraryInteger::TDigitIndex i = result.GetSize(); i > 0; i-- ) {
+			list.AppendNumber( result.GetDigit( i - 1 ) );
 		}
 	}
 }
