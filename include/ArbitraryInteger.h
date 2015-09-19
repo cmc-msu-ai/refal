@@ -7,12 +7,16 @@ namespace Refal2 {
 //-----------------------------------------------------------------------------
 // CArbitraryInteger
 
-class CArbitraryInteger : private std::vector<TNumber> {
+#ifndef UINT32_MAX
+static_assert( false, "minimum 32 unsigned integer number required" )
+#endif
+
+class CArbitraryInteger : private std::vector<uint32_t> {
 public:
 	typedef value_type TDigit;
 	typedef size_type TDigitIndex;
-	static const TDigit Base = 1 << 24;
-	static_assert( sizeof( TDigit ) >= 4, "too small digit");
+	static const TDigit Base = 100;//1 << 24;
+	static_assert( UINT32_MAX > Base, "too big Base");
 
 	CArbitraryInteger() { Zero(); }
 	explicit CArbitraryInteger( TDigit digit );
@@ -56,9 +60,11 @@ private:
 
 	void removeLeadingZeros();
 	void add( const CArbitraryInteger& operand );
+	void add( iterator i, const CArbitraryInteger& operand );
 	void sub( const CArbitraryInteger& operand );
 	void subFromBigger( const CArbitraryInteger& operand );
 	void mul( const CArbitraryInteger& operand );
+	void mulDigitDigit( TDigit x, TDigit y, CArbitraryInteger& result ) const;
 	void div( CArbitraryInteger& operand );
 
 	CArbitraryInteger( const CArbitraryInteger& );

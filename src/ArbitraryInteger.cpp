@@ -108,12 +108,14 @@ void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
 {
 	SetSign( IsNegative() != operand.IsNegative() );
 	mul( operand );
+	removeLeadingZeros();
 }
 
 void CArbitraryInteger::Div( CArbitraryInteger& operand )
 {
 	SetSign( IsNegative() != operand.IsNegative() );
 	div( operand );
+	removeLeadingZeros();
 }
 
 CArbitraryInteger::TCompareResult CArbitraryInteger::Compare(
@@ -150,7 +152,11 @@ void CArbitraryInteger::removeLeadingZeros()
 void CArbitraryInteger::add( const CArbitraryInteger& operand )
 {
 	resize( std::max( size(), operand.size() ) + 1, 0 );
-	iterator i = begin();
+	add( begin(), operand );
+}
+
+void CArbitraryInteger::add( iterator i, const CArbitraryInteger& operand )
+{
 	const_iterator j = operand.cbegin();
 	bool carryFlag = false;
 	while( j != operand.cend() ) {
@@ -162,6 +168,7 @@ void CArbitraryInteger::add( const CArbitraryInteger& operand )
 		++i;
 	}
 	while( carryFlag ) {
+		assert( i != end() );
 		( *i )++;
 		carryFlag = ( *i > Base );
 		*i %= Base;
@@ -213,10 +220,48 @@ void CArbitraryInteger::subFromBigger( const CArbitraryInteger& operand )
 	}
 }
 
+void CArbitraryInteger::mulDigitDigit( TDigit x, TDigit y,
+	CArbitraryInteger& result ) const
+{
+	result.Zero();
+#ifdef UINT64_MAX
+	uint64_t xy = x * y;
+	result.AddDigit( static_cast<TDigit>( xy % Base ) );
+	result.AddDigit( static_cast<TDigit>( xy / Base ) );
+#else
+	static const TDigit base2 = sqrt( static_cast<double>( Base ) );
+	const TDigit highX = x / base2;
+	const TDigit lowX = x % base2;
+	const TDigit highY = y / base2;
+	const TDigit lowY = y % base2;
+	const TDigit lowYlowX = lowY * lowX;
+	const TDigit lowYhighX = lowY * highX;
+	const TDigit highYlowX = highY * lowX;
+	const TDigit highYhighX = highY * highX;
+	const TDigit lowYhighXhighYlowX = lowYhighX + highYlowX;
+	TDigit low = lowYlowX + ( lowYhighXhighYlowX % base2 ) * base2;
+	TDigit high = highYhighX + ( lowYhighXhighYlowX / base2 ) + ( low / Base );
+	low %= Base;
+	result.AddDigit( low );
+	result.AddDigit( high );
+#endif
+}
+
 void CArbitraryInteger::mul( const CArbitraryInteger& operand )
 {
-	// todo: implement
-	Zero();
+	std::vector<size_type> tmp( cbegin(), cend() );
+	clear();
+	resize( tmp.size() + operand.size(), 0 );
+	iterator firstDigit = begin();
+	for( const_iterator i = tmp.cbegin(); i != tmp.cend(); ++i, ++firstDigit ) {
+		iterator currentDigit = firstDigit;
+		for( const_iterator j = operand.cbegin(); j != operand.cend(); ++j ) {
+			CArbitraryInteger tmp;
+			mulDigitDigit( *i, *j, tmp );
+			add( currentDigit, tmp );
+			++currentDigit;
+		}
+	}
 }
 
 void CArbitraryInteger::div( CArbitraryInteger& operand )
