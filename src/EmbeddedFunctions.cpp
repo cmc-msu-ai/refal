@@ -352,15 +352,12 @@ static bool embeddedChartof( CExecutionContext& executionContext )
 	if( !readString( executionContext.Argument.GetFirst(), labelText ) ) {
 		return false;
 	}
+	MakeLower( labelText );
 	CRuntimeFunctions& functions = executionContext.Program->Module(
 		executionContext.RuntimeModuleId ).Functions;
-	std::string labelLowerCaseText( labelText );
-	MakeLower( labelLowerCaseText );
-	int labelId = functions.FindKey( labelLowerCaseText );
-	if( labelId == InvalidDictionaryIndex ) {
-		labelId = functions.AddKey( labelText );
-		CRuntimeFunctionPtr& function = functions.GetData( labelId );
-		assert( !static_cast<bool>( function ) );
+	int labelId = functions.AddKey( labelText );
+	CRuntimeFunctionPtr& function = functions.GetData( labelId );
+	if( !static_cast<bool>( function ) ) {
 		function = executionContext.Program->EmptyFunction();
 	}
 	executionContext.Argument.Empty();
