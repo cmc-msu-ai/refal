@@ -470,8 +470,8 @@ void CScanner::preprocessingStringOctalCodeOne( char c )
 			token.word.push_back( Backslash );
 			token.word.push_back( octalCodeOne );
 		}
-		token.word.push_back( c );
 		preprocessingState = PS_String;
+		preprocessing( c );
 	}
 }
 
