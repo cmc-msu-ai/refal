@@ -277,18 +277,17 @@ void CArbitraryInteger::mulDigitDigit( TDigit x, TDigit y,
 	result.AddDigit( static_cast<TDigit>( xy % Base ) );
 	result.AddDigit( static_cast<TDigit>( xy / Base ) );
 #else
-	static const TDigit base2 = sqrt( static_cast<double>( Base ) );
-	const TDigit highX = x / base2;
-	const TDigit lowX = x % base2;
-	const TDigit highY = y / base2;
-	const TDigit lowY = y % base2;
+	const TDigit highX = x / BaseRoot;
+	const TDigit lowX = x % BaseRoot;
+	const TDigit highY = y / BaseRoot;
+	const TDigit lowY = y % BaseRoot;
 	const TDigit lowYlowX = lowY * lowX;
 	const TDigit lowYhighX = lowY * highX;
 	const TDigit highYlowX = highY * lowX;
 	const TDigit highYhighX = highY * highX;
-	const TDigit lowYhighXhighYlowX = lowYhighX + highYlowX;
-	TDigit low = lowYlowX + ( lowYhighXhighYlowX % base2 ) * base2;
-	TDigit high = highYhighX + ( lowYhighXhighYlowX / base2 ) + ( low / Base );
+	const TDigit mid = lowYhighX + highYlowX;
+	TDigit low = lowYlowX + ( mid % BaseRoot ) * BaseRoot;
+	TDigit high = highYhighX + ( mid / BaseRoot ) + ( low / Base );
 	low %= Base;
 	result.AddDigit( low );
 	result.AddDigit( high );
