@@ -57,7 +57,7 @@ CArbitraryInteger::TDigit CArbitraryInteger::GetDigit( TDigitIndex pos ) const
 static CArbitraryInteger::TDigit maxDecimal( CArbitraryInteger::TDigit digit )
 {
 	CArbitraryInteger::TDigit decimal = 1;
-	while( digit >= 10 ) {
+	while( digit > 10 ) {
 		decimal *= 10;
 		digit /= 10;
 	}
@@ -67,7 +67,7 @@ static CArbitraryInteger::TDigit maxDecimal( CArbitraryInteger::TDigit digit )
 static int maxDecimalDigits( CArbitraryInteger::TDigit digit )
 {
 	int count = 0;
-	while( digit >= 10 ) {
+	while( digit > 10 ) {
 		count++;
 		digit /= 10;
 	}
