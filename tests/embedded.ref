@@ -67,7 +67,7 @@ testReceptacle
 *------------------------------------------------------------------------------
 
 testLexical
-	= <lengw 'length'><lengw ('length')><lengw /1/'2'/lengw/()><lengw>'\n'+
-	<lengr 'length'><lengr ('length')><lengr /1/'2'/lengw/()><lengr>'\n'+
-	<first /1/'hello'>'|'<first /3/'h'('ell')'o'>'|'<first /0/'expr'>'|'<first /5/'expr'>'\n'+
-	<last /1/'hello'>'|'<last /3/'h'('ell')'o'>'|'<last /0/'expr'>'|'<last /5/'expr'>
+	= <lengw 'length'>'$'<lengw ('length')>'$'<lengw /1/'2'/lengw/()>'$'<lengw>'\n'+
+	<lengr 'length'>'$'<lengr ('length')>'$'<lengr /1/'2'/lengw/()>'$'<lengr>'\n'+
+	<first /1/'hello'>'$'<first /3/'h'('ell')'o'>'$'<first /0/'expr'>'$'<first /5/'expr'>'\n'+
+	<last /1/'hello'>'$'<last /3/'h'('ell')'o'>'$'<last /0/'expr'>'$'<last /5/'expr'>

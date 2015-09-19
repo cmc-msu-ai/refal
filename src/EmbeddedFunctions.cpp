@@ -584,8 +584,10 @@ static bool embeddedLengw( CExecutionContext& executionContext )
 		}
 		node = node->Next();
 	}
-	executionContext.Argument.Empty();
-	executionContext.Argument.AppendNumber( length );
+	CUnitList tmp;
+	tmp.AppendNumber( length );
+	tmp.Append( executionContext.Argument );
+	tmp.Move( executionContext.Argument );
 	return true;
 }
 
@@ -599,8 +601,10 @@ static bool embeddedLengr( CExecutionContext& executionContext )
 		assert( !( node->IsLeftBracket() || node->IsRightBracket() ) );
 		node = node->Next();
 	}
-	executionContext.Argument.Empty();
-	executionContext.Argument.AppendNumber( length );
+	CUnitList tmp;
+	tmp.AppendNumber( length );
+	tmp.Append( executionContext.Argument );
+	tmp.Move( executionContext.Argument );
 	return true;
 }
 
