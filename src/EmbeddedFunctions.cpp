@@ -270,10 +270,12 @@ static bool embeddedCvb( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string text;
-	if( !readText( executionContext.Argument, text ) ) {
+	CArbitraryInteger number;
+	if( !readText( executionContext.Argument, text )
+		|| !number.SetValueByText( text ) )
+	{
 		return false;
 	}
-	CArbitraryInteger number( text );
 	executionContext.Argument.Empty();
 	appendNumber( executionContext.Argument, number );
 	return true;

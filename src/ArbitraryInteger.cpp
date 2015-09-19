@@ -11,11 +11,6 @@ CArbitraryInteger::CArbitraryInteger( TDigit digit )
 	AddDigit( digit );
 }
 
-CArbitraryInteger::CArbitraryInteger( const std::string& text )
-{
-	SetValueByText( text );
-}
-
 void CArbitraryInteger::Swap( CArbitraryInteger& swapWith )
 {
 	this->swap( swapWith );
@@ -59,10 +54,64 @@ CArbitraryInteger::TDigit CArbitraryInteger::GetDigit( TDigitIndex pos ) const
 	return operator[]( pos );
 }
 
-void CArbitraryInteger::SetValueByText( const std::string& text )
+static CArbitraryInteger::TDigit maxDecimal( CArbitraryInteger::TDigit digit )
 {
-	// todo: implement
+	CArbitraryInteger::TDigit decimal = 1;
+	while( digit >= 10 ) {
+		decimal *= 10;
+		digit /= 10;
+	}
+	return decimal;
+}
+
+static int maxDecimalDigits( CArbitraryInteger::TDigit digit )
+{
+	int count = 0;
+	while( digit >= 10 ) {
+		count++;
+		digit /= 10;
+	}
+	return count;
+}
+
+const int MaxDecimal = maxDecimal( CArbitraryInteger::Base );
+const int MaxDecimalDigits = maxDecimalDigits( CArbitraryInteger::Base );
+
+bool CArbitraryInteger::SetValueByText( const std::string& text )
+{
 	Zero();
+	if( text.empty() ) {
+		return true;
+	}
+	std::string::const_iterator c = text.cbegin();
+	if( *c == '-' || *c == '+' ) {
+		SetSign( *c == '-' );
+		++c;
+	}
+	TDigit digit = 0;
+	int decimalCount = 0;
+	for( ; c != text.cend(); ++c ) {
+		if( *c >= '0' && *c <= '9' ) {
+			digit = digit * 10 + ( *c - '0' );
+			decimalCount++;
+			if( decimalCount == MaxDecimalDigits ) {
+				Mul( CArbitraryInteger( MaxDecimal ) );
+				Add( CArbitraryInteger( digit ) );
+				digit = 0;
+				decimalCount = 0;
+			}
+		} else {
+			Zero();
+			return false;
+		}
+	}
+	TDigit decimal = 1;
+	for( ; decimalCount > 0; decimalCount-- ) {
+		decimal *= 10;
+	}
+	Mul( CArbitraryInteger( decimal ) );
+	Add( CArbitraryInteger( digit ) );
+	return true;
 }
 
 void CArbitraryInteger::GetTextValue( std::string& text ) const
@@ -224,7 +273,7 @@ void CArbitraryInteger::mulDigitDigit( TDigit x, TDigit y,
 {
 	result.Zero();
 #ifdef UINT64_MAX
-	uint64_t xy = x * y;
+	uint64_t xy = static_cast<uint64_t>( x ) * static_cast<uint64_t>( y );
 	result.AddDigit( static_cast<TDigit>( xy % Base ) );
 	result.AddDigit( static_cast<TDigit>( xy / Base ) );
 #else

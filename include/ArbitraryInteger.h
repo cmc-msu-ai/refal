@@ -16,7 +16,6 @@ public:
 
 	CArbitraryInteger() { Zero(); }
 	explicit CArbitraryInteger( TDigit digit );
-	explicit CArbitraryInteger( const std::string& text );
 
 	void Swap( CArbitraryInteger& swapWith );
 	void Copy( CArbitraryInteger& copyTo ) const;
@@ -39,7 +38,8 @@ public:
 	TDigit GetDigit( TDigitIndex pos ) const;
 	// ex. SetValueByText( "-12345" );
 	//   means Zero(); SetSign( true ); AddDigit( 12345 );
-	void SetValueByText( const std::string& text );
+	// return false if text is incorrect
+	bool SetValueByText( const std::string& text );
 	// get number value as text
 	void GetTextValue( std::string& text ) const;
 	bool IsNegative() const { return isNegative; }
