@@ -4,7 +4,7 @@
 	extrn opnget, libget, clsget, opnput, libput, clsput
 	extrn chartof, ftochar, functab
 	extrn br, dg, cp, rp, dgall
-	extrn lengw, lengr, first, last
+	extrn lengw, lengr, first, last, multe
 	extrn apply
 	
 	
@@ -70,4 +70,5 @@ testLexical
 	= <lengw 'length'>'$'<lengw ('length')>'$'<lengw /1/'2'/lengw/()>'$'<lengw>'\n'+
 	<lengr 'length'>'$'<lengr ('length')>'$'<lengr /1/'2'/lengw/()>'$'<lengr>'\n'+
 	<first /1/'hello'>'$'<first /3/'h'('ell')'o'>'$'<first /0/'expr'>'$'<first /5/'expr'>'\n'+
-	<last /1/'hello'>'$'<last /3/'h'('ell')'o'>'$'<last /0/'expr'>'$'<last /5/'expr'>
+	<last /1/'hello'>'$'<last /3/'h'('ell')'o'>'$'<last /0/'expr'>'$'<last /5/'expr'>'\n'+
+	<multe/1/>'$'<multe/1/'a'>'$'<multe/7/'a'('b')'c'>

@@ -697,6 +697,26 @@ static bool embeddedLast( CExecutionContext& executionContext )
 	return true;
 }
 
+static bool embeddedMulte( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( executionContext.Argument.IsEmpty()
+		|| !executionContext.Argument.GetFirst()->IsNumber() )
+	{
+		return false;
+	}
+	const TNumber count = executionContext.Argument.GetFirst()->Number();
+	executionContext.Argument.RemoveFirst();
+	if( !executionContext.Argument.IsEmpty() ) {
+		CUnitNode* lastNode = executionContext.Argument.GetLast();
+		for( TNumber i = 1; i < count; i++ ) {
+			executionContext.Argument.Copy( executionContext.Argument.GetLast(),
+				executionContext.Argument.GetFirst(), lastNode );
+		}
+	}
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 
 static bool embeddedApply( CExecutionContext& executionContext )
@@ -756,6 +776,7 @@ const CEmbeddedFunctionData embeddedFunctionDataTable[] = {
 	{ "lengr", embeddedLengr },
 	{ "first", embeddedFirst },
 	{ "last", embeddedLast },
+	{ "multe", embeddedMulte },
 	// apply
 	{ "apply", embeddedApply },
 	{ nullptr, nullptr }
