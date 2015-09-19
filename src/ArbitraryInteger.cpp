@@ -48,6 +48,7 @@ void CArbitraryInteger::AddDigit( TDigit digit )
 void CArbitraryInteger::SetDigit( TDigitIndex pos, TDigit digit )
 {
 	assert( pos < GetSize() );
+	assert( digit < Base );
 	operator[]( pos ) = digit;
 	removeLeadingZeros();
 }
