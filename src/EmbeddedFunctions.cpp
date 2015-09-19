@@ -93,7 +93,6 @@ static bool readNumber( const CUnitList& list, CArbitraryInteger& number )
 			return true;
 		} else if( node->IsChar() && number.GetSize() != 0 ) {
 			if( node->Char() == '+' ) {
-				number.SetSign( false /* isNegative */ );
 				return true;
 			} else if( node->Char() == '-' ) {
 				number.SetSign( true /* isNegative */ );
