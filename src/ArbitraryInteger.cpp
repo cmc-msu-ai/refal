@@ -96,8 +96,21 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 
 void CArbitraryInteger::GetTextValue( std::string& text ) const
 {
-	// todo: implement
 	text.clear();
+	CArbitraryInteger tmp;
+	Copy( tmp );
+	while( !tmp.IsZero() ) {
+		CArbitraryInteger decimal( 10000000 );
+		tmp.Div( decimal );
+		assert( decimal.size() == 1 );
+		std::ostringstream stringStream;
+		stringStream << std::setw( 7 ) << std::setfill( '0' ) << decimal[0];
+		text = stringStream.str() + text;
+	}
+	text.erase( 0, text.find_first_not_of( '0' ) );
+	if( IsNegative() ) {
+		text = "-" + text;
+	}
 }
 
 // [ - | x ] + [ - | y ] = [ - | x + y ]
@@ -156,14 +169,13 @@ CArbitraryInteger::TCompareResult CArbitraryInteger::Compare(
 			case CR_Equal:
 				return CR_Equal;
 			case CR_Great:
-				return ( IsNegative() ? CR_Less : CR_Great );
+				break;
 			default:
 				assert( false );
 				break;
 		}
-	} else {
-		return ( IsNegative() ? CR_Less : CR_Great );
 	}
+	return ( IsNegative() ? CR_Less : CR_Great );
 }
 
 void CArbitraryInteger::BitwiseShiftLeft( int bitsCount )
@@ -359,6 +371,7 @@ void CArbitraryInteger::div( CArbitraryInteger& operand )
 		switch( compare( operand ) ) {
 			case CR_Less:
 				// x / y, where x < y
+				swap( operand );
 				Zero();
 				break;
 			case CR_Equal:
