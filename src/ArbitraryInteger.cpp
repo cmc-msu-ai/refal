@@ -149,24 +149,20 @@ void CArbitraryInteger::Div( CArbitraryInteger& operand )
 CArbitraryInteger::TCompareResult CArbitraryInteger::Compare(
 	const CArbitraryInteger& operand ) const
 {
-	if( GetSize() < operand.GetSize() ) {
-		return CR_Less;
-	} else if( operand.GetSize() < GetSize() ) {
-		return CR_Great;
+	if( IsNegative() == operand.IsNegative() ) {
+		switch( compare( operand ) ) {
+			case CR_Less:
+				return ( IsNegative() ? CR_Great : CR_Less );
+			case CR_Equal:
+				return CR_Equal;
+			case CR_Great:
+				return ( IsNegative() ? CR_Less : CR_Great );
+			default:
+				assert( false );
+				break;
+		}
 	} else {
-		assert( operand.GetSize() == GetSize() );
-		const_reverse_iterator i = crbegin();
-		const_reverse_iterator j = operand.crbegin();
-		while( i != crend() && *i == *j ) {
-			++i;
-			++j;
-		}
-		if( i == crend() ) {
-			assert( j == operand.crend() );
-			return CR_Equal;
-		}
-		assert( *i != *j );
-		return ( *i < *j ? CR_Less : CR_Great );
+		return ( IsNegative() ? CR_Less : CR_Great );
 	}
 }
 
@@ -211,6 +207,30 @@ void CArbitraryInteger::removeLeadingZeros()
 {
 	while( !empty() && back() == 0 ) {
 		erase( begin() + ( size() - 1 ) );
+	}
+}
+
+CArbitraryInteger::TCompareResult CArbitraryInteger::compare(
+	const CArbitraryInteger& operand ) const
+{
+	if( size() < operand.size() ) {
+		return CR_Less;
+	} else if( operand.size() < size() ) {
+		return CR_Great;
+	} else {
+		assert( operand.size() == size() );
+		const_reverse_iterator i = crbegin();
+		const_reverse_iterator j = operand.crbegin();
+		while( i != crend() && *i == *j ) {
+			++i;
+			++j;
+		}
+		if( i == crend() ) {
+			assert( j == operand.crend() );
+			return CR_Equal;
+		}
+		assert( *i != *j );
+		return ( *i < *j ? CR_Less : CR_Great );
 	}
 }
 
@@ -335,53 +355,48 @@ void CArbitraryInteger::div( CArbitraryInteger& operand )
 	if( IsZero() ) {
 		// 0 / ...
 		operand.Zero();
-		return;
+	} else {
+		switch( compare( operand ) ) {
+			case CR_Less:
+				// x / y, where x < y
+				Zero();
+				break;
+			case CR_Equal:
+				Zero();
+				AddDigit( 1 );
+				operand.Zero();
+				break;
+			case CR_Great:
+			{
+				// x > y > 0
+				CArbitraryInteger result;
+				calculateDiv( operand, result );
+				swap( operand );
+				swap( result );
+				break;
+			}
+			default:
+				assert( false );
+				break;
+		}
 	}
-	switch( Compare( operand ) ) {
-		case CR_Less:
-			// x / y, where x < y
-			Zero();
-			return;
-		case CR_Equal:
-			Zero();
-			AddDigit( 1 );
-			operand.Zero();
-			return;
-		case CR_Great:
-			break;
-		default:
-			assert( false );
-			break;
-	}
-	// x > y > 0
-	TDigit a = back();
-	TDigit b = operand.back();
-	int shift = ( size() - operand.size() ) * DegreeOfBase;
-	if( a < b ) {
-		do {
-			b >>= 1;
-			shift--;
-		} while( a <= b );
-		shift++;
-	} else if( b < a ) {
-		do {
-			b <<= 1;
-			shift++;
-		} while( b <= a );
-		shift--;
-	}
+}
+
+void CArbitraryInteger::calculateDiv( CArbitraryInteger& operand,
+	CArbitraryInteger& result )
+{
+	int shift = divCalculateShift( operand );
 	operand.BitwiseShiftLeft( shift );
-	CArbitraryInteger result;
+	result.clear();
 	result.resize( shift / DegreeOfBase + 1, 0 );
 	reverse_iterator i = result.rbegin();
 	TDigit mask = 1 << ( shift % DegreeOfBase );
 	for( ; shift >= 0; shift-- ) {
-		switch( Compare( operand ) ) {
+		switch( compare( operand ) ) {
 			case CR_Less:
 				break;
 			case CR_Equal:
-				// nice
-				break;
+				return;
 			case CR_Great:
 				( *i ) |= mask;
 				subFromBigger( operand );
@@ -398,8 +413,27 @@ void CArbitraryInteger::div( CArbitraryInteger& operand )
 			mask = Base >> 1;
 		}
 	}
-	Swap( operand );
-	Swap( result );
+}
+
+int CArbitraryInteger::divCalculateShift( const CArbitraryInteger& operand )
+{
+	TDigit a = back();
+	TDigit b = operand.back();
+	int shift = ( size() - operand.size() ) * DegreeOfBase;
+	if( a < b ) {
+		do {
+			b >>= 1;
+			shift--;
+		} while( a <= b );
+		shift++;
+	} else if( b < a ) {
+		do {
+			b <<= 1;
+			shift++;
+		} while( b <= a );
+		shift--;
+	}
+	return shift;
 }
 
 //-----------------------------------------------------------------------------

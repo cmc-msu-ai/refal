@@ -58,6 +58,7 @@ private:
 	bool isNegative;
 
 	void removeLeadingZeros();
+	TCompareResult compare( const CArbitraryInteger& operand ) const;
 	void add( const CArbitraryInteger& operand );
 	void add( iterator i, const CArbitraryInteger& operand );
 	void sub( const CArbitraryInteger& operand );
@@ -65,6 +66,8 @@ private:
 	void mul( const CArbitraryInteger& operand );
 	void mulDigitDigit( TDigit x, TDigit y, CArbitraryInteger& result ) const;
 	void div( CArbitraryInteger& operand );
+	void calculateDiv( CArbitraryInteger& operand, CArbitraryInteger& result );
+	int divCalculateShift( const CArbitraryInteger& operand );
 
 	CArbitraryInteger( const CArbitraryInteger& );
 	CArbitraryInteger& operator=( const CArbitraryInteger& );
