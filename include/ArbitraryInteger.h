@@ -11,10 +11,8 @@ class CArbitraryInteger : private std::vector<uint32_t> {
 public:
 	typedef value_type TDigit;
 	typedef size_type TDigitIndex;
-	static const TDigit BaseRoot = 1 << 12;
-	static const TDigit Base = BaseRoot * BaseRoot;
-	static_assert( Base > 10, "too small Base");
-	static_assert( Base <= 0x7FFFFFFF, "too big Base");
+	static const TDigit DegreeOfBase = 24;
+	static const TDigit Base = 1 << DegreeOfBase; // 2^24 = 16777216
 
 	CArbitraryInteger() { Zero(); }
 	explicit CArbitraryInteger( TDigit digit );
@@ -52,6 +50,9 @@ public:
 	// operand saves rest
 	void Div( CArbitraryInteger& operand );
 	TCompareResult Compare( const CArbitraryInteger& operand ) const;
+	// bitwise shifts
+	void BitwiseShiftLeft( int bitsCount );
+	void BitwiseShiftRight( int bitsCount );
 
 private:
 	bool isNegative;

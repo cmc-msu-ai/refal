@@ -25,8 +25,8 @@ void CArbitraryInteger::Copy( CArbitraryInteger& copyTo ) const
 
 void CArbitraryInteger::Zero()
 {
-	SetSign( false );
 	clear();
+	SetSign( false );
 }
 
 CArbitraryInteger::TDigitIndex CArbitraryInteger::GetSize() const
@@ -54,29 +54,6 @@ CArbitraryInteger::TDigit CArbitraryInteger::GetDigit( TDigitIndex pos ) const
 	return operator[]( pos );
 }
 
-static CArbitraryInteger::TDigit maxDecimal( CArbitraryInteger::TDigit digit )
-{
-	CArbitraryInteger::TDigit decimal = 1;
-	while( digit > 10 ) {
-		decimal *= 10;
-		digit /= 10;
-	}
-	return decimal;
-}
-
-static int maxDecimalDigits( CArbitraryInteger::TDigit digit )
-{
-	int count = 0;
-	while( digit > 10 ) {
-		count++;
-		digit /= 10;
-	}
-	return count;
-}
-
-const int MaxDecimal = maxDecimal( CArbitraryInteger::Base );
-const int MaxDecimalDigits = maxDecimalDigits( CArbitraryInteger::Base );
-
 bool CArbitraryInteger::SetValueByText( const std::string& text )
 {
 	Zero();
@@ -89,13 +66,16 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 		++c;
 	}
 	TDigit digit = 0;
+	const int maxDecimalDigits = 7;
+	const TDigit maxDecimal = 10000000;
+	static_assert( Base > maxDecimal, "too small Base" );
 	int decimalCount = 0;
 	for( ; c != text.cend(); ++c ) {
 		if( *c >= '0' && *c <= '9' ) {
 			digit = digit * 10 + ( *c - '0' );
 			decimalCount++;
-			if( decimalCount == MaxDecimalDigits ) {
-				Mul( CArbitraryInteger( MaxDecimal ) );
+			if( decimalCount == maxDecimalDigits ) {
+				Mul( CArbitraryInteger( maxDecimal ) );
 				Add( CArbitraryInteger( digit ) );
 				digit = 0;
 				decimalCount = 0;
@@ -190,6 +170,43 @@ CArbitraryInteger::TCompareResult CArbitraryInteger::Compare(
 	}
 }
 
+void CArbitraryInteger::BitwiseShiftLeft( int bitsCount )
+{
+	if( empty() ) {
+		return;
+	}
+	const int digitsToAdd = bitsCount / DegreeOfBase;
+	const int shift = bitsCount % DegreeOfBase;
+	insert( begin(), digitsToAdd, 0 );
+	TDigit save = 0;
+	for( iterator i = begin() + digitsToAdd; i != end(); ++i ) {
+		TDigit tmp = ( *i ) >> ( DegreeOfBase - shift );
+		*i = ( ( ( *i ) << shift ) | save ) % Base;
+		save = tmp;
+	}
+	if( save > 0 ) {
+		push_back( save );
+	}
+}
+
+void CArbitraryInteger::BitwiseShiftRight( int bitsCount )
+{
+	assert( bitsCount > 0 );
+	const int digitsToDelete = std::min( bitsCount / DegreeOfBase, size() );
+	const int shift = bitsCount % DegreeOfBase;
+	erase( begin(), begin() + digitsToDelete );
+	if( !empty() && shift > 0 ) {
+		assert( shift < DegreeOfBase );
+		TDigit save = 0;
+		for( reverse_iterator i = rbegin(); i != rend(); ++i ) {
+			TDigit tmp = ( ( *i ) << ( DegreeOfBase - shift ) ) % Base;
+			*i = ( ( *i ) >> shift ) | save;
+			save = tmp;
+		}
+	}
+	removeLeadingZeros();
+}
+
 void CArbitraryInteger::removeLeadingZeros()
 {
 	while( !empty() && back() == 0 ) {
@@ -243,26 +260,25 @@ void CArbitraryInteger::subFromBigger( const CArbitraryInteger& operand )
 	resize( std::max( size(), operand.size() ), 0 );
 	iterator i = begin();
 	const_iterator j = operand.cbegin();
-	bool takeFlag = false;
+	bool take = false;
 	while( j != operand.cend() ) {
 		assert( i != end() );
-		if( takeFlag ) {
-			( *i )--;
-		}
-		if( *i < *j ) {
-			*i += Base - *j;
-			takeFlag = true;
+		TDigit sub = *j + ( take ? 1 : 0 );
+		if( *i < sub ) {
+			*i += Base - sub;
+			take = true;
 		} else {
-			*i -= *j;
+			*i -= sub;
+			take = false;
 		}
 		++j;
 		++i;
 	}
-	while( takeFlag ) {
+	while( take ) {
 		assert( i != end() );
 		if( *i > 0 ) {
 			( *i )--;
-			takeFlag = false;
+			take = false;
 		}
 		++i;
 	}
@@ -277,17 +293,19 @@ void CArbitraryInteger::mulDigitDigit( TDigit x, TDigit y,
 	result.AddDigit( static_cast<TDigit>( xy % Base ) );
 	result.AddDigit( static_cast<TDigit>( xy / Base ) );
 #else
-	const TDigit highX = x / BaseRoot;
-	const TDigit lowX = x % BaseRoot;
-	const TDigit highY = y / BaseRoot;
-	const TDigit lowY = y % BaseRoot;
+	const TDigit baseRoot = 1 << ( DegreeOfBase / 2 ); // 2^12 = 4096
+	static_assert( baseRoot * baseRoot == Base, "wrong Base" );
+	const TDigit highX = x / baseRoot;
+	const TDigit lowX = x % baseRoot;
+	const TDigit highY = y / baseRoot;
+	const TDigit lowY = y % baseRoot;
 	const TDigit lowYlowX = lowY * lowX;
 	const TDigit lowYhighX = lowY * highX;
 	const TDigit highYlowX = highY * lowX;
 	const TDigit highYhighX = highY * highX;
 	const TDigit mid = lowYhighX + highYlowX;
-	TDigit low = lowYlowX + ( mid % BaseRoot ) * BaseRoot;
-	TDigit high = highYhighX + ( mid / BaseRoot ) + ( low / Base );
+	TDigit low = lowYlowX + ( mid % baseRoot ) * baseRoot;
+	TDigit high = highYhighX + ( mid / baseRoot ) + ( low / Base );
 	low %= Base;
 	result.AddDigit( low );
 	result.AddDigit( high );
@@ -313,9 +331,75 @@ void CArbitraryInteger::mul( const CArbitraryInteger& operand )
 
 void CArbitraryInteger::div( CArbitraryInteger& operand )
 {
-	// todo: implement
-	Zero();
-	operand.Zero();
+	assert( !operand.IsZero() );
+	if( IsZero() ) {
+		// 0 / ...
+		operand.Zero();
+		return;
+	}
+	switch( Compare( operand ) ) {
+		case CR_Less:
+			// x / y, where x < y
+			Zero();
+			return;
+		case CR_Equal:
+			Zero();
+			AddDigit( 1 );
+			operand.Zero();
+			return;
+		case CR_Great:
+			break;
+		default:
+			assert( false );
+			break;
+	}
+	// x > y > 0
+	TDigit a = back();
+	TDigit b = operand.back();
+	int shift = ( size() - operand.size() ) * DegreeOfBase;
+	if( a < b ) {
+		do {
+			b >>= 1;
+			shift--;
+		} while( a <= b );
+		shift++;
+	} else if( b < a ) {
+		do {
+			b <<= 1;
+			shift++;
+		} while( b <= a );
+		shift--;
+	}
+	operand.BitwiseShiftLeft( shift );
+	CArbitraryInteger result;
+	result.resize( shift / DegreeOfBase + 1, 0 );
+	reverse_iterator i = result.rbegin();
+	TDigit mask = 1 << ( shift % DegreeOfBase );
+	for( ; shift >= 0; shift-- ) {
+		switch( Compare( operand ) ) {
+			case CR_Less:
+				break;
+			case CR_Equal:
+				// nice
+				break;
+			case CR_Great:
+				( *i ) |= mask;
+				subFromBigger( operand );
+				removeLeadingZeros();
+				break;
+			default:
+				assert( false );
+				break;
+		}
+		operand.BitwiseShiftRight( 1 );
+		mask >>= 1;
+		if( mask == 0 ) {
+			++i;
+			mask = Base >> 1;
+		}
+	}
+	Swap( operand );
+	Swap( result );
 }
 
 //-----------------------------------------------------------------------------
