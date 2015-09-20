@@ -154,7 +154,9 @@ void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
 
 void CArbitraryInteger::Div( CArbitraryInteger& operand )
 {
+	const bool isNegative = IsNegative();
 	SetSign( IsNegative() != operand.IsNegative() );
+	operand.SetSign( isNegative );
 	div( operand );
 	removeLeadingZeros();
 }
