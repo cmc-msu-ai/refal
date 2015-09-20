@@ -200,7 +200,8 @@ void CArbitraryInteger::BitwiseShiftLeft( int bitsCount )
 void CArbitraryInteger::BitwiseShiftRight( int bitsCount )
 {
 	assert( bitsCount > 0 );
-	const int digitsToDelete = std::min( bitsCount / DegreeOfBase, size() );
+	const size_type digitsToDelete =
+		std::min<size_type>( bitsCount / DegreeOfBase, size() );
 	const int shift = bitsCount % DegreeOfBase;
 	erase( begin(), begin() + digitsToDelete );
 	if( !empty() && shift > 0 ) {
