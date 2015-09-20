@@ -185,7 +185,9 @@ static bool embeddedDiv( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	CArbitraryInteger number1;
 	CArbitraryInteger number2;
-	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 )
+		|| number2.IsZero() )
+	{
 		return false;
 	}
 	number1.Div( number2 );
@@ -199,7 +201,9 @@ static bool embeddedDr( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	CArbitraryInteger number1;
 	CArbitraryInteger number2;
-	if( !readTwoNumbers( executionContext.Argument, number1, number2 ) ) {
+	if( !readTwoNumbers( executionContext.Argument, number1, number2 )
+		|| number2.IsZero() )
+	{
 		return false;
 	}
 	number1.Div( number2 );
