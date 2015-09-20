@@ -1,12 +1,12 @@
 	entry go
 	extrn card, print, prout, printm, proutm
-	extrn add, sub, mul, div, dr, p1, m1, nrel, numb, symb
+	extrn add, sub, mul, div, dr, p1, m1, nrel, numb, symb, cvb, cvd
 	extrn opnget, libget, clsget, opnput, libput, clsput
 	extrn chartof, ftochar, functab
 	extrn br, dg, cp, rp, dgall
 	extrn lengw, lengr, first, last, multe
 	extrn apply
-	
+
 sep = '\n\n----------------------------------------------------------------\n\n'
 
 go
@@ -32,7 +32,13 @@ testIO
 *------------------------------------------------------------------------------
 
 testArithmetic
-	= <numb '+345'>'\n'+
+	= <cvd <div (<cvb'117465755457585484848974'>) <cvb'57278127'>>>'\n'+
+	<cvd<cvb<cvd<cvb'7654474517947641798494'>>>>'\n'+
+	<cvb<cvd<cvb<cvd/7654//457465//223522/>>>>'\n'+
+	<mul('-'/54//88//63/)/99//65/>'\n'+
+	<add(/54//88//63/)'-'/99//65/>'\n'+
+	<sub(<cvb'57278127'>)<cvb'117465755457585484848974'>>'\n'+
+	<numb '+345'>'\n'+
 	<symb '-'/567/>'\n'+
 	<dr (/16/)/5/>'\n'+
 	<dr (/16/)'-'/5/>'\n'+
