@@ -31,7 +31,13 @@ void CArbitraryInteger::Zero()
 
 CArbitraryInteger::TDigitIndex CArbitraryInteger::GetSize() const
 {
-	return size();
+	size_type result = size();
+	const_reverse_iterator i = crbegin();
+	while( i != crend() && *i == 0 ) {
+		++i;
+		result--;
+	}
+	return result;
 }
 
 void CArbitraryInteger::AddDigit( TDigit digit )
@@ -45,7 +51,6 @@ void CArbitraryInteger::SetDigit( TDigitIndex pos, TDigit digit )
 	assert( pos < GetSize() );
 	assert( digit < Base );
 	operator[]( pos ) = digit;
-	removeLeadingZeros();
 }
 
 CArbitraryInteger::TDigit CArbitraryInteger::GetDigit( TDigitIndex pos ) const
@@ -96,6 +101,7 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 
 void CArbitraryInteger::GetTextValue( std::string& text ) const
 {
+	const_cast<CArbitraryInteger&>( *this ).removeLeadingZeros();
 	if( IsZero() ) {
 		text = "0";
 		return;
@@ -124,6 +130,8 @@ void CArbitraryInteger::GetTextValue( std::string& text ) const
 
 void CArbitraryInteger::Add( const CArbitraryInteger& operand )
 {
+	removeLeadingZeros();
+	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
 	if( IsNegative() == operand.IsNegative() ) {
 		// result sign will be the same of first operand
 		add( operand );
@@ -140,6 +148,8 @@ void CArbitraryInteger::Add( const CArbitraryInteger& operand )
 
 void CArbitraryInteger::Sub( const CArbitraryInteger& operand )
 {
+	removeLeadingZeros();
+	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
 	if( IsNegative() == operand.IsNegative() ) {
 		sub( operand );
 	} else {
@@ -151,6 +161,8 @@ void CArbitraryInteger::Sub( const CArbitraryInteger& operand )
 
 void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
 {
+	removeLeadingZeros();
+	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
 	SetSign( IsNegative() != operand.IsNegative() );
 	mul( operand );
 	removeLeadingZeros();
@@ -158,6 +170,8 @@ void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
 
 void CArbitraryInteger::Div( CArbitraryInteger& operand )
 {
+	removeLeadingZeros();
+	operand.removeLeadingZeros();
 	const bool isNegative = IsNegative();
 	SetSign( IsNegative() != operand.IsNegative() );
 	operand.SetSign( isNegative );
@@ -168,6 +182,8 @@ void CArbitraryInteger::Div( CArbitraryInteger& operand )
 CArbitraryInteger::TCompareResult CArbitraryInteger::Compare(
 	const CArbitraryInteger& operand ) const
 {
+	const_cast<CArbitraryInteger&>( *this ).removeLeadingZeros();
+	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
 	if( IsNegative() == operand.IsNegative() ) {
 		switch( compare( operand ) ) {
 			case CR_Less:
@@ -189,6 +205,7 @@ void CArbitraryInteger::BitwiseShiftLeft( int bitsCount )
 	if( empty() ) {
 		return;
 	}
+	removeLeadingZeros();
 	const int digitsToAdd = bitsCount / DegreeOfBase;
 	const int shift = bitsCount % DegreeOfBase;
 	insert( begin(), digitsToAdd, 0 );
@@ -205,6 +222,7 @@ void CArbitraryInteger::BitwiseShiftLeft( int bitsCount )
 
 void CArbitraryInteger::BitwiseShiftRight( int bitsCount )
 {
+	removeLeadingZeros();
 	assert( bitsCount > 0 );
 	const size_type digitsToDelete =
 		std::min<size_type>( bitsCount / DegreeOfBase, size() );
