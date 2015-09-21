@@ -96,6 +96,10 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 
 void CArbitraryInteger::GetTextValue( std::string& text ) const
 {
+	if( IsZero() ) {
+		text = "0";
+		return;
+	}
 	text.clear();
 	CArbitraryInteger tmp;
 	Copy( tmp );
