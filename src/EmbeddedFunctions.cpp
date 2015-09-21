@@ -123,7 +123,7 @@ static bool readTwoNumbers( CUnitList& list,
 	return ( readNumber( tmp, number1 ) && readNumber( list, number2 ) );
 }
 
-static void appendNumber( CUnitList& list, const CArbitraryInteger& result )
+static void setNumber( CUnitList& list, const CArbitraryInteger& result )
 {
 	list.Empty();
 	if( result.IsZero() ) {
@@ -147,8 +147,7 @@ static bool embeddedAdd( CExecutionContext& executionContext )
 		return false;
 	}
 	number1.Add( number2 );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number1 );
+	setNumber( executionContext.Argument, number1 );
 	return true;
 }
 
@@ -161,8 +160,7 @@ static bool embeddedSub( CExecutionContext& executionContext )
 		return false;
 	}
 	number1.Sub( number2 );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number1 );
+	setNumber( executionContext.Argument, number1 );
 	return true;
 }
 
@@ -175,8 +173,7 @@ static bool embeddedMul( CExecutionContext& executionContext )
 		return false;
 	}
 	number1.Mul( number2 );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number1 );
+	setNumber( executionContext.Argument, number1 );
 	return true;
 }
 
@@ -191,8 +188,7 @@ static bool embeddedDiv( CExecutionContext& executionContext )
 		return false;
 	}
 	number1.Div( number2 );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number1 );
+	setNumber( executionContext.Argument, number1 );
 	return true;
 }
 
@@ -207,11 +203,10 @@ static bool embeddedDr( CExecutionContext& executionContext )
 		return false;
 	}
 	number1.Div( number2 );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number1 );
+	setNumber( executionContext.Argument, number1 );
 	CUnitNode* leftParen = executionContext.Argument.AppendParens();
 	CUnitList tmp;
-	appendNumber( tmp, number2 );
+	setNumber( tmp, number2 );
 	executionContext.Argument.InsertAfter( leftParen, tmp );
 	return true;
 }
@@ -224,8 +219,7 @@ static bool embeddedP1( CExecutionContext& executionContext )
 		return false;
 	}
 	number.Add( CArbitraryInteger( 1 ) );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number );
+	setNumber( executionContext.Argument, number );
 	return true;
 }
 
@@ -237,8 +231,7 @@ static bool embeddedM1( CExecutionContext& executionContext )
 		return false;
 	}
 	number.Sub( CArbitraryInteger( 1 ) );
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number );
+	setNumber( executionContext.Argument, number );
 	return true;
 }
 
@@ -280,8 +273,7 @@ static bool embeddedCvb( CExecutionContext& executionContext )
 	{
 		return false;
 	}
-	executionContext.Argument.Empty();
-	appendNumber( executionContext.Argument, number );
+	setNumber( executionContext.Argument, number );
 	return true;
 }
 
