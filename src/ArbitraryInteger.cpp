@@ -412,7 +412,6 @@ void CArbitraryInteger::calculateDiv( CArbitraryInteger& operand,
 			case CR_Less:
 				break;
 			case CR_Equal:
-				return;
 			case CR_Great:
 				( *i ) |= mask;
 				subFromBigger( operand );
