@@ -1,0 +1,25 @@
+	entry go
+	extrn first, last, lengw
+	extrn add, sub, mul, div, dr
+	extrn repeat(multe)
+	extrn inc(p1), dec(m1), textToNumber(cvb), numberToText(cvd)
+
+go = '\n'<MakeResult<Fibonacci /555/>>
+
+Fibonacci
+	/0/   (v(N)a) v(N)b =
+	s(N)k (v(N)a) v(N)b = (va)<Fibonacci<dec sk>(vb)<add(va)vb>>
+	s(N)k               = <Fibonacci sk(/0/)/1/>
+
+JustLength
+	w1e2 = <inc<JustLength e2>>
+	     = /0/
+
+PadTextLeft s(O)ps(N)le(O)t = <repeat<sub(sl)<JustLength et>>sp>et
+
+MakeResult
+	s(N)ws(N)k =
+	s(N)ws(N)k(v(N)x)e1 =+
+		<PadTextLeft ' 'sw<numberToText sk>>'| '<numberToText vx>'\n'+
+		<MakeResult sw<inc sk>e1>
+	v(B)1 = <MakeResult<inc<JustLength<numberToText<JustLength v1>>>>/1/v1>
