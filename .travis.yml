@@ -29,7 +29,19 @@ script:
     echo '# moduleA.ref moduleB.ref moduleC.ref                                          #';
     echo '################################################################################';
     echo;
-    ./refal2 ../tests/moduleA.ref ../tests/moduleB.ref ../tests/moduleC.ref
+    ./refal2 ../tests/moduleA.ref ../tests/moduleB.ref ../tests/moduleC.ref;
+    echo;
+    echo '################################################################################';
+    echo '# Fibonacci                                                                    #';
+    echo '################################################################################';
+    echo;
+    ./refal2 ../tests/Fibonacci.ref;
+    echo;
+    echo '################################################################################';
+    echo '# pi                                                                           #';
+    echo '################################################################################';
+    echo;
+    ./refal2 ../tests/pi.ref
 branches:
   only:
     - master
