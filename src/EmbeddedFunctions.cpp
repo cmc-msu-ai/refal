@@ -77,24 +77,22 @@ static bool readText( const CUnitList& list, std::string& text )
 	return true;
 }
 
-static bool readNumber( const CUnitList& list, CArbitraryInteger& number )
+static bool readNumber( const CUnitNode* begin, const CUnitNode* end,
+	CArbitraryInteger& number )
 {
+	assert( begin != 0 && end != 0 );
 	number.Zero();
-	if( list.IsEmpty() ) {
-		return true;
+	for( ; end != begin && end->IsNumber(); end = end->Prev() ) {
+		number.AddDigit( end->Number() );
 	}
-	const CUnitNode* node = list.GetLast();
-	for( ; node != list.GetFirst() && node->IsNumber(); node = node->Prev() ) {
-		number.AddDigit( node->Number() );
-	}
-	if( node == list.GetFirst() ) {
-		if( node->IsNumber() ) {
-			number.AddDigit( node->Number() );
+	if( end == begin ) {
+		if( end->IsNumber() ) {
+			number.AddDigit( end->Number() );
 			return true;
-		} else if( node->IsChar() && number.GetSize() != 0 ) {
-			if( node->Char() == '+' ) {
+		} else if( end->IsChar() && number.GetSize() != 0 ) {
+			if( end->Char() == '+' ) {
 				return true;
-			} else if( node->Char() == '-' ) {
+			} else if( end->Char() == '-' ) {
 				number.SetSign( true /* isNegative */ );
 				return true;
 			}
@@ -104,23 +102,35 @@ static bool readNumber( const CUnitList& list, CArbitraryInteger& number )
 	return false;
 }
 
-static bool readTwoNumbers( CUnitList& list,
+static bool readNumber( const CUnitList& list, CArbitraryInteger& number )
+{
+	number.Zero();
+	return ( list.IsEmpty()
+		|| readNumber( list.GetFirst(), list.GetLast(), number ) );
+}
+
+static bool readTwoNumbers( const CUnitList& list,
 	CArbitraryInteger& number1, CArbitraryInteger& number2 )
 {
+	number1.Zero();
+	number2.Zero();
 	if( list.IsEmpty() || !list.GetFirst()->IsLeftParen() ) {
 		return false;
 	}
-	// list contain ( `number1` ) `number2`
-	CUnitList tmp;
-	CUnitNode* first = list.GetFirst();
-	CUnitNode* last = list.GetFirst()->PairedParen();
-	list.Detach( first, last );
-	// tmp contain ( `number1` ) `number2`
-	tmp.Assign( first, last );
-	tmp.RemoveFirst();
-	tmp.RemoveLast();
-	// tmp contain `number1`, list contain `number2`
-	return ( readNumber( tmp, number1 ) && readNumber( list, number2 ) );
+	const CUnitNode* leftParen = list.GetFirst();
+	const CUnitNode* rightParen = leftParen->PairedParen();
+	if( leftParen->Next() != rightParen
+		&& !readNumber( leftParen->Next(), rightParen->Prev(), number1 ) )
+	{
+		return false;
+	}
+	if( rightParen != list.GetLast()
+		&& !readNumber( rightParen->Next(), list.GetLast(), number2 ) )
+	{
+		number1.Zero();
+		return false;
+	}
+	return true;
 }
 
 static void setNumber( CUnitList& list, const CArbitraryInteger& result )
