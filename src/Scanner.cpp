@@ -593,7 +593,7 @@ void CScanner::processingSymbol( char c )
 		token.word = c;
 		state = S_Label;
 	} else if( IsDigit( c ) ) {
-		token.number = ( c - Zero );
+		token.word = c;
 		state = S_Number;
 	} else {
 		error( E_UnexpectedCharacterInLabel, c );
@@ -617,9 +617,18 @@ void CScanner::processingLabel( char c )
 void CScanner::processingNumber( char c )
 {
 	if( IsDigit( c ) ) {
-		token.number = token.number * 10 + ( c - Zero );
-		// TODO: check overflow
+		token.word += c;
 	} else if( c == LimiterOfSymbol ) {
+		CArbitraryInteger number;
+		const bool isNumber = number.SetValueByText( token.word );
+		assert( isNumber );
+		token.type = TT_Number;
+		token.number = number.IsZero() ? 0 : number.GetDigit( 0 );
+		if( number.GetSize() > 1 ) {
+			CErrorsHelper::RaiseError( ES_Error,
+				"a constant value is too large for the number (max 2^24 - 1)",
+				token );
+		}
 		addToken( TT_Number );
 		state = S_Initial;
 	} else {
