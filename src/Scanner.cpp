@@ -622,6 +622,7 @@ void CScanner::processingNumber( char c )
 		CArbitraryInteger number;
 		const bool isNumber = number.SetValueByText( token.word );
 		assert( isNumber );
+		assert( number.IsZero() || !number.IsNegative() );
 		token.type = TT_Number;
 		token.number = number.IsZero() ? 0 : number.GetDigit( 0 );
 		if( number.GetSize() > 1 ) {

@@ -8,11 +8,17 @@
 #define DEBUG_PRINT( arg )
 #endif
 
+#include <ArbitraryInteger.h>
+#include <NodeList.h>
+#include <FastSet.h>
+#include <SetBuilder.h>
+#include <Dictionary.h>
+
 namespace Refal2 {
 
 // typedefs
 typedef char TChar;
-typedef int TNumber;
+typedef CArbitraryInteger::TDigit TNumber;
 typedef int TLabel;
 typedef unsigned char TVariableName;
 typedef char TVariableTypeTag;
@@ -57,12 +63,6 @@ bool CompareNoCase( const std::string& str1, const std::string& str2 );
 
 } // end of namespace Refal2
 
-#include <ArbitraryInteger.h>
-#include <Dictionary.h>
-#include <NodeList.h>
-#include <FastSet.h>
-#include <SetBuilder.h>
-#include <Dictionary.h>
 #include <Token.h>
 #include <Errors.h>
 #include <Unit.h>
