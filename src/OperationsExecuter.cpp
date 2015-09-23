@@ -217,6 +217,7 @@ void COperationsExecuter::doFunction()
 				initialLeftBracket.PairedParen() = 0;
 			} else {
 				executionResult = ER_WrongArgumentOfExternalFunction;
+				fieldOfView.InsertAfter( left, Argument );
 			}
 		} else if( function->IsEmpty() ) {
 			executionResult = ER_CallEmptyFunction;
