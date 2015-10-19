@@ -59,21 +59,26 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 
 //-----------------------------------------------------------------------------
 
-static bool readText( const CUnitList& list, std::string& text )
+static bool readText( const CUnitList& list, std::string& text,
+	bool textCanBeEmpty = false )
 {
 	text.clear();
-	if( list.IsEmpty() || !list.GetFirst()->IsChar() ) {
-		return false;
+	if( list.IsEmpty() ) {
+		return textCanBeEmpty;
 	}
 	const CUnitNode* node = list.GetFirst();
-	text += node->Char();
-	do {
-		node = node->Next();
+	bool canContinue = true;
+	while( canContinue ) {
+		if( node == list.GetLast() ) {
+			canContinue = false;
+		}
 		if( !node->IsChar() ) {
 			return false;
 		}
+		assert( node != nullptr );
 		text += node->Char();
-	} while( node != list.GetLast() );
+		node = node->Next();
+	}
 	return true;
 }
 
@@ -278,7 +283,7 @@ static bool embeddedCvb( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	std::string text;
 	CArbitraryInteger number;
-	if( !readText( executionContext.Argument, text )
+	if( !readText( executionContext.Argument, text, true /* textCanBeEmpty */ )
 		|| !number.SetValueByText( text ) )
 	{
 		return false;
