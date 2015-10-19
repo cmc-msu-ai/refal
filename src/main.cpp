@@ -281,6 +281,7 @@ int main( int argc, const char* argv[] )
 		CProgramPrintHelper programPrintHelper( program );
 		//programPrintHelper.SetPrintLabelWithModule();
 		fieldOfView.HandyPrint( std::cout, programPrintHelper );
+		std::cout << std::endl;
 	}
 	if( !receptacle->IsEmpty() ) {
 		if( !fieldOfView.IsEmpty() ) {

@@ -165,7 +165,6 @@ void CUnitList::HandyPrint( std::ostream& outputStream,
 	if( lastWasChar ) {
 		outputStream << "'";
 	}
-	outputStream << std::endl;
 }
 
 void CUnitList::StrangePrint( std::ostream& outputStream,
@@ -198,7 +197,6 @@ void CUnitList::StrangePrint( std::ostream& outputStream,
 				break;
 		}
 	}
-	std::cout << std::endl;
 }
 
 void CUnitList::Duplicate( const CUnitNode* fromNode,
