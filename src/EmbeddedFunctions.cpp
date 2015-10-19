@@ -11,18 +11,6 @@ static void notImplemented( const char* name )
 		<< "` not implemented yet." << std::endl;
 }
 
-static bool embeddedCard( CExecutionContext& executionContext )
-{
-	DEBUG_PRINT( __FUNCTION__ )
-	if( !executionContext.Argument.IsEmpty() ) {
-		return false;
-	}
-	std::string text;
-	std::getline( std::cin, text );
-	executionContext.Argument.AppendText( text );
-	return true;
-}
-
 static bool embeddedPrint( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
@@ -54,6 +42,18 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 	executionContext.Argument.HandyPrint( std::cout,
 		CProgramPrintHelper( executionContext.Program ) );
 	executionContext.Argument.Empty();
+	return true;
+}
+
+static bool embeddedCard( CExecutionContext& executionContext )
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	if( !embeddedProut( executionContext ) ) {
+		return false;
+	}
+	std::string text;
+	std::getline( std::cin, text );
+	executionContext.Argument.AppendText( text );
 	return true;
 }
 
