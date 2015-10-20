@@ -13,7 +13,7 @@ CArbitraryInteger::CArbitraryInteger( TDigit digit )
 
 void CArbitraryInteger::Swap( CArbitraryInteger& swapWith )
 {
-	this->swap( swapWith );
+	swapDigits( swapWith );
 	std::swap( isNegative, swapWith.isNegative );
 }
 
@@ -133,7 +133,7 @@ void CArbitraryInteger::Add( const CArbitraryInteger& operand )
 	removeLeadingZeros();
 	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
 	if( IsNegative() == operand.IsNegative() ) {
-		// result sign will be the same of first operand
+		// result sign will be the same of operands
 		add( operand );
 	} else {
 		sub( operand );
@@ -163,8 +163,9 @@ void CArbitraryInteger::Mul( const CArbitraryInteger& operand )
 {
 	removeLeadingZeros();
 	const_cast<CArbitraryInteger&>( operand ).removeLeadingZeros();
-	SetSign( IsNegative() != operand.IsNegative() );
+	const bool resultSign = IsNegative() != operand.IsNegative();
 	mul( operand );
+	SetSign( resultSign );
 	removeLeadingZeros();
 }
 
@@ -172,10 +173,11 @@ void CArbitraryInteger::Div( CArbitraryInteger& operand )
 {
 	removeLeadingZeros();
 	operand.removeLeadingZeros();
-	const bool isNegative = IsNegative();
-	SetSign( IsNegative() != operand.IsNegative() );
-	operand.SetSign( isNegative );
+	const bool operandSign = IsNegative();
+	const bool resultSign = IsNegative() != operand.IsNegative();
 	div( operand );
+	SetSign( resultSign );
+	operand.SetSign( operandSign );
 	removeLeadingZeros();
 }
 
@@ -240,6 +242,11 @@ void CArbitraryInteger::BitwiseShiftRight( int bitsCount )
 	removeLeadingZeros();
 }
 
+void CArbitraryInteger::swapDigits( CArbitraryInteger& number )
+{
+	number.std::vector<uint32_t>::swap( *this );
+}
+
 void CArbitraryInteger::removeLeadingZeros()
 {
 	while( !empty() && back() == 0 ) {
@@ -300,15 +307,27 @@ void CArbitraryInteger::add( iterator i, const CArbitraryInteger& operand )
 
 void CArbitraryInteger::sub( const CArbitraryInteger& operand )
 {
-	if( Compare( operand ) == CR_Less ) {
-		CArbitraryInteger tmp;
-		operand.Copy( tmp );
-		Swap( tmp );
-		isNegative = !isNegative;
-		subFromBigger( tmp );
-	} else {
-		// result sign will be the same of first operand
-		subFromBigger( operand );
+	switch( compare( operand ) ) {
+		case CR_Equal:
+			Zero();
+			break;
+		case CR_Less:
+		{
+			CArbitraryInteger tmp;
+			operand.Copy( tmp );
+			// result sign will be the negative of first operand
+			swapDigits( tmp );
+			isNegative = !isNegative;
+			subFromBigger( tmp );
+			break;
+		}
+		case CR_Great:
+			// result sign will be the same of first operand
+			subFromBigger( operand );
+			break;
+		default:
+			assert( false );
+			break;
 	}
 }
 

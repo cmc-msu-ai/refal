@@ -57,6 +57,7 @@ public:
 private:
 	bool isNegative;
 
+	void swapDigits( CArbitraryInteger& number );
 	void removeLeadingZeros();
 	TCompareResult compare( const CArbitraryInteger& operand ) const;
 	void add( const CArbitraryInteger& operand );
