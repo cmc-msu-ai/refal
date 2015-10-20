@@ -406,11 +406,11 @@ static bool embeddedLibget( CExecutionContext& executionContext )
 	}
 	std::string text;
 	std::getline( *streamForReading, text );
+	std::string::size_type i = 0;
+	while( ( i = text.find_first_of( "\r\n", i ) ) != std::string::npos ) {
+		text[i] = ' ';
+	}
 	executionContext.Argument.AppendText( text );
-
-	std::ostringstream stringStream;
-	stringStream << std::endl;
-	executionContext.Argument.AppendText( stringStream.str() );
 	return true;
 }
 
