@@ -548,11 +548,11 @@ inline bool COperationsExecuter::matchRightSaveToTable_W()
 	if( !shiftRight() ) {
 		return false;
 	}
-	saveToTable( right );
+	CUnitNode* const tmp = right;
 	if( right->IsParen() ) {
 		right = right->PairedParen();
 	}
-	saveToTable( right );
+	saveToTable( right, tmp );
 	return true;
 }
 
@@ -574,11 +574,11 @@ inline bool COperationsExecuter::matchRightWithQualifierSaveToTable_W(
 	if( !shiftRight() || !checkQualifier( right, qualifier ) ) {
 		return false;
 	}
-	saveToTable( right );
+	CUnitNode* const tmp = right;
 	if( right->IsParen() ) {
 		right = right->PairedParen();
 	}
-	saveToTable( right );
+	saveToTable( right, tmp );
 	return true;
 }
 
