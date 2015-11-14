@@ -16,6 +16,7 @@ static bool embeddedPrint( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	executionContext.Argument.StrangePrint( std::cout,
 		CProgramPrintHelper( executionContext.Program ) );
+	std::cout << std::endl;
 	return true;
 }
 
@@ -24,6 +25,7 @@ static bool embeddedPrintm( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	executionContext.Argument.HandyPrint( std::cout,
 		CProgramPrintHelper( executionContext.Program ) );
+	std::cout << std::endl;
 	return true;
 }
 
@@ -32,6 +34,7 @@ static bool embeddedProut( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	executionContext.Argument.StrangePrint( std::cout,
 		CProgramPrintHelper( executionContext.Program ) );
+	std::cout << std::endl;
 	executionContext.Argument.Empty();
 	return true;
 }
@@ -41,6 +44,7 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 	DEBUG_PRINT( __FUNCTION__ )
 	executionContext.Argument.HandyPrint( std::cout,
 		CProgramPrintHelper( executionContext.Program ) );
+	std::cout << std::endl;
 	executionContext.Argument.Empty();
 	return true;
 }
@@ -48,11 +52,11 @@ static bool embeddedProutm( CExecutionContext& executionContext )
 static bool embeddedCard( CExecutionContext& executionContext )
 {
 	DEBUG_PRINT( __FUNCTION__ )
-	if( !embeddedProut( executionContext ) ) {
-		return false;
-	}
+	executionContext.Argument.StrangePrint( std::cout,
+		CProgramPrintHelper( executionContext.Program ) );
 	std::string text;
 	std::getline( std::cin, text );
+	executionContext.Argument.Empty();
 	executionContext.Argument.AppendText( text );
 	return true;
 }
