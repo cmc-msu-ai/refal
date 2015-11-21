@@ -231,6 +231,7 @@ void CFunctionBuilder::AddEndOfRight()
 	} else {
 		addRule();
 	}
+	isRightDirection = false; // reset right direction flag
 	isProcessRightPart = false;
 }
 
