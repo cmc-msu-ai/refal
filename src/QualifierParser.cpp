@@ -168,7 +168,7 @@ void CQualifierParser::addLineFeed()
 		error( "no parenthesis balance in qualifier" );
 	} else {
 		if( !afterRightParen ) {
-			builder.IsNegative();
+			builder.AddNegative();
 		}
 		SetCorrect();
 		CQualifier qualifier;
