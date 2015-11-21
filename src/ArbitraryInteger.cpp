@@ -137,6 +137,9 @@ void CArbitraryInteger::Add( const CArbitraryInteger& operand )
 		add( operand );
 	} else {
 		sub( operand );
+		if( !operand.IsNegative() ) { // ( -a + b )
+			SetSign( !IsNegative() );
+		}
 	}
 	removeLeadingZeros();
 }
