@@ -80,8 +80,8 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 			digit = digit * 10 + ( *c - '0' );
 			decimalCount++;
 			if( decimalCount == maxDecimalDigits ) {
-				Mul( CArbitraryInteger( maxDecimal ) );
-				Add( CArbitraryInteger( digit ) );
+				mul( CArbitraryInteger( maxDecimal ) );
+				add( CArbitraryInteger( digit ) );
 				digit = 0;
 				decimalCount = 0;
 			}
@@ -94,8 +94,8 @@ bool CArbitraryInteger::SetValueByText( const std::string& text )
 	for( ; decimalCount > 0; decimalCount-- ) {
 		decimal *= 10;
 	}
-	Mul( CArbitraryInteger( decimal ) );
-	Add( CArbitraryInteger( digit ) );
+	mul( CArbitraryInteger( decimal ) );
+	add( CArbitraryInteger( digit ) );
 	return true;
 }
 
