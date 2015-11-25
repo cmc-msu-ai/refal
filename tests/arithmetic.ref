@@ -1,7 +1,11 @@
 	entry go
 	extrn add, sub, mul, div, dr
+	extrn numb, symb
 	
-go = <testAdd><testSub><testMul><testDiv><testDr>
+go =+
+	<testAdd><testSub><testMul><testDiv><testDr>+
+	<testNumb><testSymb>
+	
 	
 checkNegative
 	'-' e(N)1 =
@@ -50,3 +54,11 @@ testDr =+
 	<strictMatch ( '-'/5/ (    /4/ ) ) <dr (    /69/ ) '-'/13/ > >+
 	<strictMatch ( '-'/5/ ( '-'/4/ ) ) <dr ( '-'/69/ )    /13/ > >+
 	<strictMatch (    /5/ ( '-'/4/ ) ) <dr ( '-'/69/ ) '-'/13/ > >
+
+testNumb =+
+	<strictMatch (    /768/ ) <numb  '768'> >+
+	<strictMatch ( '-'/768/ ) <numb '-768'> >
+
+testSymb =+
+	<strictMatch (  '327' ) <symb    /327/> >+
+	<strictMatch ( '-327' ) <symb '-'/327/> >
