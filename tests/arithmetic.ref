@@ -20,7 +20,26 @@ testAdd =+
 	<checkNegative <add('-'/17/)/13/> >+
 	<checkNegative <add('-'/17/)'-'/13/> >
 
-testSub =
-testMul =
-testDiv =
+testSub =+
+	<checkNegative <sub(/7/)/13/> >+
+	<checkPositive <sub(/7/)'-'/13/> >+
+	<checkNegative <sub('-'/7/)/13/> >+
+	<checkPositive <sub('-'/7/)'-'/13/> >+
+	<checkPositive <sub(/17/)/13/> >+
+	<checkPositive <sub(/17/)'-'/13/> >+
+	<checkNegative <sub('-'/17/)/13/> >+
+	<checkNegative <sub('-'/17/)'-'/13/> >
+
+testMul =+
+	<checkPositive <sub(/69/)/13/> >+
+	<checkNegative <sub(/69/)'-'/13/> >+
+	<checkNegative <sub('-'/69/)/13/> >+
+	<checkPositive <sub('-'/69/)'-'/13/> >
+
+testDiv =+
+	<checkPositive <sub(/69/)/13/> >+
+	<checkNegative <sub(/69/)'-'/13/> >+
+	<checkNegative <sub('-'/69/)/13/> >+
+	<checkPositive <sub('-'/69/)'-'/13/> >
+
 testDr =
