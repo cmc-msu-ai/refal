@@ -1,0 +1,26 @@
+	entry go
+	extrn add, sub, mul, div, dr
+	
+go = <testAdd><testSub><testMul><testDiv><testDr>
+	
+checkNegative
+	'-' e(N)1 =
+
+checkPositive
+	'+' e(N)1 =
+	e(N)1 =
+
+testAdd =+
+	<checkPositive <add(/7/)/13/> >+
+	<checkNegative <add(/7/)'-'/13/> >+
+	<checkPositive <add('-'/7/)/13/> >+
+	<checkNegative <add('-'/7/)'-'/13/> >+
+	<checkPositive <add(/17/)/13/> >+
+	<checkPositive <add(/17/)'-'/13/> >+
+	<checkNegative <add('-'/17/)/13/> >+
+	<checkNegative <add('-'/17/)'-'/13/> >
+
+testSub =
+testMul =
+testDiv =
+testDr =
