@@ -10,6 +10,9 @@ checkPositive
 	'+' e(N)1 =
 	e(N)1 =
 
+strictMatch
+	(e1)e1 =
+
 testAdd =+
 	<checkPositive <add(/7/)/13/> >+
 	<checkNegative <add(/7/)'-'/13/> >+
@@ -42,4 +45,8 @@ testDiv =+
 	<checkNegative <div('-'/69/)/13/> >+
 	<checkPositive <div('-'/69/)'-'/13/> >
 
-testDr =
+testDr =+
+	<strictMatch (    /5/ (    /4/ ) ) <dr (   /69/  )    /13/ > >+
+	<strictMatch ( '-'/5/ (    /4/ ) ) <dr (    /69/ ) '-'/13/ > >+
+	<strictMatch ( '-'/5/ ( '-'/4/ ) ) <dr ( '-'/69/ )    /13/ > >+
+	<strictMatch (    /5/ ( '-'/4/ ) ) <dr ( '-'/69/ ) '-'/13/ > >
