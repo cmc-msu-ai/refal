@@ -31,15 +31,15 @@ testSub =+
 	<checkNegative <sub('-'/17/)'-'/13/> >
 
 testMul =+
-	<checkPositive <sub(/69/)/13/> >+
-	<checkNegative <sub(/69/)'-'/13/> >+
-	<checkNegative <sub('-'/69/)/13/> >+
-	<checkPositive <sub('-'/69/)'-'/13/> >
+	<checkPositive <mul(/69/)/13/> >+
+	<checkNegative <mul(/69/)'-'/13/> >+
+	<checkNegative <mul('-'/69/)/13/> >+
+	<checkPositive <mul('-'/69/)'-'/13/> >
 
 testDiv =+
-	<checkPositive <sub(/69/)/13/> >+
-	<checkNegative <sub(/69/)'-'/13/> >+
-	<checkNegative <sub('-'/69/)/13/> >+
-	<checkPositive <sub('-'/69/)'-'/13/> >
+	<checkPositive <div(/69/)/13/> >+
+	<checkNegative <div(/69/)'-'/13/> >+
+	<checkNegative <div('-'/69/)/13/> >+
+	<checkPositive <div('-'/69/)'-'/13/> >
 
 testDr =
