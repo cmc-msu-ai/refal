@@ -60,5 +60,12 @@ testNumb =+
 	<strictMatch ( '-'/768/ ) <numb '-768'> >
 
 testSymb =+
+	<strictMatch ( '0' ) <symb    /0/> >+
+	<strictMatch ( '0' ) <symb '-'/0/> >+
+	<strictMatch ( '0' ) <symb '+'/0/> >+
 	<strictMatch (  '327' ) <symb    /327/> >+
-	<strictMatch ( '-327' ) <symb '-'/327/> >
+	<strictMatch ( '-327' ) <symb '-'/327/> >+
+	<strictMatch (  '327' ) <symb '+'/327/> >+
+	<strictMatch (  '1325400188' ) <symb    /79//124/> >+
+	<strictMatch ( '-1325400188' ) <symb '-'/79//124/> >+
+	<strictMatch (  '1325400188' ) <symb '+'/79//124/> >
