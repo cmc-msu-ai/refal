@@ -91,22 +91,27 @@ static bool readNumber( const CUnitNode* begin, const CUnitNode* end,
 {
 	assert( begin != 0 && end != 0 );
 	number.Zero();
-	for( ; end != begin && end->IsNumber(); end = end->Prev() ) {
-		number.AddDigit( end->Number() );
+
+	for( const CUnitNode* i = end; i != begin; i = i->Prev() ) {
+		if( !i->IsNumber() ) {
+			number.Zero();
+			return false;
+		}
+		number.AddDigit( i->Number() );
 	}
-	if( end == begin ) {
-		if( end->IsNumber() ) {
-			number.AddDigit( end->Number() );
+
+	if( begin->IsNumber() ) {
+		number.AddDigit( begin->Number() );
+		return true;
+	} else if( begin->IsChar() && begin != end ) {
+		if( begin->Char() == '+' ) {
 			return true;
-		} else if( end->IsChar() && number.GetSize() != 0 ) {
-			if( end->Char() == '+' ) {
-				return true;
-			} else if( end->Char() == '-' ) {
-				number.SetSign( true /* isNegative */ );
-				return true;
-			}
+		} else if( begin->Char() == '-' ) {
+			number.SetSign( true /* isNegative */ );
+			return true;
 		}
 	}
+
 	number.Zero();
 	return false;
 }
