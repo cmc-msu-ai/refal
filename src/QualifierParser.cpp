@@ -182,7 +182,7 @@ void CQualifierParser::addLineFeed()
 void CQualifierParser::addLeftParen()
 {
 	if( builder.IsNegative() ) {
-		error( "unexpected left paren in qualifier" );
+		error( "unexpected left parenthesis in qualifier" );
 	} else {
 		builder.AddNegative();
 		afterRightParen = false;
@@ -200,7 +200,7 @@ void CQualifierParser::addRightParen()
 		}
 		SetCorrect();
 	} else {
-		error( "unexpected right paren in named qualifier" );
+		error( "unexpected right parenthesis in named qualifier" );
 	}
 }
 

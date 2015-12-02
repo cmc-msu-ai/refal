@@ -325,13 +325,13 @@ const char* CFunctionBuilder::getErrorMessage( TErrorCode errorCode )
 		case EC_IllegalRightBracketInLeftPart:
 			return "illegal right bracket in left part of rule";
 		case EC_RightParenDoesNotMatchLeftParen:
-			return "right paren does not match left paren";
+			return "right parenthesis does not match left parenthesis";
 		case EC_RightBracketDoesNotMatchLeftBracket:
 			return "right bracket does not match left bracket";
 		case EC_UnclosedLeftParenInLeftPart:
-			return "unclosed left paren in left part of rule";
+			return "unclosed left parenthesis in left part of rule";
 		case EC_UnclosedLeftParenInRightPart:
-			return "unclosed left paren in right part of rule";
+			return "unclosed left parenthesis in right part of rule";
 		case EC_UnclosedLeftBracketInRightPart:
 			return "unclosed left bracket in right part of rule";
 		case EC_ThereAreMultiplePartsSeparatorInRules:
