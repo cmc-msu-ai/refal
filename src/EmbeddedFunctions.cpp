@@ -410,14 +410,19 @@ static bool embeddedLibget( CExecutionContext& executionContext )
 	if( !streamForReading->is_open() ) {
 		return false;
 	}
-	if( streamForReading->eof() ) {
-		return true;
-	}
+
+	// read text until reach '\r' or '\n' char
 	std::string text;
-	std::getline( *streamForReading, text );
-	std::string::size_type i = 0;
-	while( ( i = text.find_first_of( "\r\n", i ) ) != std::string::npos ) {
-		text[i] = ' ';
+	char c;
+	while( streamForReading->get( c ) && c != '\r' && c != '\n' ) {
+		text += c;
+	}
+	if( *streamForReading ) {
+		text += ' '; // replace line feed with whitespace
+		// for reading "\r\n" as single line feed
+		if( c == '\r' && streamForReading->get( c ) && c != '\n' ) {
+			streamForReading->unget();
+		}
 	}
 	executionContext.Argument.AppendText( text );
 	return true;
