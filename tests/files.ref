@@ -1,0 +1,15 @@
+	entry go
+	extrn prout, opnget, clsget, libget, p1, cvd
+
+go =+
+	<testFile '../tests/fishWin.txt'>+
+	<testFile '../tests/fishUnix.txt'>+
+	<testFile '../tests/fishOldMac.txt'>
+
+testFile e1 = <prout 'Test: 'e1><proutFile e1><prout>
+
+proutFile e1 = <opnget e1><proutFileLines(/1/)<libget>><libget><clsget>
+
+proutFileLines
+	(s(N)l) =
+	(s(N)l)et = <prout <cvd sl>':{'et'}'><proutFileLines (<p1 sl>)<libget>>
