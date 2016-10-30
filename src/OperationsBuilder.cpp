@@ -61,6 +61,12 @@ void COperationsBuilder::AddSetRightBorder( TTableIndex tableIndex )
 	addTableIndexOperation( OT_SetRightBorder, tableIndex );
 }
 
+void COperationsBuilder::AddSaveLeftRight()
+{
+	DEBUG_PRINT( __FUNCTION__ )
+	addNoArgumensOperation( OT_SaveLeftRight );
+}
+
 /* matching operation */
 void COperationsBuilder::AddMatchEmptyExpression()
 {

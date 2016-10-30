@@ -17,6 +17,7 @@ enum TOperationType {
 	OT_SetLeftBorder, // TTableIndex
 	OT_SetRightBorder, // TTableIndex
 	OT_DecrementStackDepth, // TStackIndex
+	OT_SaveLeftRight,
 	// matching empty expression
 	OT_MatchEmptyExpression,
 	// matching symbols
@@ -169,6 +170,7 @@ public:
 	void AddDecrementStackDepth( TStackIndex size );
 	void AddSetLeftBorder( TTableIndex );
 	void AddSetRightBorder( TTableIndex );
+	void AddSaveLeftRight();
 	// matching empty expression
 	void AddMatchEmptyExpression();
 	// matching symbols

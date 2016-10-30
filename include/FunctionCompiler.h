@@ -103,12 +103,11 @@ private:
 	void matchRightDuplicateVE();
 
 	TTableIndex top;
-	TTableIndex left;
-	TTableIndex right;
 	TTableIndex maxTableSize;
 
 	CHoleList holes;
 	CHoleNode* hole;
+	CHoleNode* lastUsedHole;
 
 #if 0
 	CVariablesMask markedVariables;

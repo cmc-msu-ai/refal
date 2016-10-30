@@ -362,8 +362,8 @@ inline bool COperationsExecuter::matchRightNumber( const TNumber number )
 inline bool COperationsExecuter::matchLeftParens()
 {
 	if( shiftLeft() && left->IsLeftParen() ) {
+		saveToTable( left->PairedParen(), right );
 		right = left->PairedParen();
-		saveToTable( left, right );
 		return true;
 	} else {
 		return false;
@@ -373,8 +373,8 @@ inline bool COperationsExecuter::matchLeftParens()
 inline bool COperationsExecuter::matchRightParens()
 {
 	if( shiftRight() && right->IsRightParen() ) {
+		saveToTable( left, right->PairedParen() );
 		left = right->PairedParen();
-		saveToTable( left, right );
 		return true;
 	} else {
 		return false;

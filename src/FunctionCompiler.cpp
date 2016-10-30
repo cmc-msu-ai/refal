@@ -37,8 +37,6 @@ CHole& CHole::operator=( const CHole& hole )
 
 CLeftPartCompiler::CLeftPartCompiler() :
 	top( 0 ),
-	left( 0 ),
-	right( 0 ),
 	maxTableSize( 0 ),
 	hole( 0 )
 {
@@ -111,19 +109,17 @@ void CLeftPartCompiler::splitIntoClasses(CHole* const holes)
 void CLeftPartCompiler::CompileLeftPart( CUnitList& leftPart,
 	bool isRightDirection )
 {
-	left = 0;
-	right = 1;
 	top = 2;
-	holes.Append( CHole( leftPart, left, right ) );
+	holes.Append( CHole( leftPart, 0 /* left */, 1 /* right */ ) );
+	lastUsedHole = holes.GetFirst();
 
 	while( true ) {
 		hole = holes.GetFirst();
 
 		while( hole != 0 ) {
-			CUnitNode* left = hole->GetFirst();
-			CUnitNode* right = hole->GetLast();
-
-			if( left != right && isFreeVE( left ) && isFreeVE( right ) ) {
+			if( hole->GetFirst() != hole->GetLast()
+				&& isFreeVE( hole->GetFirst() ) && isFreeVE( hole->GetLast() ) )
+			{
 				hole = hole->Next();
 			} else {
 				matchElement();
@@ -146,6 +142,10 @@ void CLeftPartCompiler::CompileLeftPart( CUnitList& leftPart,
 
 void CLeftPartCompiler::removeHole()
 {
+	if( lastUsedHole == hole ) {
+		lastUsedHole = 0;
+	}
+
 	CHoleNode* nextHole = hole->Next();
 	holes.Remove( hole );
 	hole = nextHole;
@@ -180,14 +180,19 @@ void CLeftPartCompiler::matchDuplicateVariable(
 
 void CLeftPartCompiler::checkBorders()
 {
-	if( left != hole->GetLeft() ) {
-		left = hole->GetLeft();
-		COperationsBuilder::AddSetLeftBorder( left );
+	assert( hole != 0 );
+	if( hole != lastUsedHole ) {
+		if( lastUsedHole != 0 ) {
+			COperationsBuilder::AddSaveLeftRight();
+			lastUsedHole->SetLeft( top );
+			top++;
+			lastUsedHole->SetRight( top );
+			top++;
+		}
+		COperationsBuilder::AddSetLeftBorder( hole->GetLeft() );
+		COperationsBuilder::AddSetRightBorder( hole->GetRight() );
 	}
-	if( right != hole->GetRight() ) {
-		right = hole->GetRight();
-		COperationsBuilder::AddSetRightBorder( right );
-	}
+	lastUsedHole = hole;
 }
 
 void CLeftPartCompiler::matchVE(const bool isRightDirection)
@@ -387,16 +392,9 @@ void CLeftPartCompiler::matchLeftParens()
 	
 	hole->RemoveFirst();
 	hole->RemoveLast();
-	
-	TTableIndex oldRight = right;
-	left = top;
-	top++;
-	right = top;
-	top++;
-	hole->SetLeft( left );
-	hole->SetRight( right );
-	
-	holes.InsertAfter( hole, CHole( newHole, right, oldRight ) );
+
+	holes.InsertAfter( hole, CHole( newHole, top, top + 1 ) );
+	top += 2;
 }
 
 void CLeftPartCompiler::matchRightParens()
@@ -417,16 +415,9 @@ void CLeftPartCompiler::matchRightParens()
 	
 	hole->RemoveFirst();
 	hole->RemoveLast();
-	
-	TTableIndex oldLeft = left;
-	left = top;
-	top++;
-	right = top;
-	top++;
-	hole->SetLeft( left );
-	hole->SetRight( right );
-	
-	holes.InsertBefore( hole, CHole( newHole, oldLeft, left ) );
+
+	holes.InsertBefore( hole, CHole( newHole, top, top + 1 ) );
+	top += 2;
 }
 
 void CLeftPartCompiler::matchLeftSymbol()

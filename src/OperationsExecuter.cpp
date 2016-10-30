@@ -262,6 +262,9 @@ void COperationsExecuter::doFunctionBody()
 			case OT_DecrementStackDepth: // TUint32
 				decrementStackDepth( operation->stackDecrement );
 				break;
+			case OT_SaveLeftRight:
+				saveToTable( left, right );
+				break;
 			// matching empty expression
 			case OT_MatchEmptyExpression:
 				success = matchEmptyExpression();
