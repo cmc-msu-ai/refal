@@ -10,6 +10,7 @@ static const char* operationNames[] = {
 	"OT_SetLeftBorder",
 	"OT_SetRightBorder",
 	"OT_DecrementStackDepth",
+	"OT_SaveLeftRight",
 	"OT_MatchEmptyExpression",
 	"OT_MatchLeftChar",
 	"OT_MatchLeftLabel",
@@ -373,7 +374,7 @@ void COperationsExecuter::doFunctionBody()
 					operation->tableIndex );
 				break;
 			case OT_MatchRightDuplicate_WV: // TTableIndex
-				matchRightDuplicate_WV( operation->tableIndex );
+				success = matchRightDuplicate_WV( operation->tableIndex );
 				break;
 			case OT_MatchRightDuplicateSaveToTable_WV: // TTableIndex
 				success = matchRightDuplicateSaveToTable_WV(

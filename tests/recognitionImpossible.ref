@@ -1,0 +1,5 @@
+ entry go
+go = <right /26/ '+' ( /1/ '*' /2/ ) '+' /1/ '*' /4/>
+
+right
+ R e1 wa '+' e2 (wa e3) e4 = e1 wa '+' e2 ( wa e3 ) e4
